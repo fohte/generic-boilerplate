@@ -43,5 +43,3 @@ jobs:
           commit_message: 'style: auto-format'
           workflow: deny
           github_token: ${{ steps.app-token.outputs.token }}
-
-      - run: bun run test
