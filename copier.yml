@@ -1,0 +1,26 @@
+_templates_suffix: .jinja
+_envops:
+  block_start_string: "{%"
+  block_end_string: "%}"
+  variable_start_string: "{{"
+  variable_end_string: "}}"
+
+_skip_if_exists:
+  - "test-output"
+  - "test-*"
+
+project_name:
+  type: str
+  help: "プロジェクト名"
+  placeholder: "my-project"
+
+author_name:
+  type: str
+  help: "作者名"
+  placeholder: "Your Name"
+
+renovate_config:
+  type: str
+  help: "Renovateの設定ファイル（GitHub上のユーザー名/リポジトリ名）"
+  default: "fohte/renovate-config"
+  placeholder: "username/renovate-config"
