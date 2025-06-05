@@ -18,9 +18,3 @@ author_name:
   type: str
   help: "作者名"
   placeholder: "Your Name"
-
-renovate_config:
-  type: str
-  help: "Renovateの設定ファイル（GitHub上のユーザー名/リポジトリ名）"
-  default: "fohte/renovate-config"
-  placeholder: "username/renovate-config"
