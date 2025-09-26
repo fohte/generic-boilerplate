@@ -1,0 +1,4 @@
+remotes:
+  - git_url: https://github.com/fohte/lefthook-config
+    configs:
+      - base.yml
