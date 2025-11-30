@@ -48,6 +48,10 @@ jobs:
         if: steps.check.outputs.initialized == 'false'
         run: copier copy --defaults --trust --force gh:fohte/generic-boilerplate .
 
+      - name: Update README with repository name
+        if: steps.check.outputs.initialized == 'false'
+        run: sed -i "s/^# README$/# ${{ github.event.repository.name }}/" README.md
+
       - name: Remove template-only files
         if: steps.check.outputs.initialized == 'false'
         run: |
