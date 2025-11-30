@@ -1,4 +1,7 @@
 _min_copier_version: "9.0.0"
 _answers_file: .copier-answers.yaml
+
+# Skip README.md on copier update to preserve downstream customizations.
+# README is generated only on initial copier copy.
 _skip_if_exists:
   - README.md
