@@ -1,0 +1,66 @@
+name: Initialize Copier
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  init-copier:
+    runs-on: ubuntu-latest
+    # Skip if this is a template repository itself
+    if: ${{ !github.event.repository.is_template }}
+
+    steps:
+      - name: Check if already initialized
+        id: check
+        run: |
+          # Use GitHub API to check if .copier-answers.yaml exists
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/contents/.copier-answers.yaml")
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "initialized=true" >> $GITHUB_OUTPUT
+          else
+            echo "initialized=false" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: actions/create-github-app-token@v1
+        if: steps.check.outputs.initialized == 'false'
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.initialized == 'false'
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Install Copier
+        if: steps.check.outputs.initialized == 'false'
+        run: pip install copier
+
+      - name: Run Copier
+        if: steps.check.outputs.initialized == 'false'
+        run: copier copy --defaults --trust --force gh:fohte/generic-boilerplate .
+
+      - name: Remove template-only files
+        if: steps.check.outputs.initialized == 'false'
+        run: |
+          rm -f copier.yml
+          rm -f .copier-answers.yaml.jinja
+          rm -f README.md.jinja
+          rm -f .github/workflows/init-copier.yml
+
+      - name: Commit and push
+        if: steps.check.outputs.initialized == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: initialize from copier template"
+          git push
