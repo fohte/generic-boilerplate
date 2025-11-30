@@ -8,7 +8,5 @@ indent_size = 2
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-# Test change for copier update
-
 [*.md{,x}]
 trim_trailing_whitespace = false
