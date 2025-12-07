@@ -1,16 +1,15 @@
 # Generic Boilerplate
 
-A template for common development configurations. This repository serves as both a **GitHub Template Repository** and a **[Copier](https://copier.readthedocs.io/) template**.
+A [Copier](https://copier.readthedocs.io/) template for common development configurations.
 
 ## Overview
 
-GitHub Template Repositories only copy files at repository creation time and cannot propagate updates to downstream repositories. This repository combines GitHub Templates with Copier to enable automatic update propagation.
+This repository provides a reusable template for setting up common development configurations. Terraform directly runs `copier copy` to create new repositories from this template.
 
 ### How it works
 
-1. **New repository creation**: Terraform creates a repository using this as a GitHub Template
-2. **Automatic Copier initialization**: The `init-copier.yml` workflow runs and executes `copier copy`
-3. **Update propagation**: Renovate periodically checks for template updates and creates PRs via `copier update`
+1. **New repository creation**: Terraform creates a repository and runs `copier copy` to initialize it
+2. **Update propagation**: Renovate periodically checks for template updates and creates PRs via `copier update`
 
 ## What's Included
 
@@ -25,5 +24,4 @@ The following files exist only in this template repository and are removed/repla
 
 - `copier.yml` - Copier configuration
 - `.copier-answers.yaml.jinja` - Copier answers template
-- `.github/workflows/init-copier.yml` - One-time initialization workflow
 - `README.md` - Replaced by `README.md.jinja`
