@@ -2,14 +2,19 @@
 
 A [Copier](https://copier.readthedocs.io/) template for common development configurations.
 
-## Overview
+## Usage
 
-This repository provides a reusable template for setting up common development configurations. Terraform directly runs `copier copy` to create new repositories from this template.
+### Create a new repository
 
-### How it works
+```bash
+copier copy gh:fohte/generic-boilerplate <destination>
+```
 
-1. **New repository creation**: Terraform creates a repository and runs `copier copy` to initialize it
-2. **Update propagation**: Renovate periodically checks for template updates and creates PRs via `copier update`
+### Update an existing repository
+
+```bash
+copier update
+```
 
 ## What's Included
 
@@ -18,10 +23,19 @@ This repository provides a reusable template for setting up common development c
 - `.github/workflows/test.yml` - CI workflow
 - `renovate.json5` - Renovate configuration
 
-## Template-only files
+## Repository Structure
 
-The following files exist only in this template repository and are removed/replaced in downstream repositories:
+This repository uses a `template/` subdirectory for Copier template files. This allows the repository itself to be managed by Copier.
 
-- `copier.yml` - Copier configuration
-- `.copier-answers.yaml.jinja` - Copier answers template
-- `README.md` - Replaced by `README.md.jinja`
+```
+├── template/           # Copier template source
+│   ├── .editorconfig
+│   ├── .pre-commit-config.yaml
+│   ├── .github/workflows/test.yml
+│   ├── renovate.json5
+│   ├── .copier-answers.yaml.jinja
+│   └── README.md.jinja
+├── copier.yml          # Copier configuration
+├── .copier-answers.yaml  # This repo is also managed by Copier
+└── README.md           # This file (not from template)
+```
