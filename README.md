@@ -24,3 +24,12 @@ copier update
 ```
 
 Renovate can automatically create PRs when the template is updated.
+
+## Template Development
+
+The following files are used by Copier and are not part of the generated project:
+
+- `copier.yml` - Copier configuration
+- `.copier-answers.yaml.jinja` - Template for storing answers in downstream projects
+- `README.md.jinja` - Template for the README in downstream projects
+- `README.md` - This file (documentation for the template itself)
