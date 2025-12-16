@@ -9,6 +9,10 @@ _skip_if_exists:
 # Exclude release-please files as they are specific to this repository
 # and not needed for all projects (e.g., dotfiles)
 _exclude:
+  # .git can be a file (not directory) in worktrees, which is not excluded by default
+  - .git
+  # copier.yml is the template definition file, not needed in derived repositories
+  - copier.yml
   - release-please-config.json
   - .release-please-manifest.json
   - CHANGELOG.md
