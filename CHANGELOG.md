@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/fohte/generic-boilerplate/compare/v0.1.1...v0.1.2) (2025-12-16)
+
+
+### Bug Fixes
+
+* **copier:** exclude release-please files from template ([#24](https://github.com/fohte/generic-boilerplate/issues/24)) ([c4a9391](https://github.com/fohte/generic-boilerplate/commit/c4a9391a427744e66f2fb08f3201a449d182cdc0))
+
 ## [0.1.1](https://github.com/fohte/generic-boilerplate/compare/v0.1.0...v0.1.1) (2025-12-13)
 
 
