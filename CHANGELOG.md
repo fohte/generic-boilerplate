@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/fohte/generic-boilerplate/compare/v0.1.2...v0.1.3) (2025-12-16)
+
+
+### Bug Fixes
+
+* **copier:** add .git and copier.yml to exclude list ([#26](https://github.com/fohte/generic-boilerplate/issues/26)) ([bb81a68](https://github.com/fohte/generic-boilerplate/commit/bb81a6873bad9a41b4d8188d57efc37ef4a9b3ae))
+
 ## [0.1.2](https://github.com/fohte/generic-boilerplate/compare/v0.1.1...v0.1.2) (2025-12-16)
 
 
