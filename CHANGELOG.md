@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/fohte/generic-boilerplate/compare/v0.1.3...v0.1.4) (2025-12-17)
+
+
+### Bug Fixes
+
+* **copier:** use default answers file name ([#28](https://github.com/fohte/generic-boilerplate/issues/28)) ([5853c3c](https://github.com/fohte/generic-boilerplate/commit/5853c3c04724ec1538d6a9584ac2b4975e485555))
+
 ## [0.1.3](https://github.com/fohte/generic-boilerplate/compare/v0.1.2...v0.1.3) (2025-12-16)
 
 
