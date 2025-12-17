@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/fohte/generic-boilerplate/compare/v0.1.4...v0.1.5) (2025-12-17)
+
+
+### Features
+
+* **editorconfig:** add shfmt and Makefile settings ([#30](https://github.com/fohte/generic-boilerplate/issues/30)) ([3a28298](https://github.com/fohte/generic-boilerplate/commit/3a28298eafb097d16ab79c7249e238780d8d9663))
+
 ## [0.1.4](https://github.com/fohte/generic-boilerplate/compare/v0.1.3...v0.1.4) (2025-12-17)
 
 
