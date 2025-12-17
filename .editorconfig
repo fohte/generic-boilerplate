@@ -10,3 +10,11 @@ trim_trailing_whitespace = true
 
 [*.md{,x}]
 trim_trailing_whitespace = false
+
+# shfmt (github.com/mvdan/sh)
+[*.{sh,bash}]
+space_redirects = true
+switch_case_indent = true
+
+[{Makefile,*.mk}]
+indent_style = tab
