@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 jobs:
-  test:
+  format:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,20 +21,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Cache pre-commit
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pre-commit
-          key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
-            ${{ runner.os }}-pre-commit-
+      - uses: jdx/mise-action@v2
 
-      - name: Run pre-commit
-        id: pre-commit
-        run: |
-          pip install pre-commit
-          pre-commit run --all-files
+      - name: Run lefthook
+        id: lefthook
+        run: lefthook run pre-commit --all-files
 
       - name: Commit formatted files
         if: ${{ !cancelled() }}
