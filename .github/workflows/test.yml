@@ -36,5 +36,5 @@ jobs:
           github_token: ${{ steps.app-token.outputs.token }}
 
       - name: Fail if lefthook failed
-        if: steps.lefthook.conclusion == 'failure'
+        if: steps.lefthook.outcome == 'failure'
         run: exit 1
