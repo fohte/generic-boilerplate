@@ -1,2 +1,3 @@
 [tools]
+"cargo:basefmt" = "0.1.0"
 lefthook = "2.0.12"
