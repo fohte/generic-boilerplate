@@ -1,5 +1,5 @@
 remotes:
   - git_url: https://github.com/fohte/lefthook-config.git
-    ref: master
+    ref: v0.1.1
     configs:
       - base.yml
