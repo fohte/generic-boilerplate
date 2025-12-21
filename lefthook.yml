@@ -1,5 +1,5 @@
 remotes:
   - git_url: https://github.com/fohte/lefthook-config.git
-    ref: v0.1.5
+    ref: 09a1a3f01f2b1d4f1fcac3f9a541f17f0c25f644 # v0.1.5, renovate: datasource=github-tags depName=fohte/lefthook-config
     configs:
       - base.yml
