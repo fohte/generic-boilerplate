@@ -14,7 +14,7 @@ A [Copier](https://copier.readthedocs.io/) template for common development confi
 ### Create a new project
 
 ```bash
-copier copy gh:fohte/generic-boilerplate <destination>
+copier copy https://github.com/fohte/generic-boilerplate <destination>
 ```
 
 ### Update an existing project
