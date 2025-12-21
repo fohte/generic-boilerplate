@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.6](https://github.com/fohte/generic-boilerplate/compare/v0.1.5...v0.1.6) (2025-12-21)
+
+
+### Features
+
+* migrate from pre-commit to lefthook ([#32](https://github.com/fohte/generic-boilerplate/issues/32)) ([a6913a5](https://github.com/fohte/generic-boilerplate/commit/a6913a5abe395644250fa5fc0752dc79093bdb79))
+
+
+### Bug Fixes
+
+* **ci:** prevent infinite auto-format commit loop ([#33](https://github.com/fohte/generic-boilerplate/issues/33)) ([580e0cb](https://github.com/fohte/generic-boilerplate/commit/580e0cbb0885db83f73c0fb8b95ce51bf649e897))
+
 ## [0.1.5](https://github.com/fohte/generic-boilerplate/compare/v0.1.4...v0.1.5) (2025-12-17)
 
 
