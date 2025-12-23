@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.7](https://github.com/fohte/generic-boilerplate/compare/v0.1.6...v0.1.7) (2025-12-23)
+
+
+### Bug Fixes
+
+* `'pathlib.PurePosixPath object' has no attribute 'resolve'` ([#38](https://github.com/fohte/generic-boilerplate/issues/38)) ([213a98e](https://github.com/fohte/generic-boilerplate/commit/213a98ec04a0a022bc6778451ac31995390869ab))
+
 ## [0.1.6](https://github.com/fohte/generic-boilerplate/compare/v0.1.5...v0.1.6) (2025-12-21)
 
 
