@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8](https://github.com/fohte/generic-boilerplate/compare/v0.1.7...v0.1.8) (2025-12-24)
+
+
+### Features
+
+* **mise:** add shellcheck and shfmt ([#40](https://github.com/fohte/generic-boilerplate/issues/40)) ([18f18b1](https://github.com/fohte/generic-boilerplate/commit/18f18b16083a90eebb60725a1870ca2726035085))
+
 ## [0.1.7](https://github.com/fohte/generic-boilerplate/compare/v0.1.6...v0.1.7) (2025-12-23)
 
 
