@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.9](https://github.com/fohte/generic-boilerplate/compare/v0.1.8...v0.1.9) (2025-12-27)
+
+
+### Features
+
+* **renovate:** add `$schema` for LSP completion ([#44](https://github.com/fohte/generic-boilerplate/issues/44)) ([0c75bb1](https://github.com/fohte/generic-boilerplate/commit/0c75bb185616ec17797abc3d76d0bd2dcae26150))
+
 ## [0.1.8](https://github.com/fohte/generic-boilerplate/compare/v0.1.7...v0.1.8) (2025-12-24)
 
 
