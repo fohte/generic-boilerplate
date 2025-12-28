@@ -19,17 +19,20 @@ copier copy https://github.com/fohte/generic-boilerplate <destination>
 
 ### Update an existing project
 
+Projects created from this template can receive updates via [Copier](https://copier.readthedocs.io/).
+
 ```bash
 copier update
 ```
 
-Renovate can automatically create PRs when the template is updated.
+[Renovate](https://docs.renovatebot.com/modules/manager/copier/) automatically creates PRs when the template is updated (if `copier.enabled` is set in `renovate.json5`).
 
 ## Parameters
 
-| Parameter   | Type | Default | Description                                                                                                              |
-| ----------- | ---- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `is_public` | bool | `false` | Set to `true` for public repositories. Enables commitlint rule to prevent external GitHub references in commit messages. |
+| Parameter     | Type | Default | Description                                                                                                              |
+| ------------- | ---- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `description` | str  | `''`    | Project description for README.md.                                                                                       |
+| `is_public`   | bool | `false` | Set to `true` for public repositories. Enables commitlint rule to prevent external GitHub references in commit messages. |
 
 ## Template Development
 
