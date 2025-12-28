@@ -18,3 +18,11 @@ _exclude:
   - .release-please-manifest.json
   - CHANGELOG.md
   - .github/workflows/release-please.yml
+  # Exclude external refs plugin for private repos
+  - '{% if not is_public %}commitlint-plugin-no-external-refs.ts{% endif %}'
+
+# Template parameters
+is_public:
+  type: bool
+  default: false
+  help: Is this a public repository?
