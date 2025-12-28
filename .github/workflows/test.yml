@@ -44,6 +44,12 @@ jobs:
         continue-on-error: true
         run: lefthook run pre-commit --all-files
 
+      # lefthook's formatters run `git add` after formatting, which stages the changes.
+      # commit-action uses `git ls-files --modified` which only detects unstaged changes.
+      # We need to unstage the changes so commit-action can detect them.
+      - name: Unstage changes for commit-action
+        run: git restore --staged .
+
       - name: Commit formatted files
         if: ${{ !cancelled() && steps.check-prev.outputs.skip_commit != 'true' }}
         uses: suzuki-shunsuke/commit-action@v0.0.14
