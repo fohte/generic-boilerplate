@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10](https://github.com/fohte/generic-boilerplate/compare/v0.1.9...v0.1.10) (2025-12-28)
+
+
+### Bug Fixes
+
+* **editorconfig:** apply shfmt options to extensionless scripts ([#46](https://github.com/fohte/generic-boilerplate/issues/46)) ([0eb46dc](https://github.com/fohte/generic-boilerplate/commit/0eb46dce43ee84b9dd26b34073f7d3ca777830d8))
+
 ## [0.1.9](https://github.com/fohte/generic-boilerplate/compare/v0.1.8...v0.1.9) (2025-12-28)
 
 
