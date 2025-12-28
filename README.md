@@ -29,9 +29,10 @@ copier update
 
 ## Parameters
 
-| Parameter   | Type | Default | Description                                                                                                              |
-| ----------- | ---- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `is_public` | bool | `false` | Set to `true` for public repositories. Enables commitlint rule to prevent external GitHub references in commit messages. |
+| Parameter     | Type | Default | Description                                                                                                              |
+| ------------- | ---- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `description` | str  | `''`    | Project description for README.md.                                                                                       |
+| `is_public`   | bool | `false` | Set to `true` for public repositories. Enables commitlint rule to prevent external GitHub references in commit messages. |
 
 ## Template Development
 
