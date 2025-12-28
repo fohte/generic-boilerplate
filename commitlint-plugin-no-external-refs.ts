@@ -8,14 +8,21 @@ export interface NoExternalGitHubRefsOptions {
   allowedRepos?: string[]
 }
 
+let memoizedRepo: string | null | undefined
+
 function getCurrentRepo(): string | null {
+  if (memoizedRepo !== undefined) {
+    return memoizedRepo
+  }
   try {
     const url = execSync('git remote get-url origin', {
       encoding: 'utf-8',
     }).trim()
-    const match = url.match(/github\.com[:/]([^/]+\/[^/.]+)/)
-    return match ? match[1].replace(/\.git$/, '') : null
+    const match = url.match(/github\.com[:/]([^/]+\/[^/]+)/)
+    memoizedRepo = match ? match[1].replace(/\.git$/, '') : null
+    return memoizedRepo
   } catch {
+    memoizedRepo = null
     return null
   }
 }
@@ -29,7 +36,6 @@ export const noExternalGitHubRefs: Rule<NoExternalGitHubRefsOptions> = (
   const currentRepo = options.currentRepo || getCurrentRepo()
   if (!currentRepo) return [true]
 
-  const [owner, repo] = currentRepo.split('/')
   const allowedRepos = new Set([
     currentRepo.toLowerCase(),
     ...(options.allowedRepos || []).map((r) => r.toLowerCase()),
