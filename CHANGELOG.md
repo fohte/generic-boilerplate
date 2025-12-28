@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.11](https://github.com/fohte/generic-boilerplate/compare/v0.1.10...v0.1.11) (2025-12-28)
+
+
+### Bug Fixes
+
+* **ci:** fix commit-action not detecting staged changes ([#48](https://github.com/fohte/generic-boilerplate/issues/48)) ([3c73768](https://github.com/fohte/generic-boilerplate/commit/3c73768e61e262236a8787a98178846d45858a48))
+
 ## [0.1.10](https://github.com/fohte/generic-boilerplate/compare/v0.1.9...v0.1.10) (2025-12-28)
 
 
