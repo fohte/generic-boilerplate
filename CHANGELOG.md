@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.9](https://github.com/fohte/generic-boilerplate/compare/v0.1.8...v0.1.9) (2025-12-28)
+
+
+### Features
+
+* **renovate:** add `$schema` for LSP completion ([#44](https://github.com/fohte/generic-boilerplate/issues/44)) ([0c75bb1](https://github.com/fohte/generic-boilerplate/commit/0c75bb185616ec17797abc3d76d0bd2dcae26150))
+
+
+### Bug Fixes
+
+* **deps:** update dependency fohte/lefthook-config to v0.1.7 ([#42](https://github.com/fohte/generic-boilerplate/issues/42)) ([1e3526b](https://github.com/fohte/generic-boilerplate/commit/1e3526b9851c05693e62fb75a8971aa40482f692))
+
 ## [0.1.8](https://github.com/fohte/generic-boilerplate/compare/v0.1.7...v0.1.8) (2025-12-24)
 
 
