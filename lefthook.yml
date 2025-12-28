@@ -3,3 +3,8 @@ remotes:
     ref: v0.1.7 # renovate: datasource=github-tags depName=fohte/lefthook-config
     configs:
       - base.yml
+
+commit-msg:
+  commands:
+    commitlint:
+      run: bunx commitlint --edit {1}
