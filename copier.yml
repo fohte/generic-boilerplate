@@ -3,7 +3,7 @@ _answers_file: .copier-answers.yml
 
 description:
   type: str
-  help: Project description
+  help: Project description for README.md
   default: ''
 
 # README.md is expected to be customized immediately after repository creation,
