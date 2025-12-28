@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "devDependencies": {
+    "@commitlint/cli": "20.2.0",
+    "prettier": "3.7.4"
+  }
+}
