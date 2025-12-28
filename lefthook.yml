@@ -3,10 +3,3 @@ remotes:
     ref: v0.1.7 # renovate: datasource=github-tags depName=fohte/lefthook-config
     configs:
       - base.yml
-{% if enable_external_ref_check %}
-
-commit-msg:
-  commands:
-    commitlint:
-      run: bun x commitlint --edit "$1"
-{% endif %}
