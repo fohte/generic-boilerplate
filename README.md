@@ -27,6 +27,12 @@ copier update
 
 [Renovate](https://docs.renovatebot.com/modules/manager/copier/) automatically creates PRs when the template is updated (if `copier.enabled` is set in `renovate.json5`).
 
+## Parameters
+
+| Parameter   | Type | Default | Description                                                                                                              |
+| ----------- | ---- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `is_public` | bool | `false` | Set to `true` for public repositories. Enables commitlint rule to prevent external GitHub references in commit messages. |
+
 ## Template Development
 
 The following files are used by Copier and are not part of the generated project:
