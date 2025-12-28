@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12](https://github.com/fohte/generic-boilerplate/compare/v0.1.11...v0.1.12) (2025-12-28)
+
+
+### Bug Fixes
+
+* **template:** fix empty README h1 when destination is relative path ([#51](https://github.com/fohte/generic-boilerplate/issues/51)) ([78a18b8](https://github.com/fohte/generic-boilerplate/commit/78a18b811c0cde62e8d92485c3a50d60c35f001c))
+
 ## [0.1.11](https://github.com/fohte/generic-boilerplate/compare/v0.1.10...v0.1.11) (2025-12-28)
 
 
