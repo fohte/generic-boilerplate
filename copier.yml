@@ -18,3 +18,11 @@ _exclude:
   - .release-please-manifest.json
   - CHANGELOG.md
   - .github/workflows/release-please.yml
+  # Exclude commitlint config when external ref check is disabled
+  - "{% if not enable_external_ref_check %}commitlint.config.mjs{% endif %}"
+
+# Template parameters
+enable_external_ref_check:
+  type: bool
+  default: false
+  help: Enable commitlint rule to prevent external GitHub references in commit messages (recommended for public repos)
