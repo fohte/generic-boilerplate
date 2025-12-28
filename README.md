@@ -19,11 +19,13 @@ copier copy https://github.com/fohte/generic-boilerplate <destination>
 
 ### Update an existing project
 
+Projects created from this template can receive updates via [Copier](https://copier.readthedocs.io/).
+
 ```bash
 copier update
 ```
 
-Renovate can automatically create PRs when the template is updated.
+[Renovate](https://docs.renovatebot.com/modules/manager/copier/) automatically creates PRs when the template is updated (if `copier.enabled` is set in `renovate.json5`).
 
 ## Template Development
 
