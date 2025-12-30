@@ -38,7 +38,7 @@ is_public:
 # release-please settings
 use_release_please:
   type: bool
-  default: true
+  default: false
   help: Enable automated release management with release-please?
 
 release_type:
