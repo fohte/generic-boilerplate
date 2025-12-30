@@ -1,6 +1,11 @@
 _min_copier_version: '9.0.0'
 _answers_file: .copier-answers.yml
 
+description:
+  type: str
+  help: Project description for README.md
+  default: ''
+
 # README.md is expected to be customized immediately after repository creation,
 # so conflicts are almost guaranteed on copier update. Skip to avoid this.
 _skip_if_exists:

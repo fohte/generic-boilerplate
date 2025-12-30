@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.13](https://github.com/fohte/generic-boilerplate/compare/v0.1.12...v0.1.13) (2025-12-30)
+
+
+### Features
+
+* add commitlint ([#53](https://github.com/fohte/generic-boilerplate/issues/53)) ([940b67b](https://github.com/fohte/generic-boilerplate/commit/940b67bda79a532d64cf008a01c1dc74509edb05))
+* **commitlint:** add custom plugin to prevent external GitHub references ([#55](https://github.com/fohte/generic-boilerplate/issues/55)) ([d0616b8](https://github.com/fohte/generic-boilerplate/commit/d0616b82ec993c1dcd08a75063e1a9f63739ad71))
+
+
+### Bug Fixes
+
+* **release-please:** display deps commits in release notes ([#58](https://github.com/fohte/generic-boilerplate/issues/58)) ([a85a0d1](https://github.com/fohte/generic-boilerplate/commit/a85a0d1b172c94594ffd813488fb8e0048814183))
+* **template:** clean up README template and add description parameter ([#56](https://github.com/fohte/generic-boilerplate/issues/56)) ([4d4a121](https://github.com/fohte/generic-boilerplate/commit/4d4a121d2b1a5049461029e068962ac10d12e886))
+
+
+### Dependencies
+
+* update dependency fohte/lefthook-config to v0.1.10 ([#57](https://github.com/fohte/generic-boilerplate/issues/57)) ([6c18582](https://github.com/fohte/generic-boilerplate/commit/6c18582155247b41885621d75b1114dae9c42465))
+* update dependency fohte/lefthook-config to v0.1.9 ([#50](https://github.com/fohte/generic-boilerplate/issues/50)) ([2e7929b](https://github.com/fohte/generic-boilerplate/commit/2e7929b8e4a915c70edd9a9a20b9fc09969f7050))
+
 ## [0.1.12](https://github.com/fohte/generic-boilerplate/compare/v0.1.11...v0.1.12) (2025-12-28)
 
 
