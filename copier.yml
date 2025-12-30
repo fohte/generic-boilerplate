@@ -5,3 +5,30 @@ _answers_file: .copier-answers.yaml
 # so conflicts are almost guaranteed on copier update. Skip to avoid this.
 _skip_if_exists:
   - README.md
+
+_exclude:
+  # This repo's own config (not for template)
+  - release-please-config.json
+  - .release-please-manifest.json
+  # Conditional exclusion when release-please is disabled
+  - "{% if not use_release_please %}release-please-config.json.jinja{% endif %}"
+  - "{% if not use_release_please %}.release-please-manifest.json.jinja{% endif %}"
+  - "{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}"
+
+# release-please settings
+use_release_please:
+  type: bool
+  default: true
+  help: "Enable automated release management with release-please?"
+
+release_type:
+  type: str
+  choices:
+    - simple
+    - node
+    - python
+    - go
+    - rust
+    - java
+  help: "Select the release-type for your project"
+  when: "{{ use_release_please }}"

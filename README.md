@@ -27,3 +27,13 @@ The following files exist only in this template repository and are removed/repla
 - `.copier-answers.yaml.jinja` - Copier answers template
 - `.github/workflows/init-copier.yml` - One-time initialization workflow
 - `README.md` - Replaced by `README.md.jinja`
+
+## GitHub App Setup (for release-please)
+
+To use release-please, you need to configure a GitHub App:
+
+1. Create a GitHub App with "Repository contents: Read and write" permission
+2. Install the App to your repository
+3. Add the following Repository secrets:
+   - `APP_ID`: GitHub App's App ID
+   - `APP_PRIVATE_KEY`: GitHub App's Private Key
