@@ -1,7 +1,4 @@
-import type { Plugin, UserConfig } from '@commitlint/types'
-import { RuleConfigSeverity } from '@commitlint/types'
-
-let noExternalGitHubRefsPlugin: Plugin | null = null
+let noExternalGitHubRefsPlugin = null
 try {
   // Plugin file exists only in public repos (controlled by copier is_public parameter)
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -11,13 +8,13 @@ try {
   // Plugin not available (private repo)
 }
 
-const config: UserConfig = {
+const config = {
   rules: {
-    'body-leading-blank': [RuleConfigSeverity.Error, 'always'],
-    'footer-leading-blank': [RuleConfigSeverity.Error, 'always'],
-    'subject-full-stop': [RuleConfigSeverity.Error, 'never', '.'],
+    'body-leading-blank': [2, 'always'],
+    'footer-leading-blank': [2, 'always'],
+    'subject-full-stop': [2, 'never', '.'],
     ...(noExternalGitHubRefsPlugin && {
-      'no-external-github-refs': [RuleConfigSeverity.Error, 'always'],
+      'no-external-github-refs': [2, 'always'],
     }),
   },
   plugins: noExternalGitHubRefsPlugin ? [noExternalGitHubRefsPlugin] : [],

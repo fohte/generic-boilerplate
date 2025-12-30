@@ -1,14 +1,6 @@
 import { execSync } from 'child_process'
-import type { Plugin, Rule } from '@commitlint/types'
 
-export interface NoExternalGitHubRefsOptions {
-  /** Override the current repository (format: "owner/repo") */
-  currentRepo?: string
-  /** Additional repositories to allow references to */
-  allowedRepos?: string[]
-}
-
-function getCurrentRepo(): string | null {
+function getCurrentRepo() {
   try {
     const url = execSync('git remote get-url origin', {
       encoding: 'utf-8',
@@ -20,11 +12,7 @@ function getCurrentRepo(): string | null {
   }
 }
 
-export const noExternalGitHubRefs: Rule<NoExternalGitHubRefsOptions> = (
-  parsed,
-  when,
-  value
-) => {
+export const noExternalGitHubRefs = (parsed, when, value) => {
   const options = value || {}
   const currentRepo = options.currentRepo || getCurrentRepo()
   if (!currentRepo || !parsed.raw) return [true]
@@ -42,7 +30,7 @@ export const noExternalGitHubRefs: Rule<NoExternalGitHubRefsOptions> = (
     /(?<![a-zA-Z0-9_/-])([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_.-]+)#\d+/g,
   ]
 
-  const externalRefs: string[] = []
+  const externalRefs = []
   for (const pattern of patterns) {
     for (const match of parsed.raw.matchAll(pattern)) {
       const [, matchOwner, matchRepo] = match
@@ -62,7 +50,7 @@ export const noExternalGitHubRefs: Rule<NoExternalGitHubRefsOptions> = (
   ]
 }
 
-const plugin: Plugin = {
+const plugin = {
   rules: {
     'no-external-github-refs': noExternalGitHubRefs,
   },
