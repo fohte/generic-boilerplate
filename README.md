@@ -9,7 +9,7 @@ A [Copier](https://copier.readthedocs.io/) template for common development confi
 - `lefthook.yml` - Git hooks ([lefthook](https://github.com/evilmartians/lefthook))
   - `commitlint.config.js` - Commit message linting ([commitlint](https://commitlint.js.org/))
   - `.prettierrc.yaml` - Code formatting ([Prettier](https://prettier.io/))
-- `.github/workflows/test.yml` - CI workflow
+- `.github/workflows/test.yml` - CI workflow ([GitHub Actions](https://docs.github.com/en/actions))
 - `renovate.json5` - Dependency updates ([Renovate](https://docs.renovatebot.com/))
 
 ## Usage
