@@ -16,7 +16,9 @@ A [Copier](https://copier.readthedocs.io/) template for common development confi
 
 Configure a GitHub App for CI workflows:
 
-1. Create a GitHub App with "Repository contents: Read and write" permission
+1. Create a GitHub App with the following repository permissions:
+   - Contents: Read and write
+   - Pull requests: Read and write
 2. Install the App to your repository
 3. Add the following Repository secrets:
    - `APP_ID`: GitHub App's App ID
