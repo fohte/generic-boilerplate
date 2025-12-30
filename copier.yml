@@ -24,9 +24,13 @@ _exclude:
   - CHANGELOG.md
   # Exclude external refs plugin for private repos
   - '{% if not is_public %}commitlint-plugin-no-external-refs.ts{% endif %}'
-  # Conditional exclusion when release-please is disabled
-  - '{% if not use_release_please %}release-please-config.json.jinja{% endif %}'
-  - '{% if not use_release_please %}.release-please-manifest.json.jinja{% endif %}'
+  # Conditional exclusion when release-please is disabled.
+  # NOTE: Copier's _exclude matches against OUTPUT file names (without .jinja
+  # suffix), not source file names. For example, to exclude the output file
+  # "release-please-config.json" generated from "release-please-config.json.jinja",
+  # use "release-please-config.json" (not "release-please-config.json.jinja").
+  - '{% if not use_release_please %}release-please-config.json{% endif %}'
+  - '{% if not use_release_please %}.release-please-manifest.json{% endif %}'
   - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
 
 # Template parameters
