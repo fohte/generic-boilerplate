@@ -7,12 +7,9 @@ _skip_if_exists:
   - README.md
 
 _exclude:
-  # This repo's own config (not for template)
-  - release-please-config.json
-  - .release-please-manifest.json
   # Conditional exclusion when release-please is disabled
-  - "{% if not use_release_please %}release-please-config.json.jinja{% endif %}"
-  - "{% if not use_release_please %}.release-please-manifest.json.jinja{% endif %}"
+  - "{% if not use_release_please %}release-please-config.json{% endif %}"
+  - "{% if not use_release_please %}.release-please-manifest.json{% endif %}"
   - "{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}"
 
 # release-please settings
