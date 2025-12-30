@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.15](https://github.com/fohte/generic-boilerplate/compare/v0.1.14...v0.1.15) (2025-12-30)
+
+
+### Bug Fixes
+
+* **copier:** change `use_release_please` default to false ([#64](https://github.com/fohte/generic-boilerplate/issues/64)) ([ae5d7fb](https://github.com/fohte/generic-boilerplate/commit/ae5d7fb12aef24071b0ab03075a1431032a054c1))
+
 ## [0.1.14](https://github.com/fohte/generic-boilerplate/compare/v0.1.13...v0.1.14) (2025-12-30)
 
 
