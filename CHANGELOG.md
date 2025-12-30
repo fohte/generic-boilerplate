@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.14](https://github.com/fohte/generic-boilerplate/compare/v0.1.13...v0.1.14) (2025-12-30)
+
+
+### Features
+
+* **copier:** make release-please config reusable as template ([#62](https://github.com/fohte/generic-boilerplate/issues/62)) ([2779f75](https://github.com/fohte/generic-boilerplate/commit/2779f75bd7a29772dd6574015f80e0e100eaf53f))
+
 ## [0.1.13](https://github.com/fohte/generic-boilerplate/compare/v0.1.12...v0.1.13) (2025-12-30)
 
 
