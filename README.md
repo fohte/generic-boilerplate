@@ -5,9 +5,12 @@ A [Copier](https://copier.readthedocs.io/) template for common development confi
 ## What's Included
 
 - `.editorconfig` - Editor configuration
-- `.pre-commit-config.yaml` - Pre-commit hooks
+- `.mise.toml` - Tool version management ([mise](https://mise.jdx.dev/))
+- `lefthook.yml` - Git hooks ([lefthook](https://github.com/evilmartians/lefthook))
+- `commitlint.config.js` - Commit message linting ([commitlint](https://commitlint.js.org/))
+- `.prettierrc.yaml` - Code formatting ([Prettier](https://prettier.io/))
 - `.github/workflows/test.yml` - CI workflow
-- `renovate.json5` - Renovate configuration
+- `renovate.json5` - Dependency updates ([Renovate](https://docs.renovatebot.com/))
 
 ## Usage
 
