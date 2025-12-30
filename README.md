@@ -35,5 +35,5 @@ To use release-please, you need to configure a GitHub App:
 1. Create a GitHub App with "Repository contents: Read and write" permission
 2. Install the App to your repository
 3. Add the following Repository secrets:
-   - `APP_ID`: GitHub App's App ID
-   - `APP_PRIVATE_KEY`: GitHub App's Private Key
+    - `APP_ID`: GitHub App's App ID
+    - `APP_PRIVATE_KEY`: GitHub App's Private Key
