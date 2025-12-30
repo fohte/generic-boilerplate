@@ -24,9 +24,13 @@ _exclude:
   - '{% if not is_public %}commitlint-plugin-no-external-refs.ts{% endif %}'
   # Conditional exclusion when release-please is disabled.
   # NOTE: Copier's _exclude matches against OUTPUT file names (without .jinja
-  # suffix), not source file names. For example, to exclude the output file
-  # "release-please-config.json" generated from "release-please-config.json.jinja",
-  # use "release-please-config.json" (not "release-please-config.json.jinja").
+  # suffix), not source file names.
+  #
+  #   _exclude pattern                 | use_release_please=true | =false
+  #   ---------------------------------|-------------------------|----------
+  #   release-please-config.json       | generated               | excluded
+  #   release-please-config.json.jinja | generated               | generated
+  #
   # These patterns also exclude this repository's own release-please files
   # (without .jinja suffix) when use_release_please is false.
   - '{% if not use_release_please %}release-please-config.json{% endif %}'
