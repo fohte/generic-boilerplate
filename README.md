@@ -12,6 +12,18 @@ A [Copier](https://copier.readthedocs.io/) template for common development confi
 - `.github/workflows/test.yml` - CI workflow
 - `renovate.json5` - Dependency updates ([Renovate](https://docs.renovatebot.com/))
 
+## Prerequisites
+
+Configure a GitHub App for CI workflows:
+
+1. Create a GitHub App with the following repository permissions:
+   - Contents: Read and write
+   - Pull requests: Read and write
+2. Install the App to your repository
+3. Add the following Repository secrets:
+   - `APP_ID`: GitHub App's App ID
+   - `APP_PRIVATE_KEY`: GitHub App's Private Key
+
 ## Usage
 
 ### Create a new project
@@ -36,10 +48,12 @@ This repository uses [Semantic Versioning](https://semver.org/) (via [release-pl
 
 ## Parameters
 
-| Parameter     | Type | Default | Description                                                                                                              |
-| ------------- | ---- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `description` | str  | `''`    | Project description for README.md.                                                                                       |
-| `is_public`   | bool | `false` | Set to `true` for public repositories. Enables commitlint rule to prevent external GitHub references in commit messages. |
+| Parameter            | Type | Default | Description                                                                                                                  |
+| -------------------- | ---- | ------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `description`        | str  | `''`    | Project description for README.md.                                                                                           |
+| `is_public`          | bool | `false` | Set to `true` for public repositories. Enables commitlint rule to prevent external GitHub references in commit messages.     |
+| `use_release_please` | bool | `true`  | Enable automated release management with release-please.                                                                     |
+| `release_type`       | str  | -       | Select the release-type for your project (simple, node, python, go, rust, java). Required when `use_release_please` is true. |
 
 ## Template Development
 
