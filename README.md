@@ -1,32 +1,47 @@
 # Generic Boilerplate
 
-A template for common development configurations. This repository serves as both a **GitHub Template Repository** and a **[Copier](https://copier.readthedocs.io/) template**.
-
-## Overview
-
-GitHub Template Repositories only copy files at repository creation time and cannot propagate updates to downstream repositories. This repository combines GitHub Templates with Copier to enable automatic update propagation.
-
-### How it works
-
-1. **New repository creation**: Terraform creates a repository using this as a GitHub Template
-2. **Automatic Copier initialization**: The `init-copier.yml` workflow runs and executes `copier copy`
-3. **Update propagation**: Renovate periodically checks for template updates and creates PRs via `copier update`
+A [Copier](https://copier.readthedocs.io/) template for common development configurations.
 
 ## What's Included
 
 - `.editorconfig` - Editor configuration
-- `.pre-commit-config.yaml` - Pre-commit hooks
+- `.mise.toml` - Tool version management ([mise](https://mise.jdx.dev/))
+- `lefthook.yml` - Git hooks ([lefthook](https://github.com/evilmartians/lefthook))
+  - `commitlint.config.js` - Commit message linting ([commitlint](https://commitlint.js.org/))
+  - `.prettierrc.yaml` - Code formatting ([Prettier](https://prettier.io/))
 - `.github/workflows/test.yml` - CI workflow
-- `renovate.json5` - Renovate configuration
+- `renovate.json5` - Dependency updates ([Renovate](https://docs.renovatebot.com/))
 
-## Template-only files
+## Usage
 
-The following files exist only in this template repository and are removed/replaced in downstream repositories:
+### Create a new project
 
-- `copier.yml` - Copier configuration
-- `.copier-answers.yaml.jinja` - Copier answers template
-- `.github/workflows/init-copier.yml` - One-time initialization workflow
-- `README.md` - Replaced by `README.md.jinja`
+```bash
+copier copy https://github.com/fohte/generic-boilerplate <destination>
+```
+
+### Update an existing project
+
+Projects created from this template can receive updates via [Copier](https://copier.readthedocs.io/).
+
+```bash
+copier update
+```
+
+[Renovate](https://docs.renovatebot.com/modules/manager/copier/) automatically creates PRs when the template is updated (if `copier.enabled` is set in `renovate.json5`).
+
+## Versioning
+
+This repository uses [Semantic Versioning](https://semver.org/) (via [release-please](https://github.com/googleapis/release-please)) because Renovate's [Copier manager](https://docs.renovatebot.com/modules/manager/copier/) requires [PEP 440](https://peps.python.org/pep-0440/)-compliant version tags (e.g., `0.1.0`) to detect template updates.
+
+## Parameters
+
+| Parameter            | Type | Default | Description                                                                                                                  |
+| -------------------- | ---- | ------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `description`        | str  | `''`    | Project description for README.md.                                                                                           |
+| `is_public`          | bool | `false` | Set to `true` for public repositories. Enables commitlint rule to prevent external GitHub references in commit messages.     |
+| `use_release_please` | bool | `true`  | Enable automated release management with release-please.                                                                     |
+| `release_type`       | str  | -       | Select the release-type for your project (simple, node, python, go, rust, java). Required when `use_release_please` is true. |
 
 ## GitHub App Setup (for release-please)
 
@@ -35,5 +50,14 @@ To use release-please, you need to configure a GitHub App:
 1. Create a GitHub App with "Repository contents: Read and write" permission
 2. Install the App to your repository
 3. Add the following Repository secrets:
-    - `APP_ID`: GitHub App's App ID
-    - `APP_PRIVATE_KEY`: GitHub App's Private Key
+   - `APP_ID`: GitHub App's App ID
+   - `APP_PRIVATE_KEY`: GitHub App's Private Key
+
+## Template Development
+
+The following files are used by Copier and are not part of the generated project:
+
+- `copier.yml` - Copier configuration
+- `.copier-answers.yaml.jinja` - Template for storing answers in downstream projects
+- `README.md.jinja` - Template for the README in downstream projects
+- `README.md` - This file (documentation for the template itself)
