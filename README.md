@@ -27,6 +27,12 @@ copier update
 
 [Renovate](https://docs.renovatebot.com/modules/manager/copier/) automatically creates PRs when the template is updated (if `copier.enabled` is set in `renovate.json5`).
 
+## Versioning
+
+This repository uses [Semantic Versioning](https://semver.org/) (via [release-please](https://github.com/googleapis/release-please)).
+
+Renovate's [Copier manager](https://docs.renovatebot.com/modules/manager/copier/) requires [PEP 440](https://peps.python.org/pep-0440/)-compliant version tags (e.g., `0.1.0`) to detect template updates. Semantic Versioning satisfies this requirement while providing clear versioning semantics.
+
 ## Parameters
 
 | Parameter     | Type | Default | Description                                                                                                              |
