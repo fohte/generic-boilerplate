@@ -18,15 +18,23 @@ _exclude:
   - .git
   # copier.yml is the template definition file
   - copier.yml
-  # release-please files are specific to this repository
-  - release-please-config.json
-  - .release-please-manifest.json
+  # CHANGELOG.md is specific to this repository
   - CHANGELOG.md
   # Exclude external refs plugin for private repos
   - '{% if not is_public %}commitlint-plugin-no-external-refs.ts{% endif %}'
-  # Conditional exclusion when release-please is disabled
-  - '{% if not use_release_please %}release-please-config.json.jinja{% endif %}'
-  - '{% if not use_release_please %}.release-please-manifest.json.jinja{% endif %}'
+  # Conditional exclusion when release-please is disabled.
+  # NOTE: Copier's _exclude matches against OUTPUT file names (without .jinja
+  # suffix), not source file names.
+  #
+  #   _exclude pattern                 | use_release_please=true | =false
+  #   ---------------------------------|-------------------------|----------
+  #   release-please-config.json       | generated               | excluded
+  #   release-please-config.json.jinja | generated               | generated
+  #
+  # These patterns also exclude this repository's own release-please files
+  # (without .jinja suffix) when use_release_please is false.
+  - '{% if not use_release_please %}release-please-config.json{% endif %}'
+  - '{% if not use_release_please %}.release-please-manifest.json{% endif %}'
   - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
 
 # Template parameters
@@ -38,7 +46,7 @@ is_public:
 # release-please settings
 use_release_please:
   type: bool
-  default: true
+  default: false
   help: Enable automated release management with release-please?
 
 release_type:
