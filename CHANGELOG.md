@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.17](https://github.com/fohte/generic-boilerplate/compare/v0.1.16...v0.1.17) (2025-12-31)
+
+
+### Bug Fixes
+
+* **commitlint:** fix no-external-github-refs rule not working ([#70](https://github.com/fohte/generic-boilerplate/issues/70)) ([0a8c1f1](https://github.com/fohte/generic-boilerplate/commit/0a8c1f1b5a5cea8c9af777f45fb62b0132f2e274))
+
 ## [0.1.16](https://github.com/fohte/generic-boilerplate/compare/v0.1.15...v0.1.16) (2025-12-31)
 
 
