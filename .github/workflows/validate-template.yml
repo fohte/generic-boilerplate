@@ -11,6 +11,8 @@ jobs:
       matrix:
         fixture:
           - base
+          - base-public
+          - base-release
 
     steps:
       - uses: actions/checkout@v5

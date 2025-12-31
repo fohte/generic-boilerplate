@@ -1,0 +1,4 @@
+# Test fixture for public repository
+description: Test project description
+is_public: true
+use_release_please: false
