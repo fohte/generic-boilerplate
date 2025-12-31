@@ -4,4 +4,16 @@
     'github>fohte/renovate-config:base.json5',
 {% if type == 'node' %}    'github>fohte/renovate-config:node.json5',
 {% endif %}  ],
+  customManagers: [
+    {
+      // Extend base.json5's lefthook manager to also match .jinja files
+      customType: 'regex',
+      fileMatch: ['(^|/)lefthook\\.ya?ml(\\.jinja)?$'],
+      matchStrings: [
+        'ref:\\s*(?<currentValue>v?\\d[^\\s#]*)\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s+depName=(?<depName>[^\\s]+)',
+      ],
+      autoReplaceStringTemplate: 'ref: {{{newValue}}} # renovate: datasource={{{datasource}}} depName={{{depName}}}',
+      versioningTemplate: 'semver',
+    },
+  ],
 }
