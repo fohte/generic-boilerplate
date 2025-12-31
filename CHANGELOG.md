@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.18](https://github.com/fohte/generic-boilerplate/compare/v0.1.17...v0.1.18) (2025-12-31)
+
+
+### Bug Fixes
+
+* **template:** fix broken symlinks for commitlint config files ([#74](https://github.com/fohte/generic-boilerplate/issues/74)) ([42d78aa](https://github.com/fohte/generic-boilerplate/commit/42d78aa3aab54fdb0f322116ce412ded2a11278c))
+
 ## [0.1.17](https://github.com/fohte/generic-boilerplate/compare/v0.1.16...v0.1.17) (2025-12-31)
 
 
