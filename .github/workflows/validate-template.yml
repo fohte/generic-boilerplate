@@ -3,6 +3,9 @@ name: Validate Template
 on:
   push:
 
+permissions:
+  contents: write
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -22,12 +25,13 @@ jobs:
       - name: Install copier
         run: pipx install copier
 
-      - name: Render template
+      - name: Regenerate fixture
         run: |
-          copier copy --trust --data-file tests/fixtures/${{ matrix.fixture }}.yml . /tmp/rendered
+          rm -rf "generated/${{ matrix.fixture }}"
+          copier copy --trust --data-file "tests/fixtures/${{ matrix.fixture }}.yml" . "generated/${{ matrix.fixture }}"
 
       - name: Initialize git repository
-        working-directory: /tmp/rendered
+        working-directory: generated/${{ matrix.fixture }}
         run: |
           git init
           git config user.email "test@example.com"
@@ -36,11 +40,11 @@ jobs:
           git commit -m "initial"
 
       - name: Run lefthook
-        working-directory: /tmp/rendered
+        working-directory: generated/${{ matrix.fixture }}
         run: lefthook run pre-commit --all-files
 
       - name: Check for diff
-        working-directory: /tmp/rendered
+        working-directory: generated/${{ matrix.fixture }}
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "Error: Template validation failed. The following files have diffs after running lefthook:"
@@ -48,3 +52,37 @@ jobs:
             git diff
             exit 1
           fi
+
+  commit-generated:
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: jdx/mise-action@v2
+
+      - name: Install copier
+        run: pipx install copier
+
+      - name: Regenerate all fixtures
+        run: |
+          for fixture in base base-public base-release; do
+            rm -rf "generated/$fixture"
+            copier copy --trust --data-file "tests/fixtures/$fixture.yml" . "generated/$fixture"
+          done
+
+      - name: Commit changes
+        uses: suzuki-shunsuke/commit-action@v0.0.14
+        with:
+          commit_message: 'chore(generated): regenerate from template'
+          workflow: deny
+          github_token: ${{ steps.app-token.outputs.token }}
