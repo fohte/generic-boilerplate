@@ -1,4 +1,5 @@
 _min_copier_version: '9.0.0'
+_subdirectory: template
 _answers_file: .copier-answers.yml
 
 description:
@@ -14,12 +15,6 @@ _skip_if_exists:
 # Exclude files that are specific to this template repository
 # and not needed in derived repositories
 _exclude:
-  # .git can be a file (not directory) in worktrees, which is not excluded by default
-  - .git
-  # copier.yml is the template definition file
-  - copier.yml
-  # CHANGELOG.md is specific to this repository
-  - CHANGELOG.md
   # Exclude external refs plugin for private repos
   - '{% if not is_public %}commitlint-plugin-no-external-refs.ts{% endif %}'
   # Conditional exclusion when release-please is disabled.
@@ -30,9 +25,6 @@ _exclude:
   #   ---------------------------------|-------------------------|----------
   #   release-please-config.json       | generated               | excluded
   #   release-please-config.json.jinja | generated               | generated
-  #
-  # These patterns also exclude this repository's own release-please files
-  # (without .jinja suffix) when use_release_please is false.
   - '{% if not use_release_please %}release-please-config.json{% endif %}'
   - '{% if not use_release_please %}.release-please-manifest.json{% endif %}'
   - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
