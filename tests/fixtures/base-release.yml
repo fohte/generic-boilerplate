@@ -1,4 +1,5 @@
 # Test fixture for release-please enabled
+type: base
 description: Test project description
 is_public: false
 use_release_please: true
