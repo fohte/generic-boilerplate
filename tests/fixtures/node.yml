@@ -1,0 +1,7 @@
+# Test fixture for node template
+# Used by validate-template.yml to test template rendering
+
+type: node
+description: Test Node.js project description
+is_public: false
+use_release_please: false

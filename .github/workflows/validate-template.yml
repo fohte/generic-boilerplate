@@ -13,6 +13,7 @@ jobs:
           - base
           - base-public
           - base-release
+          - node
 
     steps:
       - uses: actions/checkout@v5
@@ -25,6 +26,11 @@ jobs:
       - name: Render template
         run: |
           copier copy --trust --data-file tests/fixtures/${{ matrix.fixture }}.yml . /tmp/rendered
+
+      - name: Install bun dependencies
+        if: startsWith(matrix.fixture, 'node')
+        working-directory: /tmp/rendered
+        run: bun install
 
       - name: Initialize git repository
         working-directory: /tmp/rendered
