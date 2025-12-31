@@ -1,11 +1,12 @@
-let noExternalGitHubRefsPlugin = null
-try {
-  // Plugin file exists only in public repos (controlled by copier is_public parameter)
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  noExternalGitHubRefsPlugin = require('./commitlint-plugin-no-external-refs.cjs')
-} catch {
-  // Plugin not available (private repo)
-}
+const { existsSync } = require('fs')
+const { join } = require('path')
+
+// Plugin file exists only in public repos (controlled by copier is_public parameter)
+const pluginPath = join(__dirname, 'commitlint-plugin-no-external-refs.cjs')
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const noExternalGitHubRefsPlugin = existsSync(pluginPath)
+  ? require(pluginPath)
+  : null
 
 const config = {
   rules: {
