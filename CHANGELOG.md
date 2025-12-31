@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.16](https://github.com/fohte/generic-boilerplate/compare/v0.1.15...v0.1.16) (2025-12-31)
+
+
+### Features
+
+* **prettier:** change trailingComma to all ([#67](https://github.com/fohte/generic-boilerplate/issues/67)) ([049a2a2](https://github.com/fohte/generic-boilerplate/commit/049a2a2e279c358a9d0bca8d5255d3dd680523cb))
+
 ## [0.1.15](https://github.com/fohte/generic-boilerplate/compare/v0.1.14...v0.1.15) (2025-12-30)
 
 
