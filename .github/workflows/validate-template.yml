@@ -1,0 +1,59 @@
+name: Validate Template
+
+on:
+  push:
+    paths:
+      - 'template/**'
+      - 'copier.yml'
+      - 'tests/fixtures/**'
+      - '.github/workflows/validate-template.yml'
+  pull_request:
+    paths:
+      - 'template/**'
+      - 'copier.yml'
+      - 'tests/fixtures/**'
+      - '.github/workflows/validate-template.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        fixture:
+          - base
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: jdx/mise-action@v2
+
+      - name: Install copier
+        run: pipx install copier
+
+      - name: Render template
+        run: |
+          copier copy --trust --data-file tests/fixtures/${{ matrix.fixture }}.yml . /tmp/rendered
+
+      - name: Initialize git repository
+        working-directory: /tmp/rendered
+        run: |
+          git init
+          git config user.email "test@example.com"
+          git config user.name "Test"
+          git add -A
+          git commit -m "initial"
+
+      - name: Run lefthook
+        working-directory: /tmp/rendered
+        run: lefthook run pre-commit --all-files
+
+      - name: Check for diff
+        working-directory: /tmp/rendered
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Error: Template validation failed. The following files have diffs after running lefthook:"
+            git status --porcelain
+            git diff
+            exit 1
+          fi
