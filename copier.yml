@@ -1,11 +1,11 @@
-_min_copier_version: '9.0.0'
+_min_copier_version: "9.0.0"
 _subdirectory: template
 _answers_file: .copier-answers.yml
 
 description:
   type: str
   help: Project description for README.md
-  default: ''
+  default: ""
 
 # README.md is expected to be customized immediately after repository creation,
 # so conflicts are almost guaranteed on copier update. Skip to avoid this.
@@ -16,13 +16,13 @@ _skip_if_exists:
 # and not needed in derived repositories
 _exclude:
   # Exclude external refs plugin for private repos
-  - '{% if not is_public %}commitlint-plugin-no-external-refs.ts{% endif %}'
+  - "{% if not is_public %}commitlint-plugin-no-external-refs.ts{% endif %}"
   # Conditional exclusion when release-please is disabled.
   # NOTE: Copier's _exclude matches against OUTPUT file names (without .jinja
   # suffix), not source file names.
-  - '{% if not use_release_please %}release-please-config.json{% endif %}'
-  - '{% if not use_release_please %}.release-please-manifest.json{% endif %}'
-  - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
+  - "{% if not use_release_please %}release-please-config.json{% endif %}"
+  - "{% if not use_release_please %}.release-please-manifest.json{% endif %}"
+  - "{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}"
 
 # Template parameters
 is_public:
@@ -46,4 +46,4 @@ release_type:
     - rust
     - java
   help: Select the release-type for your project
-  when: '{{ use_release_please }}'
+  when: "{{ use_release_please }}"
