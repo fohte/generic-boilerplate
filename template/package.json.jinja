@@ -1,5 +1,5 @@
 {
-  "name": "{{ _copier_conf.dst_path | basename }}",
+  "name": "{{ _folder_name }}",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,6 +12,7 @@
     "test:unit": "vitest run"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.0.0",
     "@fohte/eslint-config": "^0.0.0",
     "@tsconfig/bun": "^1.0.0",
     "@types/bun": "^1.0.0",
