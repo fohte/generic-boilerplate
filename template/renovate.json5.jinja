@@ -1,7 +1,8 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-  extends: [
+{% if type == 'node' %}  extends: [
     'github>fohte/renovate-config:base.json5',
-{% if type == 'node' %}    'github>fohte/renovate-config:node.json5',
-{% endif %}  ],
-}
+    'github>fohte/renovate-config:node.json5',
+  ],
+{% else %}  extends: ['github>fohte/renovate-config:base.json5'],
+{% endif %}}
