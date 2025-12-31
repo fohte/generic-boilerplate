@@ -1,1 +1,0 @@
-../commitlint-plugin-no-external-refs.js
