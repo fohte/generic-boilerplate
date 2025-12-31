@@ -2,17 +2,6 @@ name: Validate Template
 
 on:
   push:
-    paths:
-      - 'template/**'
-      - 'copier.yml'
-      - 'tests/fixtures/**'
-      - '.github/workflows/validate-template.yml'
-  pull_request:
-    paths:
-      - 'template/**'
-      - 'copier.yml'
-      - 'tests/fixtures/**'
-      - '.github/workflows/validate-template.yml'
 
 jobs:
   validate:
