@@ -48,12 +48,7 @@ jobs:
             ~/.bun/install/global
             node_modules
           key: {% raw %}${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}{% endraw %}
-
-          restore-keys: |
-            {% raw %}${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}{% endraw %}
-
-            {% raw %}${{ runner.os }}-bun-{% endraw %}
-
+          restore-keys: {% raw %}${{ runner.os }}-bun-{% endraw %}
 
       - run: bun install --frozen-lockfile
 {% endif %}
@@ -100,12 +95,7 @@ jobs:
             ~/.bun/install/global
             node_modules
           key: {% raw %}${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}{% endraw %}
-
-          restore-keys: |
-            {% raw %}${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}{% endraw %}
-
-            {% raw %}${{ runner.os }}-bun-{% endraw %}
-
+          restore-keys: {% raw %}${{ runner.os }}-bun-{% endraw %}
 
       - run: bun install --frozen-lockfile
 
