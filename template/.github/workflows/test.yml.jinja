@@ -82,7 +82,8 @@ jobs:
       - name: Fail if lefthook failed
         if: steps.lefthook.outcome == 'failure'
         run: exit 1
-{% if type == 'node' %}
+{%- if type == 'node' %}
+
   unit-test:
     runs-on: ubuntu-latest
 
@@ -110,4 +111,4 @@ jobs:
 
       - name: Run tests
         run: bun run test
-{% endif %}
+{%- endif %}
