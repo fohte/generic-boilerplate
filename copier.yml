@@ -20,6 +20,11 @@ _exclude:
   # Conditional exclusion when release-please is disabled.
   # NOTE: Copier's _exclude matches against OUTPUT file names (without .jinja
   # suffix), not source file names.
+  #
+  #   _exclude pattern                 | use_release_please=true | =false
+  #   ---------------------------------|-------------------------|----------
+  #   release-please-config.json       | generated               | excluded
+  #   release-please-config.json.jinja | generated               | generated
   - '{% if not use_release_please %}release-please-config.json{% endif %}'
   - '{% if not use_release_please %}.release-please-manifest.json{% endif %}'
   - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
