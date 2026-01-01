@@ -36,7 +36,7 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 while IFS= read -r generated_file; do
   # Extract relative path (e.g., generated/base/package.json -> package.json)
-  rel_path=$(echo "$generated_file" | cut -d'/' -f3-)
+  rel_path=${generated_file#*/*/}
 
   # Find corresponding template file
   template_file=""
@@ -45,13 +45,8 @@ while IFS= read -r generated_file; do
   elif [[ -f "template/${rel_path}" ]] && [[ ! -L "template/${rel_path}" ]]; then
     template_file="template/${rel_path}"
   elif [[ -L "template/${rel_path}" ]]; then
-    # Symlink - resolve to actual file
-    link_target=$(readlink "template/${rel_path}")
-    if [[ "$link_target" == ../* ]]; then
-      template_file="${link_target#../}"
-    else
-      template_file="$link_target"
-    fi
+    # Symlink - resolve to actual file using realpath for robustness
+    template_file=$(realpath -m --relative-to=. "template/${rel_path}")
   fi
 
   if [[ -z "$template_file" ]]; then
@@ -75,7 +70,12 @@ while IFS= read -r generated_file; do
   fi
 
   # Rewrite paths in the patch to point to template file
-  sed "s|a/${generated_file}|a/${template_file}|g; s|b/${generated_file}|b/${template_file}|g" \
+  # Escape special regex characters in file paths
+  escaped_gen=${generated_file//./\\.}
+  escaped_gen=${escaped_gen//\//\\/}
+  escaped_tpl=${template_file//./\\.}
+  escaped_tpl=${escaped_tpl//\//\\/}
+  sed "s|a/${escaped_gen}|a/${escaped_tpl}|g; s|b/${escaped_gen}|b/${escaped_tpl}|g" \
     "$tmpdir/patch.diff" > "$tmpdir/template_patch.diff"
 
   # Try to apply the patch
