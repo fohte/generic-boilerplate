@@ -57,25 +57,18 @@ This repository uses [Semantic Versioning](https://semver.org/) (via [release-pl
 
 ## Dependency Version Strategy
 
-This template uses **pinned versions** (e.g., `"eslint": "8.57.1"`) instead of version ranges (e.g., `"eslint": "^8.0.0"`) for all dependencies.
+This template uses **pinned versions** (e.g., `"eslint": "8.57.1"`) instead of version ranges (e.g., `"eslint": "^8.0.0"`) for all dependencies to avoid version mismatch issues.
 
-### Why pinned versions?
+### Known issue: conflicts on copier update
 
-When generated projects have Renovate enabled, using version ranges causes conflicts:
+When generated projects have Renovate enabled, conflicts may occur:
 
 1. Renovate updates dependencies in the generated project
 2. User merges the Renovate PR
 3. Later, `copier update` tries to apply template changes
-4. Conflict occurs because the template still has the old version
+4. Conflict occurs because the template has a different version
 
-### How it works
-
-1. Renovate updates dependencies in `generated/` directory
-2. `sync-generated-to-template` workflow patches the template with new versions
-3. Users running `copier update` receive the same versions Renovate would provide
-4. Their local Renovate sees no update needed (or minimal diff)
-
-This keeps the template in sync with Renovate's understanding of "latest", reducing conflicts significantly.
+The `sync-generated-to-template` workflow mitigates this by syncing Renovate updates from `generated/` back to the template, but conflicts may still occur due to timing differences. When conflicts happen, resolve them by choosing the newer version.
 
 ## Template Development
 
