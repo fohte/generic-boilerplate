@@ -1,0 +1,139 @@
+name: Sync Generated to Template
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  sync:
+    # Only run on Renovate PRs that change generated/ files
+    if: github.event.pull_request.user.login == 'renovate[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Get changed files in generated/
+        id: changed-files
+        run: |
+          # Compare with base branch to get all changes in PR
+          changed=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD -- 'generated/' | grep -v '.copier-answers.yml' || true)
+          if [ -z "$changed" ]; then
+            echo "No files changed in generated/"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Changed files:"
+          echo "$changed"
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          echo "$changed" > /tmp/changed_files.txt
+
+      - name: Analyze changes and create patch info
+        if: steps.changed-files.outputs.has_changes == 'true'
+        id: analyze
+        run: |
+          patch_info=""
+
+          while IFS= read -r file; do
+            # Extract fixture name and relative path
+            # e.g., generated/base/package.json -> fixture=base, rel_path=package.json
+            fixture=$(echo "$file" | cut -d'/' -f2)
+            rel_path=$(echo "$file" | cut -d'/' -f3-)
+
+            # Find corresponding template file
+            template_file=""
+            if [ -f "template/${rel_path}.jinja" ]; then
+              template_file="template/${rel_path}.jinja"
+            elif [ -f "template/${rel_path}" ] && [ ! -L "template/${rel_path}" ]; then
+              template_file="template/${rel_path}"
+            elif [ -L "template/${rel_path}" ]; then
+              # Symlink - resolve to actual file
+              link_target=$(readlink "template/${rel_path}")
+              if [[ "$link_target" == ../* ]]; then
+                template_file="${link_target#../}"
+              else
+                template_file="$link_target"
+              fi
+            fi
+
+            if [ -n "$template_file" ]; then
+              echo "Mapping: $file -> $template_file"
+              patch_info="${patch_info}${file}|${template_file}|${fixture}\n"
+            else
+              echo "Warning: No template file found for $file"
+            fi
+          done < /tmp/changed_files.txt
+
+          echo -e "$patch_info" > /tmp/patch_info.txt
+
+      - name: Apply patches to template
+        if: steps.changed-files.outputs.has_changes == 'true'
+        id: apply-patches
+        run: |
+          applied_files=""
+          failed_files=""
+
+          while IFS='|' read -r generated_file template_file _fixture; do
+            [ -z "$generated_file" ] && continue
+
+            echo "Processing: $generated_file -> $template_file"
+
+            # Check if template file contains Jinja syntax
+            if [ -f "$template_file" ] && grep -q '{{.*}}' "$template_file"; then
+              echo "Warning: $template_file contains Jinja syntax, skipping automatic patch"
+              failed_files="${failed_files}- \`${generated_file}\` -> \`${template_file}\` (contains Jinja syntax)\n"
+              continue
+            fi
+
+            # For non-Jinja files, apply the patch
+            if [ -f "$template_file" ]; then
+              if git diff "origin/${{ github.event.pull_request.base.ref }}...HEAD" -- "$generated_file" > /tmp/patch.diff 2>/dev/null; then
+                sed "s|a/${generated_file}|a/${template_file}|g; s|b/${generated_file}|b/${template_file}|g" /tmp/patch.diff > /tmp/template_patch.diff
+
+                if patch --dry-run -p1 < /tmp/template_patch.diff > /dev/null 2>&1; then
+                  patch -p1 < /tmp/template_patch.diff
+                  applied_files="${applied_files}- \`${template_file}\`\n"
+                  echo "Successfully applied patch to $template_file"
+                else
+                  echo "Warning: Could not apply patch to $template_file"
+                  failed_files="${failed_files}- \`${generated_file}\` -> \`${template_file}\` (patch failed)\n"
+                fi
+              fi
+            fi
+          done < /tmp/patch_info.txt
+
+          echo -e "$applied_files" > /tmp/applied_files.txt
+          echo -e "$failed_files" > /tmp/failed_files.txt
+
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "has_patches=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_patches=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit changes to PR branch
+        if: steps.apply-patches.outputs.has_patches == 'true'
+        uses: suzuki-shunsuke/commit-action@v0.0.14
+        with:
+          commit_message: 'chore(template): sync changes from generated/'
+          github_token: ${{ steps.app-token.outputs.token }}
+
+      - name: Fail if manual updates required
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          failed_files=$(cat /tmp/failed_files.txt 2>/dev/null || echo "")
+          if [ -n "$failed_files" ] && [ "$failed_files" != "\n" ]; then
+            echo "::error::The following files require manual update:"
+            echo -e "$failed_files"
+            exit 1
+          fi
