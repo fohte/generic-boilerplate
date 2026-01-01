@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+#
+# Apply Renovate changes from generated/ to template/
+#
+# Usage:
+#   scripts/apply-renovate-patch [base_ref]
+#
+# Arguments:
+#   base_ref: The base branch/ref to compare against (default: origin/master)
+#
+# Exit codes:
+#   0: Success (patches applied or no changes)
+#   1: Manual updates required (some files could not be patched)
+
+set -euo pipefail
+
+BASE_REF="${1:-origin/master}"
+
+# Get changed files in generated/ (Renovate's changes)
+changed=$(git diff --name-only "${BASE_REF}...HEAD" -- 'generated/' | grep -v '.copier-answers.yml' || true)
+
+if [[ -z "$changed" ]]; then
+  echo "No files changed in generated/"
+  exit 0
+fi
+
+echo "Changed files in generated/:"
+echo "$changed"
+echo ""
+
+applied_files=()
+failed_files=()
+
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+
+while IFS= read -r generated_file; do
+  # Extract relative path (e.g., generated/base/package.json -> package.json)
+  rel_path=$(echo "$generated_file" | cut -d'/' -f3-)
+
+  # Find corresponding template file
+  template_file=""
+  if [[ -f "template/${rel_path}.jinja" ]]; then
+    template_file="template/${rel_path}.jinja"
+  elif [[ -f "template/${rel_path}" ]] && [[ ! -L "template/${rel_path}" ]]; then
+    template_file="template/${rel_path}"
+  elif [[ -L "template/${rel_path}" ]]; then
+    # Symlink - resolve to actual file
+    link_target=$(readlink "template/${rel_path}")
+    if [[ "$link_target" == ../* ]]; then
+      template_file="${link_target#../}"
+    else
+      template_file="$link_target"
+    fi
+  fi
+
+  if [[ -z "$template_file" ]]; then
+    echo "Warning: No template file found for $generated_file"
+    continue
+  fi
+
+  echo "Processing: $generated_file -> $template_file"
+
+  # Get the diff for this file
+  if ! git diff "${BASE_REF}...HEAD" -- "$generated_file" > "$tmpdir/patch.diff" 2> /dev/null; then
+    echo "  Warning: Could not get diff for $generated_file"
+    failed_files+=("$generated_file -> $template_file (could not get diff)")
+    continue
+  fi
+
+  # Check if diff is empty
+  if [[ ! -s "$tmpdir/patch.diff" ]]; then
+    echo "  Skipped: No changes in diff"
+    continue
+  fi
+
+  # Rewrite paths in the patch to point to template file
+  sed "s|a/${generated_file}|a/${template_file}|g; s|b/${generated_file}|b/${template_file}|g" \
+    "$tmpdir/patch.diff" > "$tmpdir/template_patch.diff"
+
+  # Try to apply the patch
+  if patch --dry-run -p1 < "$tmpdir/template_patch.diff" > /dev/null 2>&1; then
+    patch -p1 < "$tmpdir/template_patch.diff"
+    applied_files+=("$template_file")
+    echo "  Successfully applied patch"
+  else
+    echo "  Warning: Could not apply patch"
+    failed_files+=("$generated_file -> $template_file (patch failed)")
+  fi
+done <<< "$changed"
+
+echo ""
+
+# Report results
+if [[ ${#applied_files[@]} -gt 0 ]]; then
+  echo "Successfully patched files:"
+  for f in "${applied_files[@]}"; do
+    echo "  - $f"
+  done
+fi
+
+if [[ ${#failed_files[@]} -gt 0 ]]; then
+  echo ""
+  echo "Files requiring manual update:"
+  for f in "${failed_files[@]}"; do
+    echo "  - $f"
+  done
+  exit 1
+fi
+
+echo ""
+echo "Done."
