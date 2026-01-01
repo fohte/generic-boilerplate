@@ -39,12 +39,14 @@ jobs:
           for fixture in $(echo "$fixtures" | jq -r '.[]'); do
             rm -rf "generated/$fixture"
             pipx run copier copy --trust --data-file "tests/fixtures/$fixture.yml" . "generated/$fixture"
+            # Remove answers file as it contains commit hash that changes on every run
+            rm -f "generated/$fixture/.copier-answers.yml"
           done
 
       - name: Commit changes
         uses: suzuki-shunsuke/commit-action@v0.0.14
         with:
-          commit_message: 'chore(generated): regenerate from template [skip ci]'
+          commit_message: 'chore(generated): regenerate from template'
 
   validate:
     runs-on: ubuntu-latest
