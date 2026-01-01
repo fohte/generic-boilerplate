@@ -3,6 +3,10 @@ name: Validate Template
 on:
   push:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -48,7 +52,7 @@ jobs:
       - name: Commit changes
         uses: suzuki-shunsuke/commit-action@v0.0.14
         with:
-          commit_message: 'chore(generated): regenerate from template'
+          commit_message: 'chore(generated): regenerate from template [skip ci]'
           workflow: deny
           github_token: ${{ steps.app-token.outputs.token }}
 
