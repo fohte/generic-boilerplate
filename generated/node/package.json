@@ -1,0 +1,25 @@
+{
+  "name": "node",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "format:eslint": "eslint --fix .",
+    "format:prettier": "prettier --write .",
+    "format": "conc -m 1 bun:format:eslint bun:format:prettier",
+    "test": "conc bun:test:type bun:test:unit",
+    "test:type": "tsc --noEmit",
+    "test:unit": "vitest run"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.0.0",
+    "@fohte/eslint-config": "^0.0.4",
+    "@tsconfig/bun": "^1.0.0",
+    "@types/bun": "^1.0.0",
+    "concurrently": "^9.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  }
+}
