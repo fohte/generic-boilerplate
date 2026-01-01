@@ -41,10 +41,8 @@ jobs:
             pipx run copier copy --trust --data-file "tests/fixtures/$fixture.yml" . "generated/$fixture"
             # Remove answers file as it contains commit hash that changes on every run
             rm -f "generated/$fixture/.copier-answers.yml"
-            # Install bun dependencies for node fixtures to generate bun.lock
-            if [[ "$fixture" == node* ]]; then
-              (cd "generated/$fixture" && bun install)
-            fi
+            # Remove bun.lock to avoid conflicts when adding packages
+            rm -f "generated/$fixture/bun.lock"
           done
 
       - name: Commit changes
