@@ -15,7 +15,6 @@ jobs:
         id: app-token
         with:
           app-id: ${{ secrets.APP_ID }}
-
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - uses: actions/checkout@v5
@@ -55,7 +54,6 @@ jobs:
 
       - name: Commit formatted files
         if: ${{ !cancelled() && steps.check-prev.outputs.skip_commit != 'true' }}
-
         uses: suzuki-shunsuke/commit-action@v0.0.14
         with:
           commit_message: 'style: auto-format'

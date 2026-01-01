@@ -3,9 +3,8 @@ lefthook = "2.0.12"
 
 # lefthook hooks
 actionlint = "1.7.9"
-{% if type == 'node' -%}
 bun = "1.2.0"
-{% else -%}
+{% if type != 'node' -%}
 "npm:@commitlint/cli" = "20.2.0"
 "npm:prettier" = "3.7.4"
 {% endif -%}
