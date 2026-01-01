@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.19](https://github.com/fohte/generic-boilerplate/compare/v0.1.18...v0.1.19) (2026-01-01)
+
+
+### Features
+
+* add Gemini Code Assist style guide ([#78](https://github.com/fohte/generic-boilerplate/issues/78)) ([1f9c231](https://github.com/fohte/generic-boilerplate/commit/1f9c2311e0fa5342067efaad15703baf7992636d))
+
+## [0.1.18](https://github.com/fohte/generic-boilerplate/compare/v0.1.17...v0.1.18) (2025-12-31)
+
+
+### Bug Fixes
+
+* **template:** fix broken symlinks for commitlint config files ([#74](https://github.com/fohte/generic-boilerplate/issues/74)) ([42d78aa](https://github.com/fohte/generic-boilerplate/commit/42d78aa3aab54fdb0f322116ce412ded2a11278c))
+
+## [0.1.17](https://github.com/fohte/generic-boilerplate/compare/v0.1.16...v0.1.17) (2025-12-31)
+
+
+### Bug Fixes
+
+* **commitlint:** fix no-external-github-refs rule not working ([#70](https://github.com/fohte/generic-boilerplate/issues/70)) ([0a8c1f1](https://github.com/fohte/generic-boilerplate/commit/0a8c1f1b5a5cea8c9af777f45fb62b0132f2e274))
+
 ## [0.1.16](https://github.com/fohte/generic-boilerplate/compare/v0.1.15...v0.1.16) (2025-12-31)
 
 

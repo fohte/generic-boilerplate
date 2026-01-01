@@ -3,37 +3,68 @@ name: Validate Template
 on:
   push:
 
-jobs:
-  validate:
-    runs-on: ubuntu-latest
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
-    strategy:
-      matrix:
-        fixture:
-          - base
-          - base-public
-          - base-release
-          - node
+permissions:
+  contents: write
+
+jobs:
+  list-fixtures:
+    runs-on: ubuntu-latest
+    outputs:
+      fixtures: ${{ steps.list.outputs.fixtures }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: List fixtures
+        id: list
+        run: |
+          fixtures=$(find tests/fixtures -name '*.yml' -exec basename {} .yml \; | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "fixtures=$fixtures" >> "$GITHUB_OUTPUT"
+
+  regenerate-and-commit:
+    runs-on: ubuntu-latest
+    needs: list-fixtures
 
     steps:
       - uses: actions/checkout@v5
 
       - uses: jdx/mise-action@v2
 
-      - name: Install copier
-        run: pipx install copier
-
-      - name: Render template
+      - name: Regenerate all fixtures
         run: |
-          copier copy --trust --data-file tests/fixtures/${{ matrix.fixture }}.yml . /tmp/rendered
+          fixtures='${{ needs.list-fixtures.outputs.fixtures }}'
+          for fixture in $(echo "$fixtures" | jq -r '.[]'); do
+            rm -rf "generated/$fixture"
+            pipx run copier copy --trust --data-file "tests/fixtures/$fixture.yml" . "generated/$fixture"
+            # Remove answers file as it contains commit hash that changes on every run
+            rm -f "generated/$fixture/.copier-answers.yml"
+          done
 
-      - name: Install bun dependencies
-        if: startsWith(matrix.fixture, 'node')
-        working-directory: /tmp/rendered
-        run: bun install
+      - name: Commit changes
+        uses: suzuki-shunsuke/commit-action@v0.0.14
+        with:
+          commit_message: 'chore(generated): regenerate from template'
+
+  validate:
+    runs-on: ubuntu-latest
+    needs: [list-fixtures, regenerate-and-commit]
+
+    strategy:
+      matrix:
+        fixture: ${{ fromJson(needs.list-fixtures.outputs.fixtures) }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: jdx/mise-action@v2
 
       - name: Initialize git repository
-        working-directory: /tmp/rendered
+        working-directory: generated/${{ matrix.fixture }}
         run: |
           git init
           git config user.email "test@example.com"
@@ -42,11 +73,11 @@ jobs:
           git commit -m "initial"
 
       - name: Run lefthook
-        working-directory: /tmp/rendered
+        working-directory: generated/${{ matrix.fixture }}
         run: lefthook run pre-commit --all-files
 
       - name: Check for diff
-        working-directory: /tmp/rendered
+        working-directory: generated/${{ matrix.fixture }}
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "Error: Template validation failed. The following files have diffs after running lefthook:"
