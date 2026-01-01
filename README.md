@@ -55,6 +55,28 @@ This repository uses [Semantic Versioning](https://semver.org/) (via [release-pl
 | `use_release_please` | bool | `true`  | Enable automated release management with release-please.                                                                     |
 | `release_type`       | str  | -       | Select the release-type for your project (simple, node, python, go, rust, java). Required when `use_release_please` is true. |
 
+## Dependency Version Strategy
+
+This template uses **pinned versions** (e.g., `"eslint": "8.57.1"`) instead of version ranges (e.g., `"eslint": "^8.0.0"`) for all dependencies.
+
+### Why pinned versions?
+
+When generated projects have Renovate enabled, using version ranges causes conflicts:
+
+1. Renovate updates dependencies in the generated project
+2. User merges the Renovate PR
+3. Later, `copier update` tries to apply template changes
+4. Conflict occurs because the template still has the old version
+
+### How it works
+
+1. Renovate updates dependencies in `generated/` directory
+2. `sync-generated-to-template` workflow patches the template with new versions
+3. Users running `copier update` receive the same versions Renovate would provide
+4. Their local Renovate sees no update needed (or minimal diff)
+
+This keeps the template in sync with Renovate's understanding of "latest", reducing conflicts significantly.
+
 ## Template Development
 
 The following files are used by Copier and are not part of the generated project:
