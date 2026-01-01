@@ -21,7 +21,9 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
+
+      - name: Fetch base branch
+        run: git fetch origin master --depth=1
 
       - name: Apply Renovate changes to template/
         id: sync

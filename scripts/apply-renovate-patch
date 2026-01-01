@@ -17,7 +17,7 @@ set -euo pipefail
 BASE_REF="${1:-origin/master}"
 
 # Get changed files in generated/ (Renovate's changes)
-changed=$(git diff --name-only "${BASE_REF}...HEAD" -- 'generated/' | grep -v '.copier-answers.yml' || true)
+changed=$(git diff --name-only "${BASE_REF}" HEAD -- 'generated/' | grep -v '.copier-answers.yml' || true)
 
 if [[ -z "$changed" ]]; then
   echo "No files changed in generated/"
@@ -62,7 +62,7 @@ while IFS= read -r generated_file; do
   echo "Processing: $generated_file -> $template_file"
 
   # Get the diff for this file
-  if ! git diff "${BASE_REF}...HEAD" -- "$generated_file" > "$tmpdir/patch.diff" 2> /dev/null; then
+  if ! git diff "${BASE_REF}" HEAD -- "$generated_file" > "$tmpdir/patch.diff" 2> /dev/null; then
     echo "  Warning: Could not get diff for $generated_file"
     failed_files+=("$generated_file -> $template_file (could not get diff)")
     continue
