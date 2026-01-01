@@ -123,29 +123,17 @@ jobs:
 
       - name: Commit changes to PR branch
         if: steps.apply-patches.outputs.has_patches == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "chore(template): sync changes from generated/"
-          git push
+        uses: suzuki-shunsuke/commit-action@v0.0.14
+        with:
+          commit_message: 'chore(template): sync changes from generated/'
+          github_token: ${{ steps.app-token.outputs.token }}
 
-      - name: Create issue for manual updates
+      - name: Fail if manual updates required
         if: steps.changed-files.outputs.has_changes == 'true'
         run: |
           failed_files=$(cat /tmp/failed_files.txt 2>/dev/null || echo "")
           if [ -n "$failed_files" ] && [ "$failed_files" != "\n" ]; then
-            echo "Some files require manual update. Creating issue..."
-            gh issue create \
-              --title "Manual template update required for Renovate PR #${{ github.event.pull_request.number }}" \
-              --body "The following files in \`generated/\` were updated by Renovate but could not be automatically synced to \`template/\`:
-
-          $failed_files
-
-          Please manually update the corresponding template files.
-
-          **Source PR:** #${{ github.event.pull_request.number }}" \
-              --label "template-sync"
+            echo "::error::The following files require manual update:"
+            echo -e "$failed_files"
+            exit 1
           fi
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
