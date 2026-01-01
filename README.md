@@ -55,20 +55,18 @@ This repository uses [Semantic Versioning](https://semver.org/) (via [release-pl
 | `use_release_please` | bool | `true`  | Enable automated release management with release-please.                                                                     |
 | `release_type`       | str  | -       | Select the release-type for your project (simple, node, python, go, rust, java). Required when `use_release_please` is true. |
 
-## Dependency Version Strategy
+## Version Management Policy
 
-This template uses **pinned versions** (e.g., `"eslint": "8.57.1"`) instead of version ranges (e.g., `"eslint": "^8.0.0"`) for all dependencies to avoid version mismatch issues.
+このテンプレートの責務はプロジェクトの初期生成まで。
+生成後の依存パッケージのバージョン管理は各プロジェクトに委ねる。
 
-### Known issue: conflicts on copier update
+`copier update` 時にバージョンの conflict が発生するが、
+通常は新しいバージョンを採用すればよい。
 
-When generated projects have Renovate enabled, conflicts may occur:
+### How template versions are updated
 
-1. Renovate updates dependencies in the generated project
-2. User merges the Renovate PR
-3. Later, `copier update` tries to apply template changes
-4. Conflict occurs because the template has a different version
-
-The `sync-generated-to-template` workflow mitigates this by syncing Renovate updates from `generated/` back to the template, but conflicts may still occur due to timing differences. When conflicts happen, resolve them by choosing the newer version.
+Renovate が `generated/` を更新すると、[sync-generated-to-template](.github/workflows/sync-generated-to-template.yml) workflow が
+`generated/` の差分を `template/` にパッチとして適用する。
 
 ## Template Development
 
