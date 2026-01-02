@@ -17,7 +17,7 @@ jobs:
           app-id: {% raw %}${{ secrets.APP_ID }}{% endraw %}
           private-key: {% raw %}${{ secrets.APP_PRIVATE_KEY }}{% endraw %}
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
           fetch-depth: 2
