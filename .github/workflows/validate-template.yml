@@ -78,6 +78,16 @@ jobs:
         working-directory: generated/${{ matrix.fixture }}
         run: lefthook run pre-commit --all-files
 
+      - name: Install dependencies (Node.js)
+        if: matrix.fixture == 'node'
+        working-directory: generated/${{ matrix.fixture }}
+        run: bun install --frozen-lockfile
+
+      - name: Run tests (Node.js)
+        if: matrix.fixture == 'node'
+        working-directory: generated/${{ matrix.fixture }}
+        run: bun run test
+
       - name: Check for diff
         working-directory: generated/${{ matrix.fixture }}
         run: |
