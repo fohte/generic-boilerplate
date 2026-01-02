@@ -74,6 +74,11 @@ jobs:
           git add -A
           git commit -m "initial"
 
+      - name: Verify bun.lock integrity
+        if: contains(fromJson('["node"]'), matrix.fixture)
+        working-directory: generated/${{ matrix.fixture }}
+        run: bun install --frozen-lockfile
+
       - name: Run lefthook
         working-directory: generated/${{ matrix.fixture }}
         run: lefthook run pre-commit --all-files

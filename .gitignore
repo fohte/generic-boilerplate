@@ -1,2 +1,0 @@
-# generated/ fixtures are regenerated on CI, lock files cause unnecessary diffs
-generated/**/bun.lock

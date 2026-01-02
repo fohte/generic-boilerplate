@@ -17,8 +17,11 @@ description:
 
 # README.md is expected to be customized immediately after repository creation,
 # so conflicts are almost guaranteed on copier update. Skip to avoid this.
+# bun.lock is included in template to avoid conflicts on copier update
+# (users may add packages, causing lockfile changes).
 _skip_if_exists:
   - README.md
+  - bun.lock
 
 # Exclude files that are specific to this template repository
 # and not needed in derived repositories
@@ -43,9 +46,7 @@ _exclude:
   - "{% if type != 'node' %}vitest.config.ts{% endif %}"
   - "{% if type != 'node' %}.gitignore{% endif %}"
   - "{% if type != 'node' %}src{% endif %}"
-
-_tasks:
-  - "{% if type == 'node' %}bun install{% endif %}"
+  - "{% if type != 'node' %}bun.lock{% endif %}"
 
 # Template parameters
 is_public:
