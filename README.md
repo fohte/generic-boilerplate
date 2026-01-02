@@ -55,6 +55,19 @@ This repository uses [Semantic Versioning](https://semver.org/) (via [release-pl
 | `use_release_please` | bool | `true`  | Enable automated release management with release-please.                                                                     |
 | `release_type`       | str  | -       | Select the release-type for your project (simple, node, python, go, rust, java). Required when `use_release_please` is true. |
 
+## Version Management Policy
+
+This template is responsible only for initial project generation.
+Dependency version management is delegated to each generated project.
+
+Conflicts may occur during `copier update` due to version differences.
+In most cases, simply adopt the newer version.
+
+### How template versions are updated
+
+When Renovate updates `generated/`, the [sync-generated-to-template](.github/workflows/sync-generated-to-template.yml) workflow
+applies the diff from `generated/` as patches to `template/`.
+
 ## Template Development
 
 The following files are used by Copier and are not part of the generated project:

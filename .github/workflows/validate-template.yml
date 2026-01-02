@@ -62,6 +62,8 @@ jobs:
           ref: ${{ github.ref_name }}
 
       - uses: jdx/mise-action@v2
+        with:
+          working_directory: generated/${{ matrix.fixture }}
 
       - name: Initialize git repository
         working-directory: generated/${{ matrix.fixture }}
