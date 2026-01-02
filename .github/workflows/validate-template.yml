@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: list-fixtures
     outputs:
-      node_changed: ${{ steps.check-changes.outputs.node_changed }}
+      node_changed: ${{ steps.check-changes.outputs.any_changed }}
 
     steps:
       - uses: actions/create-github-app-token@v2
@@ -52,13 +52,10 @@ jobs:
           done
 
       - name: Check if node template changed
+        uses: tj-actions/changed-files@v47
         id: check-changes
-        run: |
-          if [ -n "$(git status --porcelain generated/node/)" ]; then
-            echo "node_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "node_changed=false" >> "$GITHUB_OUTPUT"
-          fi
+        with:
+          files: generated/node/**
 
       - name: Commit changes
         uses: suzuki-shunsuke/commit-action@v0.0.14
