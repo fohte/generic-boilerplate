@@ -55,6 +55,7 @@ jobs:
         uses: tj-actions/changed-files@v47
         id: check-changes
         with:
+          base_sha: master
           files: generated/node/**
 
       - name: Commit changes
