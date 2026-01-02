@@ -27,6 +27,8 @@ jobs:
   regenerate-and-commit:
     runs-on: ubuntu-latest
     needs: list-fixtures
+    outputs:
+      node_changed: ${{ steps.check-changes.outputs.node_changed }}
 
     steps:
       - uses: actions/checkout@v5
@@ -42,6 +44,15 @@ jobs:
             # Remove answers file as it contains commit hash that changes on every run
             rm -f "generated/$fixture/.copier-answers.yml"
           done
+
+      - name: Check if node template changed
+        id: check-changes
+        run: |
+          if [ -n "$(git status --porcelain generated/node/)" ]; then
+            echo "node_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "node_changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Commit changes
         uses: suzuki-shunsuke/commit-action@v0.0.14
@@ -91,6 +102,7 @@ jobs:
   validate-node:
     runs-on: ubuntu-latest
     needs: regenerate-and-commit
+    if: needs.regenerate-and-commit.outputs.node_changed == 'true'
 
     steps:
       - uses: actions/checkout@v5
@@ -108,8 +120,8 @@ jobs:
             ~/.bun/install/cache
             ~/.bun/install/global
             generated/node/node_modules
-          key: ${{ runner.os }}-bun-${{ hashFiles('generated/node/bun.lock') }}
-          restore-keys: ${{ runner.os }}-bun-
+          key: ${{ runner.os }}-bun-validate-node-${{ hashFiles('generated/node/bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-validate-node-
 
       - run: bun install --frozen-lockfile
         working-directory: generated/node
