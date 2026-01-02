@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.20](https://github.com/fohte/generic-boilerplate/compare/v0.1.19...v0.1.20) (2026-01-02)
+
+
+### Bug Fixes
+
+* **copier:** include bun.lock in template to avoid conflicts on update ([#84](https://github.com/fohte/generic-boilerplate/issues/84)) ([7df765a](https://github.com/fohte/generic-boilerplate/commit/7df765a682296570ce5582f5d8cbc237dea80743))
+
 ## [0.1.19](https://github.com/fohte/generic-boilerplate/compare/v0.1.18...v0.1.19) (2026-01-01)
 
 
