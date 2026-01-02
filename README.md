@@ -57,16 +57,16 @@ This repository uses [Semantic Versioning](https://semver.org/) (via [release-pl
 
 ## Version Management Policy
 
-このテンプレートの責務はプロジェクトの初期生成まで。
-生成後の依存パッケージのバージョン管理は各プロジェクトに委ねる。
+This template is responsible only for initial project generation.
+Dependency version management is delegated to each generated project.
 
-`copier update` 時にバージョンの conflict が発生するが、
-通常は新しいバージョンを採用すればよい。
+Conflicts may occur during `copier update` due to version differences.
+In most cases, simply adopt the newer version.
 
 ### How template versions are updated
 
-Renovate が `generated/` を更新すると、[sync-generated-to-template](.github/workflows/sync-generated-to-template.yml) workflow が
-`generated/` の差分を `template/` にパッチとして適用する。
+When Renovate updates `generated/`, the [sync-generated-to-template](.github/workflows/sync-generated-to-template.yml) workflow
+applies the diff from `generated/` as patches to `template/`.
 
 ## Template Development
 
