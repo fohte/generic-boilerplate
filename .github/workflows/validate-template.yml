@@ -16,7 +16,7 @@ jobs:
     outputs:
       fixtures: ${{ steps.list.outputs.fixtures }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: List fixtures
         id: list
@@ -29,7 +29,7 @@ jobs:
     needs: list-fixtures
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: jdx/mise-action@v2
 
@@ -57,7 +57,7 @@ jobs:
         fixture: ${{ fromJson(needs.list-fixtures.outputs.fixtures) }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
 
