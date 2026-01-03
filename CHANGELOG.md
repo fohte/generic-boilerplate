@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.22](https://github.com/fohte/generic-boilerplate/compare/v0.1.21...v0.1.22) (2026-01-03)
+
+
+### Dependencies
+
+* update dependency fohte/lefthook-config to v0.1.11 ([#89](https://github.com/fohte/generic-boilerplate/issues/89)) ([79b3add](https://github.com/fohte/generic-boilerplate/commit/79b3addc6707d0f04fc7ad7bc79bcead78463434))
+
 ## [0.1.21](https://github.com/fohte/generic-boilerplate/compare/v0.1.20...v0.1.21) (2026-01-03)
 
 
