@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.21](https://github.com/fohte/generic-boilerplate/compare/v0.1.20...v0.1.21) (2026-01-03)
+
+
+### Features
+
+* **template:** add Gemini Code Assist style guide ([#87](https://github.com/fohte/generic-boilerplate/issues/87)) ([7b80a32](https://github.com/fohte/generic-boilerplate/commit/7b80a32a83910a424762b5ce7d543306111c5088))
+
 ## [0.1.20](https://github.com/fohte/generic-boilerplate/compare/v0.1.19...v0.1.20) (2026-01-02)
 
 
