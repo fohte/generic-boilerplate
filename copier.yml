@@ -14,8 +14,7 @@ type:
 # path during copier update. See: https://github.com/copier-org/copier/issues/1285
 project_name:
   type: str
-  help: Project name (used for package.json name field)
-  when: "{{ type == 'node' }}"
+  help: Project name
 
 description:
   type: str
