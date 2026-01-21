@@ -3,3 +3,5 @@ remotes:
     ref: v0.1.12 # renovate: datasource=github-tags depName=fohte/lefthook-config
     configs:
       - base.yml
+{% if type == 'rust' %}      - rust.yml
+{% endif %}
