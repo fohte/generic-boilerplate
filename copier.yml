@@ -15,6 +15,7 @@ type:
 project_name:
   type: str
   help: Project name
+  default: '{{ _folder_name }}'
 
 description:
   type: str
