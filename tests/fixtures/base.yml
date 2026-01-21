@@ -2,6 +2,7 @@
 # Used by validate-template.yml to test template rendering
 
 type: base
+project_name: base
 description: Test project description
 is_public: false
 use_release_please: false
