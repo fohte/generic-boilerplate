@@ -50,6 +50,11 @@ jobs:
           restore-keys: {% raw %}${{ runner.os }}-bun-{% endraw %}
 
       - run: bun install --frozen-lockfile
+{% elif type == 'rust' %}
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - run: cargo fetch
 {% endif %}
       - name: Run lefthook
         id: lefthook
@@ -99,4 +104,19 @@ jobs:
 
       - name: Run tests
         run: bun run test
+{%- elif type == 'rust' %}
+
+  unit-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: jdx/mise-action@v2
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run tests
+        run: cargo test
 {%- endif %}
