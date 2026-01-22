@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.25](https://github.com/fohte/generic-boilerplate/compare/v0.1.24...v0.1.25) (2026-01-22)
+
+
+### Features
+
+* **template:** add `type: rust` for Rust project template generation ([#95](https://github.com/fohte/generic-boilerplate/issues/95)) ([9cfd7f9](https://github.com/fohte/generic-boilerplate/commit/9cfd7f9bfe9bd60e194ee3557d6ee8df86996a69))
+
 ## [0.1.24](https://github.com/fohte/generic-boilerplate/compare/v0.1.23...v0.1.24) (2026-01-21)
 
 
