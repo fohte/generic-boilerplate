@@ -250,7 +250,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "template-project"
+name = "rust"
 version = "0.1.0"
 dependencies = [
  "rstest",
