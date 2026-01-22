@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.24](https://github.com/fohte/generic-boilerplate/compare/v0.1.23...v0.1.24) (2026-01-21)
+
+
+### Bug Fixes
+
+* **copier:** allow Renovate to run `copier update` ([#93](https://github.com/fohte/generic-boilerplate/issues/93)) ([fd86b3e](https://github.com/fohte/generic-boilerplate/commit/fd86b3edebd7d2c1cc8421c34473fa8086788d5a))
+
+## [0.1.23](https://github.com/fohte/generic-boilerplate/compare/v0.1.22...v0.1.23) (2026-01-21)
+
+
+### Bug Fixes
+
+* **copier:** prevent package.json conflicts during copier update ([#91](https://github.com/fohte/generic-boilerplate/issues/91)) ([50e149f](https://github.com/fohte/generic-boilerplate/commit/50e149f569853dbb8780cb2633958f47c470a0e6))
+
 ## [0.1.22](https://github.com/fohte/generic-boilerplate/compare/v0.1.21...v0.1.22) (2026-01-03)
 
 

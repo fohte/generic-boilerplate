@@ -11,6 +11,13 @@ type:
   default: base
   help: Project type (base = minimal template, node = Node.js/TypeScript project, rust = Rust project)
 
+# Note: _folder_name cannot be used because it resolves to a temporary directory
+# path during copier update. See: https://github.com/copier-org/copier/issues/1285
+project_name:
+  type: str
+  help: Project name
+  default: '{{ _folder_name }}'
+
 description:
   type: str
   help: Project description for README.md
