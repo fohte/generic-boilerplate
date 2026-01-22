@@ -7,8 +7,9 @@ type:
   choices:
     - base
     - node
+    - rust
   default: base
-  help: Project type (base = minimal template, node = Node.js/TypeScript project)
+  help: Project type (base = minimal template, node = Node.js/TypeScript project, rust = Rust project)
 
 # Note: _folder_name cannot be used because it resolves to a temporary directory
 # path during copier update. See: https://github.com/copier-org/copier/issues/1285
@@ -29,6 +30,7 @@ description:
 _skip_if_exists:
   - README.md
   - bun.lock
+  - Cargo.lock
 
 # Exclude files that are specific to this template repository
 # and not needed in derived repositories
@@ -51,9 +53,18 @@ _exclude:
   - "{% if type != 'node' %}tsconfig.json{% endif %}"
   - "{% if type != 'node' %}eslint.config.js{% endif %}"
   - "{% if type != 'node' %}vitest.config.ts{% endif %}"
-  - "{% if type != 'node' %}.gitignore{% endif %}"
-  - "{% if type != 'node' %}src{% endif %}"
   - "{% if type != 'node' %}bun.lock{% endif %}"
+  # Exclude Rust specific files when type is not 'rust'
+  - "{% if type != 'rust' %}Cargo.toml{% endif %}"
+  - "{% if type != 'rust' %}Cargo.lock{% endif %}"
+  - "{% if type != 'rust' %}rust-toolchain.toml{% endif %}"
+  - "{% if type != 'rust' %}src/main.rs{% endif %}"
+  # Exclude Node.js specific src files when type is not 'node'
+  - "{% if type != 'node' %}src/index.ts{% endif %}"
+  - "{% if type != 'node' %}src/index.test.ts{% endif %}"
+  # Exclude type-specific files
+  - "{% if type not in ['node', 'rust'] %}.gitignore{% endif %}"
+  - "{% if type not in ['node', 'rust'] %}src{% endif %}"
 
 # Template parameters
 is_public:

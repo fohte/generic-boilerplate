@@ -28,7 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: list-fixtures
     outputs:
-      node_changed: ${{ steps.check-changes.outputs.any_changed }}
+      node_changed: ${{ steps.check-node-changes.outputs.any_changed }}
+      rust_changed: ${{ steps.check-rust-changes.outputs.any_changed }}
 
     steps:
       - uses: actions/create-github-app-token@v2
@@ -53,10 +54,17 @@ jobs:
 
       - name: Check if node template changed
         uses: tj-actions/changed-files@v47
-        id: check-changes
+        id: check-node-changes
         with:
           base_sha: master
           files: generated/node/**
+
+      - name: Check if rust template changed
+        uses: tj-actions/changed-files@v47
+        id: check-rust-changes
+        with:
+          base_sha: master
+          files: generated/rust/**
 
       - name: Commit changes
         uses: suzuki-shunsuke/commit-action@v0.0.14
@@ -134,3 +142,26 @@ jobs:
       - name: Run tests
         working-directory: generated/node
         run: bun run test
+
+  validate-rust:
+    runs-on: ubuntu-latest
+    needs: regenerate-and-commit
+    if: needs.regenerate-and-commit.outputs.rust_changed == 'true'
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: jdx/mise-action@v2
+        with:
+          working_directory: generated/rust
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: generated/rust
+
+      - name: Run tests
+        working-directory: generated/rust
+        run: cargo test
