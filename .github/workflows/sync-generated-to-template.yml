@@ -45,7 +45,7 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
 
       - name: Commit changes to PR branch
-        if: steps.sync.outputs.has_patches == 'true'
+        if: steps.sync.outputs.has_patches == 'true' && steps.sync.outputs.success == 'true'
         uses: suzuki-shunsuke/commit-action@v0.0.14
         with:
           commit_message: 'chore(template): sync changes from generated/'
