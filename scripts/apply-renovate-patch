@@ -16,6 +16,98 @@ set -euo pipefail
 
 BASE_REF="${1:-origin/master}"
 
+# Apply version changes extracted from a diff to a template file.
+# Parses the diff to find old/new version pairs and replaces them in the template.
+#
+# Arguments:
+#   $1: diff file path
+#   $2: template file to modify
+#
+# Returns:
+#   0 if at least one replacement succeeded
+#   1 if no replacements were made
+apply_version_changes_from_diff() {
+  local diff_file="$1"
+  local template_file="$2"
+  local changes_applied=0
+
+  # Extract removed (-) and added (+) line pairs from the diff
+  # We look for lines that contain version strings
+  local old_lines=()
+  local new_lines=()
+
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^-[^-] ]]; then
+      # Removed line (starts with single -)
+      old_lines+=("${line:1}")
+    elif [[ "$line" =~ ^\+[^\+] ]]; then
+      # Added line (starts with single +)
+      new_lines+=("${line:1}")
+    fi
+  done < "$diff_file"
+
+  # Process each old/new line pair
+  # Renovate typically changes version numbers while keeping package names the same
+  for old_line in "${old_lines[@]}"; do
+    # Extract package identifier and version from the old line
+    # Supports formats:
+    #   TOML: "package:name" = "version"  or  package = "version"
+    #   JSON: "package": "version"
+    local pkg_pattern=""
+    local old_version=""
+    local new_version=""
+
+    # TOML format: "package:name" = "version" or package = "version"
+    if [[ "$old_line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=]+)[[:space:]]*=[[:space:]]*\"([^\"]+)\" ]]; then
+      pkg_pattern="${BASH_REMATCH[1]}"
+      old_version="${BASH_REMATCH[2]}"
+    # JSON format: "package": "version"
+    elif [[ "$old_line" =~ ^[[:space:]]*\"([^\"]+)\"[[:space:]]*:[[:space:]]*\"([^\"]+)\" ]]; then
+      pkg_pattern="\"${BASH_REMATCH[1]}\""
+      old_version="${BASH_REMATCH[2]}"
+    else
+      continue
+    fi
+
+    # Find corresponding new line with the same package
+    for new_line in "${new_lines[@]}"; do
+      if [[ "$new_line" == *"$pkg_pattern"* ]]; then
+        # Extract new version (double quotes)
+        if [[ "$new_line" =~ \"([0-9]+\.[0-9]+[^\"]*)\  ]]; then
+          new_version="${BASH_REMATCH[1]}"
+        # Extract new version (single quotes)
+        elif [[ "$new_line" =~ \'([0-9]+\.[0-9]+[^\']*)\' ]]; then
+          new_version="${BASH_REMATCH[1]}"
+        fi
+        break
+      fi
+    done
+
+    # Skip if we couldn't find a new version or versions are the same
+    if [[ -z "$new_version" || "$old_version" == "$new_version" ]]; then
+      continue
+    fi
+
+    # Escape special characters for sed
+    local escaped_pkg_pattern
+    # shellcheck disable=SC2016 # Single quotes are intentional to prevent expansion
+    escaped_pkg_pattern=$(printf '%s' "$pkg_pattern" | sed 's/[[\.*^$()+?{|\\]/\\&/g')
+
+    # Replace the version in the template file
+    # Match lines containing the package pattern and replace the old version with new
+    if grep -q "$pkg_pattern" "$template_file" 2> /dev/null; then
+      # Use | as sed delimiter to avoid issues with slashes in package names
+      if sed -i.bak "s|\\(${escaped_pkg_pattern}.*\\)${old_version}|\\1${new_version}|g" "$template_file"; then
+        rm -f "${template_file}.bak"
+        echo "    Replaced: $pkg_pattern $old_version -> $new_version"
+        ((changes_applied++)) || true
+      fi
+    fi
+  done
+
+  [[ $changes_applied -gt 0 ]]
+}
+
 # Get changed files in generated/ (Renovate's changes)
 changed=$(git diff --name-only "${BASE_REF}" HEAD -- 'generated/' | grep -v '.copier-answers.yml' || true)
 
@@ -90,6 +182,16 @@ while IFS= read -r generated_file; do
     patch -p1 < "$tmpdir/template_patch.diff"
     applied_files+=("$template_file")
     echo "  Successfully applied patch"
+  elif [[ "$template_file" == *.jinja ]]; then
+    # Fallback for .jinja files: extract version changes and apply with sed
+    echo "  Patch failed, trying version replacement fallback..."
+    if apply_version_changes_from_diff "$tmpdir/patch.diff" "$template_file"; then
+      applied_files+=("$template_file")
+      echo "  Successfully applied version changes"
+    else
+      echo "  Warning: Fallback also failed"
+      failed_files+=("$generated_file -> $template_file (patch and fallback failed)")
+    fi
   else
     echo "  Warning: Could not apply patch"
     failed_files+=("$generated_file -> $template_file (patch failed)")
