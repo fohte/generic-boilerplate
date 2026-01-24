@@ -9,12 +9,55 @@
 #   base_ref: The base branch/ref to compare against (default: origin/master)
 #
 # Exit codes:
-#   0: Success (patches applied or no changes)
-#   1: Manual updates required (some files could not be patched)
+#   0: Success (versions synced or no changes)
+#   1: Some files could not be synced
+#
+# Tests:
+#   See apply-renovate-patch.bats (run with: bats scripts/apply-renovate-patch.bats)
 
 set -euo pipefail
 
 BASE_REF="${1:-origin/master}"
+
+# Sync versions from generated file to template.
+# For each line with a version in the generated file, update the corresponding
+# line in the template to use the same version.
+sync_versions_to_template() {
+  local generated_file="$1"
+  local template_file="$2"
+  local changes_applied=0
+  local keys_checked=0
+
+  while IFS= read -r line; do
+    # Match version patterns: "key" = "version" (TOML) or "key": "version" (JSON)
+    if [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*[=:][[:space:]]*\"([0-9]+\.[0-9]+[^\"]*)\" ]]; then
+      local key="${BASH_REMATCH[1]}"
+      local version="${BASH_REMATCH[2]}"
+
+      # Check if template has this key
+      if grep -Fq "$key" "$template_file" 2> /dev/null; then
+        ((keys_checked++)) || true
+        # Skip if version already matches
+        if grep -F "$key" "$template_file" | grep -Fq "\"${version}\""; then
+          continue
+        fi
+        # Replace version for this key in template (match quoted version string)
+        if sed -i.bak "s#\\(${key}[[:space:]]*[=:][[:space:]]*\"\\)[^\"]*\\(\".*\\)#\\1${version}\\2#" "$template_file"; then
+          rm -f "${template_file}.bak"
+          ((changes_applied++)) || true
+        fi
+      fi
+    fi
+  done < "$generated_file"
+
+  if [[ $changes_applied -gt 0 ]]; then
+    echo "    Synced $changes_applied version(s)"
+  elif [[ $keys_checked -gt 0 ]]; then
+    echo "    Already in sync"
+  fi
+  # Return success if any keys were found (even if already in sync)
+  [[ $keys_checked -gt 0 ]]
+}
 
 # Get changed files in generated/ (Renovate's changes)
 changed=$(git diff --name-only "${BASE_REF}" HEAD -- 'generated/' | grep -v '.copier-answers.yml' || true)
@@ -31,9 +74,6 @@ echo ""
 applied_files=()
 failed_files=()
 
-tmpdir=$(mktemp -d)
-trap 'rm -rf "$tmpdir"' EXIT
-
 while IFS= read -r generated_file; do
   # Extract relative path (e.g., generated/base/package.json -> package.json)
   rel_path=${generated_file#*/*/}
@@ -45,7 +85,6 @@ while IFS= read -r generated_file; do
   elif [[ -f "template/${rel_path}" ]] && [[ ! -L "template/${rel_path}" ]]; then
     template_file="template/${rel_path}"
   elif [[ -L "template/${rel_path}" ]]; then
-    # Symlink - resolve to actual file using realpath for robustness
     template_file=$(realpath -m --relative-to=. "template/${rel_path}")
   fi
 
@@ -56,43 +95,10 @@ while IFS= read -r generated_file; do
 
   echo "Processing: $generated_file -> $template_file"
 
-  # Check if the template file already has the same content as generated file
-  # This handles the case where Renovate updated both generated/ and the symlink target directly
-  if diff -q "$generated_file" "$template_file" > /dev/null 2>&1; then
-    echo "  Skipped: Already in sync (same content)"
-    continue
-  fi
-
-  # Get the diff for this file
-  if ! git diff "${BASE_REF}" HEAD -- "$generated_file" > "$tmpdir/patch.diff" 2> /dev/null; then
-    echo "  Warning: Could not get diff for $generated_file"
-    failed_files+=("$generated_file -> $template_file (could not get diff)")
-    continue
-  fi
-
-  # Check if diff is empty
-  if [[ ! -s "$tmpdir/patch.diff" ]]; then
-    echo "  Skipped: No changes in diff"
-    continue
-  fi
-
-  # Rewrite paths in the patch to point to template file
-  # Escape special regex characters in file paths
-  escaped_gen=${generated_file//./\\.}
-  escaped_gen=${escaped_gen//\//\\/}
-  escaped_tpl=${template_file//./\\.}
-  escaped_tpl=${escaped_tpl//\//\\/}
-  sed "s|a/${escaped_gen}|a/${escaped_tpl}|g; s|b/${escaped_gen}|b/${escaped_tpl}|g" \
-    "$tmpdir/patch.diff" > "$tmpdir/template_patch.diff"
-
-  # Try to apply the patch
-  if patch --dry-run -p1 < "$tmpdir/template_patch.diff" > /dev/null 2>&1; then
-    patch -p1 < "$tmpdir/template_patch.diff"
+  if sync_versions_to_template "$generated_file" "$template_file"; then
     applied_files+=("$template_file")
-    echo "  Successfully applied patch"
   else
-    echo "  Warning: Could not apply patch"
-    failed_files+=("$generated_file -> $template_file (patch failed)")
+    failed_files+=("$generated_file -> $template_file")
   fi
 done <<< "$changed"
 
@@ -100,7 +106,7 @@ echo ""
 
 # Report results
 if [[ ${#applied_files[@]} -gt 0 ]]; then
-  echo "Successfully patched files:"
+  echo "Successfully synced files:"
   for f in "${applied_files[@]}"; do
     echo "  - $f"
   done
