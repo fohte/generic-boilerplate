@@ -36,16 +36,67 @@ jobs:
             echo "success=false" >> "$GITHUB_OUTPUT"
           fi
 
+          # Check which manifest files were changed
+          if [ -n "$(git status --porcelain template/package.json.jinja)" ]; then
+            echo "node_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "node_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ -n "$(git status --porcelain template/Cargo.toml.jinja)" ]; then
+            echo "rust_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "rust_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+
+      # ========================================
+      # Node.js (bun) lockfile regeneration
+      # ========================================
+      - name: Setup Bun
+        if: steps.sync.outputs.node_changed == 'true'
+        uses: oven-sh/setup-bun@v2
+
+      - name: Regenerate bun.lock
+        if: steps.sync.outputs.node_changed == 'true'
+        working-directory: template
+        run: |
+          # Temporarily render package.json from jinja template for lockfile generation
+          sed 's/{{ project_name }}/template-project/g' package.json.jinja > package.json
+          bun install --frozen-lockfile=false
+          rm package.json
+
+      # ========================================
+      # Rust (cargo) lockfile regeneration
+      # ========================================
+      - name: Setup Rust
+        if: steps.sync.outputs.rust_changed == 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Regenerate Cargo.lock
+        if: steps.sync.outputs.rust_changed == 'true'
+        working-directory: template
+        run: |
+          # Temporarily render Cargo.toml from jinja template for lockfile generation
+          sed 's/{{ project_name }}/template-project/g' Cargo.toml.jinja > Cargo.toml
+          cargo generate-lockfile
+          rm Cargo.toml
+
+      # ========================================
+      # Commit changes
+      # ========================================
+      - name: Check for changes
+        id: changes
+        run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "has_patches=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_patches=false" >> "$GITHUB_OUTPUT"
           fi
-        env:
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
 
       - name: Commit changes to PR branch
-        if: steps.sync.outputs.has_patches == 'true' && steps.sync.outputs.success == 'true'
+        if: steps.changes.outputs.has_patches == 'true' && steps.sync.outputs.success == 'true'
         uses: suzuki-shunsuke/commit-action@v0.0.14
         with:
           commit_message: 'chore(template): sync changes from generated/'
