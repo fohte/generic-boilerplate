@@ -38,7 +38,8 @@ if [[ ! -s "$BEFORE_DIFF_FILE" ]]; then
 fi
 
 # Get list of files changed before regeneration
-before_files=$(grep -E '^diff --git a/(generated/[^ ]+)' "$BEFORE_DIFF_FILE" | sed 's|diff --git a/\(generated/[^ ]*\) b/.*|\1|' | sort -u)
+# Use sed -n to avoid exit 1 when no matches (grep would fail with pipefail)
+before_files=$(sed -n 's|^diff --git a/\(generated/[^ ]*\) b/.*|\1|p' "$BEFORE_DIFF_FILE" | sort -u)
 
 if [[ -z "$before_files" ]]; then
   echo "No generated/ files in diff. Nothing to check."
@@ -46,15 +47,12 @@ if [[ -z "$before_files" ]]; then
 fi
 
 # Get list of files changed after regeneration (working tree)
-after_files=$(git diff origin/master -- generated/ | grep -E '^diff --git a/(generated/[^ ]+)' | sed 's|diff --git a/\(generated/[^ ]*\) b/.*|\1|' | sort -u || true)
+# Use --name-only for simplicity; handle git diff exit code 1 (changes found)
+after_files=$( (git diff --name-only origin/master -- 'generated/' || [[ $? -eq 1 ]]) | sort -u)
 
 # Check for files that were in before diff but not in after diff
-reverted_files=()
-while IFS= read -r file; do
-  if ! echo "$after_files" | grep -qx "$file"; then
-    reverted_files+=("$file")
-  fi
-done <<< "$before_files"
+# Use comm for efficient set difference operation
+mapfile -t reverted_files < <(comm -23 <(echo "$before_files") <(echo "$after_files"))
 
 if [[ ${#reverted_files[@]} -gt 0 ]]; then
   echo "::error::Renovate changes in generated/ were reverted by regeneration."
