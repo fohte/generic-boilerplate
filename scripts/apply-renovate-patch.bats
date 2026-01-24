@@ -125,3 +125,35 @@ EOF
   [ "$status" -eq 0 ]
   [[ "$output" == *"No files changed"* ]]
 }
+
+@test "does not count already-synced versions" {
+  cat > template/.mise.toml.jinja << 'EOF'
+[tools]
+lefthook = "2.0.12"
+actionlint = "1.7.9"
+EOF
+
+  cat > generated/base/.mise.toml << 'EOF'
+[tools]
+lefthook = "2.0.12"
+actionlint = "1.7.9"
+EOF
+
+  create_initial_commit
+
+  # Renovate updates only actionlint, lefthook stays the same
+  cat > generated/base/.mise.toml << 'EOF'
+[tools]
+lefthook = "2.0.12"
+actionlint = "1.8.0"
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+
+  # Should report only 1 version synced (actionlint), not 2 (lefthook already matches)
+  [[ "$output" == *"Synced 1 version"* ]]
+}
