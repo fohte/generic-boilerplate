@@ -11,6 +11,9 @@
 # Exit codes:
 #   0: Success (versions synced or no changes)
 #   1: Some files could not be synced
+#
+# Tests:
+#   See apply-renovate-patch.bats (run with: bats scripts/apply-renovate-patch.bats)
 
 set -euo pipefail
 
