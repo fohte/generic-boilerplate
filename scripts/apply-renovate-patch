@@ -26,6 +26,7 @@ sync_versions_to_template() {
   local generated_file="$1"
   local template_file="$2"
   local changes_applied=0
+  local keys_checked=0
 
   while IFS= read -r line; do
     # Match version patterns: "key" = "version" (TOML) or "key": "version" (JSON)
@@ -33,8 +34,9 @@ sync_versions_to_template() {
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}"
 
-      # Check if template has this key and version differs
+      # Check if template has this key
       if grep -Fq "$key" "$template_file" 2> /dev/null; then
+        ((keys_checked++)) || true
         # Skip if version already matches
         if grep -F "$key" "$template_file" | grep -Fq "\"${version}\""; then
           continue
@@ -50,9 +52,11 @@ sync_versions_to_template() {
 
   if [[ $changes_applied -gt 0 ]]; then
     echo "    Synced $changes_applied version(s)"
-    return 0
+  elif [[ $keys_checked -gt 0 ]]; then
+    echo "    Already in sync"
   fi
-  return 1
+  # Return success if any keys were found (even if already in sync)
+  [[ $keys_checked -gt 0 ]]
 }
 
 # Get changed files in generated/ (Renovate's changes)

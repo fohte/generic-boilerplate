@@ -157,3 +157,32 @@ EOF
   # Should report only 1 version synced (actionlint), not 2 (lefthook already matches)
   [[ "$output" == *"Synced 1 version"* ]]
 }
+
+@test "succeeds when all versions already in sync" {
+  cat > template/.mise.toml.jinja << 'EOF'
+[tools]
+lefthook = "2.0.12"
+EOF
+
+  cat > generated/base/.mise.toml << 'EOF'
+[tools]
+lefthook = "2.0.11"
+EOF
+
+  create_initial_commit
+
+  # Renovate updates to same version as template already has
+  cat > generated/base/.mise.toml << 'EOF'
+[tools]
+lefthook = "2.0.12"
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+
+  # Should succeed with "Already in sync" message, not fail
+  [[ "$output" == *"Already in sync"* ]]
+}
