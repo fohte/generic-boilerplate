@@ -13,6 +13,12 @@ permissions:
 jobs:
   list-fixtures:
     runs-on: ubuntu-latest
+    # Skip for Renovate bot commits.
+    # Renovate updates generated/ files, which triggers sync-generated-to-template.yml
+    # to sync changes to template/. If we run regenerate here on Renovate's commit,
+    # we may use stale template/ (before sync completes), causing incorrect regeneration.
+    # By skipping here, we let sync finish first, then validate runs on sync's commit.
+    if: github.actor != 'renovate[bot]'
     outputs:
       fixtures: ${{ steps.list.outputs.fixtures }}
     steps:
