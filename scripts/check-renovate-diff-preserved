@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+#
+# Check if Renovate changes in generated/ are preserved after regeneration.
+#
+# This script detects the "infinite loop" scenario:
+#   1. Renovate updates generated/ files
+#   2. sync-generated-to-template fails to patch template/ (due to Jinja syntax)
+#   3. regenerate overwrites Renovate changes with stale template output
+#
+# Usage:
+#   scripts/check-renovate-diff-preserved <before_diff_file>
+#
+# Arguments:
+#   before_diff_file: Path to file containing diff before regeneration
+#
+# Exit codes:
+#   0: Renovate changes are preserved (or no Renovate changes existed)
+#   1: Renovate changes were reverted - fail the workflow
+
+set -euo pipefail
+
+BEFORE_DIFF_FILE="${1:-}"
+
+if [[ -z "$BEFORE_DIFF_FILE" ]]; then
+  echo "Usage: $0 <before_diff_file>"
+  exit 1
+fi
+
+if [[ ! -f "$BEFORE_DIFF_FILE" ]]; then
+  echo "Error: Before diff file not found: $BEFORE_DIFF_FILE"
+  exit 1
+fi
+
+# If there was no diff before regeneration, nothing to check
+if [[ ! -s "$BEFORE_DIFF_FILE" ]]; then
+  echo "No changes in generated/ before regeneration. Nothing to check."
+  exit 0
+fi
+
+# Get list of files changed before regeneration
+# Use sed -n to avoid exit 1 when no matches (grep would fail with pipefail)
+before_files=$(sed -n 's|^diff --git a/\(generated/[^ ]*\) b/.*|\1|p' "$BEFORE_DIFF_FILE" | sort -u)
+
+if [[ -z "$before_files" ]]; then
+  echo "No generated/ files in diff. Nothing to check."
+  exit 0
+fi
+
+# Get list of files changed after regeneration (working tree)
+# Use --name-only for simplicity; handle git diff exit code 1 (changes found)
+after_files=$( (git diff --name-only origin/master -- 'generated/' || [[ $? -eq 1 ]]) | sort -u)
+
+# Check for files that were in before diff but not in after diff
+# Use comm for efficient set difference operation
+mapfile -t reverted_files < <(comm -23 <(echo "$before_files") <(echo "$after_files"))
+
+if [[ ${#reverted_files[@]} -gt 0 ]]; then
+  echo "::error::Renovate changes in generated/ were reverted by regeneration."
+  echo ""
+  echo "=== Files with reverted changes ==="
+  for f in "${reverted_files[@]}"; do
+    echo "  - $f"
+  done
+  echo ""
+  echo "This happens when sync-generated-to-template fails to patch template/ (due to Jinja syntax)."
+  echo "Please manually update the corresponding template/ files to include Renovate's changes."
+  exit 1
+fi
+
+echo "All Renovate changes are preserved after regeneration."
+exit 0
