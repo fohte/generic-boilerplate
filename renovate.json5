@@ -4,4 +4,5 @@
     'github>fohte/renovate-config:base.json5',
     'github>fohte/renovate-config:lefthook.json5',
   ],
+  ignorePaths: ['template/**'],
 }
