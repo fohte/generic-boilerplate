@@ -42,13 +42,25 @@ jobs:
           else
             echo "rust_changed=false" >> "$GITHUB_OUTPUT"
           fi
+
+          # Check if bun.lock was changed in generated/node/
+          if git diff --name-only "origin/$BASE_REF" HEAD -- 'generated/node/bun.lock' | grep -q .; then
+            echo "bun_lock_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "bun_lock_changed=false" >> "$GITHUB_OUTPUT"
+          fi
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
 
-      # Note: bun.lock regeneration is not needed here because:
-      # - generated/node/bun.lock is updated directly by Renovate
-      # - copier uses _tasks to copy from generated/node/bun.lock
-      # - template/bun.lock no longer exists
+      # ========================================
+      # Node.js (bun) lockfile sync
+      # ========================================
+      # Copy bun.lock directly from generated/node/ instead of regenerating.
+      # This avoids the issue where `bun install --lockfile-only` may produce
+      # different packages section than what Renovate generated.
+      - name: Copy bun.lock from generated/node/
+        if: steps.sync.outputs.bun_lock_changed == 'true'
+        run: cp generated/node/bun.lock template/bun.lock
 
       # ========================================
       # Rust (cargo) lockfile regeneration
