@@ -60,7 +60,11 @@ sync_versions_to_template() {
 }
 
 # Get changed files in generated/ (Renovate's changes)
-changed=$(git diff --name-only "${BASE_REF}" HEAD -- 'generated/' | grep -v '.copier-answers.yml' || true)
+# Exclude:
+#   - .copier-answers.yml: Not a source file
+#   - bun.lock: Copied directly in workflow (not version-synced to template)
+# Use anchored patterns ($) to match exact filenames, not substrings
+changed=$(git diff --name-only "${BASE_REF}" HEAD -- 'generated/' | grep -v -e '\.copier-answers\.yml$' -e 'bun\.lock$' || true)
 
 if [[ -z "$changed" ]]; then
   echo "No files changed in generated/"
