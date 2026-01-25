@@ -64,7 +64,7 @@ jobs:
         run: |
           # Temporarily render package.json from jinja template for lockfile generation
           sed 's/{{ project_name }}/template-project/g' package.json.jinja > package.json
-          bun install
+          bun install --lockfile-only
           rm package.json
 
       # ========================================
