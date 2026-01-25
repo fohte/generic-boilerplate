@@ -37,12 +37,6 @@ jobs:
           fi
 
           # Check which manifest files were changed
-          if [ -n "$(git status --porcelain template/package.json.jinja)" ]; then
-            echo "node_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "node_changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
           if [ -n "$(git status --porcelain template/Cargo.toml.jinja)" ]; then
             echo "rust_changed=true" >> "$GITHUB_OUTPUT"
           else
@@ -51,21 +45,10 @@ jobs:
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
 
-      # ========================================
-      # Node.js (bun) lockfile regeneration
-      # ========================================
-      - name: Setup Bun
-        if: steps.sync.outputs.node_changed == 'true'
-        uses: oven-sh/setup-bun@v2
-
-      - name: Regenerate bun.lock
-        if: steps.sync.outputs.node_changed == 'true'
-        working-directory: template
-        run: |
-          # Temporarily render package.json from jinja template for lockfile generation
-          sed 's/{{ project_name }}/template-project/g' package.json.jinja > package.json
-          bun install --lockfile-only
-          rm package.json
+      # Note: bun.lock regeneration is not needed here because:
+      # - generated/node/bun.lock is updated directly by Renovate
+      # - copier uses _tasks to copy from generated/node/bun.lock
+      # - template/bun.lock no longer exists
 
       # ========================================
       # Rust (cargo) lockfile regeneration

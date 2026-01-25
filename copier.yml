@@ -2,6 +2,14 @@ _min_copier_version: '9.0.0'
 _subdirectory: template
 _answers_file: .copier-answers.yml
 
+_tasks:
+  # Copy bun.lock from generated/node/ instead of template/
+  # This avoids the problem where Renovate updates generated/node/bun.lock
+  # but template/bun.lock gets out of sync (only version strings are patched,
+  # not the packages section)
+  - command: cp "{{ _copier_conf.src_path }}/generated/node/bun.lock" ./bun.lock
+    when: '{{ type == "node" }}'
+
 type:
   type: str
   choices:
@@ -25,8 +33,8 @@ description:
 
 # README.md is expected to be customized immediately after repository creation,
 # so conflicts are almost guaranteed on copier update. Skip to avoid this.
-# bun.lock is included in template to avoid conflicts on copier update
-# (users may add packages, causing lockfile changes).
+# Lockfiles (bun.lock, Cargo.lock) are skipped to preserve user-added packages.
+# Note: bun.lock is copied from generated/node/ via _tasks, not from template/.
 _skip_if_exists:
   - README.md
   - bun.lock
