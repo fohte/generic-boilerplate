@@ -66,6 +66,9 @@ jobs:
           sed 's/{{ project_name }}/template-project/g' package.json.jinja > package.json
           bun install
           rm package.json
+          # Remove node_modules to prevent it from being committed
+          # (template/ has no .gitignore, only .gitignore.jinja)
+          rm -rf node_modules
 
       # ========================================
       # Rust (cargo) lockfile regeneration
