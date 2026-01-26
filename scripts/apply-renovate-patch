@@ -38,7 +38,7 @@ sync_versions_to_template() {
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}"
       local quoted=true
-    elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*:[[:space:]]*(v?[0-9]+\.[0-9]+[^[:space:]]*) ]]; then
+    elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*:[[:space:]]*(v?[0-9]+\.[0-9]+[^[:space:]#]*) ]]; then
       # Unquoted version (YAML) - only match colon separator
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}"
@@ -48,11 +48,11 @@ sync_versions_to_template() {
     fi
 
     # Check if template has this key
-    if grep -Fq "$key" "$template_file" 2> /dev/null; then
+    if grep -Fq -- "$key" "$template_file" 2> /dev/null; then
       ((keys_checked++)) || true
       # Skip if version already matches
       if [[ "$quoted" == "true" ]]; then
-        if grep -F "$key" "$template_file" | grep -Fq "\"${version}\""; then
+        if grep -F -- "$key" "$template_file" | grep -Fq "\"${version}\""; then
           continue
         fi
         # Replace version for this key in template (match quoted version string)
@@ -61,7 +61,7 @@ sync_versions_to_template() {
           ((changes_applied++)) || true
         fi
       else
-        if grep -F "$key" "$template_file" | grep -Eq ":[[:space:]]*${version}([[:space:]]|$)"; then
+        if grep -F -- "$key" "$template_file" | grep -Eq ":[[:space:]]*${version}([[:space:]]|$)"; then
           continue
         fi
         # Replace version for this key in template (match unquoted version)
