@@ -6,4 +6,19 @@
   ],
   // template/ contains Copier templates (*.jinja), not actual project files
   ignorePaths: ['template/**'],
+  packageRules: [
+    // Override base.json5's devDependencies rule (chore:) to use deps: instead.
+    // generic-boilerplate manages Copier templates, so package updates here
+    // should propagate to all downstream repos via semantic version bumps.
+    {
+      matchDepTypes: ['devDependencies'],
+      semanticCommitType: 'deps',
+      semanticCommitScope: null,
+    },
+    {
+      matchDepTypes: ['devDependencies'],
+      matchUpdateTypes: ['major'],
+      commitMessagePrefix: 'deps!:',
+    },
+  ],
 }
