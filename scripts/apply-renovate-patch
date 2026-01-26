@@ -29,20 +29,43 @@ sync_versions_to_template() {
   local keys_checked=0
 
   while IFS= read -r line; do
-    # Match version patterns: "key" = "version" (TOML) or "key": "version" (JSON)
-    if [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*[=:][[:space:]]*\"([0-9]+\.[0-9]+[^\"]*)\" ]]; then
+    # Match version patterns:
+    # - TOML: key = "version" or "key" = "version"
+    # - JSON: "key": "version"
+    # - YAML: key: version or key: vX.Y.Z (unquoted, with optional v prefix)
+    if [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*[=:][[:space:]]*\"(v?[0-9]+\.[0-9]+[^\"]*)\" ]]; then
+      # Quoted version (TOML/JSON)
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}"
+      local quoted=true
+    elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*:[[:space:]]*(v?[0-9]+\.[0-9]+[^[:space:]]*) ]]; then
+      # Unquoted version (YAML) - only match colon separator
+      local key="${BASH_REMATCH[1]}"
+      local version="${BASH_REMATCH[2]}"
+      local quoted=false
+    else
+      continue
+    fi
 
-      # Check if template has this key
-      if grep -Fq "$key" "$template_file" 2> /dev/null; then
-        ((keys_checked++)) || true
-        # Skip if version already matches
+    # Check if template has this key
+    if grep -Fq "$key" "$template_file" 2> /dev/null; then
+      ((keys_checked++)) || true
+      # Skip if version already matches
+      if [[ "$quoted" == "true" ]]; then
         if grep -F "$key" "$template_file" | grep -Fq "\"${version}\""; then
           continue
         fi
         # Replace version for this key in template (match quoted version string)
         if sed -i.bak "s#\\(${key}[[:space:]]*[=:][[:space:]]*\"\\)[^\"]*\\(\".*\\)#\\1${version}\\2#" "$template_file"; then
+          rm -f "${template_file}.bak"
+          ((changes_applied++)) || true
+        fi
+      else
+        if grep -F "$key" "$template_file" | grep -Eq ":[[:space:]]*${version}([[:space:]]|$)"; then
+          continue
+        fi
+        # Replace version for this key in template (match unquoted version)
+        if sed -i.bak "s#\\(${key}[[:space:]]*:[[:space:]]*\\)[^[:space:]#]*#\\1${version}#" "$template_file"; then
           rm -f "${template_file}.bak"
           ((changes_applied++)) || true
         fi
