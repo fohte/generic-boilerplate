@@ -12,14 +12,13 @@
     // should propagate to all downstream repos via semantic version bumps.
     {
       matchDepTypes: ['devDependencies'],
-      matchUpdateTypes: ['major'],
-      commitMessagePrefix: 'deps!:',
+      semanticCommitType: 'deps',
+      semanticCommitScope: null,
     },
     {
       matchDepTypes: ['devDependencies'],
-      matchUpdateTypes: ['minor', 'patch'],
-      semanticCommitType: 'deps',
-      semanticCommitScope: null,
+      matchUpdateTypes: ['major'],
+      commitMessagePrefix: 'deps!:',
     },
   ],
 }
