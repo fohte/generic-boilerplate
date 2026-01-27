@@ -63,8 +63,9 @@ sync_versions_to_template() {
         fi
       else
         # Use fixed string matching to avoid regex interpretation of version specifiers like ^
-        if grep -F -- "$key" "$template_file" | grep -Fq ": ${version}" ||
-          grep -F -- "$key" "$template_file" | grep -Fq ":${version}"; then
+        # Group grep commands to avoid running the first grep twice, and ensure exact match
+        # by checking for trailing whitespace, comment, or end of line
+        if grep -F -- "$key" "$template_file" | grep -Eq ":[[:space:]]*$(printf '%s' "$version" | sed 's/[.^$*+?()[\]{}|\\]/\\&/g')([[:space:]]|#|$)"; then
           continue
         fi
         # Replace version for this key in template (match unquoted version)

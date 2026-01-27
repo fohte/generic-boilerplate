@@ -489,3 +489,37 @@ EOF
   [ "$status" -eq 0 ]
   [[ "$output" == *"Already in sync"* ]]
 }
+
+@test "does not match version prefix in YAML unquoted versions" {
+  # Regression test: ensure 1.2.3 does not match 1.2.30
+  cat > template/config.yml.jinja << 'EOF'
+version: 1.2.30
+name: {{ project_name }}
+EOF
+
+  cat > generated/base/config.yml << 'EOF'
+version: 1.2.30
+name: test
+EOF
+
+  create_initial_commit
+
+  # Renovate updates to 1.2.3 (different from template's 1.2.30)
+  cat > generated/base/config.yml << 'EOF'
+version: 1.2.3
+name: test
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update version"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  # Should sync, not report "Already in sync" (1.2.3 != 1.2.30)
+  [[ "$output" == *"Synced 1 version"* ]]
+
+  diff -u template/config.yml.jinja - << 'EOF'
+version: 1.2.3
+name: {{ project_name }}
+EOF
+}
