@@ -33,13 +33,14 @@ sync_versions_to_template() {
     # - TOML: key = "version" or "key" = "version"
     # - JSON: "key": "version"
     # - YAML: key: version or key: vX.Y.Z (unquoted, with optional v prefix)
-    if [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*[=:][[:space:]]*\"(v?[0-9]+\.[0-9]+[^\"]*)\" ]]; then
-      # Quoted version (TOML/JSON)
+    # Semver range specifiers: =, ^, ~, >, >=, <, <= (for Cargo.toml pin, npm ranges)
+    if [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*[=:][[:space:]]*\"([=^~\>\<]{0,2}v?[0-9]+\.[0-9]+[^\"]*)\" ]]; then
+      # Quoted version (TOML/JSON) - includes semver range specifiers
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}"
       local quoted=true
-    elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*:[[:space:]]*(v?[0-9]+\.[0-9]+[^[:space:]#]*) ]]; then
-      # Unquoted version (YAML) - only match colon separator
+    elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*:[[:space:]]*([=^~\>\<]{0,2}v?[0-9]+\.[0-9]+[^[:space:]#]*) ]]; then
+      # Unquoted version (YAML) - only match colon separator, includes semver range specifiers
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}"
       local quoted=false
@@ -61,7 +62,9 @@ sync_versions_to_template() {
           ((changes_applied++)) || true
         fi
       else
-        if grep -F -- "$key" "$template_file" | grep -Eq ":[[:space:]]*${version}([[:space:]]|$)"; then
+        # Use fixed string matching to avoid regex interpretation of version specifiers like ^
+        if grep -F -- "$key" "$template_file" | grep -Fq ": ${version}" ||
+          grep -F -- "$key" "$template_file" | grep -Fq ":${version}"; then
           continue
         fi
         # Replace version for this key in template (match unquoted version)

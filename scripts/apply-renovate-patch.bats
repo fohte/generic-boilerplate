@@ -278,3 +278,214 @@ version: 1.3.0
 name: {{ project_name }}
 EOF
 }
+
+@test "syncs Cargo.toml pin version with = specifier" {
+  cat > template/Cargo.toml.jinja << 'EOF'
+[package]
+name = "{{ project_name }}"
+version = "0.1.0"
+
+[dependencies]
+tokio = "2.0.17"
+serde = "1.0.0"
+EOF
+
+  cat > generated/base/Cargo.toml << 'EOF'
+[package]
+name = "test"
+version = "0.1.0"
+
+[dependencies]
+tokio = "2.0.17"
+serde = "1.0.0"
+EOF
+
+  create_initial_commit
+
+  # Renovate pins tokio version
+  cat > generated/base/Cargo.toml << 'EOF'
+[package]
+name = "test"
+version = "0.1.0"
+
+[dependencies]
+tokio = "=2.0.17"
+serde = "1.0.0"
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): pin tokio"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Synced 1 version"* ]]
+
+  diff -u template/Cargo.toml.jinja - << 'EOF'
+[package]
+name = "{{ project_name }}"
+version = "0.1.0"
+
+[dependencies]
+tokio = "=2.0.17"
+serde = "1.0.0"
+EOF
+}
+
+@test "syncs package.json with caret version specifier" {
+  cat > template/package.json.jinja << 'EOF'
+{
+  "name": "{{ project_name }}",
+  "dependencies": {
+    "lodash": "4.17.21"
+  }
+}
+EOF
+
+  cat > generated/base/package.json << 'EOF'
+{
+  "name": "test",
+  "dependencies": {
+    "lodash": "4.17.21"
+  }
+}
+EOF
+
+  create_initial_commit
+
+  # Renovate adds caret specifier
+  cat > generated/base/package.json << 'EOF'
+{
+  "name": "test",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update lodash"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Synced 1 version"* ]]
+
+  diff -u template/package.json.jinja - << 'EOF'
+{
+  "name": "{{ project_name }}",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}
+EOF
+}
+
+@test "syncs package.json with tilde version specifier" {
+  cat > template/package.json.jinja << 'EOF'
+{
+  "name": "{{ project_name }}",
+  "dependencies": {
+    "express": "4.18.0"
+  }
+}
+EOF
+
+  cat > generated/base/package.json << 'EOF'
+{
+  "name": "test",
+  "dependencies": {
+    "express": "4.18.0"
+  }
+}
+EOF
+
+  create_initial_commit
+
+  # Renovate adds tilde specifier
+  cat > generated/base/package.json << 'EOF'
+{
+  "name": "test",
+  "dependencies": {
+    "express": "~4.18.2"
+  }
+}
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update express"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Synced 1 version"* ]]
+
+  diff -u template/package.json.jinja - << 'EOF'
+{
+  "name": "{{ project_name }}",
+  "dependencies": {
+    "express": "~4.18.2"
+  }
+}
+EOF
+}
+
+@test "syncs Cargo.toml with comparison specifiers" {
+  cat > template/Cargo.toml.jinja << 'EOF'
+[dependencies]
+foo = "1.0.0"
+bar = "2.0.0"
+EOF
+
+  cat > generated/base/Cargo.toml << 'EOF'
+[dependencies]
+foo = "1.0.0"
+bar = "2.0.0"
+EOF
+
+  create_initial_commit
+
+  # Renovate updates with comparison specifiers
+  cat > generated/base/Cargo.toml << 'EOF'
+[dependencies]
+foo = ">=1.2.0"
+bar = "^2.1.0"
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update deps"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Synced 2 version"* ]]
+
+  diff -u template/Cargo.toml.jinja - << 'EOF'
+[dependencies]
+foo = ">=1.2.0"
+bar = "^2.1.0"
+EOF
+}
+
+@test "detects already synced version with specifier" {
+  cat > template/Cargo.toml.jinja << 'EOF'
+[dependencies]
+tokio = "=2.0.17"
+EOF
+
+  cat > generated/base/Cargo.toml << 'EOF'
+[dependencies]
+tokio = "2.0.16"
+EOF
+
+  create_initial_commit
+
+  # Renovate updates to same pinned version as template already has
+  cat > generated/base/Cargo.toml << 'EOF'
+[dependencies]
+tokio = "=2.0.17"
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): pin tokio"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Already in sync"* ]]
+}
