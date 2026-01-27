@@ -55,14 +55,14 @@ EOF
   run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
   [ "$status" -eq 0 ]
 
-  # Versions synced
-  grep -q 'lefthook = "2.1.0"' template/.mise.toml.jinja
-  grep -q 'actionlint = "1.8.0"' template/.mise.toml.jinja
-  grep -q '"npm:@commitlint/cli" = "20.3.1"' template/.mise.toml.jinja
-
-  # Jinja syntax preserved
-  grep -q '{% if type' template/.mise.toml.jinja
-  grep -q '{% endif' template/.mise.toml.jinja
+  diff -u template/.mise.toml.jinja - << 'EOF'
+[tools]
+lefthook = "2.1.0"
+actionlint = "1.8.0"
+{% if type != 'node' -%}
+"npm:@commitlint/cli" = "20.3.1"
+{% endif -%}
+EOF
 }
 
 @test "syncs JSON versions and preserves Jinja syntax" {
@@ -101,11 +101,14 @@ EOF
   run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
   [ "$status" -eq 0 ]
 
-  # Version synced
-  grep -q '"vitest": "3.3.0"' template/package.json.jinja
-
-  # Jinja syntax preserved
-  grep -q '{{ project_name }}' template/package.json.jinja
+  diff -u template/package.json.jinja - << 'EOF'
+{
+  "name": "{{ project_name }}",
+  "devDependencies": {
+    "vitest": "3.3.0"
+  }
+}
+EOF
 }
 
 @test "reports no changes when generated/ is unchanged" {
@@ -225,15 +228,16 @@ EOF
   run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
   [ "$status" -eq 0 ]
 
-  # Version synced (unquoted with v prefix)
-  grep -q 'ref: v0.1.13' template/lefthook.yml.jinja
-
-  # Jinja syntax preserved
-  grep -q '{% if type' template/lefthook.yml.jinja
-  grep -q '{% endif' template/lefthook.yml.jinja
-
-  # Comment preserved
-  grep -q '# renovate:' template/lefthook.yml.jinja
+  diff -u template/lefthook.yml.jinja - << 'EOF'
+remotes:
+  - git_url: https://github.com/fohte/lefthook-config
+    ref: v0.1.13 # renovate: datasource=github-tags depName=fohte/lefthook-config
+    configs:
+      - lefthook.yml
+{% if type == 'node' -%}
+      - node.yml
+{% endif -%}
+EOF
 }
 
 @test "syncs YAML unquoted versions without v prefix" {
@@ -260,9 +264,8 @@ EOF
   run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
   [ "$status" -eq 0 ]
 
-  # Version synced
-  grep -q 'version: 1.3.0' template/config.yml.jinja
-
-  # Jinja syntax preserved
-  grep -q '{{ project_name }}' template/config.yml.jinja
+  diff -u template/config.yml.jinja - << 'EOF'
+version: 1.3.0
+name: {{ project_name }}
+EOF
 }
