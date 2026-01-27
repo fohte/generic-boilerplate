@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.26](https://github.com/fohte/generic-boilerplate/compare/v0.1.25...v0.1.26) (2026-01-27)
+
+
+### Bug Fixes
+
+* **apply-renovate-patch:** correctly sync semver range specifier changes ([#116](https://github.com/fohte/generic-boilerplate/issues/116)) ([0ec61e5](https://github.com/fohte/generic-boilerplate/commit/0ec61e596aacb824a722209f2e5df065c1755100))
+* **apply-renovate-patch:** handle unquoted YAML versions with v prefix ([#114](https://github.com/fohte/generic-boilerplate/issues/114)) ([bdd35f6](https://github.com/fohte/generic-boilerplate/commit/bdd35f672e66f27cd5e7e9229c91f501caede24c))
+* **copier:** copy `bun.lock` from `generated/node/` ([#111](https://github.com/fohte/generic-boilerplate/issues/111)) ([da40af5](https://github.com/fohte/generic-boilerplate/commit/da40af5d54518e2203c1eebfe872fc5b8bea05d3))
+
+
+### Dependencies
+
+* update dependency actionlint to v1.7.10 ([#66](https://github.com/fohte/generic-boilerplate/issues/66)) ([ff2eab5](https://github.com/fohte/generic-boilerplate/commit/ff2eab587b26a7e90a43821fabf98a423dedbb6b))
+* update dependency bun to v1.3.6 ([#117](https://github.com/fohte/generic-boilerplate/issues/117)) ([128fd8b](https://github.com/fohte/generic-boilerplate/commit/128fd8b7adc4237accd32dd6c2cced0cd5bae538))
+* update dependency fohte/lefthook-config to v0.1.13 ([#97](https://github.com/fohte/generic-boilerplate/issues/97)) ([5b1df41](https://github.com/fohte/generic-boilerplate/commit/5b1df414758c13d5c1e23304ddf7cc4281037d1d))
+* update dependency lefthook to v2.0.15 ([#43](https://github.com/fohte/generic-boilerplate/issues/43)) ([e5f27c4](https://github.com/fohte/generic-boilerplate/commit/e5f27c4d4799f19cf1a0e65fcfc2888ff2df8b11))
+
 ## [0.1.25](https://github.com/fohte/generic-boilerplate/compare/v0.1.24...v0.1.25) (2026-01-22)
 
 
