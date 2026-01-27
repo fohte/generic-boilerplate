@@ -70,6 +70,8 @@ EOF
 {
   "name": "{{ project_name }}",
   "devDependencies": {
+    "eslint": "9.18.0",
+    "prettier": "3.4.2",
     "vitest": "3.2.4"
   }
 }
@@ -79,6 +81,8 @@ EOF
 {
   "name": "base",
   "devDependencies": {
+    "eslint": "9.18.0",
+    "prettier": "3.4.2",
     "vitest": "3.2.4"
   }
 }
@@ -86,10 +90,13 @@ EOF
 
   create_initial_commit
 
+  # Renovate updates only vitest, others stay the same
   cat > generated/base/package.json << 'EOF'
 {
   "name": "base",
   "devDependencies": {
+    "eslint": "9.18.0",
+    "prettier": "3.4.2",
     "vitest": "3.3.0"
   }
 }
@@ -105,6 +112,8 @@ EOF
 {
   "name": "{{ project_name }}",
   "devDependencies": {
+    "eslint": "9.18.0",
+    "prettier": "3.4.2",
     "vitest": "3.3.0"
   }
 }
