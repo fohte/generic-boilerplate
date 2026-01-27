@@ -523,3 +523,32 @@ version: 1.2.3
 name: {{ project_name }}
 EOF
 }
+
+@test "detects already synced caret version in YAML unquoted versions" {
+  # Regression test: ensure ^1.2.3 is correctly escaped and matched
+  cat > template/config.yml.jinja << 'EOF'
+version: ^1.2.3
+name: {{ project_name }}
+EOF
+
+  cat > generated/base/config.yml << 'EOF'
+version: 1.2.2
+name: test
+EOF
+
+  create_initial_commit
+
+  # Renovate updates to ^1.2.3 (same as template)
+  cat > generated/base/config.yml << 'EOF'
+version: ^1.2.3
+name: test
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update version"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  # Should report "Already in sync" since ^1.2.3 matches template
+  [[ "$output" == *"Already in sync"* ]]
+}
