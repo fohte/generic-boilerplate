@@ -186,3 +186,83 @@ EOF
   # Should succeed with "Already in sync" message, not fail
   [[ "$output" == *"Already in sync"* ]]
 }
+
+@test "syncs YAML unquoted versions with v prefix and preserves Jinja syntax" {
+  cat > template/lefthook.yml.jinja << 'EOF'
+remotes:
+  - git_url: https://github.com/fohte/lefthook-config
+    ref: v0.1.12 # renovate: datasource=github-tags depName=fohte/lefthook-config
+    configs:
+      - lefthook.yml
+{% if type == 'node' -%}
+      - node.yml
+{% endif -%}
+EOF
+
+  cat > generated/base/lefthook.yml << 'EOF'
+remotes:
+  - git_url: https://github.com/fohte/lefthook-config
+    ref: v0.1.12 # renovate: datasource=github-tags depName=fohte/lefthook-config
+    configs:
+      - lefthook.yml
+      - node.yml
+EOF
+
+  create_initial_commit
+
+  cat > generated/base/lefthook.yml << 'EOF'
+remotes:
+  - git_url: https://github.com/fohte/lefthook-config
+    ref: v0.1.13 # renovate: datasource=github-tags depName=fohte/lefthook-config
+    configs:
+      - lefthook.yml
+      - node.yml
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+
+  # Version synced (unquoted with v prefix)
+  grep -q 'ref: v0.1.13' template/lefthook.yml.jinja
+
+  # Jinja syntax preserved
+  grep -q '{% if type' template/lefthook.yml.jinja
+  grep -q '{% endif' template/lefthook.yml.jinja
+
+  # Comment preserved
+  grep -q '# renovate:' template/lefthook.yml.jinja
+}
+
+@test "syncs YAML unquoted versions without v prefix" {
+  cat > template/config.yml.jinja << 'EOF'
+version: 1.2.3
+name: {{ project_name }}
+EOF
+
+  cat > generated/base/config.yml << 'EOF'
+version: 1.2.3
+name: test
+EOF
+
+  create_initial_commit
+
+  cat > generated/base/config.yml << 'EOF'
+version: 1.3.0
+name: test
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+
+  # Version synced
+  grep -q 'version: 1.3.0' template/config.yml.jinja
+
+  # Jinja syntax preserved
+  grep -q '{{ project_name }}' template/config.yml.jinja
+}
