@@ -33,17 +33,26 @@ sync_versions_to_template() {
     # - TOML: key = "version" or "key" = "version"
     # - JSON: "key": "version"
     # - YAML: key: version or key: vX.Y.Z (unquoted, with optional v prefix)
+    # - GitHub Actions: uses: owner/repo@vX.Y.Z
     # Semver range specifiers: =, ^, ~, >, >=, <, <= (for Cargo.toml pin, npm ranges)
-    if [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*[=:][[:space:]]*\"([=^~\>\<]{0,2}v?[0-9]+\.[0-9]+[^\"]*)\" ]]; then
+    if [[ "$line" =~ ^[[:space:]]*-?[[:space:]]*(uses:[[:space:]]*[^@]+)@(v?[0-9]+\.[0-9]+[^[:space:]#]*) ]]; then
+      # GitHub Actions uses: directive - version after @
+      local key="${BASH_REMATCH[1]}"
+      local version="${BASH_REMATCH[2]}"
+      local quoted=false
+      local uses_syntax=true
+    elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*[=:][[:space:]]*\"([=^~\>\<]{0,2}v?[0-9]+\.[0-9]+[^\"]*)\" ]]; then
       # Quoted version (TOML/JSON) - includes semver range specifiers
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}"
       local quoted=true
+      local uses_syntax=false
     elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*:[[:space:]]*([=^~\>\<]{0,2}v?[0-9]+\.[0-9]+[^[:space:]#]*) ]]; then
       # Unquoted version (YAML) - only match colon separator, includes semver range specifiers
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}"
       local quoted=false
+      local uses_syntax=false
     else
       continue
     fi
@@ -52,7 +61,21 @@ sync_versions_to_template() {
     if grep -Fq -- "$key" "$template_file" 2> /dev/null; then
       ((keys_checked++)) || true
       # Skip if version already matches
-      if [[ "$quoted" == "true" ]]; then
+      if [[ "$uses_syntax" == "true" ]]; then
+        # GitHub Actions uses: syntax - version after @
+        local escaped_version
+        escaped_version=$(printf '%s' "$version" | sed 's/[].[^$*+?(){}|\\]/\\&/g')
+        if grep -F -- "$key" "$template_file" | grep -Eq "@${escaped_version}([[:space:]]|#|$)"; then
+          continue
+        fi
+        # Replace version for this key in template (match @version pattern)
+        local escaped_key
+        escaped_key=$(printf '%s' "$key" | sed 's/[&/\]/\\&/g')
+        if sed -i.bak "s#\\(${escaped_key}@\\)[^[:space:]#]*#\\1${version}#" "$template_file"; then
+          rm -f "${template_file}.bak"
+          ((changes_applied++)) || true
+        fi
+      elif [[ "$quoted" == "true" ]]; then
         if grep -F -- "$key" "$template_file" | grep -Fq "\"${version}\""; then
           continue
         fi
