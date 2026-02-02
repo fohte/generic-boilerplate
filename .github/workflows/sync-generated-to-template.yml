@@ -92,7 +92,7 @@ jobs:
 
       - name: Commit changes to PR branch
         if: steps.changes.outputs.has_patches == 'true' && steps.sync.outputs.success == 'true'
-        uses: suzuki-shunsuke/commit-action@v0.0.14
+        uses: suzuki-shunsuke/commit-action@v0.1.0
         with:
           commit_message: 'chore(template): sync changes from generated/'
           github_token: ${{ steps.app-token.outputs.token }}
