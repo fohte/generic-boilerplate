@@ -73,8 +73,10 @@ jobs:
         if: steps.sync.outputs.rust_changed == 'true'
         working-directory: template
         run: |
+          # Get project_name from the test fixture to match what copier uses
+          project_name=$(yq '.project_name' ../tests/fixtures/rust.yml)
           # Temporarily render Cargo.toml from jinja template for lockfile generation
-          sed 's/{{ project_name }}/template-project/g' Cargo.toml.jinja > Cargo.toml
+          sed "s/{{ project_name }}/${project_name}/g" Cargo.toml.jinja > Cargo.toml
           cargo generate-lockfile
           rm Cargo.toml
 
