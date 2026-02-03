@@ -35,5 +35,18 @@
       matchUpdateTypes: ['major'],
       commitMessagePrefix: 'deps(ci)!:',
     },
+
+    // Group mise npm backend packages with their npm counterparts.
+    // This ensures "npm:prettier" in .mise.toml and "prettier" in package.json
+    // are updated together in a single PR.
+    // Unfortunately, groupName doesn't support templates, so each package pair must be listed explicitly.
+    {
+      matchDepNames: ['npm:prettier', 'prettier'],
+      groupName: 'prettier',
+    },
+    {
+      matchDepNames: ['npm:@commitlint/cli', '@commitlint/cli'],
+      groupName: '@commitlint/cli',
+    },
   ],
 }
