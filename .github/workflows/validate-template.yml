@@ -49,7 +49,7 @@ jobs:
       - name: Fetch master branch
         run: git fetch origin master --depth=1
 
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@v3
 
       - name: Save diff before regeneration
         id: save-diff
@@ -108,7 +108,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@v3
         with:
           working_directory: generated/${{ matrix.fixture }}
 
@@ -145,7 +145,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@v3
         with:
           working_directory: generated/node
 
@@ -176,7 +176,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@v3
         with:
           working_directory: generated/rust
 
