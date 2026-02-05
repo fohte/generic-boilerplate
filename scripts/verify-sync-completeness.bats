@@ -39,10 +39,27 @@ teardown() {
   rm -rf "$TEST_DIR"
 }
 
+# Helper to check if output contains a line
+assert_line() {
+  local expected="$1"
+  local line
+  while IFS= read -r line; do
+    if [[ "$line" == "$expected" ]]; then
+      return 0
+    fi
+  done <<< "$output"
+  echo "Expected line not found: $expected"
+  echo "Actual output:"
+  echo "$output"
+  return 1
+}
+
 @test "succeeds when generated matches template regeneration" {
   run "$REPO_ROOT/scripts/verify-sync-completeness"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"OK"* ]] || [[ "$output" == *"All fixtures are in sync"* ]]
+  assert_line "Checking fixture: base"
+  assert_line "  OK"
+  assert_line "All fixtures are in sync."
 }
 
 @test "fails when generated does not match template regeneration" {
@@ -53,8 +70,10 @@ EOF
 
   run "$REPO_ROOT/scripts/verify-sync-completeness"
   [ "$status" -eq 1 ]
-  [[ "$output" == *"Sync incomplete for base"* ]]
-  [[ "$output" == *"Differences"* ]]
+  assert_line "Checking fixture: base"
+  assert_line "::error::Sync incomplete for base"
+  assert_line "Differences:"
+  assert_line "Sync verification failed. Please ensure template/ changes are properly synced."
 }
 
 @test "detects missing file in generated directory" {
@@ -65,7 +84,7 @@ EOF
 
   run "$REPO_ROOT/scripts/verify-sync-completeness"
   [ "$status" -eq 1 ]
-  [[ "$output" == *"Sync incomplete for base"* ]]
+  assert_line "::error::Sync incomplete for base"
 }
 
 @test "detects extra file in generated directory" {
@@ -76,7 +95,7 @@ EOF
 
   run "$REPO_ROOT/scripts/verify-sync-completeness"
   [ "$status" -eq 1 ]
-  [[ "$output" == *"Sync incomplete for base"* ]]
+  assert_line "::error::Sync incomplete for base"
 }
 
 @test "checks multiple fixtures" {
@@ -93,17 +112,7 @@ EOF
 
   run "$REPO_ROOT/scripts/verify-sync-completeness"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"Checking fixture: base"* ]]
-  [[ "$output" == *"Checking fixture: node"* ]]
-}
-
-@test "reports failure message with guidance" {
-  cat > generated/base/README.md << 'EOF'
-# wrong-name
-EOF
-
-  run "$REPO_ROOT/scripts/verify-sync-completeness"
-  [ "$status" -eq 1 ]
-  [[ "$output" == *"Sync verification failed"* ]]
-  [[ "$output" == *"template/"* ]]
+  assert_line "Checking fixture: base"
+  assert_line "Checking fixture: node"
+  assert_line "All fixtures are in sync."
 }

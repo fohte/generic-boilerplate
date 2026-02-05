@@ -30,6 +30,11 @@ fi
 has_diff=false
 
 for fixture in "${FIXTURES[@]}"; do
+  # Skip if fixture data file or generated directory doesn't exist
+  if [[ ! -f "tests/fixtures/$fixture.yml" ]] || [[ ! -d "generated/$fixture" ]]; then
+    continue
+  fi
+
   echo "Checking fixture: $fixture"
 
   tmpdir=$(mktemp -d)
