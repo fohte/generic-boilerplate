@@ -59,11 +59,13 @@ EOF
   run "$REPO_ROOT/scripts/verify-sync-completeness"
   [ "$status" -eq 1 ]
 
-  # Check key lines in output
-  echo "$output" | grep -qx "Checking fixture: base"
-  echo "$output" | grep -qx "::error::Sync incomplete for base"
-  echo "$output" | grep -qx "Differences:"
-  echo "$output" | grep -qx "Sync verification failed. Please ensure template/ changes are properly synced."
+  # Output contains temp dir path in diff, so use partial matching
+  [[ "$output" == *"Checking fixture: base"* ]]
+  [[ "$output" == *"::error::Sync incomplete for base"* ]]
+  [[ "$output" == *"Differences:"* ]]
+  [[ "$output" == *"< # wrong-name"* ]]
+  [[ "$output" == *"> # base"* ]]
+  [[ "$output" == *"Sync verification failed. Please ensure template/ changes are properly synced."* ]]
 }
 
 @test "detects missing file in generated directory" {
@@ -73,7 +75,11 @@ EOF
 
   run "$REPO_ROOT/scripts/verify-sync-completeness"
   [ "$status" -eq 1 ]
-  echo "$output" | grep -qx "::error::Sync incomplete for base"
+
+  # Output contains temp dir path, so use partial matching
+  [[ "$output" == *"::error::Sync incomplete for base"* ]]
+  [[ "$output" == *"Only in"* ]]
+  [[ "$output" == *"extra.txt"* ]]
 }
 
 @test "detects extra file in generated directory" {
@@ -83,7 +89,9 @@ EOF
 
   run "$REPO_ROOT/scripts/verify-sync-completeness"
   [ "$status" -eq 1 ]
-  echo "$output" | grep -qx "::error::Sync incomplete for base"
+
+  [[ "$output" == *"::error::Sync incomplete for base"* ]]
+  [[ "$output" == *"Only in generated/base: extra.txt"* ]]
 }
 
 @test "checks multiple fixtures" {
