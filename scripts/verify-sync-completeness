@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+#
+# Verify sync completeness between template and generated directories
+#
+# This script regenerates each fixture from the template and compares the result
+# with the current generated/$fixture directory. If there are any differences,
+# the sync is incomplete.
+#
+# Usage:
+#   scripts/verify-sync-completeness
+#
+# Exit codes:
+#   0: Sync is complete (no differences)
+#   1: Sync is incomplete (differences found)
+#
+# Tests:
+#   See verify-sync-completeness.bats (run with: bats scripts/verify-sync-completeness.bats)
+
+set -euo pipefail
+
+FIXTURES=(base base-public base-release node rust)
+
+# Use copier directly if available, otherwise use pipx run
+if command -v copier > /dev/null 2>&1; then
+  COPIER_CMD="copier"
+else
+  COPIER_CMD="pipx run copier"
+fi
+
+has_diff=false
+
+for fixture in "${FIXTURES[@]}"; do
+  echo "Checking fixture: $fixture"
+
+  tmpdir=$(mktemp -d)
+  trap 'rm -rf "$tmpdir"' EXIT
+
+  # Regenerate from template using the fixture's data file
+  $COPIER_CMD copy --trust --data-file "tests/fixtures/$fixture.yml" . "$tmpdir" > /dev/null 2>&1
+
+  # Remove .copier-answers.yml as it's not part of the sync
+  rm -f "$tmpdir/.copier-answers.yml"
+
+  # Compare with current generated/$fixture
+  if ! diff -rq "generated/$fixture" "$tmpdir" > /dev/null 2>&1; then
+    echo "::error::Sync incomplete for $fixture"
+    echo ""
+    echo "Differences:"
+    diff -r "generated/$fixture" "$tmpdir" || true
+    echo ""
+    has_diff=true
+  else
+    echo "  OK"
+  fi
+
+  rm -rf "$tmpdir"
+  trap - EXIT
+done
+
+if [[ "$has_diff" == "true" ]]; then
+  echo ""
+  echo "Sync verification failed. Please ensure template/ changes are properly synced."
+  exit 1
+fi
+
+echo ""
+echo "All fixtures are in sync."
