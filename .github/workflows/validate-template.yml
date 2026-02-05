@@ -22,7 +22,7 @@ jobs:
     outputs:
       fixtures: ${{ steps.list.outputs.fixtures }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: List fixtures
         id: list
@@ -44,7 +44,7 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Fetch master branch
         run: git fetch origin master --depth=1
@@ -104,7 +104,7 @@ jobs:
         fixture: ${{ fromJson(needs.list-fixtures.outputs.fixtures) }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
 
@@ -141,7 +141,7 @@ jobs:
     if: needs.regenerate-and-commit.outputs.node_changed == 'true'
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
 
@@ -172,7 +172,7 @@ jobs:
     if: needs.regenerate-and-commit.outputs.rust_changed == 'true'
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
 
