@@ -37,7 +37,7 @@ jobs:
             echo "skip_commit=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v2
 
       - name: Cache bun dependencies
         uses: actions/cache@v4
@@ -82,7 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v2
 
       - name: Cache bun dependencies
         uses: actions/cache@v4
