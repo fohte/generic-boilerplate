@@ -27,18 +27,21 @@ else
   COPIER_CMD="pipx run copier"
 fi
 
-has_diff=false
+# Check a single fixture for sync completeness
+# Returns 0 if in sync, 1 if differences found
+check_fixture() {
+  local fixture=$1
 
-for fixture in "${FIXTURES[@]}"; do
   # Skip if fixture data file or generated directory doesn't exist
   if [[ ! -f "tests/fixtures/$fixture.yml" ]] || [[ ! -d "generated/$fixture" ]]; then
-    continue
+    return 0
   fi
 
   echo "Checking fixture: $fixture"
 
+  local tmpdir
   tmpdir=$(mktemp -d)
-  trap 'rm -rf "$tmpdir"' EXIT
+  trap 'rm -rf "$tmpdir"' RETURN
 
   # Regenerate from template using the fixture's data file
   $COPIER_CMD copy --trust --data-file "tests/fixtures/$fixture.yml" . "$tmpdir" > /dev/null 2>&1
@@ -53,13 +56,18 @@ for fixture in "${FIXTURES[@]}"; do
     echo "Differences:"
     diff -r "generated/$fixture" "$tmpdir" || true
     echo ""
-    has_diff=true
+    return 1
   else
     echo "  OK"
   fi
+}
 
-  rm -rf "$tmpdir"
-  trap - EXIT
+has_diff=false
+
+for fixture in "${FIXTURES[@]}"; do
+  if ! check_fixture "$fixture"; then
+    has_diff=true
+  fi
 done
 
 if [[ "$has_diff" == "true" ]]; then
