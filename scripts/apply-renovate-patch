@@ -35,7 +35,7 @@ sync_versions_to_template() {
     # - YAML: key: version or key: vX.Y.Z (unquoted, with optional v prefix)
     # - GitHub Actions: uses: owner/repo@vX.Y.Z
     # Semver range specifiers: =, ^, ~, >, >=, <, <= (for Cargo.toml pin, npm ranges)
-    if [[ "$line" =~ ^[[:space:]]*-?[[:space:]]*(uses:[[:space:]]*[^@]+)@(v?[0-9]+\.[0-9]+[^[:space:]#]*) ]]; then
+    if [[ "$line" =~ ^[[:space:]]*-?[[:space:]]*(uses:[[:space:]]*[^@]+)@(v?[0-9]+(\.[0-9]+)*[^[:space:]#]*) ]]; then
       # GitHub Actions uses: directive - version after @
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}"
