@@ -81,6 +81,13 @@ jobs:
           rm Cargo.toml
 
       # ========================================
+      # Verify sync completeness
+      # ========================================
+      - name: Verify sync completeness
+        if: steps.sync.outputs.success == 'true'
+        run: scripts/verify-sync-completeness
+
+      # ========================================
       # Commit changes
       # ========================================
       - name: Check for changes
