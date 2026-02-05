@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.2.0](https://github.com/fohte/generic-boilerplate/compare/v0.1.27...v0.2.0) (2026-02-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ci:** Update actions/cache action to v5 ([#142](https://github.com/fohte/generic-boilerplate/issues/142))
+* **ci:** Update actions/cache action to v5 ([#137](https://github.com/fohte/generic-boilerplate/issues/137))
+* **ci:** Update jdx/mise-action action to v3 ([#138](https://github.com/fohte/generic-boilerplate/issues/138))
+* **ci:** Update actions/checkout action to v6 ([#139](https://github.com/fohte/generic-boilerplate/issues/139))
+* **ci:** Update actions/checkout action to v6 ([#15](https://github.com/fohte/generic-boilerplate/issues/15))
+* **ci:** Update jdx/mise-action action to v3 ([#36](https://github.com/fohte/generic-boilerplate/issues/36))
+* Update dependency vitest to v4 ([#135](https://github.com/fohte/generic-boilerplate/issues/135))
+
+### Dependencies
+
+* **ci:** Update actions/cache action to v5 ([#137](https://github.com/fohte/generic-boilerplate/issues/137)) ([a4909f6](https://github.com/fohte/generic-boilerplate/commit/a4909f63291346e51435612c5e08edb131f6b831))
+* **ci:** Update actions/cache action to v5 ([#142](https://github.com/fohte/generic-boilerplate/issues/142)) ([1514662](https://github.com/fohte/generic-boilerplate/commit/151466245c0ce29725986efe94931cf89f3dc585))
+* **ci:** Update actions/checkout action to v6 ([#139](https://github.com/fohte/generic-boilerplate/issues/139)) ([eec7e08](https://github.com/fohte/generic-boilerplate/commit/eec7e087d8d9224b55b2118b5f9676cb10ce6944))
+* **ci:** Update actions/checkout action to v6 ([#15](https://github.com/fohte/generic-boilerplate/issues/15)) ([5cbe1ff](https://github.com/fohte/generic-boilerplate/commit/5cbe1ff060d3186c3d8ad3e4b4e7c67217959970))
+* **ci:** Update jdx/mise-action action to v3 ([#138](https://github.com/fohte/generic-boilerplate/issues/138)) ([d29667f](https://github.com/fohte/generic-boilerplate/commit/d29667fd489dc6dde741228b3466788d9b5f0ecb))
+* **ci:** Update jdx/mise-action action to v3 ([#36](https://github.com/fohte/generic-boilerplate/issues/36)) ([8d1113d](https://github.com/fohte/generic-boilerplate/commit/8d1113d66fada9eb7f62efb37d7b2c5347e6d04e))
+* **ci:** Update suzuki-shunsuke/commit-action action to v0.1.0 ([#123](https://github.com/fohte/generic-boilerplate/issues/123)) ([bc3140e](https://github.com/fohte/generic-boilerplate/commit/bc3140e7d44db016c6e486ee8fe1fc659b5ea735))
+* update dependency bun to v1.3.7 ([#132](https://github.com/fohte/generic-boilerplate/issues/132)) ([13edafc](https://github.com/fohte/generic-boilerplate/commit/13edafccbfe1510dbf3bdaac35f93baea679cca8))
+* update dependency bun to v1.3.8 ([#136](https://github.com/fohte/generic-boilerplate/issues/136)) ([4e5a2fa](https://github.com/fohte/generic-boilerplate/commit/4e5a2fa9e1d5d0d936d88ab2d1d51ccbd3d2becd))
+* update dependency lefthook to v2.0.16 ([#133](https://github.com/fohte/generic-boilerplate/issues/133)) ([a2f1b08](https://github.com/fohte/generic-boilerplate/commit/a2f1b08f4ce8f6511b3963a4b9c5ceda6d7a5828))
+* Update dependency vitest to v4 ([#135](https://github.com/fohte/generic-boilerplate/issues/135)) ([999ec84](https://github.com/fohte/generic-boilerplate/commit/999ec84ec021b37de2a33f59d44161c0cfbfb846))
+* update prettier to v3.8.1 ([#130](https://github.com/fohte/generic-boilerplate/issues/130)) ([e3f9e7a](https://github.com/fohte/generic-boilerplate/commit/e3f9e7ae1d33211324d31df62e7590f51587ee91))
+* update rust crate thiserror to v2.0.18 ([#134](https://github.com/fohte/generic-boilerplate/issues/134)) ([e3ebf58](https://github.com/fohte/generic-boilerplate/commit/e3ebf58cbc776c755786c7bb1d87815686992237))
+
 ## [0.1.27](https://github.com/fohte/generic-boilerplate/compare/v0.1.26...v0.1.27) (2026-02-02)
 
 
