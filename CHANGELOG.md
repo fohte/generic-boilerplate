@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/fohte/generic-boilerplate/compare/v0.2.0...v0.3.0) (2026-02-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update dependency eslint to v9 ([#131](https://github.com/fohte/generic-boilerplate/issues/131))
+
+### Dependencies
+
+* Update @commitlint/cli to v20.4.0 ([#145](https://github.com/fohte/generic-boilerplate/issues/145)) ([4d45aa9](https://github.com/fohte/generic-boilerplate/commit/4d45aa9a2cd679ff6565bb9aa413acbfda12487a))
+* Update dependency @fohte/eslint-config to v0.1.2 ([#148](https://github.com/fohte/generic-boilerplate/issues/148)) ([b21ca02](https://github.com/fohte/generic-boilerplate/commit/b21ca0293569f9a76712a373ec198e370bbf2e12))
+* Update dependency @types/bun to v1.3.8 ([#144](https://github.com/fohte/generic-boilerplate/issues/144)) ([856acca](https://github.com/fohte/generic-boilerplate/commit/856acca4448001d0e53dd461b4f920a25c65df3d))
+* Update dependency eslint to v9 ([#131](https://github.com/fohte/generic-boilerplate/issues/131)) ([cfbe071](https://github.com/fohte/generic-boilerplate/commit/cfbe07116ad6c85cfaad54b85f8aecb68f783aeb))
+
 ## [0.2.0](https://github.com/fohte/generic-boilerplate/compare/v0.1.27...v0.2.0) (2026-02-05)
 
 
