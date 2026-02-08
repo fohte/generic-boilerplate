@@ -1,0 +1,11 @@
+# Test fixture for Rust project with all optional features enabled
+type: rust
+project_name: rust-release
+description: Test Rust project with release features
+is_public: false
+use_release_please: true
+release_type: rust
+auto_merge_release_pr: true
+use_coverage: true
+release_binary: true
+binary_name: rust-release
