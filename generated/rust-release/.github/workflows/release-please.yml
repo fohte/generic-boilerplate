@@ -1,0 +1,103 @@
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name to upload assets to (e.g., v0.1.1)'
+        required: true
+        type: string
+
+name: release-please
+
+jobs:
+  release-please:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      prs_created: ${{ steps.release.outputs.prs_created }}
+      pr: ${{ steps.release.outputs.pr }}
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # Auto-merge release PR to enable automatic releases on every merge to master
+      - name: Auto-merge release PR
+        if: steps.release.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_JSON: ${{ steps.release.outputs.pr }}
+        run: |
+          PR_NUMBER=$(echo "$PR_JSON" | jq -r '.number')
+          # Try --auto first (enables auto-merge when CI is pending/required)
+          # If PR is already in clean status, --auto fails with 'Pull request is in clean status'
+          # In that case, fall back to direct merge
+          if OUTPUT=$(gh pr merge "$PR_NUMBER" --squash --auto -R "${{ github.repository }}" 2>&1); then
+            echo "$OUTPUT"
+            echo "Auto-merge enabled successfully"
+          elif echo "$OUTPUT" | grep -q "clean status"; then
+            echo "$OUTPUT"
+            echo "PR is in clean status, merging directly"
+            gh pr merge "$PR_NUMBER" --squash -R "${{ github.repository }}"
+          else
+            echo "$OUTPUT"
+            echo "Auto-merge failed with unexpected error"
+            exit 1
+          fi
+
+  build-release:
+    needs: release-please
+    # always() is required because release-please job is skipped on workflow_dispatch,
+    # and dependent jobs skip without evaluating their if condition by default.
+    if: always() && (needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch')
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - run: rustup show
+
+      - run: rustup target add ${{ matrix.target }}
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package binary
+        run: |
+          cd target/${{ matrix.target }}/release
+          tar czf ../../../rust-release-${{ matrix.target }}.tar.gz rust-release
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ inputs.tag_name || needs.release-please.outputs.tag_name }}
+        run: |
+          gh release upload "$TAG_NAME" \
+            rust-release-${{ matrix.target }}.tar.gz
