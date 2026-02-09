@@ -9,4 +9,3 @@ auto_merge_release_pr: true
 use_coverage: true
 release_binary: true
 binary_name: rust-release
-is_subpackage: false

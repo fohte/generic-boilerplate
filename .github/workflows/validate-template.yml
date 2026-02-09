@@ -69,23 +69,6 @@ jobs:
             pipx run copier copy --trust --data-file "tests/fixtures/$fixture.yml" . "generated/$fixture"
             # Remove answers file as it contains commit hash that changes on every run
             rm -f "generated/$fixture/.copier-answers.yml"
-
-            # Generate subpackage directories for monorepo fixtures
-            subpackages=$(yq -o=json '.subpackages // []' "tests/fixtures/$fixture.yml")
-            count=$(echo "$subpackages" | jq 'length')
-            for i in $(seq 0 $((count - 1))); do
-              pkg_name=$(echo "$subpackages" | jq -r ".[$i].name")
-              pkg_type=$(echo "$subpackages" | jq -r ".[$i].type")
-              pipx run copier copy --trust --defaults \
-                --data "type=$pkg_type" \
-                --data "project_name=$pkg_name" \
-                --data "description=" \
-                --data "is_public=false" \
-                --data "use_release_please=false" \
-                --data "is_subpackage=true" \
-                . "generated/$fixture/$pkg_name"
-              rm -f "generated/$fixture/$pkg_name/.copier-answers.yml"
-            done
           done
 
       - name: Check Renovate changes preserved
@@ -129,15 +112,28 @@ jobs:
         with:
           working_directory: generated/${{ matrix.fixture }}
 
-      - name: Fix Cargo.lock package name
-        if: hashFiles(format('generated/{0}/Cargo.toml', matrix.fixture)) != ''
+      - name: Fix lock file package names
         working-directory: generated/${{ matrix.fixture }}
         run: |
-          # template/Cargo.lock uses a fixed package name ("rust"), but each
-          # fixture may have a different project_name. Align the lock file so
-          # cargo doesn't rewrite it during validation.
-          expected=$(sed -n 's/^name = "\(.*\)"/\1/p' Cargo.toml | head -1)
-          sed -i "s/^name = \"rust\"$/name = \"${expected}\"/" Cargo.lock
+          # Template lock files use fixed package names ("rust" in Cargo.lock,
+          # "node" in bun.lock), but each fixture/subpackage may have a different
+          # project_name. Align lock files so tools don't rewrite them during validation.
+          while IFS= read -r -d '' toml; do
+            dir=$(dirname "$toml")
+            lock="$dir/Cargo.lock"
+            if [ -f "$lock" ]; then
+              expected=$(sed -n 's/^name = "\(.*\)"/\1/p' "$toml" | head -1)
+              sed -i "s/^name = \"rust\"$/name = \"${expected}\"/" "$lock"
+            fi
+          done < <(find . -name Cargo.toml -print0)
+          while IFS= read -r -d '' pkg_json; do
+            dir=$(dirname "$pkg_json")
+            lock="$dir/bun.lock"
+            if [ -f "$lock" ]; then
+              expected=$(sed -n 's/.*"name": "\(.*\)".*/\1/p' "$pkg_json" | head -1)
+              sed -i "s/\"name\": \"node\"/\"name\": \"${expected}\"/" "$lock"
+            fi
+          done < <(find . -name package.json -print0)
 
       - name: Initialize git repository
         working-directory: generated/${{ matrix.fixture }}

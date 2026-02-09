@@ -5,4 +5,3 @@ description: Test project description
 is_public: true
 use_release_please: false
 subpackages: []
-is_subpackage: false

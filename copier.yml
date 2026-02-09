@@ -1,4 +1,4 @@
-_min_copier_version: '9.0.0'
+_min_copier_version: '9.5.0'
 _subdirectory: template
 _answers_file: .copier-answers.yml
 
@@ -31,6 +31,8 @@ _skip_if_exists:
   - README.md
   - bun.lock
   - Cargo.lock
+  - '*/bun.lock'
+  - '*/Cargo.lock'
 
 # Exclude files that are specific to this template repository
 # and not needed in derived repositories
@@ -50,35 +52,28 @@ _exclude:
   - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
   - '{% if not use_release_please %}.github/workflows/test-release-please.yml{% endif %}'
   # Exclude Node.js specific files when type is not 'node'
-  - "{% if type != 'node' %}package.json{% endif %}"
-  - "{% if type != 'node' %}tsconfig.json{% endif %}"
-  - "{% if type != 'node' %}eslint.config.js{% endif %}"
-  - "{% if type != 'node' %}vitest.config.ts{% endif %}"
-  - "{% if type != 'node' %}bun.lock{% endif %}"
+  # Use leading / to match root only (not yield subpackage directories)
+  - "{% if type != 'node' %}/package.json{% endif %}"
+  - "{% if type != 'node' %}/tsconfig.json{% endif %}"
+  - "{% if type != 'node' %}/eslint.config.js{% endif %}"
+  - "{% if type != 'node' %}/vitest.config.ts{% endif %}"
+  - "{% if type != 'node' %}/bun.lock{% endif %}"
   # Exclude Rust specific files when type is not 'rust'
-  - "{% if type != 'rust' %}Cargo.toml{% endif %}"
-  - "{% if type != 'rust' %}Cargo.lock{% endif %}"
-  - "{% if type != 'rust' %}rust-toolchain.toml{% endif %}"
-  - "{% if type != 'rust' %}clippy.toml{% endif %}"
-  - "{% if type != 'rust' %}sgconfig.yml{% endif %}"
-  - "{% if type != 'rust' %}.sg{% endif %}"
-  - "{% if type != 'rust' %}src/main.rs{% endif %}"
+  - "{% if type != 'rust' %}/Cargo.toml{% endif %}"
+  - "{% if type != 'rust' %}/Cargo.lock{% endif %}"
+  - "{% if type != 'rust' %}/rust-toolchain.toml{% endif %}"
+  - "{% if type != 'rust' %}/clippy.toml{% endif %}"
+  - "{% if type != 'rust' %}/sgconfig.yml{% endif %}"
+  - "{% if type != 'rust' %}/.sg{% endif %}"
+  - "{% if type != 'rust' %}/src/main.rs{% endif %}"
   # Exclude Node.js specific src files when type is not 'node'
-  - "{% if type != 'node' %}src/index.ts{% endif %}"
-  - "{% if type != 'node' %}src/index.test.ts{% endif %}"
+  - "{% if type != 'node' %}/src/index.ts{% endif %}"
+  - "{% if type != 'node' %}/src/index.test.ts{% endif %}"
   # Exclude coverage files when coverage is disabled
-  - '{% if not use_coverage %}codecov.yml{% endif %}'
+  - '{% if not use_coverage %}/codecov.yml{% endif %}'
   # Exclude type-specific files
-  - "{% if type not in ['node', 'rust'] %}.gitignore{% endif %}"
-  - "{% if type not in ['node', 'rust'] %}src{% endif %}"
-  # Exclude root-level infrastructure files for subpackage deployments
-  - '{% if is_subpackage %}.github{% endif %}'
-  - '{% if is_subpackage %}lefthook.yml{% endif %}'
-  - '{% if is_subpackage %}renovate.json5{% endif %}'
-  - '{% if is_subpackage %}.mise.toml{% endif %}'
-  - '{% if is_subpackage %}release-please-config.json{% endif %}'
-  - '{% if is_subpackage %}.release-please-manifest.json{% endif %}'
-  - '{% if is_subpackage %}README.md{% endif %}'
+  - "{% if type not in ['node', 'rust'] %}/.gitignore{% endif %}"
+  - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
 
 # Template parameters
 is_public:
@@ -139,10 +134,3 @@ subpackages:
     Subpackage definitions for monorepo.
     Example: [{name: frontend, type: node}, {name: backend, type: rust}]
   when: "{{ type == 'base' }}"
-
-# Set to true when deploying into a monorepo subdirectory.
-# Suppresses root-level infrastructure files.
-is_subpackage:
-  type: bool
-  default: false
-  help: Skip root-level infrastructure files (for monorepo subdirectory deployment)

@@ -9,4 +9,3 @@ subpackages:
     type: node
   - name: backend
     type: rust
-is_subpackage: false
