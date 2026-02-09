@@ -198,7 +198,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "{{ project_name }}"
+name = "rust"
 version = "0.1.0"
 dependencies = [
  "rstest",
