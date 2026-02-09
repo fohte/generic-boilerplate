@@ -48,6 +48,7 @@ _exclude:
   - '{% if not use_release_please %}release-please-config.json{% endif %}'
   - '{% if not use_release_please %}.release-please-manifest.json{% endif %}'
   - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
+  - '{% if not use_release_please %}.github/workflows/test-release-please.yml{% endif %}'
   # Exclude Node.js specific files when type is not 'node'
   - "{% if type != 'node' %}package.json{% endif %}"
   - "{% if type != 'node' %}tsconfig.json{% endif %}"
@@ -58,10 +59,15 @@ _exclude:
   - "{% if type != 'rust' %}Cargo.toml{% endif %}"
   - "{% if type != 'rust' %}Cargo.lock{% endif %}"
   - "{% if type != 'rust' %}rust-toolchain.toml{% endif %}"
+  - "{% if type != 'rust' %}clippy.toml{% endif %}"
+  - "{% if type != 'rust' %}sgconfig.yml{% endif %}"
+  - "{% if type != 'rust' %}.sg{% endif %}"
   - "{% if type != 'rust' %}src/main.rs{% endif %}"
   # Exclude Node.js specific src files when type is not 'node'
   - "{% if type != 'node' %}src/index.ts{% endif %}"
   - "{% if type != 'node' %}src/index.test.ts{% endif %}"
+  # Exclude coverage files when coverage is disabled
+  - '{% if not use_coverage %}codecov.yml{% endif %}'
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] %}.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}src{% endif %}"
@@ -97,6 +103,29 @@ release_type:
     - java
   help: Select the release-type for your project
   when: '{{ use_release_please }}'
+
+auto_merge_release_pr:
+  type: bool
+  default: false
+  help: Automatically merge release-please PRs?
+  when: '{{ use_release_please }}'
+
+use_coverage:
+  type: bool
+  default: false
+  help: Enable code coverage with cargo-llvm-cov and Codecov?
+  when: "{{ type == 'rust' }}"
+
+release_binary:
+  type: bool
+  default: false
+  help: Build and upload release binaries?
+  when: "{{ type == 'rust' and use_release_please }}"
+
+binary_name:
+  type: str
+  help: Name of the binary to build
+  when: '{{ release_binary }}'
 
 # Monorepo subpackage definitions.
 # When non-empty, infrastructure files (test.yml, lefthook, renovate, etc.)

@@ -112,6 +112,16 @@ jobs:
         with:
           working_directory: generated/${{ matrix.fixture }}
 
+      - name: Fix Cargo.lock package name
+        if: hashFiles(format('generated/{0}/Cargo.toml', matrix.fixture)) != ''
+        working-directory: generated/${{ matrix.fixture }}
+        run: |
+          # template/Cargo.lock uses a fixed package name ("rust"), but each
+          # fixture may have a different project_name. Align the lock file so
+          # cargo doesn't rewrite it during validation.
+          expected=$(sed -n 's/^name = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          sed -i "s/^name = \"rust\"$/name = \"${expected}\"/" Cargo.lock
+
       - name: Initialize git repository
         working-directory: generated/${{ matrix.fixture }}
         run: |

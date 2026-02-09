@@ -7,6 +7,11 @@ name: Test
 
 on:
   push:
+{%- if use_release_please %}
+    branches-ignore:
+      # Skip release-please branches (Release PRs) since they only update CHANGELOG and version
+      - release-please--branches--*
+{%- endif %}
 
 permissions:
   contents: write
@@ -42,8 +47,17 @@ jobs:
             echo "skip_commit=false" >> "$GITHUB_OUTPUT"
           fi
 
+{%- if type == 'rust' %}
+
+      # Run rustup before mise-action to prevent race condition.
+      # Multiple cargo: tools in mise.toml trigger parallel rustup component downloads,
+      # causing "could not rename downloaded file" errors.
+      - run: rustup show
+{%- endif %}
+
       - uses: jdx/mise-action@v3
-{% if type == 'node' %}
+{%- if type == 'node' %}
+
       - name: Cache bun dependencies
         uses: actions/cache@v5
         with:
@@ -55,12 +69,13 @@ jobs:
           restore-keys: {% raw %}${{ runner.os }}-bun-{% endraw %}
 
       - run: bun install --frozen-lockfile
-{% elif type == 'rust' %}
+{%- elif type == 'rust' %}
+
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
 
       - run: cargo fetch
-{% elif subpackages %}
+{%- elif subpackages %}
 {%- if has_node %}
 
       - name: Cache bun dependencies
@@ -97,7 +112,8 @@ jobs:
         run: cd "{{ pkg.name }}" && cargo fetch
 {%- endfor %}
 {%- endif %}
-{% endif %}
+{%- endif %}
+
       - name: Run lefthook
         id: lefthook
         continue-on-error: true
@@ -154,13 +170,34 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - run: rustup show
+
       - uses: jdx/mise-action@v3
 
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
+{%- if use_coverage %}
+
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+
+      - name: Install llvm-tools-preview
+        run: rustup component add llvm-tools-preview
+
+      - name: Run tests with coverage
+        run: cargo llvm-cov --lcov --output-path lcov.info
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: {% raw %}${{ secrets.CODECOV_TOKEN }}{% endraw %}
+          files: lcov.info
+          fail_ci_if_error: false
+{%- else %}
 
       - name: Run tests
         run: cargo test
+{%- endif %}
 {%- elif subpackages %}
 {%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
 
