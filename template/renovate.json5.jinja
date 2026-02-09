@@ -1,12 +1,11 @@
+{%- set types = subpackages | map(attribute='type') | reject('equalto', 'base') | unique | sort | list -%}
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-{% if subpackages %}
-  {% set types = subpackages | map(attribute='type') | reject('equalto', 'base') | unique | sort | list %}
-  extends: [
+{% if subpackages %}  extends: [
     'github>fohte/renovate-config:base.json5',
-  {% for t in types %}
+  {%- for t in types %}
     'github>fohte/renovate-config:{{ t }}.json5',
-  {% endfor %}
+  {%- endfor %}
   ],
 {% elif type == 'node' %}  extends: [
     'github>fohte/renovate-config:base.json5',
