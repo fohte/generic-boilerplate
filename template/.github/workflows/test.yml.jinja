@@ -78,7 +78,7 @@ jobs:
 {%- for pkg in node_pkgs %}
 
       - name: Install bun dependencies ({{ pkg.name }})
-        run: cd {{ pkg.name }} && bun install --frozen-lockfile
+        run: cd "{{ pkg.name }}" && bun install --frozen-lockfile
 {%- endfor %}
 {%- endif %}
 {%- if has_rust %}
@@ -94,7 +94,7 @@ jobs:
 {%- for pkg in rust_pkgs %}
 
       - name: Fetch cargo dependencies ({{ pkg.name }})
-        run: cd {{ pkg.name }} && cargo fetch
+        run: cd "{{ pkg.name }}" && cargo fetch
 {%- endfor %}
 {%- endif %}
 {% endif %}

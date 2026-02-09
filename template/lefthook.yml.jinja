@@ -6,7 +6,7 @@ remotes:
 {%- if type == 'rust' and not subpackages %}
       - rust.yml
 {%- endif %}
-{%- if subpackages %}
+{%- if subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0 %}
 
 pre-commit:
   commands:
