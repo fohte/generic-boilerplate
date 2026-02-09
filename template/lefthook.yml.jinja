@@ -3,6 +3,23 @@ remotes:
     ref: v0.1.14 # renovate: datasource=github-tags depName=fohte/lefthook-config
     configs:
       - base.yml
-{%- if type == 'rust' %}
+{%- if type == 'rust' and not subpackages %}
       - rust.yml
+{%- endif %}
+{%- if subpackages %}
+
+pre-commit:
+  commands:
+{%- for pkg in subpackages %}
+{%- if pkg.type == 'rust' %}
+    cargo-fmt-{{ pkg.name }}:
+      root: "{{ pkg.name }}/"
+      glob: "{{ pkg.name }}/**/*.rs"
+      run: cargo fmt -- {staged_files} && git add {staged_files}
+    cargo-clippy-{{ pkg.name }}:
+      root: "{{ pkg.name }}/"
+      glob: "{{ pkg.name }}/**/*.rs"
+      run: cargo clippy -- -D warnings
+{%- endif %}
+{%- endfor %}
 {%- endif %}

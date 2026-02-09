@@ -65,6 +65,14 @@ _exclude:
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] %}.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}src{% endif %}"
+  # Exclude root-level infrastructure files for subpackage deployments
+  - '{% if is_subpackage %}.github{% endif %}'
+  - '{% if is_subpackage %}lefthook.yml{% endif %}'
+  - '{% if is_subpackage %}renovate.json5{% endif %}'
+  - '{% if is_subpackage %}.mise.toml{% endif %}'
+  - '{% if is_subpackage %}release-please-config.json{% endif %}'
+  - '{% if is_subpackage %}.release-please-manifest.json{% endif %}'
+  - '{% if is_subpackage %}README.md{% endif %}'
 
 # Template parameters
 is_public:
@@ -89,3 +97,23 @@ release_type:
     - java
   help: Select the release-type for your project
   when: '{{ use_release_please }}'
+
+# Monorepo subpackage definitions.
+# When non-empty, infrastructure files (test.yml, lefthook, renovate, etc.)
+# are generated in monorepo mode.
+# Input via --data-file is recommended for this parameter.
+subpackages:
+  type: yaml
+  multiline: true
+  default: []
+  help: |
+    Subpackage definitions for monorepo.
+    Example: [{name: frontend, type: node}, {name: backend, type: rust}]
+  when: "{{ type == 'base' }}"
+
+# Set to true when deploying into a monorepo subdirectory.
+# Suppresses root-level infrastructure files.
+is_subpackage:
+  type: bool
+  default: false
+  help: Skip root-level infrastructure files (for monorepo subdirectory deployment)
