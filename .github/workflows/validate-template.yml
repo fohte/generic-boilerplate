@@ -69,6 +69,23 @@ jobs:
             pipx run copier copy --trust --data-file "tests/fixtures/$fixture.yml" . "generated/$fixture"
             # Remove answers file as it contains commit hash that changes on every run
             rm -f "generated/$fixture/.copier-answers.yml"
+
+            # Generate subpackage directories for monorepo fixtures
+            subpackages=$(yq -o=json '.subpackages // []' "tests/fixtures/$fixture.yml")
+            count=$(echo "$subpackages" | jq 'length')
+            for i in $(seq 0 $((count - 1))); do
+              pkg_name=$(echo "$subpackages" | jq -r ".[$i].name")
+              pkg_type=$(echo "$subpackages" | jq -r ".[$i].type")
+              pipx run copier copy --trust --defaults \
+                --data "type=$pkg_type" \
+                --data "project_name=$pkg_name" \
+                --data "description=" \
+                --data "is_public=false" \
+                --data "use_release_please=false" \
+                --data "is_subpackage=true" \
+                . "generated/$fixture/$pkg_name"
+              rm -f "generated/$fixture/$pkg_name/.copier-answers.yml"
+            done
           done
 
       - name: Check Renovate changes preserved
