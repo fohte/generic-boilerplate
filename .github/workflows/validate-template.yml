@@ -121,6 +121,11 @@ jobs:
           git add -A
           git commit -m "initial"
 
+      - name: Regenerate Cargo.lock with correct package name
+        if: hashFiles(format('generated/{0}/Cargo.toml', matrix.fixture)) != ''
+        working-directory: generated/${{ matrix.fixture }}
+        run: cargo generate-lockfile
+
       - name: Run lefthook
         working-directory: generated/${{ matrix.fixture }}
         run: lefthook run pre-commit --all-files
