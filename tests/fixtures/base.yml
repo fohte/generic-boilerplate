@@ -6,3 +6,5 @@ project_name: base
 description: Test project description
 is_public: false
 use_release_please: false
+subpackages: []
+is_subpackage: false

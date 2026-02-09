@@ -15,7 +15,7 @@
     { "type": "ci", "hidden": true }
   ],
   "packages": {
-{% if subpackages %}
+{%- if subpackages %}
 {% for pkg in subpackages %}
     "{{ pkg.name }}": {
       "release-type": "{{ pkg.release_type | default('simple') }}",
@@ -23,7 +23,7 @@
       "bump-patch-for-minor-pre-major": true,
       "component": "{{ pkg.name }}"
     }{{ ',' if not loop.last else '' }}
-{% endfor %}
+{% endfor -%}
 {% else %}
     ".": {
       "release-type": "{{ release_type }}",
@@ -32,6 +32,6 @@
       "include-component-in-tag": false,
       "component": ""
     }
-{% endif %}
+{%- endif %}
   }
 }

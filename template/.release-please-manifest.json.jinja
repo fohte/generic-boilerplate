@@ -1,9 +1,9 @@
 {
-{% if subpackages %}
+{%- if subpackages %}
 {% for pkg in subpackages %}
   "{{ pkg.name }}": "0.1.0"{{ ',' if not loop.last else '' }}
-{% endfor %}
+{% endfor -%}
 {% else %}
   ".": "0.1.0"
-{% endif %}
+{%- endif %}
 }

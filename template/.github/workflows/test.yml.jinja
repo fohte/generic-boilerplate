@@ -1,8 +1,8 @@
-{# Helper variables for monorepo mode #}
-{% set has_node = (type == 'node') or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) %}
-{% set has_rust = (type == 'rust') or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) %}
-{% set node_pkgs = subpackages | selectattr('type', 'equalto', 'node') | list %}
-{% set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list %}
+{#- Helper variables for monorepo mode -#}
+{%- set has_node = (type == 'node') or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) -%}
+{%- set has_rust = (type == 'rust') or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) -%}
+{%- set node_pkgs = subpackages | selectattr('type', 'equalto', 'node') | list -%}
+{%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list -%}
 name: Test
 
 on:
