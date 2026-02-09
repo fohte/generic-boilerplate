@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/fohte/generic-boilerplate/compare/v0.3.0...v0.3.1) (2026-02-09)
+
+
+### Features
+
+* **template:** port improvements from armyknife ([#149](https://github.com/fohte/generic-boilerplate/issues/149)) ([5a29064](https://github.com/fohte/generic-boilerplate/commit/5a29064189bea86a1f36b6d9571db3fee56e543c))
+
 ## [0.3.0](https://github.com/fohte/generic-boilerplate/compare/v0.2.0...v0.3.0) (2026-02-07)
 
 
