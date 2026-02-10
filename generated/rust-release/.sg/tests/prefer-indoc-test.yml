@@ -37,6 +37,15 @@ valid:
     let s = "  line1\\n  line2\\n  line3";
   - |
     let s = "  first\\n  \\n  third";
+  # Raw strings with leading spaces (indoc would strip indentation)
+  - |
+    let s = r#"
+      line1
+      line2
+    "#;
+  # Lines with leading tabs (indoc would strip indentation)
+  - |
+    let s = "line1\\n\tline2\\n\tline3";
 invalid:
   # Raw string with leading newline (multiline)
   - |

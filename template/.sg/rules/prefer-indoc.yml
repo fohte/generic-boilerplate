@@ -12,13 +12,17 @@ note: |
 rule:
   any:
     # raw string literal containing a newline (multiline)
+    # Exclude strings with leading spaces (indoc would strip indentation)
     - kind: raw_string_literal
       regex: \n
       not:
-        inside:
-          kind: token_tree
+        any:
+          - inside:
+              kind: token_tree
+          - regex: "\n "
+          - regex: "\n\t"
     # normal string literal containing 2+ \\n escapes (truly multiline)
-    # Exclude strings where lines have leading spaces (indoc would strip them)
+    # Exclude strings where lines have leading spaces/tabs (indoc would strip them)
     - kind: string_literal
       regex: "\\\\n.*\\\\n"
       not:
@@ -26,3 +30,4 @@ rule:
           - inside:
               kind: token_tree
           - regex: "\\\\n "
+          - regex: "\\\\n\\\\t"
