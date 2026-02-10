@@ -37,6 +37,11 @@ jobs:
             echo "skip_commit=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # Run rustup before mise-action to prevent race condition.
+      # Multiple cargo: tools in mise.toml trigger parallel rustup component downloads,
+      # causing "could not rename downloaded file" errors.
+      - run: rustup show
+
       - uses: jdx/mise-action@v3
 
       - name: Cache bun dependencies
@@ -115,6 +120,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+
+      - run: rustup show
 
       - uses: jdx/mise-action@v3
 
