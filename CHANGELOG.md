@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2](https://github.com/fohte/generic-boilerplate/compare/v0.3.1...v0.3.2) (2026-02-10)
+
+
+### Features
+
+* **sg:** add `prefer-indoc` rule for multiline string literals ([#154](https://github.com/fohte/generic-boilerplate/issues/154)) ([35646af](https://github.com/fohte/generic-boilerplate/commit/35646af827556af560ba95bae69019c0de1138cc))
+* **template:** support monorepo configuration with Copier yield tag ([#150](https://github.com/fohte/generic-boilerplate/issues/150)) ([a491b7b](https://github.com/fohte/generic-boilerplate/commit/a491b7b1ef836f3a53ce338bfc220f5c20074998))
+
 ## [0.3.1](https://github.com/fohte/generic-boilerplate/compare/v0.3.0...v0.3.1) (2026-02-09)
 
 
