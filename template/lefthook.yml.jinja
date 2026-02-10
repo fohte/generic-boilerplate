@@ -10,6 +10,9 @@ remotes:
 pre-commit:
   commands:
     ast-grep:
+{%- if rust_pkgs | length > 0 %}
+      root: '{{ rust_pkgs[0].name }}/'
+{%- endif %}
       glob: '*.rs'
       run: ast-grep scan --rule .sg/rules/no-assert-contains.yml {staged_files}
 {%- if rust_pkgs | length > 0 %}
