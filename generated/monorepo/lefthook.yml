@@ -3,14 +3,14 @@ remotes:
     ref: v0.1.14 # renovate: datasource=github-tags depName=fohte/lefthook-config
     configs:
       - base.yml
+      - rust.yml
 
 pre-commit:
   commands:
-    cargo-fmt-backend:
+    ast-grep:
+      glob: '*.rs'
+      run: ast-grep scan --rule .sg/rules/no-assert-contains.yml {staged_files}
+    cargo-fmt:
       root: 'backend/'
-      glob: 'backend/**/*.rs'
-      run: cargo fmt -- {staged_files} && git add {staged_files}
-    cargo-clippy-backend:
+    cargo-clippy:
       root: 'backend/'
-      glob: 'backend/**/*.rs'
-      run: cargo clippy -- -D warnings
