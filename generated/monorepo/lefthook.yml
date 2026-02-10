@@ -3,22 +3,15 @@ remotes:
     ref: v0.1.14 # renovate: datasource=github-tags depName=fohte/lefthook-config
     configs:
       - base.yml
-{%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list %}
-{%- if type == 'rust' or rust_pkgs | length > 0 %}
       - rust.yml
 
 pre-commit:
   commands:
     ast-grep:
-{%- if rust_pkgs | length > 0 %}
-      root: '{{ rust_pkgs[0].name }}/'
-{%- endif %}
+      root: 'backend/'
       glob: '*.rs'
       run: ast-grep scan --rule .sg/rules/no-assert-contains.yml {staged_files}
-{%- if rust_pkgs | length > 0 %}
     cargo-fmt:
-      root: '{{ rust_pkgs[0].name }}/'
+      root: 'backend/'
     cargo-clippy:
-      root: '{{ rust_pkgs[0].name }}/'
-{%- endif %}
-{%- endif %}
+      root: 'backend/'

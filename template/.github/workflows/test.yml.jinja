@@ -1,3 +1,8 @@
+{#- Helper variables for monorepo mode -#}
+{%- set has_node = (type == 'node') or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) -%}
+{%- set has_rust = (type == 'rust') or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) -%}
+{%- set node_pkgs = subpackages | selectattr('type', 'equalto', 'node') | list -%}
+{%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list -%}
 name: Test
 
 on:
@@ -42,7 +47,7 @@ jobs:
             echo "skip_commit=false" >> "$GITHUB_OUTPUT"
           fi
 
-{%- if type == 'rust' %}
+{%- if has_rust %}
 
       # Run rustup before mise-action to prevent race condition.
       # Multiple cargo: tools in mise.toml trigger parallel rustup component downloads,
@@ -70,6 +75,43 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - run: cargo fetch
+{%- elif subpackages %}
+{%- if has_node %}
+
+      - name: Cache bun dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.bun/install/cache
+            ~/.bun/install/global
+{%- for pkg in node_pkgs %}
+            {{ pkg.name }}/node_modules
+{%- endfor %}
+          key: {% raw %}${{ runner.os }}-bun-${{ hashFiles({% endraw %}{% for pkg in node_pkgs %}'{{ pkg.name }}/bun.lock'{{ ', ' if not loop.last else '' }}{% endfor %}{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-bun-{% endraw %}
+
+{%- for pkg in node_pkgs %}
+
+      - name: Install bun dependencies ({{ pkg.name }})
+        run: cd "{{ pkg.name }}" && bun install --frozen-lockfile
+{%- endfor %}
+{%- endif %}
+{%- if has_rust %}
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |-
+{%- for pkg in rust_pkgs %}
+            {{ pkg.name }}
+{%- endfor %}
+
+{%- for pkg in rust_pkgs %}
+
+      - name: Fetch cargo dependencies ({{ pkg.name }})
+        run: cd "{{ pkg.name }}" && cargo fetch
+{%- endfor %}
+{%- endif %}
 {%- endif %}
 
       - name: Run lefthook
@@ -156,4 +198,47 @@ jobs:
       - name: Run tests
         run: cargo test
 {%- endif %}
+{%- elif subpackages %}
+{%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
+
+  unit-test-{{ pkg.name }}:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+{%- if pkg.type == 'rust' %}
+
+      - run: rustup show
+{%- endif %}
+
+      - uses: jdx/mise-action@v3
+{%- if pkg.type == 'node' %}
+
+      - name: Cache bun dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.bun/install/cache
+            ~/.bun/install/global
+            {{ pkg.name }}/node_modules
+          key: {% raw %}${{ runner.os }}-bun-${{ hashFiles({% endraw %}'{{ pkg.name }}/bun.lock'{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-bun-{% endraw %}
+
+      - run: cd {{ pkg.name }} && bun install --frozen-lockfile
+
+      - name: Run tests
+        working-directory: {{ pkg.name }}
+        run: bun run test
+{%- elif pkg.type == 'rust' %}
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: {{ pkg.name }}
+
+      - name: Run tests
+        working-directory: {{ pkg.name }}
+        run: cargo test
+{%- endif %}
+{%- endfor %}
 {%- endif %}

@@ -6,3 +6,4 @@ is_public: false
 use_release_please: true
 release_type: simple
 auto_merge_release_pr: false
+subpackages: []

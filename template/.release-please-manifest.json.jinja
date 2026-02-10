@@ -1,3 +1,9 @@
 {
+{%- if subpackages %}
+{% for pkg in subpackages %}
+  {{ pkg.name | tojson }}: "0.1.0"{{ ',' if not loop.last else '' }}
+{% endfor -%}
+{% else %}
   ".": "0.1.0"
+{%- endif %}
 }
