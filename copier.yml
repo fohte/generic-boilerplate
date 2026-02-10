@@ -38,7 +38,7 @@ _skip_if_exists:
 # and not needed in derived repositories
 _exclude:
   # Exclude external refs plugin for private repos
-  - '{% if not is_public %}commitlint-plugin-no-external-refs.ts{% endif %}'
+  - '{% if not is_public %}commitlint-plugin-no-external-refs.cjs{% endif %}'
   # Conditional exclusion when release-please is disabled.
   # NOTE: Copier's _exclude matches against OUTPUT file names (without .jinja
   # suffix), not source file names.
