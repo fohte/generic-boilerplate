@@ -124,6 +124,9 @@ jobs:
             if [ -f "$lock" ]; then
               expected=$(sed -n 's/^name = "\(.*\)"/\1/p' "$toml" | head -1)
               sed -i "s/^name = \"rust\"$/name = \"${expected}\"/" "$lock"
+              # Regenerate lock file to normalize format (Cargo.lock v4 uses
+              # topological sort, so a sed rename may break ordering)
+              (cd "$dir" && cargo generate-lockfile)
             fi
           done < <(find . -name Cargo.toml -print0)
           while IFS= read -r -d '' pkg_json; do
