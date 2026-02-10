@@ -7,10 +7,10 @@ remotes:
 pre-commit:
   commands:
     cargo-fmt-backend:
-      root: 'backend/'
-      glob: 'backend/**/*.rs'
+      root: "backend/"
+      glob: "backend/**/*.rs"
       run: cargo fmt -- {staged_files} && git add {staged_files}
     cargo-clippy-backend:
-      root: 'backend/'
-      glob: 'backend/**/*.rs'
+      root: "backend/"
+      glob: "backend/**/*.rs"
       run: cargo clippy -- -D warnings
