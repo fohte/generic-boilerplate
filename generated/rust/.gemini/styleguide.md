@@ -6,7 +6,6 @@
 
 Assume version choices are intentional. Your training data may be outdated.
 
-
 ## Test code review rules
 
 ### Parameterize similar test cases with rstest
