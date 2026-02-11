@@ -4,192 +4,54 @@
 
 ### Parameterize similar test cases with rstest
 
-When multiple test functions share the same assertion logic and differ only in input/expected values, consolidate them into a single parameterized test using `#[rstest]` with `#[case]`.
-
-Signs of violation:
-
-- Two or more test functions with nearly identical bodies, differing only in literals
-- Copy-pasted test logic with minor variations
-
-Before (bad):
+Do not write multiple test functions that differ only in input/expected values. Use `#[rstest]` with `#[case]`.
 
 ```rust
+// bad: separate functions per case
 #[test]
-fn test_parse_empty() {
-    assert_eq!(parse(""), None);
-}
-
+fn test_parse_empty() { assert_eq!(parse(""), None); }
 #[test]
-fn test_parse_whitespace() {
-    assert_eq!(parse("   "), None);
-}
+fn test_parse_valid() { assert_eq!(parse("hello"), Some("hello")); }
 
-#[test]
-fn test_parse_valid() {
-    assert_eq!(parse("hello"), Some("hello"));
-}
-```
-
-After (good):
-
-```rust
+// good: parameterized
 #[rstest]
 #[case::empty("", None)]
-#[case::whitespace("   ", None)]
 #[case::valid("hello", Some("hello"))]
 fn test_parse(#[case] input: &str, #[case] expected: Option<&str>) {
     assert_eq!(parse(input), expected);
 }
 ```
 
-### Do not write tests that only verify test helpers
+### Always name `#[case]` variants
 
-Tests should verify production code behavior. Tests that only exercise test helper functions, fixtures, or test utilities are unnecessary.
-
-Signs of violation:
-
-- A test whose only assertions target a helper defined in the test module or test utilities
-- Tests named like `test_make_fixture`, `test_create_mock`, `test_build_test_data`
-- Tests whose sole purpose is to assert that a builder, factory, or fake returns expected default values
-
-Fix: remove the test. If the helper is complex enough to need its own tests, promote it to production code. Test helpers are validated indirectly by the tests that use them.
+Use `#[case::descriptive_name(...)]`, not bare `#[case(...)]`. Named cases identify failures without inspecting values.
 
 ### Use `#[fixture]` for shared test setup
 
-When multiple test functions repeat the same setup code, extract it into an rstest `#[fixture]`.
-
-Signs of violation:
-
-- Identical `let` bindings or initialization blocks at the top of multiple test functions
-- Builder/constructor calls repeated across tests with the same arguments
-
-Before (bad):
+Do not repeat the same setup code across tests. Extract into `#[fixture]`.
 
 ```rust
+// bad: duplicated setup
 #[rstest]
-fn test_find_existing(/* ... */) {
-    let mut repo = InMemoryRepository::default();
-    repo.add(item);
-    // ...
-}
-
+fn test_a() { let repo = make_repo(); /* ... */ }
 #[rstest]
-fn test_find_missing(/* ... */) {
-    let mut repo = InMemoryRepository::default();
-    repo.add(item);
-    // ...
-}
-```
+fn test_b() { let repo = make_repo(); /* ... */ }
 
-After (good):
-
-```rust
+// good: fixture injection
 #[fixture]
-fn repository() -> InMemoryRepository {
-    let mut r = InMemoryRepository::default();
-    r.add(item);
-    r
-}
-
+fn repo() -> Repo { make_repo() }
 #[rstest]
-fn test_find_existing(repository: InMemoryRepository) { /* ... */ }
-
-#[rstest]
-fn test_find_missing(repository: InMemoryRepository) { /* ... */ }
-```
-
-### Always name `#[case]` variants
-
-Use `#[case::descriptive_name(...)]` instead of bare `#[case(...)]`. Named cases make test failure output immediately understandable without inspecting the input values.
-
-Before (bad):
-
-```rust
-#[rstest]
-#[case("", None)]
-#[case("hello", Some("hello"))]
-fn test_parse(#[case] input: &str, #[case] expected: Option<&str>) { /* ... */ }
-```
-
-After (good):
-
-```rust
-#[rstest]
-#[case::empty("", None)]
-#[case::valid("hello", Some("hello"))]
-fn test_parse(#[case] input: &str, #[case] expected: Option<&str>) { /* ... */ }
+fn test_a(repo: Repo) { /* ... */ }
 ```
 
 ### Use `indoc!` for multiline string literals in tests
 
-When test code contains multiline string literals with manual `\n` escapes or string concatenation, use the `indoc!` macro for readability.
+Do not embed `\n` in string literals. Use `indoc!` for readability.
 
-Signs of violation:
+### Extract repeated assertions into helper functions
 
-- String literals with embedded `\n` that span logical multiple lines
-- String concatenation (`format!` or `+`) used solely to build multiline test input
+If the same assertion chain appears in 3+ tests, extract it into a helper.
 
-Before (bad):
+### Do not write tests that only verify test helpers
 
-```rust
-#[case::with_header("---\ntitle: Test\n---\nBody content\n", "Test", "Body content\n")]
-```
-
-After (good):
-
-```rust
-#[case::with_header(
-    indoc! {"
-        ---
-        title: Test
-        ---
-        Body content
-    "},
-    "Test",
-    "Body content\n"
-)]
-```
-
-### Extract repeated assertion patterns into helper functions
-
-When multiple test functions contain the same sequence of assertions or complex validation logic, extract it into a shared helper function.
-
-Signs of violation:
-
-- The same `assert_eq!` / `assert!` chain appears in 3+ test functions
-- Multi-line assertion logic (e.g., destructure then assert each field) is copy-pasted across tests
-
-Before (bad):
-
-```rust
-#[rstest]
-fn test_parse_markdown(/* ... */) {
-    let doc = parse(input);
-    assert_eq!(doc.title, expected_title);
-    assert_eq!(doc.body, expected_body);
-    assert!(doc.metadata.is_some());
-}
-
-#[rstest]
-fn test_parse_html(/* ... */) {
-    let doc = parse(input);
-    assert_eq!(doc.title, expected_title);
-    assert_eq!(doc.body, expected_body);
-    assert!(doc.metadata.is_some());
-}
-```
-
-After (good):
-
-```rust
-fn assert_doc(doc: &Document, expected_title: &str, expected_body: &str) {
-    assert_eq!(doc.title, expected_title);
-    assert_eq!(doc.body, expected_body);
-    assert!(doc.metadata.is_some());
-}
-
-#[rstest]
-fn test_parse_markdown(/* ... */) {
-    assert_doc(&parse(input), expected_title, expected_body);
-}
-```
+Tests must verify production code. Tests that only assert on test helpers, fixtures, or mocks are unnecessary. Remove them.
