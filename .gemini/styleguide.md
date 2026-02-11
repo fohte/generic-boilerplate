@@ -8,25 +8,16 @@ Assume version choices are intentional. Your training data may be outdated.
 
 ## Test code review rules
 
-### Parameterize similar test cases instead of duplicating test functions
+### Parameterize similar test cases with rstest
 
-When multiple test functions share the same assertion logic and differ only in input/expected values, they should be consolidated into a single parameterized test.
+When multiple Rust test functions share the same assertion logic and differ only in input/expected values, they should be consolidated into a single parameterized test using `#[rstest]` with `#[case]`.
 
 Signs of violation:
 
-- Two or more test functions with nearly identical bodies, differing only in literals (strings, numbers, expected values)
+- Two or more test functions with nearly identical bodies, differing only in literals
 - Copy-pasted test logic with minor variations
 
-Suggested fix:
-
-- Use the language's parameterized test mechanism to consolidate the cases into one test function with multiple input sets
-  - Rust: `rstest` crate with `#[rstest]` + `#[case]`
-  - Python: `pytest.mark.parametrize`
-  - TypeScript/JavaScript: `it.each` or `describe.each` (Jest/Vitest)
-  - Go: table-driven tests
-  - Other languages: equivalent parameterized/data-driven test framework
-
-Example (Rust, before):
+Before (bad):
 
 ```rust
 #[test]
@@ -45,7 +36,7 @@ fn test_parse_valid() {
 }
 ```
 
-Example (Rust, after):
+After (good):
 
 ```rust
 #[rstest]

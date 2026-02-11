@@ -58,6 +58,8 @@ _exclude:
   - "{% if type != 'node' %}/eslint.config.js{% endif %}"
   - "{% if type != 'node' %}/vitest.config.ts{% endif %}"
   - "{% if type != 'node' %}/bun.lock{% endif %}"
+  # Exclude CLAUDE.md when no Rust code (only contains Rust test rules)
+  - "{% if type != 'rust' and not (subpackages | selectattr('type', 'equalto', 'rust') | list) %}/CLAUDE.md{% endif %}"
   # Exclude Rust specific files when type is not 'rust'
   - "{% if type != 'rust' %}/Cargo.toml{% endif %}"
   - "{% if type != 'rust' %}/Cargo.lock{% endif %}"

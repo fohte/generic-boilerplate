@@ -1,33 +1,18 @@
+{%- set has_rust = (type == 'rust') or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) -%}
 # CLAUDE.md
-
-## Project overview
-
-This is a [Copier](https://copier.readthedocs.io/) template repository for generating boilerplate project scaffolding.
-
-- `template/` — Copier template files. Editing these affects newly generated projects.
-- `generated/` — Output generated from `template/`. Do not edit directly; regenerate from the template instead.
-- Root config files (`.editorconfig`, `.prettierrc.yaml`, etc.) are shared via symlinks from `template/`.
+{% if has_rust %}
 
 ## Test code rules
 
-### Parameterize similar test cases instead of duplicating test functions
+### Parameterize similar test cases with rstest
 
-When multiple test functions share the same assertion logic and differ only in input/expected values, consolidate them into a single parameterized test.
+When multiple test functions share the same assertion logic and differ only in input/expected values, consolidate them into a single parameterized test using `#[rstest]` with `#[case]`.
 
 Signs of violation:
-
 - Two or more test functions with nearly identical bodies, differing only in literals
 - Copy-pasted test logic with minor variations
 
-Use the language's parameterized test mechanism:
-
-- Rust: `rstest` with `#[rstest]` + `#[case]`
-- Python: `pytest.mark.parametrize`
-- TypeScript/JavaScript: `it.each` or `describe.each` (Jest/Vitest)
-- Go: table-driven tests
-
-Example (Rust, before — bad):
-
+Before (bad):
 ```rust
 #[test]
 fn test_parse_empty() {
@@ -45,8 +30,7 @@ fn test_parse_valid() {
 }
 ```
 
-Example (Rust, after — good):
-
+After (good):
 ```rust
 #[rstest]
 #[case::empty("", None)]
@@ -62,9 +46,9 @@ fn test_parse(#[case] input: &str, #[case] expected: Option<&str>) {
 Tests should verify production code behavior. Tests that only exercise test helper functions, fixtures, or test utilities are unnecessary.
 
 Signs of violation:
-
 - A test whose only assertions target a helper defined in the test module or test utilities
 - Tests named like `test_make_fixture`, `test_create_mock`, `test_build_test_data`
 - Tests whose sole purpose is to assert that a builder, factory, or fake returns expected default values
 
 Fix: remove the test. If the helper is complex enough to need its own tests, promote it to production code. Test helpers are validated indirectly by the tests that use them.
+{% endif -%}
