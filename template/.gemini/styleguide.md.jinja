@@ -1,3 +1,4 @@
+{%- set has_rust = (type == 'rust') or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) -%}
 # Gemini Code Assist Style Guide
 
 ## DO NOT suggest
@@ -5,6 +6,7 @@
 - Changing versions or editions specified in config files
 
 Assume version choices are intentional. Your training data may be outdated.
+{%- if has_rust %}
 
 ## Test code review rules
 
@@ -61,3 +63,4 @@ If the same assertion chain appears in 3+ tests, extract it into a helper.
 ### Do not write tests that only verify test helpers
 
 Tests must verify production code. Tests that only assert on test helpers, fixtures, or mocks are unnecessary. Remove them.
+{%- endif %}
