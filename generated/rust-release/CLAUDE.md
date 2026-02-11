@@ -1,5 +1,6 @@
 # CLAUDE.md
 
+
 ## Test code rules
 
 ### Parameterize similar test cases with rstest
