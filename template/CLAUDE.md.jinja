@@ -1,6 +1,6 @@
 {%- set has_rust = (type == 'rust') or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) -%}
 # CLAUDE.md
-{% if has_rust %}
+{%- if has_rust %}
 
 ## Test code rules
 
@@ -57,4 +57,4 @@ If the same assertion chain appears in 3+ tests, extract it into a helper.
 ### Do not write tests that only verify test helpers
 
 Tests must verify production code. Tests that only assert on test helpers, fixtures, or mocks are unnecessary. Remove them.
-{% endif -%}
+{%- endif %}
