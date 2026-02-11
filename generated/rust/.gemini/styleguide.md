@@ -129,6 +129,36 @@ After (good):
 fn test_parse(#[case] input: &str, #[case] expected: Option<&str>) { /* ... */ }
 ```
 
+### Use `indoc!` for multiline string literals in tests
+
+When test code contains multiline string literals with manual `\n` escapes or string concatenation, use the `indoc!` macro for readability.
+
+Signs of violation:
+
+- String literals with embedded `\n` that span logical multiple lines
+- String concatenation (`format!` or `+`) used solely to build multiline test input
+
+Before (bad):
+
+```rust
+#[case::with_header("---\ntitle: Test\n---\nBody content\n", "Test", "Body content\n")]
+```
+
+After (good):
+
+```rust
+#[case::with_header(
+    indoc! {"
+        ---
+        title: Test
+        ---
+        Body content
+    "},
+    "Test",
+    "Body content\n"
+)]
+```
+
 ### Extract repeated assertion patterns into helper functions
 
 When multiple test functions contain the same sequence of assertions or complex validation logic, extract it into a shared helper function.
