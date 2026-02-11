@@ -53,3 +53,113 @@ Signs of violation:
 - Tests whose sole purpose is to assert that a builder, factory, or fake returns expected default values
 
 Fix: remove the test. If the helper is complex enough to need its own tests, promote it to production code. Test helpers are validated indirectly by the tests that use them.
+
+### Use `#[fixture]` for shared test setup
+
+When multiple test functions repeat the same setup code, extract it into an rstest `#[fixture]`.
+
+Signs of violation:
+
+- Identical `let` bindings or initialization blocks at the top of multiple test functions
+- Builder/constructor calls repeated across tests with the same arguments
+
+Before (bad):
+
+```rust
+#[rstest]
+fn test_find_existing(/* ... */) {
+    let mut repo = InMemoryRepository::default();
+    repo.add(item);
+    // ...
+}
+
+#[rstest]
+fn test_find_missing(/* ... */) {
+    let mut repo = InMemoryRepository::default();
+    repo.add(item);
+    // ...
+}
+```
+
+After (good):
+
+```rust
+#[fixture]
+fn repository() -> InMemoryRepository {
+    let mut r = InMemoryRepository::default();
+    r.add(item);
+    r
+}
+
+#[rstest]
+fn test_find_existing(repository: InMemoryRepository) { /* ... */ }
+
+#[rstest]
+fn test_find_missing(repository: InMemoryRepository) { /* ... */ }
+```
+
+### Always name `#[case]` variants
+
+Use `#[case::descriptive_name(...)]` instead of bare `#[case(...)]`. Named cases make test failure output immediately understandable without inspecting the input values.
+
+Before (bad):
+
+```rust
+#[rstest]
+#[case("", None)]
+#[case("hello", Some("hello"))]
+fn test_parse(#[case] input: &str, #[case] expected: Option<&str>) { /* ... */ }
+```
+
+After (good):
+
+```rust
+#[rstest]
+#[case::empty("", None)]
+#[case::valid("hello", Some("hello"))]
+fn test_parse(#[case] input: &str, #[case] expected: Option<&str>) { /* ... */ }
+```
+
+### Extract repeated assertion patterns into helper functions
+
+When multiple test functions contain the same sequence of assertions or complex validation logic, extract it into a shared helper function.
+
+Signs of violation:
+
+- The same `assert_eq!` / `assert!` chain appears in 3+ test functions
+- Multi-line assertion logic (e.g., destructure then assert each field) is copy-pasted across tests
+
+Before (bad):
+
+```rust
+#[rstest]
+fn test_parse_markdown(/* ... */) {
+    let doc = parse(input);
+    assert_eq!(doc.title, expected_title);
+    assert_eq!(doc.body, expected_body);
+    assert!(doc.metadata.is_some());
+}
+
+#[rstest]
+fn test_parse_html(/* ... */) {
+    let doc = parse(input);
+    assert_eq!(doc.title, expected_title);
+    assert_eq!(doc.body, expected_body);
+    assert!(doc.metadata.is_some());
+}
+```
+
+After (good):
+
+```rust
+fn assert_doc(doc: &Document, expected_title: &str, expected_body: &str) {
+    assert_eq!(doc.title, expected_title);
+    assert_eq!(doc.body, expected_body);
+    assert!(doc.metadata.is_some());
+}
+
+#[rstest]
+fn test_parse_markdown(/* ... */) {
+    assert_doc(&parse(input), expected_title, expected_body);
+}
+```
