@@ -34,7 +34,7 @@ get_subpackage_type() {
   fi
 
   local pkg_type
-  pkg_type=$(yq ".subpackages[] | select(.name == \"${subpkg}\") | .type" "$fixture_file" 2> /dev/null)
+  pkg_type=$(SUBPKG_NAME="$subpkg" yq '.subpackages[] | select(.name == strenv(SUBPKG_NAME)) | .type' "$fixture_file" 2> /dev/null)
 
   if [[ -z "$pkg_type" || "$pkg_type" == "null" ]]; then
     return 1
@@ -67,12 +67,12 @@ resolve_yield_template() {
 
   # Try multi-type conditional (e.g., {% if pkg.type in ['node', 'rust'] %})
   local found
-  found=$(find "$yield_dir" -maxdepth 1 -name "*${filename}*" -not -name "*.jinja" 2> /dev/null | head -1)
+  found=$(find "$yield_dir" -maxdepth 1 -name "*${filename}*" -not -name "*.jinja" -print -quit 2> /dev/null)
   if [[ -n "$found" && -f "$found" ]]; then
     echo "$found"
     return 0
   fi
-  found=$(find "$yield_dir" -maxdepth 1 -name "*${filename}*.jinja" 2> /dev/null | head -1)
+  found=$(find "$yield_dir" -maxdepth 1 -name "*${filename}*.jinja" -print -quit 2> /dev/null)
   if [[ -n "$found" && -f "$found" ]]; then
     echo "$found"
     return 0
@@ -84,12 +84,12 @@ resolve_yield_template() {
     local base="${filename##*/}"
     # Look for conditional subdirectory
     local found_sub
-    found_sub=$(find "$yield_dir" -path "*${subdir}*" -name "${base}" 2> /dev/null | head -1)
+    found_sub=$(find "$yield_dir" -path "*${subdir}*" -name "${base}" -print -quit 2> /dev/null)
     if [[ -n "$found_sub" && -f "$found_sub" ]]; then
       echo "$found_sub"
       return 0
     fi
-    found_sub=$(find "$yield_dir" -path "*${subdir}*" -name "${base}.jinja" 2> /dev/null | head -1)
+    found_sub=$(find "$yield_dir" -path "*${subdir}*" -name "${base}.jinja" -print -quit 2> /dev/null)
     if [[ -n "$found_sub" && -f "$found_sub" ]]; then
       echo "$found_sub"
       return 0
