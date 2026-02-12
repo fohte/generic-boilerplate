@@ -145,4 +145,5 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: backend/lcov.info
+          flags: backend
           fail_ci_if_error: false
