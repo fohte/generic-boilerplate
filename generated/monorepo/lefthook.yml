@@ -10,7 +10,7 @@ pre-commit:
     ast-grep:
       root: 'backend/'
       glob: '*.rs'
-      run: ast-grep scan --rule .sg/rules/no-assert-contains.yml {staged_files}
+      run: ast-grep scan {staged_files}
     cargo-fmt:
       root: 'backend/'
     cargo-clippy:

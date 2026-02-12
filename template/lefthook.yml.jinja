@@ -14,7 +14,7 @@ pre-commit:
       root: '{{ rust_pkgs[0].name }}/'
 {%- endif %}
       glob: '*.rs'
-      run: ast-grep scan --rule .sg/rules/no-assert-contains.yml {staged_files}
+      run: ast-grep scan {staged_files}
 {%- if rust_pkgs | length > 0 %}
     cargo-fmt:
       root: '{{ rust_pkgs[0].name }}/'
