@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/fohte/generic-boilerplate/compare/v0.3.2...v0.3.3) (2026-02-11)
+
+
+### Features
+
+* **template:** add Rust test code review rules for AI reviewers ([#157](https://github.com/fohte/generic-boilerplate/issues/157)) ([62a6408](https://github.com/fohte/generic-boilerplate/commit/62a6408d7df6550001fb7c8631e6f859f0c72c50))
+
 ## [0.3.2](https://github.com/fohte/generic-boilerplate/compare/v0.3.1...v0.3.2) (2026-02-10)
 
 
