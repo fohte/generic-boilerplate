@@ -1,6 +1,6 @@
 {%- set has_rust = (type == 'rust') or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) -%}
 [tools]
-lefthook = "2.0.16"
+lefthook = "2.1.0"
 {%- if has_rust %}
 "cargo:ast-grep" = "0.40.4"
 {%- endif %}
