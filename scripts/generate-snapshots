@@ -41,10 +41,18 @@ output_dir=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --fixture)
+      if [[ -z "${2-}" ]]; then
+        echo "Error: missing argument for $1" >&2
+        exit 1
+      fi
       fixture=$2
       shift 2
       ;;
     --output)
+      if [[ -z "${2-}" ]]; then
+        echo "Error: missing argument for $1" >&2
+        exit 1
+      fi
       output_dir=$2
       shift 2
       ;;
@@ -60,6 +68,7 @@ if [[ -n "$fixture" && -n "$output_dir" ]]; then
   generate_fixture "$fixture" "$output_dir"
 elif [[ -z "$fixture" && -z "$output_dir" ]]; then
   # Bulk mode: regenerate all fixtures
+  shopt -s nullglob
   for data_file in tests/fixtures/*.yml; do
     fixture=$(basename "$data_file" .yml)
     echo "Generating: $fixture"
