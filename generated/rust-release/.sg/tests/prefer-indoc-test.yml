@@ -28,6 +28,12 @@ valid:
         line1
         line2
     "};
+  # Path-qualified indoc macro
+  - |
+    let s = indoc::indoc! {"
+        line1
+        line2
+    "};
   # Single \\n only (not truly multiline content)
   - |
     let s = "\\n";

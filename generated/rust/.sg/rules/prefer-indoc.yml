@@ -23,7 +23,7 @@ rule:
                 kind: macro_invocation
                 has:
                   field: macro
-                  regex: '^(indoc|formatdoc|writedoc)$'
+                  regex: '(indoc|formatdoc|writedoc)$'
               stopBy: end
           - regex: "\n "
           - regex: "\n\t"
@@ -39,7 +39,7 @@ rule:
                 kind: macro_invocation
                 has:
                   field: macro
-                  regex: '^(indoc|formatdoc|writedoc)$'
+                  regex: '(indoc|formatdoc|writedoc)$'
               stopBy: end
           - regex: "\\\\n "
           - regex: "\\\\n\\\\t"
