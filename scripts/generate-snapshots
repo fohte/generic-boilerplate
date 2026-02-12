@@ -12,9 +12,6 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-
 # Use copier directly if available, otherwise fall back to pipx run
 if command -v copier > /dev/null 2>&1; then
   COPIER_CMD="copier"
@@ -23,6 +20,7 @@ else
 fi
 
 # Generate a single fixture snapshot.
+# All paths are relative to the current working directory.
 # Arguments:
 #   $1 - fixture name (corresponds to tests/fixtures/<name>.yml)
 #   $2 - output directory
@@ -30,7 +28,7 @@ generate_fixture() {
   local fixture=$1
   local output_dir=$2
 
-  $COPIER_CMD copy --trust --data-file "$REPO_ROOT/tests/fixtures/$fixture.yml" "$REPO_ROOT" "$output_dir"
+  $COPIER_CMD copy --trust --data-file "tests/fixtures/$fixture.yml" . "$output_dir"
 
   # Remove answers file as it contains a commit hash that changes on every run
   rm -f "$output_dir/.copier-answers.yml"
@@ -62,11 +60,11 @@ if [[ -n "$fixture" && -n "$output_dir" ]]; then
   generate_fixture "$fixture" "$output_dir"
 elif [[ -z "$fixture" && -z "$output_dir" ]]; then
   # Bulk mode: regenerate all fixtures
-  for data_file in "$REPO_ROOT"/tests/fixtures/*.yml; do
+  for data_file in tests/fixtures/*.yml; do
     fixture=$(basename "$data_file" .yml)
     echo "Generating: $fixture"
-    rm -rf "$REPO_ROOT/generated/$fixture"
-    generate_fixture "$fixture" "$REPO_ROOT/generated/$fixture"
+    rm -rf "generated/$fixture"
+    generate_fixture "$fixture" "generated/$fixture"
   done
 else
   echo "Error: --fixture and --output must be specified together" >&2
