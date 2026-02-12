@@ -35,92 +35,26 @@ jobs:
           else
             echo "success=false" >> "$GITHUB_OUTPUT"
           fi
-
-          # Check which manifest files were changed (root or yield subpackage)
-          if git status --porcelain | grep -q 'Cargo.toml.*\.jinja'; then
-            echo "rust_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "rust_changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
-          # Check if bun.lock was changed in generated/ (root or subpackage level)
-          if git diff --name-only "origin/$BASE_REF" HEAD -- 'generated/*/bun.lock' 'generated/*/*/bun.lock' | grep -q .; then
-            echo "bun_lock_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "bun_lock_changed=false" >> "$GITHUB_OUTPUT"
-          fi
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
 
       # ========================================
-      # Node.js (bun) lockfile sync
+      # Lockfile sync (bun.lock copy + Cargo.lock regeneration)
       # ========================================
-      # Copy bun.lock directly from generated/ instead of regenerating.
-      # This avoids the issue where `bun install --lockfile-only` may produce
-      # different packages section than what Renovate generated.
-      # Handles both root-level (generated/node/) and monorepo subpackages.
-      - name: Copy bun.lock from generated/
-        if: steps.sync.outputs.bun_lock_changed == 'true'
-        run: |
-          YIELD_DIR="template/{% yield pkg from subpackages %}{{ pkg.name }}{% endyield %}"
+      - name: Sync bun.lock
+        run: scripts/sync-lockfiles --bun-lock "origin/$BASE_REF"
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
 
-          # Root-level: generated/node/bun.lock -> template/bun.lock
-          if [[ -f generated/node/bun.lock ]]; then
-            cp generated/node/bun.lock template/bun.lock
-          fi
-
-          # Monorepo subpackages: find node subpackages from fixture YAML and copy
-          for fixture_file in tests/fixtures/*.yml; do
-            fixture=$(basename "$fixture_file" .yml)
-            # Find node subpackages in this fixture
-            subpkgs=$(yq '.subpackages[]? | select(.type == "node") | .name' "$fixture_file" 2>/dev/null || true)
-            for subpkg in $subpkgs; do
-              src="generated/${fixture}/${subpkg}/bun.lock"
-              dest="${YIELD_DIR}/{% if pkg.type == 'node' %}bun.lock{% endif %}"
-              if [[ -f "$src" && -f "$dest" ]]; then
-                cp "$src" "$dest"
-              fi
-            done
-          done
-
-      # ========================================
-      # Rust (cargo) lockfile regeneration
-      # ========================================
       - name: Setup Rust
-        if: steps.sync.outputs.rust_changed == 'true'
+        if: steps.sync.outputs.success == 'true'
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Regenerate Cargo.lock
-        if: steps.sync.outputs.rust_changed == 'true'
-        run: |
-          YIELD_DIR="template/{% yield pkg from subpackages %}{{ pkg.name }}{% endyield %}"
-
-          # Root-level: template/Cargo.toml.jinja -> template/Cargo.lock
-          if [[ -f template/Cargo.toml.jinja ]]; then
-            project_name=$(yq '.project_name' tests/fixtures/rust.yml)
-            sed "s/{{ project_name }}/${project_name}/g" template/Cargo.toml.jinja > template/Cargo.toml
-            (cd template && cargo generate-lockfile)
-            rm template/Cargo.toml
-          fi
-
-          # Monorepo subpackages: find rust subpackages and regenerate their Cargo.lock
-          yield_cargo="${YIELD_DIR}/{% if pkg.type == 'rust' %}Cargo.toml{% endif %}.jinja"
-          if [[ -f "$yield_cargo" ]]; then
-            for fixture_file in tests/fixtures/*.yml; do
-              fixture=$(basename "$fixture_file" .yml)
-              subpkgs=$(yq '.subpackages[]? | select(.type == "rust") | .name' "$fixture_file" 2>/dev/null || true)
-              for subpkg in $subpkgs; do
-                if [[ -d "generated/${fixture}/${subpkg}" ]]; then
-                  yield_lock="${YIELD_DIR}/{% if pkg.type == 'rust' %}Cargo.lock{% endif %}"
-                  sed "s/{{ pkg.name }}/${subpkg}/g" "$yield_cargo" > "${YIELD_DIR}/Cargo.toml"
-                  (cd "$YIELD_DIR" && cargo generate-lockfile)
-                  mv "${YIELD_DIR}/Cargo.lock" "$yield_lock"
-                  rm "${YIELD_DIR}/Cargo.toml"
-                  break 2
-                fi
-              done
-            done
-          fi
+      - name: Sync Cargo.lock
+        if: steps.sync.outputs.success == 'true'
+        run: scripts/sync-lockfiles --cargo-lock "origin/$BASE_REF"
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
 
       # ========================================
       # Verify sync completeness
