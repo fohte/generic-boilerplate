@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4](https://github.com/fohte/generic-boilerplate/compare/v0.3.3...v0.3.4) (2026-02-12)
+
+
+### Bug Fixes
+
+* **rust/sg:** detect `prefer-indoc` rule violations in pre-commit ([#160](https://github.com/fohte/generic-boilerplate/issues/160)) ([1d569a7](https://github.com/fohte/generic-boilerplate/commit/1d569a7fba6b7977cb9fe07a701b38eaa9c8a059))
+
 ## [0.3.3](https://github.com/fohte/generic-boilerplate/compare/v0.3.2...v0.3.3) (2026-02-11)
 
 
