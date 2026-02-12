@@ -111,7 +111,7 @@ use_coverage:
   type: bool
   default: false
   help: Enable code coverage with cargo-llvm-cov and Codecov?
-  when: "{{ type == 'rust' }}"
+  when: "{{ type == 'rust' or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) }}"
 
 release_binary:
   type: bool
