@@ -48,7 +48,7 @@ fi
 
 # Get list of files changed after regeneration (working tree)
 # Use --name-only for simplicity; handle git diff exit code 1 (changes found)
-after_files=$( (git diff --name-only origin/master -- 'generated/' || [[ $? -eq 1 ]]) | sort -u)
+after_files=$( (git diff --no-renames --name-only origin/master -- 'generated/' || [[ $? -eq 1 ]]) | sort -u)
 
 # Check for files that were in before diff but not in after diff
 # Use comm for efficient set difference operation
