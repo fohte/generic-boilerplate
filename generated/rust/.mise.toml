@@ -1,5 +1,5 @@
 [tools]
-lefthook = "2.0.16"
+lefthook = "2.1.0"
 "cargo:ast-grep" = "0.40.4"
 
 # lefthook hooks
