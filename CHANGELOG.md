@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.5](https://github.com/fohte/generic-boilerplate/compare/v0.3.4...v0.3.5) (2026-02-12)
+
+
+### Bug Fixes
+
+* **prefer-indoc:** restrict `token_tree` exclusion to `indoc` family macros only ([#163](https://github.com/fohte/generic-boilerplate/issues/163)) ([059935e](https://github.com/fohte/generic-boilerplate/commit/059935e3c68e48b6c921278f65bcaaf36b68e34a))
+* **template:** enable `cargo-llvm-cov` coverage for monorepo Rust subpackages ([#164](https://github.com/fohte/generic-boilerplate/issues/164)) ([f350819](https://github.com/fohte/generic-boilerplate/commit/f350819dafd19ff99911269ca3e52fceabe02370))
+
+
+### Dependencies
+
+* Update @commitlint/cli to v20.4.1 ([#152](https://github.com/fohte/generic-boilerplate/issues/152)) ([004fc84](https://github.com/fohte/generic-boilerplate/commit/004fc84da7d4b8652611056a5ae273ee06943644))
+* update dependency cargo:ast-grep to 0.40.5 ([#153](https://github.com/fohte/generic-boilerplate/issues/153)) ([268c5af](https://github.com/fohte/generic-boilerplate/commit/268c5afd33f1d72f446d068a8e0f17c063d2f3b6))
+* update dependency lefthook to v2.1.0 ([#156](https://github.com/fohte/generic-boilerplate/issues/156)) ([66a1a13](https://github.com/fohte/generic-boilerplate/commit/66a1a13a4e4c29fd0f982db8a4e7ba2dc65417c4))
+
 ## [0.3.4](https://github.com/fohte/generic-boilerplate/compare/v0.3.3...v0.3.4) (2026-02-12)
 
 
