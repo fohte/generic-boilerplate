@@ -910,3 +910,187 @@ version = "0.1.0"
 tokio = "1.1.0"
 EOF
 }
+
+# ========================================
+# Monorepo subpackage tests
+# ========================================
+
+setup_monorepo() {
+  # Create yield directory structure
+  local yield_dir="template/{% yield pkg from subpackages %}{{ pkg.name }}{% endyield %}"
+  mkdir -p "$yield_dir"
+  mkdir -p generated/monorepo/frontend generated/monorepo/backend
+  mkdir -p tests/fixtures
+
+  # Create fixture YAML with subpackages
+  cat > tests/fixtures/monorepo.yml << 'FIXTURE'
+type: base
+project_name: monorepo
+subpackages:
+  - name: frontend
+    type: node
+  - name: backend
+    type: rust
+FIXTURE
+}
+
+@test "syncs monorepo subpackage JSON versions to yield template" {
+  setup_monorepo
+
+  local yield_dir="template/{% yield pkg from subpackages %}{{ pkg.name }}{% endyield %}"
+
+  cat > "${yield_dir}/{% if pkg.type == 'node' %}package.json{% endif %}.jinja" << 'EOF'
+{
+  "name": "{{ pkg.name }}",
+  "devDependencies": {
+    "vitest": "3.2.4"
+  }
+}
+EOF
+
+  cat > generated/monorepo/frontend/package.json << 'EOF'
+{
+  "name": "frontend",
+  "devDependencies": {
+    "vitest": "3.2.4"
+  }
+}
+EOF
+
+  create_initial_commit
+
+  # Renovate updates vitest in frontend subpackage
+  cat > generated/monorepo/frontend/package.json << 'EOF'
+{
+  "name": "frontend",
+  "devDependencies": {
+    "vitest": "3.3.0"
+  }
+}
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update vitest in monorepo frontend"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Synced 1 version"* ]]
+
+  diff -u "${yield_dir}/{% if pkg.type == 'node' %}package.json{% endif %}.jinja" - << 'EOF'
+{
+  "name": "{{ pkg.name }}",
+  "devDependencies": {
+    "vitest": "3.3.0"
+  }
+}
+EOF
+}
+
+@test "syncs monorepo subpackage TOML versions to yield template" {
+  setup_monorepo
+
+  local yield_dir="template/{% yield pkg from subpackages %}{{ pkg.name }}{% endyield %}"
+
+  cat > "${yield_dir}/{% if pkg.type == 'rust' %}Cargo.toml{% endif %}.jinja" << 'EOF'
+[package]
+name = "{{ pkg.name }}"
+version = "0.1.0"
+
+[dependencies]
+tokio = "1.0.0"
+EOF
+
+  cat > generated/monorepo/backend/Cargo.toml << 'EOF'
+[package]
+name = "backend"
+version = "0.1.0"
+
+[dependencies]
+tokio = "1.0.0"
+EOF
+
+  create_initial_commit
+
+  # Renovate updates tokio in backend subpackage
+  cat > generated/monorepo/backend/Cargo.toml << 'EOF'
+[package]
+name = "backend"
+version = "0.1.0"
+
+[dependencies]
+tokio = "1.1.0"
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update tokio in monorepo backend"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Synced 1 version"* ]]
+
+  diff -u "${yield_dir}/{% if pkg.type == 'rust' %}Cargo.toml{% endif %}.jinja" - << 'EOF'
+[package]
+name = "{{ pkg.name }}"
+version = "0.1.0"
+
+[dependencies]
+tokio = "1.1.0"
+EOF
+}
+
+@test "excludes monorepo subpackage bun.lock and Cargo.lock from processing" {
+  setup_monorepo
+
+  local yield_dir="template/{% yield pkg from subpackages %}{{ pkg.name }}{% endyield %}"
+
+  cat > "${yield_dir}/{% if pkg.type == 'node' %}package.json{% endif %}.jinja" << 'EOF'
+{
+  "name": "{{ pkg.name }}",
+  "devDependencies": {
+    "vitest": "3.2.4"
+  }
+}
+EOF
+
+  cat > generated/monorepo/frontend/package.json << 'EOF'
+{
+  "name": "frontend",
+  "devDependencies": {
+    "vitest": "3.2.4"
+  }
+}
+EOF
+
+  cat > generated/monorepo/frontend/bun.lock << 'EOF'
+lockfile content v1
+EOF
+
+  cat > generated/monorepo/backend/Cargo.lock << 'EOF'
+[[package]]
+name = "tokio"
+version = "1.0.0"
+EOF
+
+  create_initial_commit
+
+  cat > generated/monorepo/frontend/bun.lock << 'EOF'
+lockfile content v2
+EOF
+
+  cat > generated/monorepo/backend/Cargo.lock << 'EOF'
+[[package]]
+name = "tokio"
+version = "1.1.0"
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update lockfiles"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+
+  # bun.lock and Cargo.lock should be excluded
+  [[ "$output" != *"bun.lock"* ]]
+  [[ "$output" != *"Cargo.lock"* ]]
+  [[ "$output" == *"No files changed"* ]]
+}

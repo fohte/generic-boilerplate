@@ -19,6 +19,86 @@ set -euo pipefail
 
 BASE_REF="${1:-origin/master}"
 
+YIELD_DIR="template/{% yield pkg from subpackages %}{{ pkg.name }}{% endyield %}"
+
+# Get the subpackage type from fixture YAML.
+# Usage: get_subpackage_type <fixture> <subpackage_name>
+# Returns the type (e.g., "node", "rust") via stdout.
+get_subpackage_type() {
+  local fixture="$1"
+  local subpkg="$2"
+  local fixture_file="tests/fixtures/${fixture}.yml"
+
+  if [[ ! -f "$fixture_file" ]]; then
+    return 1
+  fi
+
+  local pkg_type
+  pkg_type=$(SUBPKG_NAME="$subpkg" yq '.subpackages[] | select(.name == strenv(SUBPKG_NAME)) | .type' "$fixture_file" 2> /dev/null)
+
+  if [[ -z "$pkg_type" || "$pkg_type" == "null" ]]; then
+    return 1
+  fi
+
+  echo "$pkg_type"
+}
+
+# Resolve a file inside the yield directory to its conditional template path.
+# Usage: resolve_yield_template <filename> <pkg_type>
+# Returns the full template path via stdout.
+resolve_yield_template() {
+  local filename="$1"
+  local pkg_type="$2"
+  local yield_dir="$YIELD_DIR"
+
+  # Try exact conditional filename with .jinja extension
+  local conditional_jinja="${yield_dir}/{% if pkg.type == '${pkg_type}' %}${filename}{% endif %}.jinja"
+  if [[ -f "$conditional_jinja" ]]; then
+    echo "$conditional_jinja"
+    return 0
+  fi
+
+  # Try exact conditional filename without .jinja
+  local conditional="${yield_dir}/{% if pkg.type == '${pkg_type}' %}${filename}{% endif %}"
+  if [[ -f "$conditional" ]]; then
+    echo "$conditional"
+    return 0
+  fi
+
+  # Try multi-type conditional (e.g., {% if pkg.type in ['node', 'rust'] %})
+  local found
+  found=$(find "$yield_dir" -maxdepth 1 -name "*${filename}*" -not -name "*.jinja" -print -quit 2> /dev/null)
+  if [[ -n "$found" && -f "$found" ]]; then
+    echo "$found"
+    return 0
+  fi
+  found=$(find "$yield_dir" -maxdepth 1 -name "*${filename}*.jinja" -print -quit 2> /dev/null)
+  if [[ -n "$found" && -f "$found" ]]; then
+    echo "$found"
+    return 0
+  fi
+
+  # Try subdirectories (e.g., .sg/rules/no-assert-contains.yml)
+  if [[ "$filename" == */* ]]; then
+    local subdir="${filename%/*}"
+    local base="${filename##*/}"
+    # Look for conditional subdirectory
+    local found_sub
+    found_sub=$(find "$yield_dir" -path "*${subdir}*" -name "${base}" -print -quit 2> /dev/null)
+    if [[ -n "$found_sub" && -f "$found_sub" ]]; then
+      echo "$found_sub"
+      return 0
+    fi
+    found_sub=$(find "$yield_dir" -path "*${subdir}*" -name "${base}.jinja" -print -quit 2> /dev/null)
+    if [[ -n "$found_sub" && -f "$found_sub" ]]; then
+      echo "$found_sub"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
 # Sync versions from generated file to template.
 # For each line with a version in the generated file, update the corresponding
 # line in the template to use the same version.
@@ -140,17 +220,37 @@ applied_files=()
 failed_files=()
 
 while IFS= read -r generated_file; do
-  # Extract relative path (e.g., generated/base/package.json -> package.json)
-  rel_path=${generated_file#*/*/}
-
-  # Find corresponding template file
   template_file=""
-  if [[ -f "template/${rel_path}.jinja" ]]; then
-    template_file="template/${rel_path}.jinja"
-  elif [[ -f "template/${rel_path}" ]] && [[ ! -L "template/${rel_path}" ]]; then
-    template_file="template/${rel_path}"
-  elif [[ -L "template/${rel_path}" ]]; then
-    template_file=$(realpath -m --relative-to=. "template/${rel_path}")
+
+  # Count path depth: generated/<fixture>/<file> (3) vs generated/<fixture>/<subpkg>/<file> (4+)
+  depth=$(echo "$generated_file" | tr '/' '\n' | wc -l)
+
+  if [[ $depth -ge 4 ]]; then
+    # Potential monorepo subpackage: generated/<fixture>/<subpkg>/<file>
+    fixture=$(echo "$generated_file" | cut -d/ -f2)
+    subpkg=$(echo "$generated_file" | cut -d/ -f3)
+    # Everything after generated/<fixture>/<subpkg>/
+    subpkg_file=$(echo "$generated_file" | cut -d/ -f4-)
+
+    # Try to resolve as a yield subpackage first
+    pkg_type=""
+    if pkg_type=$(get_subpackage_type "$fixture" "$subpkg"); then
+      template_file=$(resolve_yield_template "$subpkg_file" "$pkg_type" 2> /dev/null) || true
+    fi
+  fi
+
+  # Fallback: root-level template resolution (original logic)
+  if [[ -z "$template_file" ]]; then
+    # Extract relative path (e.g., generated/base/package.json -> package.json)
+    rel_path=${generated_file#*/*/}
+
+    if [[ -f "template/${rel_path}.jinja" ]]; then
+      template_file="template/${rel_path}.jinja"
+    elif [[ -f "template/${rel_path}" ]] && [[ ! -L "template/${rel_path}" ]]; then
+      template_file="template/${rel_path}"
+    elif [[ -L "template/${rel_path}" ]]; then
+      template_file=$(realpath -m --relative-to=. "template/${rel_path}")
+    fi
   fi
 
   if [[ -z "$template_file" ]]; then

@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+#
+# Sync lockfiles from generated/ to template/
+#
+# Copies bun.lock and regenerates Cargo.lock for both root-level fixtures
+# and monorepo subpackages (yield directory).
+#
+# Usage:
+#   scripts/sync-lockfiles [--bun-lock] [--cargo-lock] [base_ref]
+#
+# Options:
+#   --bun-lock:   Copy bun.lock files from generated/ to template/
+#   --cargo-lock: Regenerate Cargo.lock in template/ from Cargo.toml.jinja
+#   (no options = both)
+#
+# Arguments:
+#   base_ref: The base branch/ref to detect changed files (default: origin/master)
+
+set -euo pipefail
+
+YIELD_DIR="template/{% yield pkg from subpackages %}{{ pkg.name }}{% endyield %}"
+
+# Parse options
+do_bun=false
+do_cargo=false
+base_ref=""
+
+for arg in "$@"; do
+  case "$arg" in
+    --bun-lock) do_bun=true ;;
+    --cargo-lock) do_cargo=true ;;
+    *) base_ref="$arg" ;;
+  esac
+done
+
+# Default: both
+if [[ "$do_bun" == "false" && "$do_cargo" == "false" ]]; then
+  do_bun=true
+  do_cargo=true
+fi
+
+base_ref="${base_ref:-origin/master}"
+
+# Check if any bun.lock changed
+has_bun_lock_changes() {
+  git diff --name-only "$base_ref" HEAD -- 'generated/*/bun.lock' 'generated/*/*/bun.lock' | grep -q .
+}
+
+# Check if any Cargo.toml.jinja was modified by apply-renovate-patch
+has_cargo_toml_changes() {
+  git status --porcelain | grep -q 'Cargo.toml.*\.jinja'
+}
+
+sync_bun_lock() {
+  if ! has_bun_lock_changes; then
+    echo "No bun.lock changes detected"
+    return 0
+  fi
+
+  echo "Syncing bun.lock files..."
+
+  # Root-level: generated/node/bun.lock -> template/bun.lock
+  if [[ -f generated/node/bun.lock ]]; then
+    echo "  Copying generated/node/bun.lock -> template/bun.lock"
+    cp generated/node/bun.lock template/bun.lock
+  fi
+
+  # Monorepo subpackages: find node subpackages from fixture YAML and copy
+  for fixture_file in tests/fixtures/*.yml; do
+    local fixture
+    fixture=$(basename "$fixture_file" .yml)
+    local subpkgs
+    subpkgs=$(yq '.subpackages[]? | select(.type == "node") | .name' "$fixture_file" 2> /dev/null || true)
+    for subpkg in $subpkgs; do
+      local src="generated/${fixture}/${subpkg}/bun.lock"
+      local dest="${YIELD_DIR}/{% if pkg.type == 'node' %}bun.lock{% endif %}"
+      if [[ -f "$src" && -f "$dest" ]]; then
+        echo "  Copying $src -> yield directory"
+        cp "$src" "$dest"
+      fi
+    done
+  done
+}
+
+sync_cargo_lock() {
+  if ! has_cargo_toml_changes; then
+    echo "No Cargo.toml.jinja changes detected"
+    return 0
+  fi
+
+  echo "Regenerating Cargo.lock files..."
+
+  # Root-level: template/Cargo.toml.jinja -> template/Cargo.lock
+  if [[ -f template/Cargo.toml.jinja ]]; then
+    echo "  Regenerating template/Cargo.lock"
+    local project_name
+    project_name=$(yq '.project_name' tests/fixtures/rust.yml)
+    sed "s/{{ project_name }}/${project_name}/g" template/Cargo.toml.jinja > template/Cargo.toml
+    (cd template && cargo generate-lockfile)
+    rm template/Cargo.toml
+  fi
+
+  # Monorepo subpackages: find rust subpackages and regenerate their Cargo.lock
+  local yield_cargo="${YIELD_DIR}/{% if pkg.type == 'rust' %}Cargo.toml{% endif %}.jinja"
+  if [[ -f "$yield_cargo" ]]; then
+    for fixture_file in tests/fixtures/*.yml; do
+      local fixture
+      fixture=$(basename "$fixture_file" .yml)
+      local subpkgs
+      subpkgs=$(yq '.subpackages[]? | select(.type == "rust") | .name' "$fixture_file" 2> /dev/null || true)
+      for subpkg in $subpkgs; do
+        if [[ -d "generated/${fixture}/${subpkg}" ]]; then
+          local yield_lock="${YIELD_DIR}/{% if pkg.type == 'rust' %}Cargo.lock{% endif %}"
+          echo "  Regenerating yield directory Cargo.lock (from ${fixture}/${subpkg})"
+          sed "s/{{ pkg.name }}/${subpkg}/g" "$yield_cargo" > "${YIELD_DIR}/Cargo.toml"
+          (cd "$YIELD_DIR" && cargo generate-lockfile)
+          mv "${YIELD_DIR}/Cargo.lock" "$yield_lock"
+          rm "${YIELD_DIR}/Cargo.toml"
+          # Only need one rust subpackage to regenerate the template lockfile
+          return 0
+        fi
+      done
+    done
+  fi
+}
+
+if [[ "$do_bun" == "true" ]]; then
+  sync_bun_lock
+fi
+
+if [[ "$do_cargo" == "true" ]]; then
+  sync_cargo_lock
+fi
