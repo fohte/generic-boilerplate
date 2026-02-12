@@ -8,7 +8,6 @@ remotes:
 pre-commit:
   commands:
     ast-grep:
-      root: 'backend/'
       glob: '*.rs'
       run: ast-grep scan {staged_files}
     cargo-fmt:
