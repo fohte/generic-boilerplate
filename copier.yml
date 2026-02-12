@@ -107,12 +107,6 @@ auto_merge_release_pr:
   help: Automatically merge release-please PRs?
   when: '{{ use_release_please }}'
 
-use_coverage:
-  type: bool
-  default: false
-  help: Enable code coverage with cargo-llvm-cov and Codecov?
-  when: "{{ type == 'rust' }}"
-
 release_binary:
   type: bool
   default: false
@@ -136,3 +130,10 @@ subpackages:
     Subpackage definitions for monorepo.
     Example: [{name: frontend, type: node}, {name: backend, type: rust}]
   when: "{{ type == 'base' }}"
+
+# Placed after subpackages so the when condition can reference it in interactive mode
+use_coverage:
+  type: bool
+  default: false
+  help: Enable code coverage with cargo-llvm-cov and Codecov?
+  when: "{{ type == 'rust' or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) }}"

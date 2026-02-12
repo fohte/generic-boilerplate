@@ -235,10 +235,31 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: {{ pkg.name }}
+{%- if use_coverage %}
+
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+
+      - name: Install llvm-tools-preview
+        run: rustup component add llvm-tools-preview
+
+      - name: Run tests with coverage
+        working-directory: {{ pkg.name }}
+        run: cargo llvm-cov --lcov --output-path lcov.info
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: {% raw %}${{ secrets.CODECOV_TOKEN }}{% endraw %}
+          files: {{ pkg.name }}/lcov.info
+          flags: {{ pkg.name }}
+          fail_ci_if_error: false
+{%- else %}
 
       - name: Run tests
         working-directory: {{ pkg.name }}
         run: cargo test
+{%- endif %}
 {%- endif %}
 {%- endfor %}
 {%- endif %}

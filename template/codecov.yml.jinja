@@ -12,3 +12,20 @@ coverage:
     patch:
       default:
         informational: true
+{%- if subpackages %}
+
+flag_management:
+  default_rules:
+    carryforward: true
+    statuses:
+      - type: project
+        informational: true
+      - type: patch
+        informational: true
+  individual_flags:
+{%- for pkg in subpackages if pkg.type == 'rust' %}
+    - name: {{ pkg.name }}
+      paths:
+        - {{ pkg.name }}/
+{%- endfor %}
+{%- endif %}
