@@ -65,8 +65,8 @@ _exclude:
   - "{% if type != 'rust' %}/Cargo.lock{% endif %}"
   - "{% if type != 'rust' %}/rust-toolchain.toml{% endif %}"
   - "{% if type != 'rust' %}/clippy.toml{% endif %}"
-  - "{% if type != 'rust' %}/sgconfig.yml{% endif %}"
-  - "{% if type != 'rust' %}/.sg{% endif %}"
+  - "{% if type != 'rust' and not (subpackages | selectattr('type', 'equalto', 'rust') | list) %}/sgconfig.yml{% endif %}"
+  - "{% if type != 'rust' and not (subpackages | selectattr('type', 'equalto', 'rust') | list) %}/.sg{% endif %}"
   - "{% if type != 'rust' %}/src/main.rs{% endif %}"
   # Exclude Node.js specific src files when type is not 'node'
   - "{% if type != 'node' %}/src/index.ts{% endif %}"
