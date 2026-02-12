@@ -111,8 +111,10 @@ jobs:
               subpkgs=$(yq '.subpackages[]? | select(.type == "rust") | .name' "$fixture_file" 2>/dev/null || true)
               for subpkg in $subpkgs; do
                 if [[ -d "generated/${fixture}/${subpkg}" ]]; then
+                  yield_lock="${YIELD_DIR}/{% if pkg.type == 'rust' %}Cargo.lock{% endif %}"
                   sed "s/{{ pkg.name }}/${subpkg}/g" "$yield_cargo" > "${YIELD_DIR}/Cargo.toml"
                   (cd "$YIELD_DIR" && cargo generate-lockfile)
+                  mv "${YIELD_DIR}/Cargo.lock" "$yield_lock"
                   rm "${YIELD_DIR}/Cargo.toml"
                   break 2
                 fi
