@@ -2,16 +2,17 @@
 #
 # Sync lockfiles from generated/ to template/
 #
-# Copies bun.lock and regenerates Cargo.lock for both root-level fixtures
-# and monorepo subpackages (yield directory).
+# Copies bun.lock/pnpm-lock.yaml and regenerates Cargo.lock for both root-level
+# fixtures and monorepo subpackages (yield directory).
 #
 # Usage:
-#   scripts/sync-lockfiles [--bun-lock] [--cargo-lock] [base_ref]
+#   scripts/sync-lockfiles [--bun-lock] [--pnpm-lock] [--cargo-lock] [base_ref]
 #
 # Options:
 #   --bun-lock:   Copy bun.lock files from generated/ to template/
+#   --pnpm-lock:  Copy pnpm-lock.yaml files from generated/ to template/
 #   --cargo-lock: Regenerate Cargo.lock in template/ from Cargo.toml.jinja
-#   (no options = both)
+#   (no options = all)
 #
 # Arguments:
 #   base_ref: The base branch/ref to detect changed files (default: origin/master)
@@ -22,20 +23,23 @@ YIELD_DIR="template/{% yield pkg from subpackages %}{{ pkg.name }}{% endyield %}
 
 # Parse options
 do_bun=false
+do_pnpm=false
 do_cargo=false
 base_ref=""
 
 for arg in "$@"; do
   case "$arg" in
     --bun-lock) do_bun=true ;;
+    --pnpm-lock) do_pnpm=true ;;
     --cargo-lock) do_cargo=true ;;
     *) base_ref="$arg" ;;
   esac
 done
 
-# Default: both
-if [[ "$do_bun" == "false" && "$do_cargo" == "false" ]]; then
+# Default: all
+if [[ "$do_bun" == "false" && "$do_pnpm" == "false" && "$do_cargo" == "false" ]]; then
   do_bun=true
+  do_pnpm=true
   do_cargo=true
 fi
 
@@ -44,6 +48,11 @@ base_ref="${base_ref:-origin/master}"
 # Check if any bun.lock changed
 has_bun_lock_changes() {
   git diff --name-only "$base_ref" HEAD -- 'generated/*/bun.lock' 'generated/*/*/bun.lock' | grep -q .
+}
+
+# Check if any pnpm-lock.yaml changed
+has_pnpm_lock_changes() {
+  git diff --name-only "$base_ref" HEAD -- 'generated/*/pnpm-lock.yaml' 'generated/*/*/pnpm-lock.yaml' | grep -q .
 }
 
 # Check if any Cargo.toml.jinja was modified by apply-renovate-patch
@@ -69,11 +78,52 @@ sync_bun_lock() {
   for fixture_file in tests/fixtures/*.yml; do
     local fixture
     fixture=$(basename "$fixture_file" .yml)
+    local pkg_mgr
+    pkg_mgr=$(yq '.node_package_manager // "bun"' "$fixture_file" 2> /dev/null || true)
+    if [[ "$pkg_mgr" != "bun" ]]; then
+      continue
+    fi
     local subpkgs
     subpkgs=$(yq '.subpackages[]? | select(.type == "node") | .name' "$fixture_file" 2> /dev/null || true)
     for subpkg in $subpkgs; do
       local src="generated/${fixture}/${subpkg}/bun.lock"
-      local dest="${YIELD_DIR}/{% if pkg.type == 'node' %}bun.lock{% endif %}"
+      local dest="${YIELD_DIR}/{% if pkg.type == 'node' and node_package_manager == 'bun' %}bun.lock{% endif %}"
+      if [[ -f "$src" && -f "$dest" ]]; then
+        echo "  Copying $src -> yield directory"
+        cp "$src" "$dest"
+      fi
+    done
+  done
+}
+
+sync_pnpm_lock() {
+  if ! has_pnpm_lock_changes; then
+    echo "No pnpm-lock.yaml changes detected"
+    return 0
+  fi
+
+  echo "Syncing pnpm-lock.yaml files..."
+
+  # Root-level: generated/node-pnpm/pnpm-lock.yaml -> template/pnpm-lock.yaml
+  if [[ -f generated/node-pnpm/pnpm-lock.yaml ]]; then
+    echo "  Copying generated/node-pnpm/pnpm-lock.yaml -> template/pnpm-lock.yaml"
+    cp generated/node-pnpm/pnpm-lock.yaml template/pnpm-lock.yaml
+  fi
+
+  # Monorepo subpackages: find node subpackages from fixture YAML and copy
+  for fixture_file in tests/fixtures/*.yml; do
+    local fixture
+    fixture=$(basename "$fixture_file" .yml)
+    local pkg_mgr
+    pkg_mgr=$(yq '.node_package_manager // ""' "$fixture_file" 2> /dev/null || true)
+    if [[ "$pkg_mgr" != "pnpm" ]]; then
+      continue
+    fi
+    local subpkgs
+    subpkgs=$(yq '.subpackages[]? | select(.type == "node") | .name' "$fixture_file" 2> /dev/null || true)
+    for subpkg in $subpkgs; do
+      local src="generated/${fixture}/${subpkg}/pnpm-lock.yaml"
+      local dest="${YIELD_DIR}/{% if pkg.type == 'node' and node_package_manager == 'pnpm' %}pnpm-lock.yaml{% endif %}"
       if [[ -f "$src" && -f "$dest" ]]; then
         echo "  Copying $src -> yield directory"
         cp "$src" "$dest"
@@ -126,6 +176,10 @@ sync_cargo_lock() {
 
 if [[ "$do_bun" == "true" ]]; then
   sync_bun_lock
+fi
+
+if [[ "$do_pnpm" == "true" ]]; then
+  sync_pnpm_lock
 fi
 
 if [[ "$do_cargo" == "true" ]]; then

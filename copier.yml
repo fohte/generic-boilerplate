@@ -25,13 +25,15 @@ description:
 
 # README.md is expected to be customized immediately after repository creation,
 # so conflicts are almost guaranteed on copier update. Skip to avoid this.
-# bun.lock is included in template to avoid conflicts on copier update
+# Lock files are included in template to avoid conflicts on copier update
 # (users may add packages, causing lockfile changes).
 _skip_if_exists:
   - README.md
   - bun.lock
+  - pnpm-lock.yaml
   - Cargo.lock
   - '*/bun.lock'
+  - '*/pnpm-lock.yaml'
   - '*/Cargo.lock'
 
 # Exclude files that are specific to this template repository
@@ -57,7 +59,8 @@ _exclude:
   - "{% if type != 'node' %}/tsconfig.json{% endif %}"
   - "{% if type != 'node' %}/eslint.config.js{% endif %}"
   - "{% if type != 'node' %}/vitest.config.ts{% endif %}"
-  - "{% if type != 'node' %}/bun.lock{% endif %}"
+  - "{% if type != 'node' or node_package_manager != 'bun' %}/bun.lock{% endif %}"
+  - "{% if type != 'node' or node_package_manager != 'pnpm' %}/pnpm-lock.yaml{% endif %}"
   # Exclude CLAUDE.md when no Rust code (only contains Rust test rules)
   - "{% if type != 'rust' and not (subpackages | selectattr('type', 'equalto', 'rust') | list) %}/CLAUDE.md{% endif %}"
   # Exclude Rust specific files when type is not 'rust'
@@ -132,6 +135,15 @@ subpackages:
   when: "{{ type == 'base' }}"
 
 # Placed after subpackages so the when condition can reference it in interactive mode
+node_package_manager:
+  type: str
+  choices:
+    - bun
+    - pnpm
+  default: bun
+  help: Node.js package manager to use
+  when: "{{ type == 'node' or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
+
 use_coverage:
   type: bool
   default: false

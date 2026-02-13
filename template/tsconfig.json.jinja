@@ -1,0 +1,13 @@
+{
+{%- if node_package_manager == 'pnpm' %}
+  "extends": ["@tsconfig/node-lts/tsconfig.json", "@tsconfig/strictest/tsconfig.json"],
+{%- else %}
+  "extends": "@tsconfig/bun/tsconfig.json",
+{%- endif %}
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
+}

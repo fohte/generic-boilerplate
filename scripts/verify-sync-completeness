@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-FIXTURES=(base base-public base-release monorepo node rust rust-release)
+FIXTURES=(base base-public base-release monorepo node node-pnpm rust rust-release)
 
 # Use copier directly if available, otherwise use pipx run
 if command -v copier > /dev/null 2>&1; then

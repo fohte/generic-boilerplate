@@ -46,6 +46,11 @@ jobs:
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
 
+      - name: Sync pnpm-lock.yaml
+        run: scripts/sync-lockfiles --pnpm-lock "origin/$BASE_REF"
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+
       - name: Setup Rust
         if: steps.sync.outputs.success == 'true'
         uses: dtolnay/rust-toolchain@stable
