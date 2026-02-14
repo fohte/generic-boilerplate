@@ -9,7 +9,8 @@
 # In bulk mode (no arguments), each generated/<fixture> directory is rebuilt
 # from a clean temporary copy and synced via rsync. Files listed in copier.yml
 # _skip_if_exists (e.g. lockfiles) are preserved using rsync --exclude, and
-# files no longer produced by the template are removed via --delete.
+# files no longer produced by the template are removed via --delete. For new
+# fixtures, excluded files are copied from the temp dir if missing.
 # In single-fixture mode, the output directory is used as-is (the caller is
 # responsible for cleanup).
 
@@ -25,14 +26,41 @@ else
   COPIER_CMD="pipx run copier"
 fi
 
-# Read _skip_if_exists patterns from copier.yml as rsync --exclude args.
+# Read _skip_if_exists patterns from copier.yml.
 # This is the single source of truth for files to preserve during regeneration.
+read_skip_if_exists() {
+  yq '._skip_if_exists[]' "$REPO_ROOT/copier.yml"
+}
+
+# Convert _skip_if_exists patterns to rsync --exclude args.
 build_rsync_excludes() {
   local -a excludes=()
   while IFS= read -r pattern; do
     excludes+=(--exclude "$pattern")
-  done < <(yq '._skip_if_exists[]' "$REPO_ROOT/copier.yml")
+  done < <(read_skip_if_exists)
   printf '%s\n' "${excludes[@]}"
+}
+
+# Copy _skip_if_exists files from source to destination if they don't exist
+# in the destination yet. This complements rsync --exclude which prevents
+# both transfer and deletion — without this, new fixtures would be missing
+# their initial lockfiles and README.md.
+copy_missing_skip_files() {
+  local src=$1
+  local dst=$2
+
+  while IFS= read -r pattern; do
+    # Use nullglob-safe expansion of the pattern against the source tree
+    for src_file in "$src"/$pattern; do
+      [ -f "$src_file" ] || continue
+      local rel="${src_file#"$src"/}"
+      local dst_file="$dst/$rel"
+      if [ ! -f "$dst_file" ]; then
+        mkdir -p "$(dirname "$dst_file")"
+        cp "$src_file" "$dst_file"
+      fi
+    done
+  done < <(read_skip_if_exists)
 }
 
 # Generate a single fixture snapshot.
@@ -98,6 +126,7 @@ elif [[ -z "$fixture" && -z "$output_dir" ]]; then
     generate_fixture "$fixture" "$tmpdir"
     mkdir -p "generated/$fixture"
     rsync -a --delete "${rsync_excludes[@]}" "$tmpdir/" "generated/$fixture/"
+    copy_missing_skip_files "$tmpdir" "generated/$fixture"
     rm -rf "$tmpdir"
   done
 else
