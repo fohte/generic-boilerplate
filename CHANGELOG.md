@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6](https://github.com/fohte/generic-boilerplate/compare/v0.3.5...v0.3.6) (2026-02-14)
+
+
+### Features
+
+* **template:** support pnpm as an alternative Node.js package manager ([#166](https://github.com/fohte/generic-boilerplate/issues/166)) ([4c8e2b3](https://github.com/fohte/generic-boilerplate/commit/4c8e2b3c8625e36e03043ae6aaaffca8a52e4659))
+
 ## [0.3.5](https://github.com/fohte/generic-boilerplate/compare/v0.3.4...v0.3.5) (2026-02-12)
 
 
