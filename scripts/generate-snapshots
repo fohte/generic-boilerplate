@@ -8,7 +8,7 @@
 #
 # In bulk mode (no arguments), each generated/<fixture> directory is rebuilt
 # from a clean temporary copy and synced via rsync. Files listed in copier.yml
-# _skip_if_exists (e.g. lockfiles) are preserved using rsync --exclude, and
+# _skip_if_exists (e.g. README.md) are preserved using rsync --exclude, and
 # files no longer produced by the template are removed via --delete. For new
 # fixtures, excluded files are copied from the temp dir if missing.
 # In single-fixture mode, the output directory is used as-is (the caller is
@@ -44,7 +44,7 @@ build_rsync_excludes() {
 # Copy _skip_if_exists files from source to destination if they don't exist
 # in the destination yet. This complements rsync --exclude which prevents
 # both transfer and deletion — without this, new fixtures would be missing
-# their initial lockfiles and README.md.
+# their initial README.md.
 copy_missing_skip_files() {
   local src=$1
   local dst=$2
@@ -121,7 +121,7 @@ elif [[ -z "$fixture" && -z "$output_dir" ]]; then
 
     # Generate into a clean temporary directory, then sync to the real
     # output. rsync --delete removes stale files while --exclude preserves
-    # files matching _skip_if_exists (lockfiles, README.md, etc.).
+    # files matching _skip_if_exists (README.md, etc.).
     tmpdir=$(mktemp -d)
     generate_fixture "$fixture" "$tmpdir"
     mkdir -p "generated/$fixture"
