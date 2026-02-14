@@ -63,14 +63,7 @@ jobs:
           fi
 
       - name: Regenerate all fixtures
-        run: |
-          fixtures='${{ needs.list-fixtures.outputs.fixtures }}'
-          for fixture in $(echo "$fixtures" | jq -r '.[]'); do
-            rm -rf "generated/$fixture"
-            pipx run copier copy --trust --data-file "tests/fixtures/$fixture.yml" . "generated/$fixture"
-            # Remove answers file as it contains commit hash that changes on every run
-            rm -f "generated/$fixture/.copier-answers.yml"
-          done
+        run: scripts/generate-snapshots
 
       - name: Check Renovate changes preserved
         if: steps.save-diff.outputs.has_diff == 'true'
