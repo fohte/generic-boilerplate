@@ -6,11 +6,11 @@
 #   scripts/generate-snapshots                                  # Regenerate all fixtures into generated/
 #   scripts/generate-snapshots --fixture <name> --output <dir>  # Generate a single fixture to a custom directory
 #
-# In bulk mode (no arguments), each generated/<fixture> directory is removed and
-# recreated from scratch, but lockfiles (matching copier.yml _skip_if_exists
-# patterns) are preserved across regeneration to avoid reverting Renovate updates.
-# In single-fixture mode, the output directory is used as-is (the caller is
-# responsible for cleanup).
+# In bulk mode (no arguments), each generated/<fixture> directory is overwritten
+# in place. Files listed in copier.yml _skip_if_exists (e.g. lockfiles) are
+# automatically preserved by copier, and files no longer produced by the
+# template are removed. In single-fixture mode, the output directory is used
+# as-is (the caller is responsible for cleanup).
 
 set -euo pipefail
 
@@ -21,55 +21,6 @@ else
   COPIER_CMD="pipx run copier"
 fi
 
-# Lockfile patterns to preserve during bulk regeneration.
-# Keep in sync with _skip_if_exists in copier.yml.
-LOCKFILE_PATTERNS=(
-  "bun.lock"
-  "Cargo.lock"
-  "*/bun.lock"
-  "*/Cargo.lock"
-)
-
-# Save lockfiles from the output directory to a temporary directory.
-# Arguments:
-#   $1 - output directory to save lockfiles from
-#   $2 - temporary directory to save lockfiles to
-save_lockfiles() {
-  local output_dir=$1
-  local tmp_dir=$2
-
-  for pattern in "${LOCKFILE_PATTERNS[@]}"; do
-    # Use find for glob expansion within the output directory
-    while IFS= read -r -d '' file; do
-      local rel_path="${file#"$output_dir"/}"
-      local dest="$tmp_dir/$rel_path"
-      mkdir -p "$(dirname "$dest")"
-      cp "$file" "$dest"
-    done < <(find "$output_dir" -path "$output_dir/$pattern" -print0 2> /dev/null)
-  done
-}
-
-# Restore lockfiles from the temporary directory to the output directory.
-# Arguments:
-#   $1 - temporary directory containing saved lockfiles
-#   $2 - output directory to restore lockfiles to
-restore_lockfiles() {
-  local tmp_dir=$1
-  local output_dir=$2
-
-  if [[ ! -d "$tmp_dir" ]]; then
-    return
-  fi
-
-  # Find all saved lockfiles and restore them
-  while IFS= read -r -d '' file; do
-    local rel_path="${file#"$tmp_dir"/}"
-    local dest="$output_dir/$rel_path"
-    mkdir -p "$(dirname "$dest")"
-    cp "$file" "$dest"
-  done < <(find "$tmp_dir" -type f -print0 2> /dev/null)
-}
-
 # Generate a single fixture snapshot.
 # All paths are relative to the current working directory.
 # Arguments:
@@ -79,10 +30,38 @@ generate_fixture() {
   local fixture=$1
   local output_dir=$2
 
-  $COPIER_CMD copy --trust --data-file "tests/fixtures/$fixture.yml" . "$output_dir"
+  $COPIER_CMD copy --trust --overwrite --data-file "tests/fixtures/$fixture.yml" . "$output_dir"
 
   # Remove answers file as it contains a commit hash that changes on every run
   rm -f "$output_dir/.copier-answers.yml"
+}
+
+# Remove files that the template no longer produces (stale files).
+# Generates into a clean temporary directory and deletes any file in
+# output_dir that does not appear in the clean output.
+# Arguments:
+#   $1 - fixture name
+#   $2 - output directory
+remove_stale_files() {
+  local fixture=$1
+  local output_dir=$2
+
+  local tmpdir
+  tmpdir=$(mktemp -d)
+  trap 'rm -rf "$tmpdir"' RETURN
+
+  $COPIER_CMD copy --trust --overwrite --data-file "tests/fixtures/$fixture.yml" . "$tmpdir"
+  rm -f "$tmpdir/.copier-answers.yml"
+
+  while IFS= read -r -d '' file; do
+    local rel_path="${file#"$output_dir"/}"
+    if [[ ! -e "$tmpdir/$rel_path" ]]; then
+      rm -f "$file"
+    fi
+  done < <(find "$output_dir" -type f -print0)
+
+  # Clean up empty directories left behind
+  find "$output_dir" -type d -empty -delete 2> /dev/null || true
 }
 
 # Parse arguments
@@ -124,17 +103,8 @@ elif [[ -z "$fixture" && -z "$output_dir" ]]; then
     fixture=$(basename "$data_file" .yml)
     echo "Generating: $fixture"
 
-    # Save lockfiles before removing the directory so that copier's
-    # _skip_if_exists can preserve them (the files must exist for the
-    # skip logic to trigger).
-    lockfile_tmp=$(mktemp -d)
-    save_lockfiles "generated/$fixture" "$lockfile_tmp"
-
-    rm -rf "generated/$fixture"
     generate_fixture "$fixture" "generated/$fixture"
-
-    restore_lockfiles "$lockfile_tmp" "generated/$fixture"
-    rm -rf "$lockfile_tmp"
+    remove_stale_files "$fixture" "generated/$fixture"
   done
 else
   echo "Error: --fixture and --output must be specified together" >&2
