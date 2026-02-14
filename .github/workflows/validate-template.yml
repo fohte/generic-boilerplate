@@ -209,7 +209,7 @@ jobs:
         run: cargo test
 
   # this job is used for branch protection rule
-  check-status:
+  validate-status:
     runs-on: ubuntu-latest
     needs:
       - list-fixtures
