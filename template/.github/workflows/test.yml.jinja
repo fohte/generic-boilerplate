@@ -107,7 +107,9 @@ jobs:
 {%- for pkg in node_pkgs %}
 
       - name: Install pnpm dependencies ({{ pkg.name }})
-        run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
+        run: cd "$PKG_NAME" && pnpm install --frozen-lockfile
+        env:
+          PKG_NAME: {{ pkg.name }}
 {%- endfor %}
 {%- else %}
 
@@ -275,7 +277,10 @@ jobs:
           key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
 
-      - run: cd {{ pkg.name }} && pnpm install --frozen-lockfile
+      - name: Install pnpm dependencies
+        run: cd "$PKG_NAME" && pnpm install --frozen-lockfile
+        env:
+          PKG_NAME: {{ pkg.name }}
 
       - name: Run tests
         working-directory: {{ pkg.name }}
