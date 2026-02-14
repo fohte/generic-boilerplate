@@ -1,0 +1,21 @@
+{
+{%- if node_package_manager == 'pnpm' %}
+  "extends": [
+    "@tsconfig/node-lts/tsconfig.json",
+    "@tsconfig/strictest/tsconfig.json"
+  ],
+  "exclude": ["**/*.cjs"],
+  "compilerOptions": {
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+{%- else %}
+  "extends": "@tsconfig/bun/tsconfig.json",
+  "compilerOptions": {
+{%- endif %}
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
+}

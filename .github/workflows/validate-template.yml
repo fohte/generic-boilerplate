@@ -35,6 +35,7 @@ jobs:
     needs: list-fixtures
     outputs:
       node_changed: ${{ steps.check-node-changes.outputs.any_changed }}
+      node_pnpm_changed: ${{ steps.check-node-pnpm-changes.outputs.any_changed }}
       rust_changed: ${{ steps.check-rust-changes.outputs.any_changed }}
 
     steps:
@@ -74,6 +75,13 @@ jobs:
         with:
           base_sha: master
           files: generated/node/**
+
+      - name: Check if node-pnpm template changed
+        uses: tj-actions/changed-files@v47
+        id: check-node-pnpm-changes
+        with:
+          base_sha: master
+          files: generated/node-pnpm/**
 
       - name: Check if rust template changed
         uses: tj-actions/changed-files@v47
@@ -129,6 +137,11 @@ jobs:
               expected=$(sed -n 's/.*"name": "\(.*\)".*/\1/p' "$pkg_json" | head -1)
               sed -i "s/\"name\": \"node\"/\"name\": \"${expected}\"/" "$lock"
             fi
+            pnpm_lock="$dir/pnpm-lock.yaml"
+            if [ -f "$pnpm_lock" ]; then
+              expected=$(sed -n 's/.*"name": "\(.*\)".*/\1/p' "$pkg_json" | head -1)
+              sed -i "s/name: node-pnpm$/name: ${expected}/" "$pnpm_lock"
+            fi
           done < <(find . -name package.json -print0)
 
       - name: Initialize git repository
@@ -157,33 +170,70 @@ jobs:
   validate-node:
     runs-on: ubuntu-latest
     needs: regenerate-and-commit
-    if: needs.regenerate-and-commit.outputs.node_changed == 'true'
+
+    strategy:
+      matrix:
+        include:
+          - fixture: node
+            package_manager: bun
+            changed_output: node_changed
+          - fixture: node-pnpm
+            package_manager: pnpm
+            changed_output: node_pnpm_changed
+
+    if: >-
+      needs.regenerate-and-commit.outputs.node_changed == 'true' ||
+      needs.regenerate-and-commit.outputs.node_pnpm_changed == 'true'
 
     steps:
       - uses: actions/checkout@v6
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true'
         with:
           ref: ${{ github.ref_name }}
 
       - uses: jdx/mise-action@v3
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true'
         with:
-          working_directory: generated/node
+          working_directory: generated/${{ matrix.fixture }}
 
       - name: Cache bun dependencies
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'bun'
         uses: actions/cache@v5
         with:
           path: |
             ~/.bun/install/cache
             ~/.bun/install/global
-            generated/node/node_modules
-          key: ${{ runner.os }}-bun-validate-node-${{ hashFiles('generated/node/bun.lock') }}
-          restore-keys: ${{ runner.os }}-bun-validate-node-
+            generated/${{ matrix.fixture }}/node_modules
+          key: ${{ runner.os }}-bun-validate-${{ matrix.fixture }}-${{ hashFiles(format('generated/{0}/bun.lock', matrix.fixture)) }}
+          restore-keys: ${{ runner.os }}-bun-validate-${{ matrix.fixture }}-
+
+      - name: Get pnpm store directory
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'pnpm'
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'pnpm'
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ steps.pnpm-store.outputs.path }}
+            generated/${{ matrix.fixture }}/node_modules
+          key: ${{ runner.os }}-pnpm-validate-${{ matrix.fixture }}-${{ hashFiles(format('generated/{0}/pnpm-lock.yaml', matrix.fixture)) }}
+          restore-keys: ${{ runner.os }}-pnpm-validate-${{ matrix.fixture }}-
 
       - run: bun install --frozen-lockfile
-        working-directory: generated/node
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'bun'
+        working-directory: generated/${{ matrix.fixture }}
+
+      - run: pnpm install --frozen-lockfile
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'pnpm'
+        working-directory: generated/${{ matrix.fixture }}
 
       - name: Run tests
-        working-directory: generated/node
-        run: bun run test
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true'
+        working-directory: generated/${{ matrix.fixture }}
+        run: ${{ matrix.package_manager }} run test
 
   validate-rust:
     runs-on: ubuntu-latest

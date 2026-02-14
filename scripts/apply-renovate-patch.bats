@@ -1038,7 +1038,7 @@ tokio = "1.1.0"
 EOF
 }
 
-@test "excludes monorepo subpackage bun.lock and Cargo.lock from processing" {
+@test "excludes monorepo subpackage bun.lock, pnpm-lock.yaml, and Cargo.lock from processing" {
   setup_monorepo
 
   local yield_dir="template/{% yield pkg from subpackages %}{{ pkg.name }}{% endyield %}"
@@ -1065,6 +1065,10 @@ EOF
 lockfile content v1
 EOF
 
+  cat > generated/monorepo/frontend/pnpm-lock.yaml << 'EOF'
+lockfileVersion: '9.0'
+EOF
+
   cat > generated/monorepo/backend/Cargo.lock << 'EOF'
 [[package]]
 name = "tokio"
@@ -1075,6 +1079,10 @@ EOF
 
   cat > generated/monorepo/frontend/bun.lock << 'EOF'
 lockfile content v2
+EOF
+
+  cat > generated/monorepo/frontend/pnpm-lock.yaml << 'EOF'
+lockfileVersion: '9.1'
 EOF
 
   cat > generated/monorepo/backend/Cargo.lock << 'EOF'
@@ -1089,8 +1097,9 @@ EOF
   run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
   [ "$status" -eq 0 ]
 
-  # bun.lock and Cargo.lock should be excluded
+  # bun.lock, pnpm-lock.yaml, and Cargo.lock should be excluded
   [[ "$output" != *"bun.lock"* ]]
+  [[ "$output" != *"pnpm-lock.yaml"* ]]
   [[ "$output" != *"Cargo.lock"* ]]
   [[ "$output" == *"No files changed"* ]]
 }
