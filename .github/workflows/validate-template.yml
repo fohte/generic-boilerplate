@@ -219,18 +219,5 @@ jobs:
       - validate-rust
     if: always()
     steps:
-      - name: Check job results
-        run: |
-          results=(
-            "${{ needs.list-fixtures.result }}"
-            "${{ needs.regenerate-and-commit.result }}"
-            "${{ needs.validate.result }}"
-            "${{ needs.validate-node.result }}"
-            "${{ needs.validate-rust.result }}"
-          )
-          for result in "${results[@]}"; do
-            if [[ "$result" != "success" && "$result" != "skipped" ]]; then
-              echo "Job failed with result: $result"
-              exit 1
-            fi
-          done
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
