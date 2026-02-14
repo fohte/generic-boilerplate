@@ -3,5 +3,7 @@ type: node
 project_name: node-pnpm
 description: Test Node.js project with pnpm
 is_public: false
-use_release_please: false
+use_release_please: true
+release_type: node
+auto_merge_release_pr: false
 node_package_manager: pnpm
