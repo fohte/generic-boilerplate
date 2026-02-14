@@ -128,7 +128,9 @@ jobs:
 {%- for pkg in node_pkgs %}
 
       - name: Install bun dependencies ({{ pkg.name }})
-        run: cd "{{ pkg.name }}" && bun install --frozen-lockfile
+        run: cd "$PKG_NAME" && bun install --frozen-lockfile
+        env:
+          PKG_NAME: {{ pkg.name }}
 {%- endfor %}
 {%- endif %}
 {%- endif %}
@@ -145,7 +147,9 @@ jobs:
 {%- for pkg in rust_pkgs %}
 
       - name: Fetch cargo dependencies ({{ pkg.name }})
-        run: cd "{{ pkg.name }}" && cargo fetch
+        run: cd "$PKG_NAME" && cargo fetch
+        env:
+          PKG_NAME: {{ pkg.name }}
 {%- endfor %}
 {%- endif %}
 {%- endif %}
@@ -297,7 +301,10 @@ jobs:
           key: {% raw %}${{ runner.os }}-bun-${{ hashFiles({% endraw %}'{{ pkg.name }}/bun.lock'{% raw %}) }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-bun-{% endraw %}
 
-      - run: cd {{ pkg.name }} && bun install --frozen-lockfile
+      - name: Install bun dependencies
+        run: cd "$PKG_NAME" && bun install --frozen-lockfile
+        env:
+          PKG_NAME: {{ pkg.name }}
 
       - name: Run tests
         working-directory: {{ pkg.name }}

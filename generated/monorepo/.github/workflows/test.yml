@@ -55,7 +55,9 @@ jobs:
           restore-keys: ${{ runner.os }}-bun-
 
       - name: Install bun dependencies (frontend)
-        run: cd "frontend" && bun install --frozen-lockfile
+        run: cd "$PKG_NAME" && bun install --frozen-lockfile
+        env:
+          PKG_NAME: frontend
 
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
@@ -64,7 +66,9 @@ jobs:
             backend
 
       - name: Fetch cargo dependencies (backend)
-        run: cd "backend" && cargo fetch
+        run: cd "$PKG_NAME" && cargo fetch
+        env:
+          PKG_NAME: backend
 
       - name: Run lefthook
         id: lefthook
@@ -109,7 +113,10 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('frontend/bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-
 
-      - run: cd frontend && bun install --frozen-lockfile
+      - name: Install bun dependencies
+        run: cd "$PKG_NAME" && bun install --frozen-lockfile
+        env:
+          PKG_NAME: frontend
 
       - name: Run tests
         working-directory: frontend
