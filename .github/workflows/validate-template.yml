@@ -209,7 +209,7 @@ jobs:
         run: cargo test
 
   # this job is used for branch protection rule
-  check-status:
+  validate-status:
     runs-on: ubuntu-latest
     needs:
       - list-fixtures
@@ -217,6 +217,7 @@ jobs:
       - validate
       - validate-node
       - validate-rust
-    if: failure()
+    if: always()
     steps:
-      - run: exit 1
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
