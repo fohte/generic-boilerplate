@@ -87,11 +87,3 @@ jobs:
         run: |
           echo "::error::Some files require manual update. Check the logs above for details."
           exit 1
-
-  # this job is used for branch protection rule
-  check-status:
-    runs-on: ubuntu-latest
-    needs: sync
-    if: failure()
-    steps:
-      - run: exit 1
