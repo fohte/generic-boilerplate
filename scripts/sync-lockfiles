@@ -46,6 +46,11 @@ has_bun_lock_changes() {
   git diff --name-only "$base_ref" HEAD -- 'generated/*/bun.lock' 'generated/*/*/bun.lock' | grep -q .
 }
 
+# Check if any Cargo.lock changed in generated/
+has_cargo_lock_changes() {
+  git diff --name-only "$base_ref" HEAD -- 'generated/*/Cargo.lock' 'generated/*/*/Cargo.lock' | grep -q .
+}
+
 # Check if any Cargo.toml.jinja was modified by apply-renovate-patch
 has_cargo_toml_changes() {
   git status --porcelain | grep -q 'Cargo.toml.*\.jinja'
@@ -83,8 +88,8 @@ sync_bun_lock() {
 }
 
 sync_cargo_lock() {
-  if ! has_cargo_toml_changes; then
-    echo "No Cargo.toml.jinja changes detected"
+  if ! has_cargo_toml_changes && ! has_cargo_lock_changes; then
+    echo "No Cargo.toml.jinja or Cargo.lock changes detected"
     return 0
   fi
 
