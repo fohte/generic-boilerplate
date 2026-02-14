@@ -207,12 +207,17 @@ jobs:
           key: ${{ runner.os }}-bun-validate-${{ matrix.fixture }}-${{ hashFiles(format('generated/{0}/bun.lock', matrix.fixture)) }}
           restore-keys: ${{ runner.os }}-bun-validate-${{ matrix.fixture }}-
 
+      - name: Get pnpm store directory
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'pnpm'
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
       - name: Cache pnpm store
         if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'pnpm'
         uses: actions/cache@v5
         with:
           path: |
-            ~/.local/share/pnpm/store/v3
+            ${{ steps.pnpm-store.outputs.path }}
             generated/${{ matrix.fixture }}/node_modules
           key: ${{ runner.os }}-pnpm-validate-${{ matrix.fixture }}-${{ hashFiles(format('generated/{0}/pnpm-lock.yaml', matrix.fixture)) }}
           restore-keys: ${{ runner.os }}-pnpm-validate-${{ matrix.fixture }}-

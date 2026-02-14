@@ -59,11 +59,15 @@ jobs:
 {%- if type == 'node' %}
 {%- if node_package_manager == 'pnpm' %}
 
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
       - name: Cache pnpm store
         uses: actions/cache@v5
         with:
           path: |
-            ~/.local/share/pnpm/store/v3
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
             node_modules
           key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
@@ -93,11 +97,15 @@ jobs:
 {%- if has_node %}
 {%- if node_package_manager == 'pnpm' %}
 
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
       - name: Cache pnpm store
         uses: actions/cache@v5
         with:
           path: |
-            ~/.local/share/pnpm/store/v3
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
 {%- for pkg in node_pkgs %}
             {{ pkg.name }}/node_modules
 {%- endfor %}
@@ -189,11 +197,15 @@ jobs:
       - uses: jdx/mise-action@v3
 {%- if node_package_manager == 'pnpm' %}
 
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
       - name: Cache pnpm store
         uses: actions/cache@v5
         with:
           path: |
-            ~/.local/share/pnpm/store/v3
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
             node_modules
           key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
@@ -272,11 +284,15 @@ jobs:
 {%- if pkg.type == 'node' %}
 {%- if node_package_manager == 'pnpm' %}
 
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
       - name: Cache pnpm store
         uses: actions/cache@v5
         with:
           path: |
-            ~/.local/share/pnpm/store/v3
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
             {{ pkg.name }}/node_modules
           key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
