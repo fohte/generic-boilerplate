@@ -39,29 +39,6 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
 
       # ========================================
-      # Lockfile sync (bun.lock copy + Cargo.lock regeneration)
-      # ========================================
-      - name: Sync bun.lock
-        run: scripts/sync-lockfiles --bun-lock "origin/$BASE_REF"
-        env:
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-
-      - name: Sync pnpm-lock.yaml
-        run: scripts/sync-lockfiles --pnpm-lock "origin/$BASE_REF"
-        env:
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-
-      - name: Setup Rust
-        if: steps.sync.outputs.success == 'true'
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Sync Cargo.lock
-        if: steps.sync.outputs.success == 'true'
-        run: scripts/sync-lockfiles --cargo-lock "origin/$BASE_REF"
-        env:
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-
-      # ========================================
       # Verify sync completeness
       # ========================================
       - name: Verify sync completeness

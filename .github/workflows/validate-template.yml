@@ -113,36 +113,15 @@ jobs:
         with:
           working_directory: generated/${{ matrix.fixture }}
 
-      - name: Fix lock file package names
+      - name: Generate lockfiles
         working-directory: generated/${{ matrix.fixture }}
         run: |
-          # Template lock files use fixed package names ("rust" in Cargo.lock,
-          # "node" in bun.lock), but each fixture/subpackage may have a different
-          # project_name. Align lock files so tools don't rewrite them during validation.
-          while IFS= read -r -d '' toml; do
-            dir=$(dirname "$toml")
-            lock="$dir/Cargo.lock"
-            if [ -f "$lock" ]; then
-              expected=$(sed -n 's/^name = "\(.*\)"/\1/p' "$toml" | head -1)
-              sed -i "s/^name = \"rust\"$/name = \"${expected}\"/" "$lock"
-              # Regenerate lock file to normalize format (Cargo.lock v4 uses
-              # topological sort, so a sed rename may break ordering)
-              (cd "$dir" && cargo generate-lockfile)
-            fi
-          done < <(find . -name Cargo.toml -print0)
-          while IFS= read -r -d '' pkg_json; do
-            dir=$(dirname "$pkg_json")
-            lock="$dir/bun.lock"
-            if [ -f "$lock" ]; then
-              expected=$(sed -n 's/.*"name": "\(.*\)".*/\1/p' "$pkg_json" | head -1)
-              sed -i "s/\"name\": \"node\"/\"name\": \"${expected}\"/" "$lock"
-            fi
-            pnpm_lock="$dir/pnpm-lock.yaml"
-            if [ -f "$pnpm_lock" ]; then
-              expected=$(sed -n 's/.*"name": "\(.*\)".*/\1/p' "$pkg_json" | head -1)
-              sed -i "s/name: node-pnpm$/name: ${expected}/" "$pnpm_lock"
-            fi
-          done < <(find . -name package.json -print0)
+          # Generate Cargo.lock for Rust projects so that cargo commands
+          # invoked by lefthook don't create untracked files.
+          find . -name Cargo.toml -not -path '*/target/*' -print0 \
+            | while IFS= read -r -d '' toml; do
+                (cd "$(dirname "$toml")" && cargo generate-lockfile)
+              done
 
       - name: Initialize git repository
         working-directory: generated/${{ matrix.fixture }}
@@ -204,7 +183,7 @@ jobs:
             ~/.bun/install/cache
             ~/.bun/install/global
             generated/${{ matrix.fixture }}/node_modules
-          key: ${{ runner.os }}-bun-validate-${{ matrix.fixture }}-${{ hashFiles(format('generated/{0}/bun.lock', matrix.fixture)) }}
+          key: ${{ runner.os }}-bun-validate-${{ matrix.fixture }}-${{ hashFiles(format('generated/{0}/package.json', matrix.fixture)) }}
           restore-keys: ${{ runner.os }}-bun-validate-${{ matrix.fixture }}-
 
       - name: Get pnpm store directory
@@ -219,14 +198,14 @@ jobs:
           path: |
             ${{ steps.pnpm-store.outputs.path }}
             generated/${{ matrix.fixture }}/node_modules
-          key: ${{ runner.os }}-pnpm-validate-${{ matrix.fixture }}-${{ hashFiles(format('generated/{0}/pnpm-lock.yaml', matrix.fixture)) }}
+          key: ${{ runner.os }}-pnpm-validate-${{ matrix.fixture }}-${{ hashFiles(format('generated/{0}/package.json', matrix.fixture)) }}
           restore-keys: ${{ runner.os }}-pnpm-validate-${{ matrix.fixture }}-
 
-      - run: bun install --frozen-lockfile
+      - run: bun install
         if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'bun'
         working-directory: generated/${{ matrix.fixture }}
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
         if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'pnpm'
         working-directory: generated/${{ matrix.fixture }}
 
