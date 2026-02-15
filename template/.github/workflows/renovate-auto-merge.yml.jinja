@@ -27,13 +27,18 @@ jobs:
           echo "$changed_files"
 
           # Check if all changed files are .copier-answers.yml
-          non_copier_files=$(echo "$changed_files" | grep -v '^\.copier-answers\.yml$' || true)
-          if [ -z "$non_copier_files" ]; then
-            echo "copier_only=true" >> "$GITHUB_OUTPUT"
-          else
+          if [ -z "$changed_files" ]; then
             echo "copier_only=false" >> "$GITHUB_OUTPUT"
-            echo "Non-copier files found:"
-            echo "$non_copier_files"
+            echo "No changed files detected"
+          else
+            non_copier_files=$(echo "$changed_files" | grep -v '^\.copier-answers\.yml$' || true)
+            if [ -z "$non_copier_files" ]; then
+              echo "copier_only=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "copier_only=false" >> "$GITHUB_OUTPUT"
+              echo "Non-copier files found:"
+              echo "$non_copier_files"
+            fi
           fi
 
       - name: Enable auto-merge
