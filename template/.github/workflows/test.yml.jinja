@@ -269,6 +269,7 @@ jobs:
 {%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
       {{ pkg.name }}: {% raw %}${{ steps.changes-{% endraw %}{{ pkg.name }}{% raw %}.outputs.any_changed }}{% endraw %}
 {%- endfor %}
+      workflow: {% raw %}${{ steps.changes-workflow.outputs.any_changed }}{% endraw %}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -281,11 +282,19 @@ jobs:
         with:
           files: {{ pkg.name }}/**
 {%- endfor %}
+
+      - name: Check for workflow changes
+        uses: tj-actions/changed-files@v47
+        id: changes-workflow
+        with:
+          files: .github/workflows/test.yml
 {%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
 
   unit-test-{{ pkg.name }}:
     needs: detect-changes
-    if: needs.detect-changes.outputs.{{ pkg.name }} == 'true'
+    if: >-
+      needs.detect-changes.outputs.{{ pkg.name }} == 'true' ||
+      needs.detect-changes.outputs.workflow == 'true'
     runs-on: ubuntu-latest
 
     steps:
