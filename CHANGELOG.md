@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.9](https://github.com/fohte/generic-boilerplate/compare/v0.3.8...v0.3.9) (2026-02-15)
+
+
+### Features
+
+* **template:** auto-merge Renovate copier PRs that only change `.copier-answers.yml` ([#190](https://github.com/fohte/generic-boilerplate/issues/190)) ([b5583cb](https://github.com/fohte/generic-boilerplate/commit/b5583cb488f5174168b97756b7b603571344edd5))
+
 ## [0.3.8](https://github.com/fohte/generic-boilerplate/compare/v0.3.7...v0.3.8) (2026-02-15)
 
 
