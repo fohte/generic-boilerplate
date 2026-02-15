@@ -296,7 +296,6 @@ jobs:
       needs.detect-changes.outputs.{{ pkg.name }} == 'true' ||
       needs.detect-changes.outputs.workflow == 'true'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
 {%- if pkg.type == 'rust' %}
