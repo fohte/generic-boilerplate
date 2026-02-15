@@ -262,9 +262,30 @@ jobs:
         run: cargo test
 {%- endif %}
 {%- elif subpackages %}
+
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+{%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
+      {{ pkg.name }}: {% raw %}${{ steps.changes-{% endraw %}{{ pkg.name }}{% raw %}.outputs.any_changed }}{% endraw %}
+{%- endfor %}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+{%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
+
+      - name: Check for {{ pkg.name }} changes
+        uses: tj-actions/changed-files@v47
+        id: changes-{{ pkg.name }}
+        with:
+          files: {{ pkg.name }}/**
+{%- endfor %}
 {%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
 
   unit-test-{{ pkg.name }}:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.{{ pkg.name }} == 'true'
     runs-on: ubuntu-latest
 
     steps:
