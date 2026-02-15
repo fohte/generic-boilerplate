@@ -126,7 +126,6 @@ jobs:
       needs.detect-changes.outputs.frontend == 'true' ||
       needs.detect-changes.outputs.workflow == 'true'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
 
@@ -154,7 +153,6 @@ jobs:
       needs.detect-changes.outputs.backend == 'true' ||
       needs.detect-changes.outputs.workflow == 'true'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
 
