@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.10](https://github.com/fohte/generic-boilerplate/compare/v0.3.9...v0.3.10) (2026-02-15)
+
+
+### Dependencies
+
+* update dependency fohte/lefthook-config to v0.1.15 ([#192](https://github.com/fohte/generic-boilerplate/issues/192)) ([9c13dce](https://github.com/fohte/generic-boilerplate/commit/9c13dce089a2c173d1a1c70156d2d2001d544cf8))
+* Update Node.js to v24 ([#186](https://github.com/fohte/generic-boilerplate/issues/186)) ([99a5156](https://github.com/fohte/generic-boilerplate/commit/99a5156834461ceab13d61ecf4eaee5d3b8e0390))
+
 ## [0.3.9](https://github.com/fohte/generic-boilerplate/compare/v0.3.8...v0.3.9) (2026-02-15)
 
 
