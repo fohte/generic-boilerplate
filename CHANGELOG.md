@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.7](https://github.com/fohte/generic-boilerplate/compare/v0.3.6...v0.3.7) (2026-02-15)
+
+
+### Features
+
+* **template:** remove lockfiles from template and eliminate sync logic ([#187](https://github.com/fohte/generic-boilerplate/issues/187)) ([49c4d49](https://github.com/fohte/generic-boilerplate/commit/49c4d4978527a79909a6073f93eb1c2fab7f7297))
+
+
+### Dependencies
+
+* Update dependency @tsconfig/strictest to v2.0.8 ([#180](https://github.com/fohte/generic-boilerplate/issues/180)) ([b36dbee](https://github.com/fohte/generic-boilerplate/commit/b36dbee88989b5d51e17b43acf50ecd97c699baf))
+* update dependency pnpm to v10.28.2 ([#181](https://github.com/fohte/generic-boilerplate/issues/181)) ([544e32e](https://github.com/fohte/generic-boilerplate/commit/544e32e1d67ce6dfdf07001bd3bedc5a4cf2fc08))
+
 ## [0.3.6](https://github.com/fohte/generic-boilerplate/compare/v0.3.5...v0.3.6) (2026-02-14)
 
 
