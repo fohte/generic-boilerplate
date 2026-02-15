@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.8](https://github.com/fohte/generic-boilerplate/compare/v0.3.7...v0.3.8) (2026-02-15)
+
+
+### Features
+
+* **template:** run unit tests only for changed subpackages in monorepo CI ([#188](https://github.com/fohte/generic-boilerplate/issues/188)) ([ef3a118](https://github.com/fohte/generic-boilerplate/commit/ef3a1187bae80ddafed0dfebd6b29e958c788f8c))
+
 ## [0.3.7](https://github.com/fohte/generic-boilerplate/compare/v0.3.6...v0.3.7) (2026-02-15)
 
 
