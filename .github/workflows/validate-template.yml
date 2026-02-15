@@ -113,6 +113,16 @@ jobs:
         with:
           working_directory: generated/${{ matrix.fixture }}
 
+      - name: Generate lockfiles
+        working-directory: generated/${{ matrix.fixture }}
+        run: |
+          # Generate Cargo.lock for Rust projects so that cargo commands
+          # invoked by lefthook don't create untracked files.
+          find . -name Cargo.toml -not -path '*/target/*' -print0 \
+            | while IFS= read -r -d '' toml; do
+                (cd "$(dirname "$toml")" && cargo generate-lockfile)
+              done
+
       - name: Initialize git repository
         working-directory: generated/${{ matrix.fixture }}
         run: |
