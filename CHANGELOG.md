@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.11](https://github.com/fohte/generic-boilerplate/compare/v0.3.10...v0.3.11) (2026-02-16)
+
+
+### Features
+
+* **template:** support pnpm workspace mode for monorepo ([#195](https://github.com/fohte/generic-boilerplate/issues/195)) ([473678c](https://github.com/fohte/generic-boilerplate/commit/473678c3c11f6e046d2ca693e460d01bbd140753))
+
 ## [0.3.10](https://github.com/fohte/generic-boilerplate/compare/v0.3.9...v0.3.10) (2026-02-15)
 
 
