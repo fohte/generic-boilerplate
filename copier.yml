@@ -125,16 +125,6 @@ subpackages:
     Example: [{name: frontend, type: node}, {name: backend, type: rust}]
   when: "{{ type == 'base' }}"
 
-monorepo_node_workspace:
-  type: bool
-  help: Enable pnpm workspace for monorepo (hoists shared devDependencies to root)
-  when: "{{ type == 'base' and (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
-  default: "{{ node_package_manager | default('bun') == 'pnpm' and (subpackages | selectattr('type', 'equalto', 'node') | list | length) >= 2 }}"
-  validator: >-
-    {% if monorepo_node_workspace and node_package_manager | default('bun') != 'pnpm' %}
-    monorepo_node_workspace requires pnpm as the package manager. bun workspace is not supported.
-    {% endif %}
-
 # Placed after subpackages so the when condition can reference it in interactive mode
 node_package_manager:
   type: str
@@ -144,6 +134,17 @@ node_package_manager:
   default: bun
   help: Node.js package manager to use
   when: "{{ type == 'node' or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
+
+# Placed after node_package_manager so the default/validator can reference it in interactive mode
+monorepo_node_workspace:
+  type: bool
+  help: Enable pnpm workspace for monorepo (hoists shared devDependencies to root)
+  when: "{{ type == 'base' and (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
+  default: "{{ node_package_manager == 'pnpm' and (subpackages | selectattr('type', 'equalto', 'node') | list | length) >= 2 }}"
+  validator: >-
+    {% if monorepo_node_workspace and node_package_manager != 'pnpm' %}
+    monorepo_node_workspace requires pnpm as the package manager. bun workspace is not supported.
+    {% endif %}
 
 use_coverage:
   type: bool
