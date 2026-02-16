@@ -17,11 +17,7 @@
     "format:prettier": "prettier --write .",
     "format": "conc -m 1 {{ node_package_manager }}:format:eslint {{ node_package_manager }}:format:prettier",
 {%- if is_workspace %}
-{%- if node_package_manager == 'pnpm' %}
     "test": "pnpm -r run test"
-{%- else %}
-    "test": "bun --filter '*' run test"
-{%- endif %}
 {%- else %}
     "test": "conc {{ node_package_manager }}:test:type {{ node_package_manager }}:test:unit",
     "test:type": "tsc --noEmit",

@@ -1,5 +1,5 @@
 {
-  "name": "monorepo-node-workspace",
+  "name": "monorepo-node-workspace-pnpm",
   "private": true,
   "workspaces": [
     "frontend",
@@ -10,14 +10,15 @@
     "lint": "eslint .",
     "format:eslint": "eslint --fix .",
     "format:prettier": "prettier --write .",
-    "format": "conc -m 1 bun:format:eslint bun:format:prettier",
-    "test": "bun --filter '*' run test"
+    "format": "conc -m 1 pnpm:format:eslint pnpm:format:prettier",
+    "test": "pnpm -r run test"
   },
   "devDependencies": {
     "@commitlint/cli": "20.4.1",
     "@fohte/eslint-config": "0.1.2",
-    "@tsconfig/bun": "1.0.10",
-    "@types/bun": "1.3.8",
+    "@tsconfig/node-lts": "22.0.1",
+    "@tsconfig/strictest": "2.0.8",
+    "@types/node": "22.13.4",
     "concurrently": "9.2.1",
     "eslint": "9.39.2",
     "prettier": "3.8.1",

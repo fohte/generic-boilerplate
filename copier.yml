@@ -51,8 +51,8 @@ _exclude:
   - "{% if type != 'node' %}/tsconfig.json{% endif %}"
   - "{% if type != 'node' and not (monorepo_node_workspace | default(false)) %}/eslint.config.js{% endif %}"
   - "{% if type != 'node' %}/vitest.config.ts{% endif %}"
-  # pnpm-workspace.yaml only when workspace + pnpm
-  - "{% if not (monorepo_node_workspace | default(false)) or node_package_manager | default('bun') != 'pnpm' %}/pnpm-workspace.yaml{% endif %}"
+  # pnpm-workspace.yaml only when workspace is enabled (workspace requires pnpm)
+  - '{% if not (monorepo_node_workspace | default(false)) %}/pnpm-workspace.yaml{% endif %}'
   # Exclude CLAUDE.md when no Rust code (only contains Rust test rules)
   - "{% if type != 'rust' and not (subpackages | selectattr('type', 'equalto', 'rust') | list) %}/CLAUDE.md{% endif %}"
   # Exclude Rust specific files when type is not 'rust'
@@ -127,9 +127,13 @@ subpackages:
 
 monorepo_node_workspace:
   type: bool
-  help: Enable Node.js workspace for monorepo (hoists shared devDependencies to root)
+  help: Enable pnpm workspace for monorepo (hoists shared devDependencies to root)
   when: "{{ type == 'base' and (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
-  default: "{{ (subpackages | selectattr('type', 'equalto', 'node') | list | length) >= 2 }}"
+  default: "{{ node_package_manager | default('bun') == 'pnpm' and (subpackages | selectattr('type', 'equalto', 'node') | list | length) >= 2 }}"
+  validator: >-
+    {% if monorepo_node_workspace and node_package_manager | default('bun') != 'pnpm' %}
+    monorepo_node_workspace requires pnpm as the package manager. bun workspace is not supported.
+    {% endif %}
 
 # Placed after subpackages so the when condition can reference it in interactive mode
 node_package_manager:
