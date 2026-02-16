@@ -3,6 +3,7 @@
 {%- set has_rust = (type == 'rust') or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) -%}
 {%- set node_pkgs = subpackages | selectattr('type', 'equalto', 'node') | list -%}
 {%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list -%}
+{%- set is_workspace = monorepo_node_workspace | default(false) -%}
 name: Test
 
 on:
@@ -95,6 +96,46 @@ jobs:
       - run: cargo fetch
 {%- elif subpackages %}
 {%- if has_node %}
+{%- if is_workspace %}
+{#- Workspace mode: single root install -#}
+{%- if node_package_manager == 'pnpm' %}
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        with:
+          path: |
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+            node_modules
+{%- for pkg in node_pkgs %}
+            {{ pkg.name }}/node_modules
+{%- endfor %}
+          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+
+      - run: pnpm install --frozen-lockfile
+{%- else %}
+
+      - name: Cache bun dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.bun/install/cache
+            ~/.bun/install/global
+            node_modules
+{%- for pkg in node_pkgs %}
+            {{ pkg.name }}/node_modules
+{%- endfor %}
+          key: {% raw %}${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-bun-{% endraw %}
+
+      - run: bun install --frozen-lockfile
+{%- endif %}
+{%- else %}
+{#- Non-workspace mode: per-package install -#}
 {%- if node_package_manager == 'pnpm' %}
 
       - name: Get pnpm store directory
@@ -136,6 +177,7 @@ jobs:
       - name: Install bun dependencies ({{ pkg.name }})
         run: cd "{{ pkg.name }}" && bun install --frozen-lockfile
 {%- endfor %}
+{%- endif %}
 {%- endif %}
 {%- endif %}
 {%- if has_rust %}
@@ -270,6 +312,9 @@ jobs:
       {{ pkg.name }}: {% raw %}${{ steps.changes-{% endraw %}{{ pkg.name }}{% raw %}.outputs.any_changed }}{% endraw %}
 {%- endfor %}
       workflow: {% raw %}${{ steps.changes-workflow.outputs.any_changed }}{% endraw %}
+{%- if is_workspace %}
+      root-lockfile: {% raw %}${{ steps.changes-root-lockfile.outputs.any_changed }}{% endraw %}
+{%- endif %}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -288,13 +333,35 @@ jobs:
         id: changes-workflow
         with:
           files: .github/workflows/test.yml
+{%- if is_workspace %}
+
+      - name: Check for root lockfile changes
+        uses: tj-actions/changed-files@v47
+        id: changes-root-lockfile
+        with:
+          files: |
+            package.json
+{%- if node_package_manager == 'pnpm' %}
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
+{%- else %}
+            bun.lock
+{%- endif %}
+{%- endif %}
 {%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
 
   unit-test-{{ pkg.name }}:
     needs: detect-changes
+{%- if pkg.type == 'node' and is_workspace %}
+    if: >-
+      needs.detect-changes.outputs.{{ pkg.name }} == 'true' ||
+      needs.detect-changes.outputs.workflow == 'true' ||
+      needs.detect-changes.outputs.root-lockfile == 'true'
+{%- else %}
     if: >-
       needs.detect-changes.outputs.{{ pkg.name }} == 'true' ||
       needs.detect-changes.outputs.workflow == 'true'
+{%- endif %}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -305,6 +372,54 @@ jobs:
 
       - uses: jdx/mise-action@v3
 {%- if pkg.type == 'node' %}
+{%- if is_workspace %}
+{#- Workspace mode: install from root -#}
+{%- if node_package_manager == 'pnpm' %}
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        with:
+          path: |
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+            node_modules
+{%- for p in node_pkgs %}
+            {{ p.name }}/node_modules
+{%- endfor %}
+          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        working-directory: {{ pkg.name }}
+        run: pnpm run test
+{%- else %}
+
+      - name: Cache bun dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.bun/install/cache
+            ~/.bun/install/global
+            node_modules
+{%- for p in node_pkgs %}
+            {{ p.name }}/node_modules
+{%- endfor %}
+          key: {% raw %}${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-bun-{% endraw %}
+
+      - run: bun install --frozen-lockfile
+
+      - name: Run tests
+        working-directory: {{ pkg.name }}
+        run: bun run test
+{%- endif %}
+{%- else %}
+{#- Non-workspace mode: per-package install -#}
 {%- if node_package_manager == 'pnpm' %}
 
       - name: Get pnpm store directory
@@ -342,6 +457,7 @@ jobs:
       - name: Run tests
         working-directory: {{ pkg.name }}
         run: bun run test
+{%- endif %}
 {%- endif %}
 {%- elif pkg.type == 'rust' %}
 

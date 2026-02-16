@@ -1,0 +1,12 @@
+type: base
+project_name: monorepo-node-workspace
+description: Test monorepo project with Node.js workspace
+is_public: false
+use_release_please: false
+node_package_manager: bun
+monorepo_node_workspace: true
+subpackages:
+  - name: frontend
+    type: node
+  - name: backend
+    type: node
