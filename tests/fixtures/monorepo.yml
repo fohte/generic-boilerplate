@@ -6,6 +6,7 @@ is_public: false
 use_release_please: false
 use_coverage: true
 node_package_manager: bun
+monorepo_node_workspace: false
 subpackages:
   - name: frontend
     type: node

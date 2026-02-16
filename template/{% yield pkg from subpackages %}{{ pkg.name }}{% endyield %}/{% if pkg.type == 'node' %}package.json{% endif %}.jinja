@@ -1,22 +1,26 @@
+{%- set is_workspace = monorepo_node_workspace | default(false) -%}
 {
   "name": "{{ pkg.name }}",
   "private": true,
   "type": "module",
   "scripts": {
+{%- if not is_workspace %}
     "lint": "eslint .",
     "format:eslint": "eslint --fix .",
     "format:prettier": "prettier --write .",
     "format": "conc -m 1 {{ node_package_manager }}:format:eslint {{ node_package_manager }}:format:prettier",
+{%- endif %}
     "test": "conc {{ node_package_manager }}:test:type {{ node_package_manager }}:test:unit",
     "test:type": "tsc --noEmit",
     "test:unit": "vitest run"
-  },
+  }{{ "," if not is_workspace else "" }}
+{%- if not is_workspace %}
   "devDependencies": {
     "@commitlint/cli": "20.4.1",
     "@fohte/eslint-config": "0.1.2",
 {%- if node_package_manager == 'pnpm' %}
     "@tsconfig/node-lts": "22.0.1",
-    "@tsconfig/strictest": "2.0.5",
+    "@tsconfig/strictest": "2.0.8",
     "@types/node": "22.13.4",
 {%- else %}
     "@tsconfig/bun": "1.0.10",
@@ -28,4 +32,5 @@
     "typescript": "5.9.3",
     "vitest": "4.0.18"
   }
+{%- endif %}
 }

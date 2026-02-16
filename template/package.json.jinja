@@ -1,15 +1,28 @@
+{%- set is_workspace = monorepo_node_workspace | default(false) -%}
+{%- set node_pkgs = subpackages | default([]) | selectattr('type', 'equalto', 'node') | list -%}
 {
   "name": "{{ project_name }}",
   "private": true,
+{%- if is_workspace %}
+  "workspaces": [
+{%- for pkg in node_pkgs %}
+    "{{ pkg.name }}"{{ "," if not loop.last else "" }}
+{%- endfor %}
+  ],
+{%- endif %}
   "type": "module",
   "scripts": {
     "lint": "eslint .",
     "format:eslint": "eslint --fix .",
     "format:prettier": "prettier --write .",
     "format": "conc -m 1 {{ node_package_manager }}:format:eslint {{ node_package_manager }}:format:prettier",
+{%- if is_workspace %}
+    "test": "pnpm -r run test"
+{%- else %}
     "test": "conc {{ node_package_manager }}:test:type {{ node_package_manager }}:test:unit",
     "test:type": "tsc --noEmit",
     "test:unit": "vitest run"
+{%- endif %}
   },
   "devDependencies": {
     "@commitlint/cli": "20.4.1",

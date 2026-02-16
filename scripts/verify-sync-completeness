@@ -20,7 +20,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-FIXTURES=(base base-public base-release monorepo node node-pnpm rust rust-release)
+FIXTURES=(base base-public base-release monorepo monorepo-node-workspace node node-pnpm rust rust-release)
 
 # Check a single fixture for sync completeness
 # Returns 0 if in sync, 1 if differences found

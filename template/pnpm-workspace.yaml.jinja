@@ -1,0 +1,5 @@
+{%- set node_pkgs = subpackages | default([]) | selectattr('type', 'equalto', 'node') | list -%}
+packages:
+{%- for pkg in node_pkgs %}
+  - '{{ pkg.name }}'
+{%- endfor %}
