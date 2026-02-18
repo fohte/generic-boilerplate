@@ -1,0 +1,73 @@
+{%- set has_node = (type == 'node') or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) -%}
+{%- set has_rust = (type == 'rust') or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) -%}
+#!/usr/bin/env bash
+#
+# Bootstrap the development environment.
+#
+# Usage:
+#   scripts/bootstrap              # Full setup (mise + lefthook + dependencies)
+#   scripts/bootstrap --worktree   # Worktree setup (mise + dependencies only)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
+
+worktree=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --worktree)
+      worktree=true
+      shift
+      ;;
+    *)
+      echo "Error: Unknown argument: $1" >&2
+      echo "Usage: $0 [--worktree]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Install tool versions managed by mise
+if command -v mise > /dev/null 2>&1; then
+  mise install
+fi
+
+# Install git hooks via lefthook (skip for worktrees — they share the parent's .git/hooks)
+if [ "$worktree" = false ] && command -v lefthook > /dev/null 2>&1; then
+  lefthook install
+fi
+{%- if type == 'node' %}
+
+# Install Node.js dependencies
+{% if node_package_manager == 'pnpm' -%}
+pnpm install
+{%- else -%}
+bun install
+{%- endif %}
+{%- elif monorepo_node_workspace | default(false) %}
+
+# Install Node.js dependencies (workspace)
+pnpm install
+{%- elif has_node and not (monorepo_node_workspace | default(false)) %}
+
+# Install Node.js dependencies
+{%- for pkg in subpackages if pkg.type == 'node' %}
+{% if node_package_manager == 'pnpm' -%}
+(cd {{ pkg.name }} && pnpm install)
+{%- else -%}
+(cd {{ pkg.name }} && bun install)
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+{%- if type == 'rust' %}
+
+# Fetch Rust dependencies
+cargo fetch
+{%- elif has_rust and type != 'rust' %}
+
+# Fetch Rust dependencies
+{%- for pkg in subpackages if pkg.type == 'rust' %}
+cargo fetch --manifest-path {{ pkg.name }}/Cargo.toml
+{%- endfor %}
+{%- endif %}
