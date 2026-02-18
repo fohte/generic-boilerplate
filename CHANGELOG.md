@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.12](https://github.com/fohte/generic-boilerplate/compare/v0.3.11...v0.3.12) (2026-02-18)
+
+
+### Features
+
+* **rust:** migrate CI build cache to sccache ([#198](https://github.com/fohte/generic-boilerplate/issues/198)) ([49473ac](https://github.com/fohte/generic-boilerplate/commit/49473ac7d09e3621522c9e39d0e9e6cbd7eeb0b9))
+* **template:** add `scripts/bootstrap` to automate dev environment setup ([#200](https://github.com/fohte/generic-boilerplate/issues/200)) ([be86016](https://github.com/fohte/generic-boilerplate/commit/be86016b6bf59a34377cbc5ba2a34043d2514780))
+* **template:** share `CARGO_TARGET_DIR` across worktrees for Rust projects ([#197](https://github.com/fohte/generic-boilerplate/issues/197)) ([2e50688](https://github.com/fohte/generic-boilerplate/commit/2e50688faa2a752f11209f2d528c92c955a4ce74))
+
 ## [0.3.11](https://github.com/fohte/generic-boilerplate/compare/v0.3.10...v0.3.11) (2026-02-16)
 
 
