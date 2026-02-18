@@ -14,9 +14,17 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
 worktree=false
-for arg in "$@"; do
-  case "$arg" in
-    --worktree) worktree=true ;;
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --worktree)
+      worktree=true
+      shift
+      ;;
+    *)
+      echo "Error: Unknown argument: $1" >&2
+      echo "Usage: $0 [--worktree]" >&2
+      exit 1
+      ;;
   esac
 done
 
