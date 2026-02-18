@@ -68,7 +68,7 @@ _exclude:
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
   # Exclude type-specific files
-  - "{% if type not in ['node', 'rust'] and not (monorepo_node_workspace | default(false)) %}/.gitignore{% endif %}"
+  - "{% if type not in ['node', 'rust'] and not (monorepo_node_workspace | default(false)) and not (subpackages | selectattr('type', 'equalto', 'rust') | list) %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
 
 # Template parameters
