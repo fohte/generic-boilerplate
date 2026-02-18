@@ -89,6 +89,9 @@ jobs:
     runs-on: {% raw %}${{ matrix.os }}{% endraw %}
     permissions:
       contents: write
+    env:
+      SCCACHE_GHA_ENABLED: 'true'
+      RUSTC_WRAPPER: 'sccache'
     steps:
       - uses: actions/checkout@v6
 
@@ -96,8 +99,8 @@ jobs:
 
       - run: rustup target add {% raw %}${{ matrix.target }}{% endraw %}
 
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Build
         run: cargo build --release --target {% raw %}${{ matrix.target }}{% endraw %}
