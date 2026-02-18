@@ -20,6 +20,11 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+{%- if has_rust %}
+    env:
+      SCCACHE_GHA_ENABLED: 'true'
+      RUSTC_WRAPPER: 'sccache'
+{%- endif %}
 
     steps:
       - uses: actions/create-github-app-token@v2
@@ -54,6 +59,11 @@ jobs:
       # Multiple cargo: tools in mise.toml trigger parallel rustup component downloads,
       # causing "could not rename downloaded file" errors.
       - run: rustup show
+
+      # Run sccache-action before mise-action so that sccache binary is
+      # available when mise installs cargo tools (RUSTC_WRAPPER=sccache).
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
 {%- endif %}
 
       - uses: jdx/mise-action@v3
@@ -89,9 +99,6 @@ jobs:
       - run: bun install --frozen-lockfile
 {%- endif %}
 {%- elif type == 'rust' %}
-
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
 
       - run: cargo fetch
 {%- elif subpackages %}
@@ -163,14 +170,6 @@ jobs:
 {%- endif %}
 {%- endif %}
 {%- if has_rust %}
-
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: |-
-{%- for pkg in rust_pkgs %}
-            {{ pkg.name }}
-{%- endfor %}
 
 {%- for pkg in rust_pkgs %}
 
@@ -253,16 +252,21 @@ jobs:
 
   unit-test:
     runs-on: ubuntu-latest
+    env:
+      SCCACHE_GHA_ENABLED: 'true'
+      RUSTC_WRAPPER: 'sccache'
 
     steps:
       - uses: actions/checkout@v6
 
       - run: rustup show
 
-      - uses: jdx/mise-action@v3
+      # Run sccache-action before mise-action so that sccache binary is
+      # available when mise installs cargo tools (RUSTC_WRAPPER=sccache).
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
 
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
+      - uses: jdx/mise-action@v3
 {%- if use_coverage %}
 
       - name: Install cargo-llvm-cov
@@ -341,11 +345,21 @@ jobs:
       needs.detect-changes.outputs.workflow == 'true'
 {%- endif %}
     runs-on: ubuntu-latest
+{%- if pkg.type == 'rust' %}
+    env:
+      SCCACHE_GHA_ENABLED: 'true'
+      RUSTC_WRAPPER: 'sccache'
+{%- endif %}
     steps:
       - uses: actions/checkout@v6
 {%- if pkg.type == 'rust' %}
 
       - run: rustup show
+
+      # Run sccache-action before mise-action so that sccache binary is
+      # available when mise installs cargo tools (RUSTC_WRAPPER=sccache).
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
 {%- endif %}
 
       - uses: jdx/mise-action@v3
@@ -416,11 +430,6 @@ jobs:
 {%- endif %}
 {%- endif %}
 {%- elif pkg.type == 'rust' %}
-
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: {{ pkg.name }}
 {%- if use_coverage %}
 
       - name: Install cargo-llvm-cov

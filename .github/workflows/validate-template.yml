@@ -218,20 +218,23 @@ jobs:
     runs-on: ubuntu-latest
     needs: regenerate-and-commit
     if: needs.regenerate-and-commit.outputs.rust_changed == 'true'
+    env:
+      SCCACHE_GHA_ENABLED: 'true'
+      RUSTC_WRAPPER: 'sccache'
 
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
 
+      # Run sccache-action before mise-action so that sccache binary is
+      # available when mise installs cargo tools (RUSTC_WRAPPER=sccache).
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
       - uses: jdx/mise-action@v3
         with:
           working_directory: generated/rust
-
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: generated/rust
 
       - name: Run tests
         working-directory: generated/rust
