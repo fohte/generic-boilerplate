@@ -94,7 +94,7 @@ jobs:
         run: exit 1
 
   detect-changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       frontend: ${{ steps.changes-frontend.outputs.any_changed }}
       backend: ${{ steps.changes-backend.outputs.any_changed }}
