@@ -292,7 +292,7 @@ jobs:
 {%- elif subpackages %}
 
   detect-changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
 {%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
       {{ pkg.name }}: {% raw %}${{ steps.changes-{% endraw %}{{ pkg.name }}{% raw %}.outputs.any_changed }}{% endraw %}
