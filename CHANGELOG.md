@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.13](https://github.com/fohte/generic-boilerplate/compare/v0.3.12...v0.3.13) (2026-02-19)
+
+
+### Features
+
+* **template:** switch lightweight CI jobs to `ubuntu-slim` runner ([#201](https://github.com/fohte/generic-boilerplate/issues/201)) ([eac9810](https://github.com/fohte/generic-boilerplate/commit/eac9810a0802403d3cebb6f2376615a83d2b1b73))
+
 ## [0.3.12](https://github.com/fohte/generic-boilerplate/compare/v0.3.11...v0.3.12) (2026-02-18)
 
 
