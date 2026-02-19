@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.14](https://github.com/fohte/generic-boilerplate/compare/v0.3.13...v0.3.14) (2026-02-19)
+
+
+### Features
+
+* **mise:** switch ast-grep and basefmt to `github:` backend ([#203](https://github.com/fohte/generic-boilerplate/issues/203)) ([29c54f6](https://github.com/fohte/generic-boilerplate/commit/29c54f6cc82863a6f7540290bd420fc842baea23))
+
 ## [0.3.13](https://github.com/fohte/generic-boilerplate/compare/v0.3.12...v0.3.13) (2026-02-19)
 
 
