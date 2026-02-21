@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.15](https://github.com/fohte/generic-boilerplate/compare/v0.3.14...v0.3.15) (2026-02-21)
+
+
+### Bug Fixes
+
+* **copier:** add workaround to restore executable bit on `scripts/bootstrap` after copier update ([#205](https://github.com/fohte/generic-boilerplate/issues/205)) ([5e4117d](https://github.com/fohte/generic-boilerplate/commit/5e4117df2d56a2e507aab7259906bf72b67044bb))
+
 ## [0.3.14](https://github.com/fohte/generic-boilerplate/compare/v0.3.13...v0.3.14) (2026-02-19)
 
 
