@@ -6,7 +6,7 @@ _answers_file: .copier-answers.yml
 # (executable bit) when committing copier update results. This task restores
 # the executable bit on scripts that require it.
 _tasks:
-  - command: chmod +x scripts/bootstrap
+  - command: test ! -f scripts/bootstrap || chmod +x scripts/bootstrap
     when: "{{ _copier_conf.os in ['linux', 'macos'] }}"
 
 type:
