@@ -2,6 +2,13 @@ _min_copier_version: '9.5.0'
 _subdirectory: template
 _answers_file: .copier-answers.yml
 
+# Workaround: Renovate's copier manager does not preserve file permissions
+# (executable bit) when committing copier update results. This task restores
+# the executable bit on scripts that require it.
+_tasks:
+  - command: test ! -f scripts/bootstrap || chmod +x scripts/bootstrap
+    when: "{{ _copier_conf.os in ['linux', 'macos'] }}"
+
 type:
   type: str
   choices:
