@@ -35,6 +35,16 @@
       matchUpdateTypes: ['major'],
       commitMessagePrefix: 'deps(ci)!:',
     },
+    {
+      matchManagers: ['mise'],
+      matchUpdateTypes: ['minor', 'patch'],
+      commitMessagePrefix: 'deps:',
+    },
+    {
+      matchManagers: ['mise'],
+      matchUpdateTypes: ['major'],
+      commitMessagePrefix: 'deps!:',
+    },
 
     // Group mise npm backend packages with their npm counterparts.
     // This ensures "npm:prettier" in .mise.toml and "prettier" in package.json
