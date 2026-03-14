@@ -38,7 +38,7 @@ jobs:
       - name: Commit and push changes
         uses: suzuki-shunsuke/commit-action@v0.1.0
         with:
-          commit_message: 'fix: restore executable bit on scripts/bootstrap'
+          commit_message: 'chore: restore executable bit on scripts/bootstrap'
           workflow: deny
           github_token: {% raw %}${{ steps.app-token.outputs.token }}{% endraw %}
 
@@ -50,6 +50,24 @@ jobs:
       {% raw %}startsWith(github.head_ref, 'renovate/https-github.com-fohte-generic-boilerplate-'){% endraw %}
 
     steps:
+      - name: Check for artifact update errors
+        id: check-artifact
+        env:
+          GH_TOKEN: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
+          PR_NUMBER: {% raw %}${{ github.event.pull_request.number }}{% endraw %}
+        run: |
+          # Renovate posts a comment containing "Artifact update problem" when
+          # copier update (updateArtifacts) fails. If such a comment exists,
+          # block auto-merge to prevent merging a stale _commit value.
+          artifact_comments=$(gh pr view "$PR_NUMBER" --repo {% raw %}${{ github.repository }}{% endraw %} --json comments --jq '.comments[].body' | grep -c 'Artifact update problem' || true)
+          if [ "$artifact_comments" -gt 0 ]; then
+            echo "has_artifact_error=true" >> "$GITHUB_OUTPUT"
+            echo "Artifact update problem detected in PR comments, blocking auto-merge"
+          else
+            echo "has_artifact_error=false" >> "$GITHUB_OUTPUT"
+            echo "No artifact update problems found"
+          fi
+
       - name: Check changed files
         id: check
         env:
@@ -76,7 +94,9 @@ jobs:
           fi
 
       - name: Enable auto-merge
-        if: steps.check.outputs.copier_only == 'true'
+        if: >-
+          steps.check.outputs.copier_only == 'true' &&
+          steps.check-artifact.outputs.has_artifact_error == 'false'
         env:
           GH_TOKEN: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
           PR_NUMBER: {% raw %}${{ github.event.pull_request.number }}{% endraw %}
