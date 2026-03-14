@@ -20,8 +20,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: {% raw %}${{ vars.FOHTE_BOT_APP_ID }}{% endraw %}
-          private-key: {% raw %}${{ secrets.FOHTE_BOT_PRIVATE_KEY }}{% endraw %}
+          app-id: {% raw %}${{ secrets.APP_ID }}{% endraw %}
+          private-key: {% raw %}${{ secrets.APP_PRIVATE_KEY }}{% endraw %}
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,24 +29,24 @@ jobs:
           ref: {% raw %}${{ github.head_ref }}{% endraw %}
           token: {% raw %}${{ steps.app-token.outputs.token }}{% endraw %}
 
-      - name: Install copier
-        run: pipx install copier
+      - name: Restore executable bit on scripts/bootstrap
+        run: |
+          if [ -f scripts/bootstrap ]; then
+            git update-index --chmod=+x scripts/bootstrap
+          fi
 
-      - name: Run copier update
-        run: copier update --trust --defaults --skip-answered
+      # git update-index --chmod=+x stages the change.
+      # commit-action uses `git ls-files --modified` which only detects unstaged changes.
+      # We need to unstage the changes so commit-action can detect them.
+      - name: Unstage changes for commit-action
+        run: git restore --staged .
 
       - name: Commit and push changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          if git diff --quiet && git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git add -A
-            git commit -m "fix: apply copier update with --trust"
-            git push
-          fi
+        uses: suzuki-shunsuke/commit-action@v0.1.0
+        with:
+          commit_message: 'fix: restore executable bit on scripts/bootstrap'
+          workflow: deny
+          github_token: {% raw %}${{ steps.app-token.outputs.token }}{% endraw %}
 
   auto-merge:
     needs: copier-update
