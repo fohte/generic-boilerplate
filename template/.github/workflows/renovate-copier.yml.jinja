@@ -32,14 +32,8 @@ jobs:
       - name: Restore executable bit on scripts/bootstrap
         run: |
           if [ -f scripts/bootstrap ]; then
-            git update-index --chmod=+x scripts/bootstrap
+            chmod +x scripts/bootstrap
           fi
-
-      # git update-index --chmod=+x stages the change.
-      # commit-action uses `git ls-files --modified` which only detects unstaged changes.
-      # We need to unstage the changes so commit-action can detect them.
-      - name: Unstage changes for commit-action
-        run: git restore --staged .
 
       - name: Commit and push changes
         uses: suzuki-shunsuke/commit-action@v0.1.0
