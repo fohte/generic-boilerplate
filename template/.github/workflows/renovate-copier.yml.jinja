@@ -23,7 +23,7 @@ jobs:
           private-key: {% raw %}${{ secrets.APP_PRIVATE_KEY }}{% endraw %}
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: {% raw %}${{ github.head_ref }}{% endraw %}
           token: {% raw %}${{ steps.app-token.outputs.token }}{% endraw %}
