@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.0](https://github.com/fohte/generic-boilerplate/compare/v0.3.18...v0.4.0) (2026-03-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ci:** Update actions/checkout action to v6 ([#224](https://github.com/fohte/generic-boilerplate/issues/224))
+* Update dependency eslint to v10 ([#168](https://github.com/fohte/generic-boilerplate/issues/168))
+* Update dependency @tsconfig/node-lts to v24.0.0 ([#185](https://github.com/fohte/generic-boilerplate/issues/185))
+
+### Dependencies
+
+* **ci:** Update actions/checkout action to v6 ([#224](https://github.com/fohte/generic-boilerplate/issues/224)) ([872041b](https://github.com/fohte/generic-boilerplate/commit/872041bb779974add15211654c2fe5bf04df31bb))
+* **ci:** Update suzuki-shunsuke/commit-action action to v0.1.1 ([#219](https://github.com/fohte/generic-boilerplate/issues/219)) ([4bb72bb](https://github.com/fohte/generic-boilerplate/commit/4bb72bbef1550779a1734e59fdeb57febe737fd5))
+* Update @commitlint/cli to v20.4.3 ([#215](https://github.com/fohte/generic-boilerplate/issues/215)) ([d5e8be9](https://github.com/fohte/generic-boilerplate/commit/d5e8be901f09d9cce522f4194876f5598e765a9e))
+* Update dependency @tsconfig/node-lts to v24.0.0 ([#185](https://github.com/fohte/generic-boilerplate/issues/185)) ([3a87b65](https://github.com/fohte/generic-boilerplate/commit/3a87b659b0ea521a5cb7485aa0f38c5f55baa123))
+* Update dependency actionlint to v1.7.11 ([#217](https://github.com/fohte/generic-boilerplate/issues/217)) ([4f14df8](https://github.com/fohte/generic-boilerplate/commit/4f14df8cf3fc1f0f10fe9fab0bdf3432556156c6))
+* Update dependency bun to v1.3.10 ([#194](https://github.com/fohte/generic-boilerplate/issues/194)) ([51ad24c](https://github.com/fohte/generic-boilerplate/commit/51ad24cfd6ccc21b691811db0f8a6bb239c623c9))
+* Update dependency eslint to v10 ([#168](https://github.com/fohte/generic-boilerplate/issues/168)) ([348cc28](https://github.com/fohte/generic-boilerplate/commit/348cc2824e0cf3572e47e1be57b438c746d52ef0))
+* Update dependency github:ast-grep/ast-grep to v0.41.0 ([#220](https://github.com/fohte/generic-boilerplate/issues/220)) ([7091f1b](https://github.com/fohte/generic-boilerplate/commit/7091f1b77bf33c5d6d53b16fc0f80f82c50ea8e1))
+* Update dependency lefthook to v2.1.3 ([#218](https://github.com/fohte/generic-boilerplate/issues/218)) ([7a545d7](https://github.com/fohte/generic-boilerplate/commit/7a545d7d63abb4fbf112cef78ab3113fa3514682))
+* Update dependency pnpm to v10.30.3 ([#184](https://github.com/fohte/generic-boilerplate/issues/184)) ([993b25c](https://github.com/fohte/generic-boilerplate/commit/993b25cef0766526d365a1af53d41174c63031a8))
+
 ## [0.3.18](https://github.com/fohte/generic-boilerplate/compare/v0.3.17...v0.3.18) (2026-03-14)
 
 
