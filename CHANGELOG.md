@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.3.18](https://github.com/fohte/generic-boilerplate/compare/v0.3.17...v0.3.18) (2026-03-14)
+
+
+### Bug Fixes
+
+* **copier:** remove auto-merge mechanism ([#212](https://github.com/fohte/generic-boilerplate/issues/212)) ([f19f421](https://github.com/fohte/generic-boilerplate/commit/f19f4214eda9d963f5c233cd4548756a48a75b2e))
+
+## [0.3.17](https://github.com/fohte/generic-boilerplate/compare/v0.3.16...v0.3.17) (2026-03-14)
+
+
+### Bug Fixes
+
+* **copier:** simplify `copier-update` job to only restore executable bit ([#210](https://github.com/fohte/generic-boilerplate/issues/210)) ([f63ea55](https://github.com/fohte/generic-boilerplate/commit/f63ea55d422c5f2aa55822465727b7943229b74a))
+
+## [0.3.16](https://github.com/fohte/generic-boilerplate/compare/v0.3.15...v0.3.16) (2026-03-14)
+
+
+### Bug Fixes
+
+* **copier:** move `copier update --trust` to CI workflow by removing `_tasks` ([#208](https://github.com/fohte/generic-boilerplate/issues/208)) ([57f2761](https://github.com/fohte/generic-boilerplate/commit/57f27615edd836582c149f14714367cffc1e4601))
+
 ## [0.3.15](https://github.com/fohte/generic-boilerplate/compare/v0.3.14...v0.3.15) (2026-03-05)
 
 
