@@ -1,4 +1,4 @@
-name: Renovate auto-merge
+name: Renovate copier
 
 on:
   pull_request:
@@ -9,7 +9,47 @@ permissions:
   pull-requests: write
 
 jobs:
-  copier:
+  copier-update:
+    runs-on: ubuntu-slim
+    if: >-
+      github.actor == 'renovate[bot]' &&
+      {% raw %}startsWith(github.head_ref, 'renovate/https-github.com-fohte-generic-boilerplate-'){% endraw %}
+
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: {% raw %}${{ vars.FOHTE_BOT_APP_ID }}{% endraw %}
+          private-key: {% raw %}${{ secrets.FOHTE_BOT_PRIVATE_KEY }}{% endraw %}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: {% raw %}${{ github.head_ref }}{% endraw %}
+          token: {% raw %}${{ steps.app-token.outputs.token }}{% endraw %}
+
+      - name: Install copier
+        run: pipx install copier
+
+      - name: Run copier update
+        run: copier update --trust --defaults --skip-answered
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git add -A
+            git commit -m "fix: apply copier update with --trust"
+            git push
+          fi
+
+  auto-merge:
+    needs: copier-update
     runs-on: ubuntu-slim
     if: >-
       github.actor == 'renovate[bot]' &&
