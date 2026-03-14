@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.16](https://github.com/fohte/generic-boilerplate/compare/v0.3.15...v0.3.16) (2026-03-14)
+
+
+### Bug Fixes
+
+* **copier:** move `copier update --trust` to CI workflow by removing `_tasks` ([#208](https://github.com/fohte/generic-boilerplate/issues/208)) ([57f2761](https://github.com/fohte/generic-boilerplate/commit/57f27615edd836582c149f14714367cffc1e4601))
+
 ## [0.3.15](https://github.com/fohte/generic-boilerplate/compare/v0.3.14...v0.3.15) (2026-03-05)
 
 
