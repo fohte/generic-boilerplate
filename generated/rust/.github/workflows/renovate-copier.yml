@@ -20,8 +20,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ vars.FOHTE_BOT_APP_ID }}
-          private-key: ${{ secrets.FOHTE_BOT_PRIVATE_KEY }}
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,24 +29,18 @@ jobs:
           ref: ${{ github.head_ref }}
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Install copier
-        run: pipx install copier
-
-      - name: Run copier update
-        run: copier update --trust --defaults --skip-answered
+      - name: Restore executable bit on scripts/bootstrap
+        run: |
+          if [ -f scripts/bootstrap ]; then
+            chmod +x scripts/bootstrap
+          fi
 
       - name: Commit and push changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          if git diff --quiet && git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git add -A
-            git commit -m "fix: apply copier update with --trust"
-            git push
-          fi
+        uses: suzuki-shunsuke/commit-action@v0.1.0
+        with:
+          commit_message: 'fix: restore executable bit on scripts/bootstrap'
+          workflow: deny
+          github_token: ${{ steps.app-token.outputs.token }}
 
   auto-merge:
     needs: copier-update
