@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.17](https://github.com/fohte/generic-boilerplate/compare/v0.3.16...v0.3.17) (2026-03-14)
+
+
+### Bug Fixes
+
+* **copier:** simplify `copier-update` job to only restore executable bit ([#210](https://github.com/fohte/generic-boilerplate/issues/210)) ([f63ea55](https://github.com/fohte/generic-boilerplate/commit/f63ea55d422c5f2aa55822465727b7943229b74a))
+
 ## [0.3.16](https://github.com/fohte/generic-boilerplate/compare/v0.3.15...v0.3.16) (2026-03-14)
 
 
