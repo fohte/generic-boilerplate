@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.18](https://github.com/fohte/generic-boilerplate/compare/v0.3.17...v0.3.18) (2026-03-14)
+
+
+### Bug Fixes
+
+* **copier:** remove auto-merge mechanism ([#212](https://github.com/fohte/generic-boilerplate/issues/212)) ([f19f421](https://github.com/fohte/generic-boilerplate/commit/f19f4214eda9d963f5c233cd4548756a48a75b2e))
+
 ## [0.3.17](https://github.com/fohte/generic-boilerplate/compare/v0.3.16...v0.3.17) (2026-03-14)
 
 
