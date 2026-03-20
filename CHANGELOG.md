@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.1](https://github.com/fohte/generic-boilerplate/compare/v0.4.0...v0.4.1) (2026-03-20)
+
+
+### Features
+
+* **template:** migrate pnpm version management to corepack ([#229](https://github.com/fohte/generic-boilerplate/issues/229)) ([be4d268](https://github.com/fohte/generic-boilerplate/commit/be4d268f0eb391b46225b44990dc7fa68843265c))
+
+
+### Dependencies
+
+* Update dependency github:ast-grep/ast-grep to v0.41.1 ([#227](https://github.com/fohte/generic-boilerplate/issues/227)) ([a65eaba](https://github.com/fohte/generic-boilerplate/commit/a65eaba23559bbff0e2ea28be0a4b2f1d7855bef))
+
 ## [0.4.0](https://github.com/fohte/generic-boilerplate/compare/v0.3.18...v0.4.0) (2026-03-14)
 
 
