@@ -70,6 +70,8 @@ jobs:
 {%- if type == 'node' %}
 {%- if node_package_manager == 'pnpm' %}
 
+      - run: corepack enable
+
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
@@ -106,6 +108,8 @@ jobs:
 {%- if is_workspace %}
 {#- Workspace mode: single root install (pnpm only) #}
 
+      - run: corepack enable
+
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
@@ -126,6 +130,8 @@ jobs:
 {%- else %}
 {#- Non-workspace mode: per-package install -#}
 {%- if node_package_manager == 'pnpm' %}
+
+      - run: corepack enable
 
       - name: Get pnpm store directory
         id: pnpm-store
@@ -213,6 +219,8 @@ jobs:
 
       - uses: jdx/mise-action@v3
 {%- if node_package_manager == 'pnpm' %}
+
+      - run: corepack enable
 
       - name: Get pnpm store directory
         id: pnpm-store
@@ -367,6 +375,8 @@ jobs:
 {%- if is_workspace %}
 {#- Workspace mode: install from root (pnpm only) #}
 
+      - run: corepack enable
+
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
@@ -391,6 +401,8 @@ jobs:
 {%- else %}
 {#- Non-workspace mode: per-package install -#}
 {%- if node_package_manager == 'pnpm' %}
+
+      - run: corepack enable
 
       - name: Get pnpm store directory
         id: pnpm-store

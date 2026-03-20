@@ -113,6 +113,10 @@ jobs:
         with:
           working_directory: generated/${{ matrix.fixture }}
 
+      - name: Enable corepack
+        run: corepack enable
+        if: hashFiles(format('generated/{0}/package.json', matrix.fixture)) != ''
+
       - name: Generate lockfiles
         working-directory: generated/${{ matrix.fixture }}
         run: |
@@ -174,6 +178,10 @@ jobs:
         if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true'
         with:
           working_directory: generated/${{ matrix.fixture }}
+
+      - name: Enable corepack
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'pnpm'
+        run: corepack enable
 
       - name: Cache bun dependencies
         if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'bun'

@@ -10,6 +10,9 @@
 {%- endfor %}
   ],
 {%- endif %}
+{%- if node_package_manager == 'pnpm' %}
+  "packageManager": "pnpm@10.30.3",
+{%- endif %}
   "type": "module",
   "scripts": {
     "lint": "eslint .",
