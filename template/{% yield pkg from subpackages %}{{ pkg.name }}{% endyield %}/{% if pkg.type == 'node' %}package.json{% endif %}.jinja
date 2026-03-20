@@ -2,6 +2,9 @@
 {
   "name": "{{ pkg.name }}",
   "private": true,
+{%- if not is_workspace and node_package_manager == 'pnpm' %}
+  "packageManager": "pnpm@10.30.3",
+{%- endif %}
   "type": "module",
   "scripts": {
 {%- if not is_workspace %}
