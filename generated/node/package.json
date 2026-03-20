@@ -12,7 +12,7 @@
     "test:unit": "vitest run"
   },
   "devDependencies": {
-    "@commitlint/cli": "20.4.3",
+    "@commitlint/cli": "20.4.4",
     "@eslint/eslintrc": "3.3.5",
     "@fohte/eslint-config": "0.2.0",
     "@tsconfig/bun": "1.0.10",
