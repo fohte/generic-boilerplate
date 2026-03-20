@@ -1,5 +1,13 @@
 {%- set is_workspace = monorepo_node_workspace | default(false) -%}
 {%- set node_pkgs = subpackages | default([]) | selectattr('type', 'equalto', 'node') | list -%}
+{%- if type != 'node' and not is_workspace %}
+{#- Non-workspace pnpm monorepo: minimal package.json for corepack version pinning #}
+{
+  "name": "{{ project_name }}",
+  "private": true,
+  "packageManager": "pnpm@10.30.3"
+}
+{%- else -%}
 {
   "name": "{{ project_name }}",
   "private": true,
@@ -9,6 +17,9 @@
     "{{ pkg.name }}"{{ "," if not loop.last else "" }}
 {%- endfor %}
   ],
+{%- endif %}
+{%- if node_package_manager == 'pnpm' %}
+  "packageManager": "pnpm@10.30.3",
 {%- endif %}
   "type": "module",
   "scripts": {
@@ -43,3 +54,4 @@
     "vitest": "4.0.18"
   }
 }
+{%- endif %}

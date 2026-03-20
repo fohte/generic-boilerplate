@@ -32,6 +32,11 @@ done
 if command -v mise > /dev/null 2>&1; then
   mise install
 fi
+{%- if has_node and node_package_manager == 'pnpm' %}
+
+# Enable corepack so that pnpm version from package.json packageManager field is used
+corepack enable
+{%- endif %}
 
 # Install git hooks via lefthook (skip for worktrees — they share the parent's .git/hooks)
 if [ "$worktree" = false ] && command -v lefthook > /dev/null 2>&1; then
