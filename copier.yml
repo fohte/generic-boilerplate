@@ -47,7 +47,7 @@ _exclude:
   - '{% if not use_release_please %}.github/workflows/test-release-please.yml{% endif %}'
   # Exclude Node.js specific files when type is not 'node'
   # Use leading / to match root only (not yield subpackage directories)
-  - "{% if type != 'node' and not (monorepo_node_workspace | default(false)) %}/package.json{% endif %}"
+  - "{% if type != 'node' and not (monorepo_node_workspace | default(false)) and node_package_manager | default('bun') != 'pnpm' %}/package.json{% endif %}"
   - "{% if type != 'node' %}/tsconfig.json{% endif %}"
   - "{% if type != 'node' and not (monorepo_node_workspace | default(false)) %}/eslint.config.js{% endif %}"
   - "{% if type != 'node' %}/vitest.config.ts{% endif %}"
