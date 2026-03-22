@@ -27,13 +27,7 @@
     },
     {
       matchManagers: ['github-actions'],
-      matchUpdateTypes: ['minor', 'patch'],
       commitMessagePrefix: 'deps(ci):',
-    },
-    {
-      matchManagers: ['github-actions'],
-      matchUpdateTypes: ['major'],
-      commitMessagePrefix: 'deps(ci)!:',
     },
     {
       matchManagers: ['mise'],
