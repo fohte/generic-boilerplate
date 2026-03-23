@@ -836,6 +836,58 @@ jobs:
 EOF
 }
 
+@test "syncs packageManager field with package-name@version format" {
+  cat > template/package.json.jinja << 'EOF'
+{
+  "name": "{{ project_name }}",
+  "packageManager": "pnpm@10.30.3",
+  "devDependencies": {
+    "vitest": "3.2.4"
+  }
+}
+EOF
+
+  cat > generated/base/package.json << 'EOF'
+{
+  "name": "base",
+  "packageManager": "pnpm@10.30.3",
+  "devDependencies": {
+    "vitest": "3.2.4"
+  }
+}
+EOF
+
+  create_initial_commit
+
+  # Renovate updates pnpm version in packageManager field
+  cat > generated/base/package.json << 'EOF'
+{
+  "name": "base",
+  "packageManager": "pnpm@10.32.1",
+  "devDependencies": {
+    "vitest": "3.2.4"
+  }
+}
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update pnpm"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Synced 1 version"* ]]
+
+  diff -u template/package.json.jinja - << 'EOF'
+{
+  "name": "{{ project_name }}",
+  "packageManager": "pnpm@10.32.1",
+  "devDependencies": {
+    "vitest": "3.2.4"
+  }
+}
+EOF
+}
+
 # ========================================
 # Monorepo subpackage tests
 # ========================================

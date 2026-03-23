@@ -121,10 +121,10 @@ sync_versions_to_template() {
       local version="${BASH_REMATCH[2]}"
       local quoted=false
       local uses_syntax=true
-    elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*[=:][[:space:]]*\"([=^~\>\<]{0,2}v?[0-9]+\.[0-9]+[^\"]*)\" ]]; then
-      # Quoted version (TOML/JSON) - includes semver range specifiers
+    elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*[=:][[:space:]]*\"([^@\"]+@|[=^~\>\<]{0,2}v?)?([0-9]+\.[0-9]+[^\"]*)\" ]]; then
+      # Quoted version (TOML/JSON) - includes semver range specifiers and package@version format
       local key="${BASH_REMATCH[1]}"
-      local version="${BASH_REMATCH[2]}"
+      local version="${BASH_REMATCH[2]}${BASH_REMATCH[3]}"
       local quoted=true
       local uses_syntax=false
     elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*:[[:space:]]*([=^~\>\<]{0,2}v?[0-9]+\.[0-9]+[^[:space:]#]*) ]]; then
