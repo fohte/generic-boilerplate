@@ -1,7 +1,7 @@
 {%- set is_workspace = monorepo_node_workspace | default(false) -%}
 {%- set node_pkgs = subpackages | default([]) | selectattr('type', 'equalto', 'node') | list -%}
-{%- if type != 'node' and not is_workspace %}
-{#- Non-workspace pnpm monorepo: minimal package.json for corepack version pinning #}
+{%- if type != 'node' and not is_workspace -%}
+{#- Non-workspace pnpm monorepo: minimal package.json for corepack version pinning -#}
 {
   "name": "{{ project_name }}",
   "private": true,
