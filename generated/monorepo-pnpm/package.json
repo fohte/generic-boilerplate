@@ -1,5 +1,5 @@
 {
   "name": "monorepo-pnpm",
   "private": true,
-  "packageManager": "pnpm@10.32.1"
+  "packageManager": "pnpm@10.30.3"
 }
