@@ -203,7 +203,6 @@ sync_versions_to_template() {
 # Exclude files from version syncing. Patterns are grep regex, anchored to end of filename.
 excludes=(
   '\.copier-answers\.yml$' # Not a source file
-  'bun\.lock$'             # No corresponding template file (lockfiles are not in template)
   'pnpm-lock\.yaml$'       # No corresponding template file (lockfiles are not in template)
   'Cargo\.lock$'           # No corresponding template file (lockfiles are not in template)
 )

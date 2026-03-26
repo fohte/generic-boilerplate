@@ -32,7 +32,7 @@ done
 if command -v mise > /dev/null 2>&1; then
   mise install
 fi
-{%- if has_node and node_package_manager == 'pnpm' %}
+{%- if has_node %}
 
 # Enable corepack so that pnpm version from package.json packageManager field is used
 corepack enable
@@ -45,11 +45,7 @@ fi
 {%- if type == 'node' %}
 
 # Install Node.js dependencies
-{% if node_package_manager == 'pnpm' -%}
 pnpm install
-{%- else -%}
-bun install
-{%- endif %}
 {%- elif monorepo_node_workspace | default(false) %}
 
 # Install Node.js dependencies (workspace)
@@ -58,11 +54,7 @@ pnpm install
 
 # Install Node.js dependencies
 {%- for pkg in subpackages if pkg.type == 'node' %}
-{% if node_package_manager == 'pnpm' -%}
 (cd {{ pkg.name }} && pnpm install)
-{%- else -%}
-(cd {{ pkg.name }} && bun install)
-{%- endif %}
 {%- endfor %}
 {%- endif %}
 {%- if type == 'rust' %}

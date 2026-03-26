@@ -158,10 +158,8 @@ jobs:
       matrix:
         include:
           - fixture: node
-            package_manager: bun
             changed_output: node_changed
           - fixture: node-pnpm
-            package_manager: pnpm
             changed_output: node_pnpm_changed
 
     if: >-
@@ -180,27 +178,16 @@ jobs:
           working_directory: generated/${{ matrix.fixture }}
 
       - name: Enable corepack
-        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'pnpm'
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true'
         run: corepack enable
 
-      - name: Cache bun dependencies
-        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'bun'
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.bun/install/cache
-            ~/.bun/install/global
-            generated/${{ matrix.fixture }}/node_modules
-          key: ${{ runner.os }}-bun-validate-${{ matrix.fixture }}-${{ hashFiles(format('generated/{0}/package.json', matrix.fixture)) }}
-          restore-keys: ${{ runner.os }}-bun-validate-${{ matrix.fixture }}-
-
       - name: Get pnpm store directory
-        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'pnpm'
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true'
         id: pnpm-store
         run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: Cache pnpm store
-        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'pnpm'
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true'
         uses: actions/cache@v5
         with:
           path: |
@@ -209,18 +196,14 @@ jobs:
           key: ${{ runner.os }}-pnpm-validate-${{ matrix.fixture }}-${{ hashFiles(format('generated/{0}/package.json', matrix.fixture)) }}
           restore-keys: ${{ runner.os }}-pnpm-validate-${{ matrix.fixture }}-
 
-      - run: bun install
-        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'bun'
-        working-directory: generated/${{ matrix.fixture }}
-
       - run: pnpm install
-        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true' && matrix.package_manager == 'pnpm'
+        if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true'
         working-directory: generated/${{ matrix.fixture }}
 
       - name: Run tests
         if: needs.regenerate-and-commit.outputs[matrix.changed_output] == 'true'
         working-directory: generated/${{ matrix.fixture }}
-        run: ${{ matrix.package_manager }} run test
+        run: pnpm run test
 
   validate-rust:
     runs-on: ubuntu-latest
