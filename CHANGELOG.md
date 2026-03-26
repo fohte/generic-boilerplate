@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.2](https://github.com/fohte/generic-boilerplate/compare/v0.4.1...v0.4.2) (2026-03-26)
+
+
+### Bug Fixes
+
+* **apply-renovate-patch:** handle `package@version` format in `packageManager` field ([#237](https://github.com/fohte/generic-boilerplate/issues/237)) ([1126fa8](https://github.com/fohte/generic-boilerplate/commit/1126fa8ccdb63895b55880f16e5d6088f953b319))
+
+
+### Dependencies
+
+* **ci:** Update actions/create-github-app-token action to v3 ([#235](https://github.com/fohte/generic-boilerplate/issues/235)) ([143785b](https://github.com/fohte/generic-boilerplate/commit/143785bbf30c8fcf44b5052bcccf5efe9c4d0ab6))
+* Update @commitlint/cli to v20.4.4 ([#231](https://github.com/fohte/generic-boilerplate/issues/231)) ([99a73b2](https://github.com/fohte/generic-boilerplate/commit/99a73b2e4f277ede3787c39f1958c7c58cb3eac0))
+* Update dependency @fohte/eslint-config to v0.3.1 ([#240](https://github.com/fohte/generic-boilerplate/issues/240)) ([22bdec7](https://github.com/fohte/generic-boilerplate/commit/22bdec781b841b3eb87a8aa622fd3bad05f765d4))
+* Update dependency lefthook to v2.1.4 ([#228](https://github.com/fohte/generic-boilerplate/issues/228)) ([bbb123d](https://github.com/fohte/generic-boilerplate/commit/bbb123d62168764ee3c1ca0675ed004a7ebc7bca))
+* Update dependency shfmt to v3.13.0 ([#226](https://github.com/fohte/generic-boilerplate/issues/226)) ([1600e93](https://github.com/fohte/generic-boilerplate/commit/1600e939b5ac05d4d66e49225e875889d64b46aa))
+* Update dependency vitest to v4.1.0 ([#233](https://github.com/fohte/generic-boilerplate/issues/233)) ([b0bdcd3](https://github.com/fohte/generic-boilerplate/commit/b0bdcd3f0149c28c2f76b89c356cecacec9f6a5e))
+* Update Node.js to v24.14.0 ([#223](https://github.com/fohte/generic-boilerplate/issues/223)) ([1962f66](https://github.com/fohte/generic-boilerplate/commit/1962f663ed81bddad213c37608e4f4418f1e495e))
+
 ## [0.4.1](https://github.com/fohte/generic-boilerplate/compare/v0.4.0...v0.4.1) (2026-03-20)
 
 
