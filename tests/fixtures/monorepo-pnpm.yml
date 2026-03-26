@@ -8,7 +8,6 @@ description: Test monorepo project with pnpm (non-workspace)
 is_public: false
 use_release_please: false
 use_coverage: false
-node_package_manager: pnpm
 monorepo_node_workspace: false
 subpackages:
   - name: frontend
