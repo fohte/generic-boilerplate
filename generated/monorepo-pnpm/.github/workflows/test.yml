@@ -26,7 +26,7 @@ jobs:
           fetch-depth: 2
 
       - name: Check if current commit is auto-format by bot
-        id: check-prev
+        id: check-auto-format
         run: |
           commit_message=$(git log -1 --format=%s)
           commit_author=$(git log -1 --format=%an)
@@ -88,7 +88,7 @@ jobs:
         run: git restore --staged .
 
       - name: Commit formatted files
-        if: ${{ !cancelled() && steps.check-prev.outputs.skip_commit != 'true' }}
+        if: ${{ !cancelled() && steps.check-auto-format.outputs.skip_commit != 'true' }}
         uses: suzuki-shunsuke/commit-action@v0.1.1
         with:
           commit_message: 'style: auto-format'
