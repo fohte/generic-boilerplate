@@ -128,6 +128,18 @@ jobs:
           git add -A
           git commit -m "initial"
 
+      - name: Install Node.js dependencies
+        if: hashFiles(format('generated/{0}/**/package.json', matrix.fixture)) != ''
+        working-directory: generated/${{ matrix.fixture }}
+        run: |
+          # Install dependencies so that lefthook eslint hook can find the eslint binary.
+          # Find all directories containing package.json and install in each.
+          find . -name package.json -not -path '*/node_modules/*' -print0 \
+            | while IFS= read -r -d '' pkg; do
+                dir="$(dirname "$pkg")"
+                (cd "$dir" && pnpm install --no-frozen-lockfile)
+              done
+
       - name: Run lefthook
         working-directory: generated/${{ matrix.fixture }}
         run: lefthook run pre-commit --all-files
@@ -135,10 +147,18 @@ jobs:
       - name: Check for diff
         working-directory: generated/${{ matrix.fixture }}
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
+          # "Install Node.js dependencies" step generates pnpm-lock.yaml and
+          # node_modules/ which are not part of the template output.
+          # Exclude them so they don't cause a false diff failure.
+          exclude_paths=(
+            ':!pnpm-lock.yaml' ':!**/pnpm-lock.yaml'
+            ':!node_modules' ':!**/node_modules'
+          )
+          status=$(git status --porcelain -- . "${exclude_paths[@]}")
+          if [ -n "$status" ]; then
             echo "Error: Template validation failed. The following files have diffs after running lefthook:"
-            git status --porcelain
-            git diff
+            echo "$status"
+            git diff -- . "${exclude_paths[@]}"
             exit 1
           fi
 
