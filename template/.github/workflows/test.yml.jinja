@@ -67,7 +67,7 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.9
 {%- endif %}
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v4
 {%- if type == 'node' %}
 
       - run: corepack enable
@@ -182,7 +182,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v4
 
       - run: corepack enable
 
@@ -221,7 +221,7 @@ jobs:
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.9
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v4
 {%- if use_coverage %}
 
       - name: Install cargo-llvm-cov
@@ -317,7 +317,7 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.9
 {%- endif %}
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v4
 {%- if pkg.type == 'node' %}
 {%- if is_workspace %}
 {#- Workspace mode: install from root (pnpm only) #}
