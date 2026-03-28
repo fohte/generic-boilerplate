@@ -65,11 +65,12 @@ repos=$(
 # in a single API call using aliases.
 build_query() {
   local query="query {"
+  local i=0
   while IFS= read -r full_name; do
     local repo="${full_name#*/}"
-    local alias
-    # shellcheck disable=SC2001
-    alias="repo_$(echo "$repo" | sed 's/[^a-zA-Z0-9]/_/g')"
+    # Use counter suffix to avoid alias collisions (e.g. my-repo vs my_repo)
+    local alias="repo_${i}"
+    i=$((i + 1))
     query+="
   ${alias}: repository(owner: \"${OWNER}\", name: \"${repo}\") {
     name
