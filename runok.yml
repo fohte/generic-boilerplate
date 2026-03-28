@@ -11,4 +11,6 @@ definitions:
 
 rules:
   - allow: 'bash <var:project-scripts>'
+  - allow: 'bash <var:project-scripts> *'
   - allow: '<var:project-scripts>'
+  - allow: '<var:project-scripts> *'
