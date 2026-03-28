@@ -84,6 +84,13 @@ build_query() {
   echo "$query"
 }
 
+if [[ -z "$repos" ]]; then
+  if "$JSON_OUTPUT"; then
+    echo '[]'
+  fi
+  exit 0
+fi
+
 query=$(echo "$repos" | build_query)
 
 # Execute the GraphQL query
