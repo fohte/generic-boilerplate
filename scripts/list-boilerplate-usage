@@ -18,10 +18,20 @@ FILE_PATH=".copier-answers.yml"
 JSON_OUTPUT=false
 OUTDATED_ONLY=false
 
-for arg in "$@"; do
-  case "$arg" in
-    --json) JSON_OUTPUT=true ;;
-    --outdated) OUTDATED_ONLY=true ;;
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --json)
+      JSON_OUTPUT=true
+      shift
+      ;;
+    --outdated)
+      OUTDATED_ONLY=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
   esac
 done
 
@@ -35,11 +45,13 @@ renovate_prs=$(
     --jq '.[] | select(.title | test("generic-boilerplate")) | {repo: .repository.name, title: .title, number: .number, url: .url}'
 )
 
-# Build a lookup: repo name -> PR info (JSON)
-get_renovate_pr() {
-  local repo_name="$1"
-  echo "$renovate_prs" | jq -s --arg name "$repo_name" '.[] | select(.repo == $name)' 2> /dev/null
-}
+# Build associative array for O(1) PR lookups by repo name
+declare -A renovate_pr_map
+while IFS= read -r pr_json; do
+  [[ -z "$pr_json" ]] && continue
+  repo_name=$(echo "$pr_json" | jq -r '.repo')
+  renovate_pr_map["$repo_name"]="$pr_json"
+done <<< "$renovate_prs"
 
 # Search for repos containing .copier-answers.yml (root only, exclude templates/fixtures)
 repos=$(
@@ -91,14 +103,23 @@ echo "$result" | jq -c '
   name=$(echo "$entry" | jq -r '.name')
   yaml=$(echo "$entry" | jq -r '.yaml')
 
+  # Extract all needed values from yaml in a single yq call
+  mapfile -t values < <(echo "$yaml" | yq -r '
+    ._src_path // "",
+    ._commit // "unknown",
+    .type // "N/A",
+    ([to_entries[] | select(.key | test("^_") | not)] | from_entries | @json)
+  ')
+  src_path="${values[0]}"
+  commit="${values[1]}"
+  type="${values[2]}"
+  params="${values[3]:-null}"
+
   # Filter: only repos whose _src_path contains the boilerplate repo
-  src_path=$(echo "$yaml" | yq -r '._src_path // ""')
   if [[ "$src_path" != *"$BOILERPLATE_REPO"* ]]; then
     continue
   fi
 
-  commit=$(echo "$yaml" | yq -r '._commit // "unknown"')
-  type=$(echo "$yaml" | yq -r '.type // "N/A"')
   outdated=$([[ "$commit" != "$latest_version" ]] && echo true || echo false)
 
   # --outdated: skip repos that are up to date
@@ -106,12 +127,9 @@ echo "$result" | jq -c '
     continue
   fi
 
-  # Collect all non-internal keys as parameters
-  params=$(echo "$yaml" | yq -r 'to_entries | map(select(.key | test("^_") | not)) | from_entries' | yq -o=json '.')
-
   # Look up Renovate PR for this repo
-  pr_json=$(get_renovate_pr "$name")
-  if [[ -n "$pr_json" && "$pr_json" != "null" ]]; then
+  pr_json="${renovate_pr_map[$name]:-}"
+  if [[ -n "$pr_json" ]]; then
     pr_url=$(echo "$pr_json" | jq -r '.url')
     pr_number=$(echo "$pr_json" | jq -r '.number')
     has_pr=true
