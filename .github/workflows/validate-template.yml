@@ -49,7 +49,7 @@ jobs:
       - name: Fetch master branch
         run: git fetch origin master --depth=1
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v4
 
       - name: Save diff before regeneration
         id: save-diff
@@ -101,7 +101,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v4
         with:
           working_directory: generated/${{ matrix.fixture }}
 
@@ -172,7 +172,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v4
         with:
           working_directory: generated/node
 
@@ -217,7 +217,7 @@ jobs:
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.9
 
-      - uses: jdx/mise-action@v3
+      - uses: jdx/mise-action@v4
         with:
           working_directory: generated/rust
 
