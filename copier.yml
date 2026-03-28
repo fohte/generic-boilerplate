@@ -47,7 +47,7 @@ _exclude:
   - '{% if not use_release_please %}.github/workflows/test-release-please.yml{% endif %}'
   # Exclude Node.js specific files when type is not 'node'
   # Use leading / to match root only (not yield subpackage directories)
-  - "{% if type != 'node' and not (monorepo_node_workspace | default(false)) and node_package_manager | default('bun') != 'pnpm' %}/package.json{% endif %}"
+  - "{% if type != 'node' and not (monorepo_node_workspace | default(false)) and not (subpackages | default([]) | selectattr('type', 'equalto', 'node') | list) %}/package.json{% endif %}"
   - "{% if type != 'node' %}/tsconfig.json{% endif %}"
   - "{% if type != 'node' and not (monorepo_node_workspace | default(false)) %}/eslint.config.js{% endif %}"
   - "{% if type != 'node' %}/vitest.config.ts{% endif %}"
@@ -125,26 +125,11 @@ subpackages:
     Example: [{name: frontend, type: node}, {name: backend, type: rust}]
   when: "{{ type == 'base' }}"
 
-# Placed after subpackages so the when condition can reference it in interactive mode
-node_package_manager:
-  type: str
-  choices:
-    - bun
-    - pnpm
-  default: bun
-  help: Node.js package manager to use
-  when: "{{ type == 'node' or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
-
-# Placed after node_package_manager so the default/validator can reference it in interactive mode
 monorepo_node_workspace:
   type: bool
   help: Enable pnpm workspace for monorepo (hoists shared devDependencies to root)
   when: "{{ type == 'base' and (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
-  default: "{{ node_package_manager == 'pnpm' and (subpackages | selectattr('type', 'equalto', 'node') | list | length) >= 2 }}"
-  validator: >-
-    {% if monorepo_node_workspace and node_package_manager != 'pnpm' %}
-    monorepo_node_workspace requires pnpm as the package manager. bun workspace is not supported.
-    {% endif %}
+  default: "{{ (subpackages | selectattr('type', 'equalto', 'node') | list | length) >= 2 }}"
 
 use_coverage:
   type: bool

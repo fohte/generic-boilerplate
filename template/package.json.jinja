@@ -1,7 +1,7 @@
 {%- set is_workspace = monorepo_node_workspace | default(false) -%}
 {%- set node_pkgs = subpackages | default([]) | selectattr('type', 'equalto', 'node') | list -%}
 {%- if type != 'node' and not is_workspace -%}
-{#- Non-workspace pnpm monorepo: minimal package.json for corepack version pinning -#}
+{#- Non-workspace monorepo: minimal package.json for corepack version pinning -#}
 {
   "name": "{{ project_name }}",
   "private": true,
@@ -18,19 +18,17 @@
 {%- endfor %}
   ],
 {%- endif %}
-{%- if node_package_manager == 'pnpm' %}
   "packageManager": "pnpm@10.30.3",
-{%- endif %}
   "type": "module",
   "scripts": {
     "lint": "eslint .",
     "format:eslint": "eslint --fix .",
     "format:prettier": "prettier --write .",
-    "format": "conc -m 1 {{ node_package_manager }}:format:eslint {{ node_package_manager }}:format:prettier",
+    "format": "conc -m 1 pnpm:format:eslint pnpm:format:prettier",
 {%- if is_workspace %}
     "test": "pnpm -r run test"
 {%- else %}
-    "test": "conc {{ node_package_manager }}:test:type {{ node_package_manager }}:test:unit",
+    "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
     "test:unit": "vitest run"
 {%- endif %}
@@ -39,14 +37,9 @@
     "@commitlint/cli": "20.4.4",
     "@eslint/eslintrc": "3.3.5",
     "@fohte/eslint-config": "0.3.1",
-{%- if node_package_manager == 'pnpm' %}
     "@tsconfig/node-lts": "24.0.0",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.12.0",
-{%- else %}
-    "@tsconfig/bun": "1.0.10",
-    "@types/bun": "1.3.10",
-{%- endif %}
     "concurrently": "9.2.1",
     "eslint": "10.0.3",
     "prettier": "3.8.1",
