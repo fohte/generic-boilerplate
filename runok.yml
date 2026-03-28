@@ -1,0 +1,12 @@
+definitions:
+  vars:
+    project-scripts:
+      type: path
+      values:
+        - ./scripts/apply-renovate-patch
+        - ./scripts/check-renovate-diff-preserved
+        - ./scripts/generate-snapshots
+        - ./scripts/verify-sync-completeness
+
+rules:
+  - allow: 'bash <var:project-scripts>'
