@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.5.0](https://github.com/fohte/generic-boilerplate/compare/v0.4.2...v0.5.0) (2026-03-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update dependency @tsconfig/node-lts to v24.0.0 ([#252](https://github.com/fohte/generic-boilerplate/issues/252))
+* Update dependency @types/node to v24 ([#253](https://github.com/fohte/generic-boilerplate/issues/253))
+
+### Features
+
+* **lefthook:** add ESLint pre-commit hook for Node.js projects ([#246](https://github.com/fohte/generic-boilerplate/issues/246)) ([12fe2b2](https://github.com/fohte/generic-boilerplate/commit/12fe2b249ba9d0ce226fdd3d8c4dcd0dd66e6dd0))
+
+
+### Bug Fixes
+
+* **template:** add `pnpm-lock.yaml` to `.prettierignore` ([#249](https://github.com/fohte/generic-boilerplate/issues/249)) ([2cfc7d2](https://github.com/fohte/generic-boilerplate/commit/2cfc7d2eb632535035ebc1ae7e7b0e3684142891))
+* **test-workflow:** base auto-format skip on current commit instead of previous ([#243](https://github.com/fohte/generic-boilerplate/issues/243)) ([4c55e2c](https://github.com/fohte/generic-boilerplate/commit/4c55e2c0943ac37038bb0c0335f43bae48f12e42))
+
+
+### Dependencies
+
+* **ci:** Update jdx/mise-action action to v4 ([#234](https://github.com/fohte/generic-boilerplate/issues/234)) ([a5c2ce3](https://github.com/fohte/generic-boilerplate/commit/a5c2ce30aabff5d5a99ddb807563dc8f60127429))
+* Update @commitlint/cli to v20.5.0 ([#238](https://github.com/fohte/generic-boilerplate/issues/238)) ([9f5cd03](https://github.com/fohte/generic-boilerplate/commit/9f5cd03700484475bb94530af5802e0c39ef5b87))
+* Update dependency @tsconfig/node-lts to v24.0.0 ([#252](https://github.com/fohte/generic-boilerplate/issues/252)) ([fcdd62d](https://github.com/fohte/generic-boilerplate/commit/fcdd62d5f87aced9f1e21601773091adf6503a80))
+* Update dependency @types/node to v24 ([#253](https://github.com/fohte/generic-boilerplate/issues/253)) ([1360bd7](https://github.com/fohte/generic-boilerplate/commit/1360bd7a59d9b41bd0b41aaaf23b0430c9333836))
+* Update dependency eslint to v10.1.0 ([#251](https://github.com/fohte/generic-boilerplate/issues/251)) ([45c14d8](https://github.com/fohte/generic-boilerplate/commit/45c14d8117f4ae00b2a1ba421ad149076a25e1ad))
+* Update dependency github:ast-grep/ast-grep to v0.42.0 ([#239](https://github.com/fohte/generic-boilerplate/issues/239)) ([d3c585c](https://github.com/fohte/generic-boilerplate/commit/d3c585c79f23f358c84bf147546fab61b5344818))
+* update pnpm to v10.32.1 ([#225](https://github.com/fohte/generic-boilerplate/issues/225)) ([638bb7c](https://github.com/fohte/generic-boilerplate/commit/638bb7ce42a1e6f7e8d1f0a464605d40f99ef881))
+
 ## [0.4.2](https://github.com/fohte/generic-boilerplate/compare/v0.4.1...v0.4.2) (2026-03-26)
 
 
