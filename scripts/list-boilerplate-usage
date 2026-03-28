@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+# List all fohte org repositories that use generic-boilerplate via Copier,
+# showing their selected template parameters (type, etc.).
+#
+# Usage: scripts/list-boilerplate-usage [--json] [--outdated]
+#
+# Options:
+#   --json       Output in JSON format
+#   --outdated   Only show repos not on the latest version
+#
+# Requires: gh, jq, yq
+
+set -euo pipefail
+
+OWNER="fohte"
+BOILERPLATE_REPO="generic-boilerplate"
+FILE_PATH=".copier-answers.yml"
+JSON_OUTPUT=false
+OUTDATED_ONLY=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --json)
+      JSON_OUTPUT=true
+      shift
+      ;;
+    --outdated)
+      OUTDATED_ONLY=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Get the latest release tag from the boilerplate repo
+latest_version=$(gh release view --repo "${OWNER}/${BOILERPLATE_REPO}" --json tagName --jq '.tagName')
+
+# Fetch open Renovate PRs for generic-boilerplate updates (keyed by repo name)
+renovate_prs=$(
+  gh search prs --owner "$OWNER" "Update generic-boilerplate" --state open \
+    --json repository,title,url,number \
+    --jq '.[] | select(.title | test("generic-boilerplate")) | {repo: .repository.name, title: .title, number: .number, url: .url}'
+)
+
+# Build associative array for O(1) PR lookups by repo name
+declare -A renovate_pr_map
+while IFS= read -r pr_json; do
+  [[ -z "$pr_json" ]] && continue
+  repo_name=$(echo "$pr_json" | jq -r '.repo')
+  renovate_pr_map["$repo_name"]="$pr_json"
+done <<< "$renovate_prs"
+
+# Search for repos containing .copier-answers.yml (root only, exclude templates/fixtures)
+repos=$(
+  gh search code --owner "$OWNER" "filename:${FILE_PATH}" \
+    --json repository,path \
+    --jq ".[] | select(.path == \"${FILE_PATH}\") | .repository.nameWithOwner" |
+    sort -u
+)
+
+# Build a GraphQL query that fetches .copier-answers.yml content from each repo
+# in a single API call using aliases.
+build_query() {
+  local query="query {"
+  local i=0
+  while IFS= read -r full_name; do
+    local repo="${full_name#*/}"
+    # Use counter suffix to avoid alias collisions (e.g. my-repo vs my_repo)
+    local alias="repo_${i}"
+    i=$((i + 1))
+    query+="
+  ${alias}: repository(owner: \"${OWNER}\", name: \"${repo}\") {
+    name
+    object(expression: \"HEAD:${FILE_PATH}\") {
+      ... on Blob { text }
+    }
+  }"
+  done
+  query+="
+}"
+  echo "$query"
+}
+
+if [[ -z "$repos" ]]; then
+  if "$JSON_OUTPUT"; then
+    echo '[]'
+  fi
+  exit 0
+fi
+
+query=$(echo "$repos" | build_query)
+
+# Execute the GraphQL query
+result=$(gh api graphql -f query="$query")
+
+# Parse the result: filter repos whose _src_path points to generic-boilerplate,
+# then extract template parameters.
+echo "$result" | jq -c '
+  .data | to_entries[]
+  | .value as $repo
+  | select($repo.object != null)
+  | select($repo.object.text != null)
+  | {
+      name: $repo.name,
+      yaml: $repo.object.text
+    }
+' | while IFS= read -r entry; do
+  name=$(echo "$entry" | jq -r '.name')
+  yaml=$(echo "$entry" | jq -r '.yaml')
+
+  # Extract all needed values from yaml in a single yq call
+  mapfile -t values < <(echo "$yaml" | yq -r '
+    ._src_path // "",
+    ._commit // "unknown",
+    .type // "N/A",
+    ([to_entries[] | select(.key | test("^_") | not)] | from_entries | @json)
+  ')
+  src_path="${values[0]}"
+  commit="${values[1]}"
+  type="${values[2]}"
+  params="${values[3]:-null}"
+
+  # Filter: only repos whose _src_path contains the boilerplate repo
+  if [[ "$src_path" != *"$BOILERPLATE_REPO"* ]]; then
+    continue
+  fi
+
+  outdated=$([[ "$commit" != "$latest_version" ]] && echo true || echo false)
+
+  # --outdated: skip repos that are up to date
+  if "$OUTDATED_ONLY" && [[ "$outdated" == "false" ]]; then
+    continue
+  fi
+
+  # Look up Renovate PR for this repo
+  pr_json="${renovate_pr_map[$name]:-}"
+  if [[ -n "$pr_json" ]]; then
+    pr_url=$(echo "$pr_json" | jq -r '.url')
+    pr_number=$(echo "$pr_json" | jq -r '.number')
+    has_pr=true
+  else
+    pr_url=""
+    pr_number=""
+    has_pr=false
+  fi
+
+  if "$JSON_OUTPUT"; then
+    pr_obj="null"
+    if "$has_pr"; then
+      pr_obj=$(jq -n --arg url "$pr_url" --argjson number "$pr_number" '{number: $number, url: $url}')
+    fi
+    jq -n \
+      --arg name "$name" \
+      --arg commit "$commit" \
+      --arg latest "$latest_version" \
+      --argjson outdated "$outdated" \
+      --argjson params "$params" \
+      --argjson renovate_pr "$pr_obj" \
+      '{repo: $name, commit: $commit, latest: $latest, outdated: $outdated, renovate_pr: $renovate_pr, params: $params}'
+  else
+    if "$outdated"; then
+      echo "$name (commit: $commit <- latest: $latest_version)"
+    else
+      echo "$name (commit: $commit)"
+    fi
+    echo "  type: $type"
+    if "$has_pr"; then
+      echo "  renovate PR: #${pr_number} ${pr_url}"
+    elif "$outdated"; then
+      echo "  renovate PR: (none)"
+    fi
+    echo "$params" | jq -r 'to_entries[] | select(.key != "type" and .key != "project_name") | "  \(.key): \(.value)"'
+    echo ""
+  fi
+done | if "$JSON_OUTPUT"; then
+  jq -s '.'
+else
+  cat
+fi
