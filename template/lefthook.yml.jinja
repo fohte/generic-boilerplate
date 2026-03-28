@@ -2,11 +2,7 @@
 {%- set node_pkgs = subpackages | selectattr('type', 'equalto', 'node') | list -%}
 {%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list -%}
 {%- set has_rust = (type == 'rust') or (rust_pkgs | length > 0) -%}
-{%- if node_package_manager | default('bun') == 'pnpm' -%}
-  {%- set eslint_run = 'pnpm exec eslint {staged_files}' -%}
-{%- else -%}
-  {%- set eslint_run = 'bun x eslint {staged_files}' -%}
-{%- endif -%}
+{%- set eslint_run = 'pnpm exec eslint {staged_files}' -%}
 remotes:
   - git_url: https://github.com/fohte/lefthook-config.git
     ref: v0.1.15 # renovate: datasource=github-tags depName=fohte/lefthook-config

@@ -8,12 +8,12 @@ pre-commit:
   commands:
     eslint:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
-      run: bun x eslint {staged_files}
+      run: pnpm exec eslint {staged_files}
     eslint-frontend:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
       root: 'frontend/'
-      run: bun x eslint {staged_files}
+      run: pnpm exec eslint {staged_files}
     eslint-backend:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
       root: 'backend/'
-      run: bun x eslint {staged_files}
+      run: pnpm exec eslint {staged_files}

@@ -137,13 +137,7 @@ jobs:
           find . -name package.json -not -path '*/node_modules/*' -print0 \
             | while IFS= read -r -d '' pkg; do
                 dir="$(dirname "$pkg")"
-                cd "$dir"
-                if jq -e '.packageManager // empty | test("pnpm")' package.json > /dev/null 2>&1; then
-                  pnpm install --no-frozen-lockfile
-                else
-                  bun install
-                fi
-                cd "$OLDPWD"
+                (cd "$dir" && pnpm install --no-frozen-lockfile)
               done
 
       - name: Run lefthook
