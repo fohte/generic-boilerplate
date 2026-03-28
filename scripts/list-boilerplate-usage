@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+# List all fohte org repositories that use generic-boilerplate via Copier,
+# showing their selected template parameters (type, etc.).
+#
+# Usage: scripts/list-boilerplate-usage [--json] [--outdated]
+#
+# Options:
+#   --json       Output in JSON format
+#   --outdated   Only show repos not on the latest version
+#
+# Requires: gh, jq, yq
+
+set -euo pipefail
+
+OWNER="fohte"
+BOILERPLATE_REPO="generic-boilerplate"
+FILE_PATH=".copier-answers.yml"
+JSON_OUTPUT=false
+OUTDATED_ONLY=false
+
+for arg in "$@"; do
+  case "$arg" in
+    --json) JSON_OUTPUT=true ;;
+    --outdated) OUTDATED_ONLY=true ;;
+  esac
+done
+
+# Get the latest release tag from the boilerplate repo
+latest_version=$(gh release view --repo "${OWNER}/${BOILERPLATE_REPO}" --json tagName --jq '.tagName')
+
+# Search for repos containing .copier-answers.yml (root only, exclude templates/fixtures)
+repos=$(
+  gh search code --owner "$OWNER" "filename:${FILE_PATH}" \
+    --json repository,path \
+    --jq ".[] | select(.path == \"${FILE_PATH}\") | .repository.nameWithOwner" |
+    sort -u
+)
+
+# Build a GraphQL query that fetches .copier-answers.yml content from each repo
+# in a single API call using aliases.
+build_query() {
+  local query="query {"
+  while IFS= read -r full_name; do
+    local repo="${full_name#*/}"
+    local alias
+    # shellcheck disable=SC2001
+    alias="repo_$(echo "$repo" | sed 's/[^a-zA-Z0-9]/_/g')"
+    query+="
+  ${alias}: repository(owner: \"${OWNER}\", name: \"${repo}\") {
+    name
+    object(expression: \"HEAD:${FILE_PATH}\") {
+      ... on Blob { text }
+    }
+  }"
+  done
+  query+="
+}"
+  echo "$query"
+}
+
+query=$(echo "$repos" | build_query)
+
+# Execute the GraphQL query
+result=$(gh api graphql -f query="$query")
+
+# Parse the result: filter repos whose _src_path points to generic-boilerplate,
+# then extract template parameters.
+echo "$result" | jq -c '
+  .data | to_entries[]
+  | .value as $repo
+  | select($repo.object != null)
+  | select($repo.object.text != null)
+  | {
+      name: $repo.name,
+      yaml: $repo.object.text
+    }
+' | while IFS= read -r entry; do
+  name=$(echo "$entry" | jq -r '.name')
+  yaml=$(echo "$entry" | jq -r '.yaml')
+
+  # Filter: only repos whose _src_path contains the boilerplate repo
+  src_path=$(echo "$yaml" | yq -r '._src_path // ""')
+  if [[ "$src_path" != *"$BOILERPLATE_REPO"* ]]; then
+    continue
+  fi
+
+  commit=$(echo "$yaml" | yq -r '._commit // "unknown"')
+  type=$(echo "$yaml" | yq -r '.type // "N/A"')
+  outdated=$([[ "$commit" != "$latest_version" ]] && echo true || echo false)
+
+  # --outdated: skip repos that are up to date
+  if "$OUTDATED_ONLY" && [[ "$outdated" == "false" ]]; then
+    continue
+  fi
+
+  # Collect all non-internal keys as parameters
+  params=$(echo "$yaml" | yq -r 'to_entries | map(select(.key | test("^_") | not)) | from_entries' | yq -o=json '.')
+
+  if "$JSON_OUTPUT"; then
+    jq -n \
+      --arg name "$name" \
+      --arg commit "$commit" \
+      --arg latest "$latest_version" \
+      --argjson outdated "$outdated" \
+      --argjson params "$params" \
+      '{repo: $name, commit: $commit, latest: $latest, outdated: $outdated, params: $params}'
+  else
+    if "$outdated"; then
+      echo "$name (commit: $commit <- latest: $latest_version)"
+    else
+      echo "$name (commit: $commit)"
+    fi
+    echo "  type: $type"
+    echo "$params" | jq -r 'to_entries[] | select(.key != "type" and .key != "project_name") | "  \(.key): \(.value)"'
+    echo ""
+  fi
+done | if "$JSON_OUTPUT"; then
+  jq -s '.'
+else
+  cat
+fi
