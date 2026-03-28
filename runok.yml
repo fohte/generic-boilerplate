@@ -7,6 +7,7 @@ definitions:
         - ./scripts/check-renovate-diff-preserved
         - ./scripts/generate-snapshots
         - ./scripts/verify-sync-completeness
+        - ./scripts/list-boilerplate-usage
 
 rules:
   - allow: 'bash <var:project-scripts>'
