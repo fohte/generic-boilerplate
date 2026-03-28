@@ -1,14 +1,38 @@
+{%- set has_node = (type == 'node') or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) -%}
+{%- set node_pkgs = subpackages | selectattr('type', 'equalto', 'node') | list -%}
+{%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list -%}
+{%- set has_rust = (type == 'rust') or (rust_pkgs | length > 0) -%}
+{%- if node_package_manager | default('bun') == 'pnpm' -%}
+  {%- set eslint_run = 'pnpm exec eslint {staged_files}' -%}
+{%- else -%}
+  {%- set eslint_run = 'bun x eslint {staged_files}' -%}
+{%- endif -%}
 remotes:
   - git_url: https://github.com/fohte/lefthook-config.git
     ref: v0.1.15 # renovate: datasource=github-tags depName=fohte/lefthook-config
     configs:
       - base.yml
-{%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list %}
-{%- if type == 'rust' or rust_pkgs | length > 0 %}
+{%- if has_rust %}
       - rust.yml
+{%- endif %}
+{%- if has_node or has_rust %}
 
 pre-commit:
   commands:
+{%- if has_node %}
+{%- if type == 'node' or (monorepo_node_workspace | default(false)) %}
+    eslint:
+      glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
+      run: {{ eslint_run }}
+{%- endif %}
+{%- for pkg in node_pkgs %}
+    eslint-{{ pkg.name }}:
+      glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
+      root: '{{ pkg.name }}/'
+      run: {{ eslint_run }}
+{%- endfor %}
+{%- endif %}
+{%- if has_rust %}
     ast-grep:
       glob: '*.rs'
       run: ast-grep scan {staged_files}
@@ -17,5 +41,6 @@ pre-commit:
       root: '{{ rust_pkgs[0].name }}/'
     cargo-clippy:
       root: '{{ rust_pkgs[0].name }}/'
+{%- endif %}
 {%- endif %}
 {%- endif %}
