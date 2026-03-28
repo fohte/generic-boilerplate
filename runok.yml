@@ -10,3 +10,4 @@ definitions:
 
 rules:
   - allow: 'bash <var:project-scripts>'
+  - allow: '<var:project-scripts>'
