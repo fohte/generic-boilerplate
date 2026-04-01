@@ -1,0 +1,6 @@
+# Auto-generated files
+CHANGELOG.md
+{% if type == 'node' or (monorepo_node_workspace | default(false)) or (subpackages | default([]) | selectattr('type', 'equalto', 'node') | list) %}
+# Lock files
+pnpm-lock.yaml
+{% endif -%}
