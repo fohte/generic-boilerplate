@@ -16,7 +16,6 @@ permissions:
   pull-requests: write
 
 jobs:
-
   detect-changes-frontend:
     runs-on: ubuntu-slim
     outputs:

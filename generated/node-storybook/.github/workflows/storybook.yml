@@ -16,7 +16,6 @@ permissions:
   pull-requests: write
 
 jobs:
-
   detect-changes:
     runs-on: ubuntu-slim
     outputs:
