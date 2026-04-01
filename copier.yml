@@ -45,6 +45,7 @@ _exclude:
   - '{% if not use_release_please %}.release-please-manifest.json{% endif %}'
   - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
   - '{% if not use_release_please %}.github/workflows/test-release-please.yml{% endif %}'
+  - '{% if not use_release_please %}.github/workflows/pr-title-check.yml{% endif %}'
   # Exclude Node.js specific files when type is not 'node'
   # Use leading / to match root only (not yield subpackage directories)
   - "{% if type != 'node' and not (monorepo_node_workspace | default(false)) and not (subpackages | default([]) | selectattr('type', 'equalto', 'node') | list) %}/package.json{% endif %}"
