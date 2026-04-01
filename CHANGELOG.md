@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/fohte/generic-boilerplate/compare/v0.5.1...v0.5.2) (2026-04-01)
+
+
+### Bug Fixes
+
+* exclude pr-title-check workflow when release-please is disabled ([#261](https://github.com/fohte/generic-boilerplate/issues/261)) ([6c2a390](https://github.com/fohte/generic-boilerplate/commit/6c2a3906881fb58efb52be3d6e8f7023d03e752b))
+
 ## [0.5.1](https://github.com/fohte/generic-boilerplate/compare/v0.5.0...v0.5.1) (2026-04-01)
 
 
