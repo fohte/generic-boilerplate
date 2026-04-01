@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.1](https://github.com/fohte/generic-boilerplate/compare/v0.5.0...v0.5.1) (2026-04-01)
+
+
+### Features
+
+* add PR title check workflow for strict Conventional Commits compliance ([#257](https://github.com/fohte/generic-boilerplate/issues/257)) ([e0a86c2](https://github.com/fohte/generic-boilerplate/commit/e0a86c29ff9ce89da20321d2471de253f94da31b))
+
+
+### Bug Fixes
+
+* exclude `pnpm-lock.yaml` from `.prettierignore` in non-pnpm projects ([#260](https://github.com/fohte/generic-boilerplate/issues/260)) ([d7ac05f](https://github.com/fohte/generic-boilerplate/commit/d7ac05fd4f6e02839356f9743ea48a000e615b02))
+
 ## [0.5.0](https://github.com/fohte/generic-boilerplate/compare/v0.4.2...v0.5.0) (2026-03-28)
 
 
