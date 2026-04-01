@@ -1,7 +1,0 @@
-# Test fixture for node template with Storybook
-type: node
-project_name: node-storybook
-description: Test Node.js project with Storybook
-is_public: false
-use_release_please: false
-use_storybook: true

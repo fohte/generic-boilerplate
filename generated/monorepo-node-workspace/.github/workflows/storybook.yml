@@ -72,7 +72,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages project create monorepo-storybook-workspace-frontend-storybook --production-branch=main
+          command: pages project create monorepo-node-workspace-pnpm-frontend-storybook --production-branch=main
         continue-on-error: true
 
       - name: Deploy to Cloudflare Pages
@@ -81,7 +81,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy frontend/storybook-static --project-name=monorepo-storybook-workspace-frontend-storybook --branch=${{ github.head_ref || 'main' }} --commit-dirty=true
+          command: pages deploy frontend/storybook-static --project-name=monorepo-node-workspace-pnpm-frontend-storybook --branch=${{ github.head_ref || 'main' }} --commit-dirty=true
 
       - name: Comment preview URL on PR
         if: github.event_name == 'pull_request'
