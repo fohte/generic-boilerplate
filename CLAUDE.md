@@ -21,3 +21,10 @@ When a file in `template/` has identical content to a file in the repository roo
 - `generated/` directory contains snapshot fixtures auto-generated from `template/` and `tests/fixtures/*.yml`
 - Never edit files in `generated/` directly. Always modify the template source and regenerate
 - Run `scripts/generate-snapshots` to regenerate all snapshots after template changes
+
+## Test fixture policy
+
+- Do not add new fixtures for every feature combination. Each fixture increases CI cost and maintenance burden due to combinatorial explosion
+- When adding a new template feature, enable it in an existing fixture rather than creating a dedicated fixture
+- Only add a new fixture when the feature requires a fundamentally different project structure that no existing fixture covers (e.g., a new `type` value)
+- Rare or unlikely configurations do not need fixture coverage
