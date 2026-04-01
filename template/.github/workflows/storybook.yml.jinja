@@ -23,7 +23,6 @@ permissions:
 jobs:
 {%- if is_monorepo %}
 {%- for pkg in storybook_pkgs %}
-
   detect-changes-{{ pkg.name }}:
     runs-on: ubuntu-slim
     outputs:
@@ -124,7 +123,6 @@ jobs:
             {% raw %}${{ steps.deploy.outputs.pages-deployment-alias-url }}{% endraw %}
 {%- endfor %}
 {%- else %}
-
   detect-changes:
     runs-on: ubuntu-slim
     outputs:
