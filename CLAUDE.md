@@ -15,3 +15,9 @@ When a file in `template/` has identical content to a file in the repository roo
 - Root file: the real file (e.g., `.github/workflows/pr-title-check.yml`)
 - Template file: a symlink to the root (e.g., `template/.github/workflows/pr-title-check.yml -> ../../../.github/workflows/pr-title-check.yml`)
 - Never copy files between root and template; always use symlinks
+
+## Snapshot generation
+
+- `generated/` directory contains snapshot fixtures auto-generated from `template/` and `tests/fixtures/*.yml`
+- Never edit files in `generated/` directly. Always modify the template source and regenerate
+- Run `scripts/generate-snapshots` to regenerate all snapshots after template changes
