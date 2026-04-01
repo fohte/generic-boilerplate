@@ -1,4 +1,5 @@
 {%- set is_workspace = monorepo_node_workspace | default(false) -%}
+{%- set has_storybook = pkg.storybook | default(false) -%}
 {
   "name": "{{ pkg.name }}",
   "private": true,
@@ -15,21 +16,38 @@
 {%- endif %}
     "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
-    "test:unit": "vitest run"
-  }{{ "," if not is_workspace else "" }}
+    "test:unit": "vitest run"{{ "," if has_storybook else "" }}
+{%- if has_storybook %}
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"
+{%- endif %}
+  }{{ "," if not is_workspace or has_storybook else "" }}
 {%- if not is_workspace %}
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
     "@eslint/eslintrc": "3.3.5",
     "@fohte/eslint-config": "0.3.1",
+{%- if has_storybook %}
+    "@storybook/addon-docs": "10.2.10",
+    "@storybook/addon-themes": "10.2.10",
+{%- endif %}
     "@tsconfig/node-lts": "24.0.0",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.12.0",
     "concurrently": "9.2.1",
     "eslint": "10.1.0",
     "prettier": "3.8.1",
+{%- if has_storybook %}
+    "storybook": "10.2.10",
+{%- endif %}
     "typescript": "5.9.3",
     "vitest": "4.1.0"
+  }
+{%- elif has_storybook %}
+  "devDependencies": {
+    "@storybook/addon-docs": "10.2.10",
+    "@storybook/addon-themes": "10.2.10",
+    "storybook": "10.2.10"
   }
 {%- endif %}
 }
