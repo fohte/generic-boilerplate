@@ -3,6 +3,8 @@
 {%- set storybook_pkgs = subpackages | default([]) | selectattr('storybook', 'defined') | selectattr('storybook', 'equalto', true) | list -%}
 {%- set node_pkgs = subpackages | default([]) | selectattr('type', 'equalto', 'node') | list -%}
 {%- set is_workspace = monorepo_node_workspace | default(false) -%}
+{#- Slugify: lowercase, replace _ and / with -, remove @ -#}
+{%- macro slug(name) %}{{ name | replace('_', '-') | replace('@', '') | replace('/', '-') | lower }}{% endmacro -%}
 name: Storybook
 
 on:
@@ -23,7 +25,7 @@ permissions:
 jobs:
 {%- if is_monorepo %}
 {%- for pkg in storybook_pkgs %}
-  detect-changes-{{ pkg.name }}:
+  detect-changes-{{ slug(pkg.name) }}:
     runs-on: ubuntu-slim
     outputs:
       changed: {% raw %}${{ steps.changes.outputs.any_changed }}{% endraw %}
@@ -45,9 +47,9 @@ jobs:
             pnpm-workspace.yaml
 {%- endif %}
 
-  deploy-{{ pkg.name }}:
-    needs: detect-changes-{{ pkg.name }}
-    if: needs.detect-changes-{{ pkg.name }}.outputs.changed == 'true'
+  deploy-{{ slug(pkg.name) }}:
+    needs: detect-changes-{{ slug(pkg.name) }}
+    if: needs.detect-changes-{{ slug(pkg.name) }}.outputs.changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -73,7 +75,7 @@ jobs:
           key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --filter "{{ pkg.name }}..." --frozen-lockfile
 {%- else %}
 
       - name: Get pnpm store directory
@@ -101,7 +103,7 @@ jobs:
         with:
           apiToken: {% raw %}${{ secrets.CLOUDFLARE_API_TOKEN }}{% endraw %}
           accountId: {% raw %}${{ secrets.CLOUDFLARE_ACCOUNT_ID }}{% endraw %}
-          command: pages project create {{ project_name }}-{{ pkg.name }}-storybook --production-branch=main
+          command: pages project create {{ slug(project_name) }}-{{ slug(pkg.name) }}-storybook --production-branch=main
         continue-on-error: true
 
       - name: Deploy to Cloudflare Pages
@@ -110,13 +112,13 @@ jobs:
         with:
           apiToken: {% raw %}${{ secrets.CLOUDFLARE_API_TOKEN }}{% endraw %}
           accountId: {% raw %}${{ secrets.CLOUDFLARE_ACCOUNT_ID }}{% endraw %}
-          command: pages deploy {{ pkg.name }}/storybook-static --project-name={{ project_name }}-{{ pkg.name }}-storybook --branch={% raw %}${{ github.head_ref || 'main' }}{% endraw %} --commit-dirty=true
+          command: pages deploy {{ pkg.name }}/storybook-static --project-name={{ slug(project_name) }}-{{ slug(pkg.name) }}-storybook --branch={% raw %}${{ github.head_ref || 'main' }}{% endraw %} --commit-dirty=true
 
       - name: Comment preview URL on PR
         if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          header: storybook-preview-{{ pkg.name }}
+          header: storybook-preview-{{ slug(pkg.name) }}
           message: |
             ## Storybook Preview ({{ pkg.name }})
 
@@ -176,7 +178,7 @@ jobs:
         with:
           apiToken: {% raw %}${{ secrets.CLOUDFLARE_API_TOKEN }}{% endraw %}
           accountId: {% raw %}${{ secrets.CLOUDFLARE_ACCOUNT_ID }}{% endraw %}
-          command: pages project create {{ project_name }}-storybook --production-branch=main
+          command: pages project create {{ slug(project_name) }}-storybook --production-branch=main
         continue-on-error: true
 
       - name: Deploy to Cloudflare Pages
@@ -185,7 +187,7 @@ jobs:
         with:
           apiToken: {% raw %}${{ secrets.CLOUDFLARE_API_TOKEN }}{% endraw %}
           accountId: {% raw %}${{ secrets.CLOUDFLARE_ACCOUNT_ID }}{% endraw %}
-          command: pages deploy storybook-static --project-name={{ project_name }}-storybook --branch={% raw %}${{ github.head_ref || 'main' }}{% endraw %} --commit-dirty=true
+          command: pages deploy storybook-static --project-name={{ slug(project_name) }}-storybook --branch={% raw %}${{ github.head_ref || 'main' }}{% endraw %} --commit-dirty=true
 
       - name: Comment preview URL on PR
         if: github.event_name == 'pull_request'

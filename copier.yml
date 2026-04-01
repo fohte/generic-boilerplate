@@ -67,8 +67,8 @@ _exclude:
   - "{% if type != 'node' %}/src/index.test.ts{% endif %}"
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
-  # Exclude Storybook workflow when storybook is disabled
-  - '{% if not use_storybook | default(false) %}.github/workflows/storybook.yml{% endif %}'
+  # Exclude Storybook workflow when storybook is disabled or no storybook packages exist
+  - "{% if not use_storybook | default(false) or (type == 'base' and not (subpackages | default([]) | selectattr('storybook', 'defined') | selectattr('storybook', 'equalto', true) | list)) %}.github/workflows/storybook.yml{% endif %}"
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not (monorepo_node_workspace | default(false)) and not (subpackages | selectattr('type', 'equalto', 'rust') | list) %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
