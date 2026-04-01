@@ -1,0 +1,14 @@
+# Test fixture for monorepo template with Storybook and pnpm workspace
+type: base
+project_name: monorepo-storybook-workspace
+description: Test monorepo project with Storybook and pnpm workspace
+is_public: false
+use_release_please: false
+monorepo_node_workspace: true
+use_storybook: true
+subpackages:
+  - name: frontend
+    type: node
+    storybook: true
+  - name: backend
+    type: node

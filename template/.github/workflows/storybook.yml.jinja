@@ -1,0 +1,201 @@
+{#- Helper variables -#}
+{%- set is_monorepo = subpackages | default([]) | length > 0 -%}
+{%- set storybook_pkgs = subpackages | default([]) | selectattr('storybook', 'defined') | selectattr('storybook', 'equalto', true) | list -%}
+{%- set node_pkgs = subpackages | default([]) | selectattr('type', 'equalto', 'node') | list -%}
+{%- set is_workspace = monorepo_node_workspace | default(false) -%}
+name: Storybook
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: {% raw %}storybook-${{ github.ref }}{% endraw %}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write
+
+jobs:
+{%- if is_monorepo %}
+{%- for pkg in storybook_pkgs %}
+
+  detect-changes-{{ pkg.name }}:
+    runs-on: ubuntu-slim
+    outputs:
+      changed: {% raw %}${{ steps.changes.outputs.any_changed }}{% endraw %}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+
+      - name: Check for changes
+        uses: tj-actions/changed-files@v47
+        id: changes
+        with:
+          files: |
+            {{ pkg.name }}/**
+            .github/workflows/storybook.yml
+{%- if is_workspace %}
+            package.json
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
+{%- endif %}
+
+  deploy-{{ pkg.name }}:
+    needs: detect-changes-{{ pkg.name }}
+    if: needs.detect-changes-{{ pkg.name }}.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: jdx/mise-action@v4
+
+      - run: corepack enable
+{%- if is_workspace %}
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        with:
+          path: |
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+            node_modules
+{%- for p in node_pkgs %}
+            {{ p.name }}/node_modules
+{%- endfor %}
+          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+
+      - run: pnpm install --frozen-lockfile
+{%- else %}
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        with:
+          path: |
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+            {{ pkg.name }}/node_modules
+          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+
+      - name: Install pnpm dependencies
+        run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
+{%- endif %}
+
+      - name: Build Storybook
+        run: cd "{{ pkg.name }}" && pnpm run storybook:build
+
+      - name: Create Cloudflare Pages project if not exists
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: {% raw %}${{ secrets.CLOUDFLARE_API_TOKEN }}{% endraw %}
+          accountId: {% raw %}${{ secrets.CLOUDFLARE_ACCOUNT_ID }}{% endraw %}
+          command: pages project create {{ project_name }}-{{ pkg.name }}-storybook --production-branch=main
+        continue-on-error: true
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: {% raw %}${{ secrets.CLOUDFLARE_API_TOKEN }}{% endraw %}
+          accountId: {% raw %}${{ secrets.CLOUDFLARE_ACCOUNT_ID }}{% endraw %}
+          command: pages deploy {{ pkg.name }}/storybook-static --project-name={{ project_name }}-{{ pkg.name }}-storybook --branch={% raw %}${{ github.head_ref || 'main' }}{% endraw %} --commit-dirty=true
+
+      - name: Comment preview URL on PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: storybook-preview-{{ pkg.name }}
+          message: |
+            ## Storybook Preview ({{ pkg.name }})
+
+            {% raw %}${{ steps.deploy.outputs.pages-deployment-alias-url }}{% endraw %}
+{%- endfor %}
+{%- else %}
+
+  detect-changes:
+    runs-on: ubuntu-slim
+    outputs:
+      changed: {% raw %}${{ steps.changes.outputs.any_changed }}{% endraw %}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+
+      - name: Check for changes
+        uses: tj-actions/changed-files@v47
+        id: changes
+        with:
+          files: |
+            src/**
+            package.json
+            pnpm-lock.yaml
+            .github/workflows/storybook.yml
+
+  deploy:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: jdx/mise-action@v4
+
+      - run: corepack enable
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        with:
+          path: |
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+            node_modules
+          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        run: pnpm run storybook:build
+
+      - name: Create Cloudflare Pages project if not exists
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: {% raw %}${{ secrets.CLOUDFLARE_API_TOKEN }}{% endraw %}
+          accountId: {% raw %}${{ secrets.CLOUDFLARE_ACCOUNT_ID }}{% endraw %}
+          command: pages project create {{ project_name }}-storybook --production-branch=main
+        continue-on-error: true
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: {% raw %}${{ secrets.CLOUDFLARE_API_TOKEN }}{% endraw %}
+          accountId: {% raw %}${{ secrets.CLOUDFLARE_ACCOUNT_ID }}{% endraw %}
+          command: pages deploy storybook-static --project-name={{ project_name }}-storybook --branch={% raw %}${{ github.head_ref || 'main' }}{% endraw %} --commit-dirty=true
+
+      - name: Comment preview URL on PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: storybook-preview
+          message: |
+            ## Storybook Preview
+
+            {% raw %}${{ steps.deploy.outputs.pages-deployment-alias-url }}{% endraw %}
+{%- endif %}

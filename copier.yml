@@ -67,6 +67,8 @@ _exclude:
   - "{% if type != 'node' %}/src/index.test.ts{% endif %}"
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
+  # Exclude Storybook workflow when storybook is disabled
+  - '{% if not use_storybook | default(false) %}.github/workflows/storybook.yml{% endif %}'
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not (monorepo_node_workspace | default(false)) and not (subpackages | selectattr('type', 'equalto', 'rust') | list) %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
@@ -136,3 +138,10 @@ use_coverage:
   default: false
   help: Enable code coverage with cargo-llvm-cov and Codecov?
   when: "{{ type == 'rust' or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) }}"
+
+# Storybook settings
+use_storybook:
+  type: bool
+  default: false
+  help: Enable Storybook deployment to Cloudflare Pages?
+  when: "{{ type == 'node' or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
