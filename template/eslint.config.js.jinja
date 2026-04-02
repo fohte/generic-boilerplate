@@ -1,22 +1,23 @@
+{%- set is_workspace = monorepo_node_workspace | default(false) -%}
+{%- set has_storybook = use_storybook | default(false) -%}
 import { config } from '@fohte/eslint-config'
 
 export default config(
   { typescript: { typeChecked: true } },
+{%- if has_storybook and not is_workspace %}
   {
     files: ['**/*.ts{,x}'],
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: [
-            '.storybook/main.ts',
-            '.storybook/preview.ts',
-            '**/.storybook/main.ts',
-            '**/.storybook/preview.ts',
-          ],
+          allowDefaultProject: ['.storybook/main.ts', '.storybook/preview.ts'],
         },
       },
     },
   },
+{%- elif is_workspace and has_storybook %}
+  { ignores: ['**/.storybook/'] },
+{%- endif %}
   {
     rules: {
       'no-restricted-imports': [
@@ -33,11 +34,13 @@ export default config(
       ],
     },
   },
+{%- if has_storybook and not is_workspace %}
   // .storybook/ and vitest.config.ts are outside src/ where @ alias is unavailable
   {
-    files: ['.storybook/**/*.ts', '**/.storybook/**/*.ts', 'vitest.config.ts'],
+    files: ['.storybook/**/*.ts', 'vitest.config.ts'],
     rules: {
       'no-restricted-imports': 'off',
     },
   },
+{%- endif %}
 )
