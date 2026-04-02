@@ -6,8 +6,10 @@ is_public: false
 use_release_please: false
 use_coverage: true
 monorepo_node_workspace: false
+use_storybook: true
 subpackages:
   - name: frontend
     type: node
+    storybook: true
   - name: backend
     type: rust

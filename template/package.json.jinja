@@ -1,5 +1,6 @@
 {%- set is_workspace = monorepo_node_workspace | default(false) -%}
 {%- set node_pkgs = subpackages | default([]) | selectattr('type', 'equalto', 'node') | list -%}
+{%- set has_storybook = use_storybook | default(false) -%}
 {%- if type != 'node' and not is_workspace -%}
 {#- Non-workspace monorepo: minimal package.json for corepack version pinning -#}
 {
@@ -30,19 +31,30 @@
 {%- else %}
     "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run"{{ "," if has_storybook else "" }}
+{%- endif %}
+{%- if has_storybook and not is_workspace %}
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"
 {%- endif %}
   },
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
     "@eslint/eslintrc": "3.3.5",
     "@fohte/eslint-config": "0.3.1",
+{%- if has_storybook and not is_workspace %}
+    "@storybook/addon-docs": "10.3.3",
+    "@storybook/addon-themes": "10.3.3",
+{%- endif %}
     "@tsconfig/node-lts": "24.0.0",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.12.0",
     "concurrently": "9.2.1",
     "eslint": "10.1.0",
     "prettier": "3.8.1",
+{%- if has_storybook and not is_workspace %}
+    "storybook": "10.3.3",
+{%- endif %}
     "typescript": "5.9.3",
     "vitest": "4.1.0"
   }

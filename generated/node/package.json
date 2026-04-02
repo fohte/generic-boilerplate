@@ -10,18 +10,23 @@
     "format": "conc -m 1 pnpm:format:eslint pnpm:format:prettier",
     "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"
   },
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
     "@eslint/eslintrc": "3.3.5",
     "@fohte/eslint-config": "0.3.1",
+    "@storybook/addon-docs": "10.3.3",
+    "@storybook/addon-themes": "10.3.3",
     "@tsconfig/node-lts": "24.0.0",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.12.0",
     "concurrently": "9.2.1",
     "eslint": "10.1.0",
     "prettier": "3.8.1",
+    "storybook": "10.3.3",
     "typescript": "5.9.3",
     "vitest": "4.1.0"
   }
