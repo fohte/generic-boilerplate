@@ -2,7 +2,16 @@ import { config } from '@fohte/eslint-config'
 
 export default config(
   { typescript: { typeChecked: true } },
-  { ignores: ['**/.storybook/'] },
+  {
+    files: ['**/*.ts{,x}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: {
+          allowDefaultProject: ['.storybook/main.ts', '.storybook/preview.ts'],
+        },
+      },
+    },
+  },
   {
     rules: {
       'no-restricted-imports': [
@@ -17,6 +26,13 @@ export default config(
           ],
         },
       ],
+    },
+  },
+  // .storybook/ and vitest.config.ts are outside src/ where @ alias is unavailable
+  {
+    files: ['.storybook/**/*.ts', 'vitest.config.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
 )
