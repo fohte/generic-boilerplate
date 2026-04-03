@@ -147,3 +147,12 @@ use_storybook:
   default: false
   help: Enable Storybook deployment to Cloudflare Pages?
   when: "{{ type == 'node' or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
+
+_migrations:
+  - version: '0.6.0'
+    before:
+      - >-
+        echo "NOTE: The pr-title-check workflow job name changed from
+        'pr-title-check' to 'check-title'. If you have 'pr-title-check'
+        as a required status check in your repository ruleset, update it
+        to 'check-title'."
