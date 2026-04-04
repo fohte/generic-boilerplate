@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.3](https://github.com/fohte/generic-boilerplate/compare/v0.5.2...v0.5.3) (2026-04-02)
+
+
+### Features
+
+* **template:** add Storybook deploy workflow for Cloudflare Pages ([#262](https://github.com/fohte/generic-boilerplate/issues/262)) ([d241f32](https://github.com/fohte/generic-boilerplate/commit/d241f3206215a2e98ff9566e217a394d2944eaa2))
+
 ## [0.5.2](https://github.com/fohte/generic-boilerplate/compare/v0.5.1...v0.5.2) (2026-04-01)
 
 
