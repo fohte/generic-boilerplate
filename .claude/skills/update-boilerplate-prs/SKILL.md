@@ -54,64 +54,38 @@ The output shows each repository's current version, latest version, and whether 
 
 ## Step 3: Trigger PR creation from Renovate Dashboard
 
-Repositories without a Renovate PR may be blocked by Renovate's rate limit (max concurrent PRs). Check the Renovate Dependency Dashboard checkbox in each repository to trigger PR creation.
-
-### 3a. Find the Dashboard issue
+Repositories without a Renovate PR may be blocked by Renovate's rate limit (max concurrent PRs). Use the trigger script to check the Renovate Dependency Dashboard checkbox in each repository.
 
 ```bash
-gh issue list -R fohte/<repo> --search "Dependency Dashboard" --json number,title
+# Dry-run first to verify targets
+scripts/trigger-renovate-boilerplate-prs --dry-run
+
+# Update Dashboard checkboxes and wait for PRs to be created (all repos)
+scripts/trigger-renovate-boilerplate-prs
+
+# Or target specific repos
+scripts/trigger-renovate-boilerplate-prs <repo1> <repo2>
 ```
 
-### 3b. Update the Dashboard checkbox
-
-The Dashboard issue body contains rate-limited updates with checkboxes. Find the generic-boilerplate update line and check it.
-
-```bash
-# Fetch issue body
-body=$(gh issue view <issue-number> -R fohte/<repo> --json body -q .body)
-```
-
-Look for a line like:
-
-```markdown
-- [ ] <!-- unlimit-branch=renovate/https-github.com-fohte-generic-boilerplate-0.x -->chore(deps): Update generic-boilerplate to v0.5.3
-```
-
-Change the checkbox to `[x]` and update the issue.
-
-```bash
-# Update the checkbox
-updated_body=$(echo "$body" | sed 's/- \[ \] <!-- unlimit-branch=renovate\/https-github.com-fohte-generic-boilerplate/- [x] <!-- unlimit-branch=renovate\/https-github.com-fohte-generic-boilerplate/')
-
-gh issue edit <issue-number> -R fohte/<repo> --body "$updated_body"
-```
-
-### 3c. Wait for Renovate to create the PR
-
-After updating the checkbox, Renovate takes approximately 3 minutes to detect the change and create the PR.
-
-```bash
-# Wait 3 minutes
-sleep 180
-
-# Verify PR creation
-scripts/list-boilerplate-usage --outdated
-```
-
-Proceed to Step 4 once the PR appears. If not yet created, wait additional time.
-
-**When multiple repos lack PRs**: Update all Dashboard checkboxes first, then wait once for all of them.
+The script updates all checkboxes, then polls every 30 seconds (up to 5 minutes) until Renovate creates the PRs, printing each PR URL as it appears.
 
 ## Step 4: Auto-merge version-only PRs
 
 PRs where the only change is the `_commit` version bump in `.copier-answers.yml` can be merged automatically without manual review.
 
+**Before running auto-merge**: Check if Step 1 revealed any new template parameters (e.g., `use_storybook`). If so, the auto-merge script alone is not sufficient -- new parameters are set to default values by copier, which may not match the repo's actual usage. In that case, skip auto-merge and validate all PRs in Step 5 instead.
+
+When no new parameters are introduced (pure version bump only):
+
 ```bash
 # Dry-run first to verify
 scripts/auto-merge-boilerplate-prs --dry-run
 
-# Merge (enables auto-merge via --squash --auto)
+# Merge (enables auto-merge via --squash --auto, all repos)
 scripts/auto-merge-boilerplate-prs
+
+# Or target specific repos
+scripts/auto-merge-boilerplate-prs <repo1> <repo2>
 ```
 
 After this step, only PRs with actual template changes remain for manual validation.
@@ -131,7 +105,15 @@ gh pr diff <number> -R fohte/<repo>
   - Each repository's template configuration (copier-answers.yml settings) determines which changes apply. Judge "expected changes" vs "not applicable" based on the configuration
   - Ensure repository-specific customizations (non-template changes) are not broken
 
-### 5b. Check CI status
+### 5b. Verify new template parameters match actual repo usage
+
+When a new template parameter is introduced (e.g., `use_storybook`), copier sets it to the default value. The default may not match the repo's actual usage. Check the actual repo contents to verify.
+
+For example, if the template adds `use_storybook: false` by default but the repo actually uses Storybook (has `@storybook/*` in `package.json`), the parameter must be corrected to `true` so the corresponding template files are generated.
+
+Do not trust the copier-answers values blindly -- always cross-check against what the repo actually uses.
+
+### 5c. Check CI status
 
 ```bash
 gh pr view <number> -R fohte/<repo> \

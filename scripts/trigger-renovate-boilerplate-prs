@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+# Trigger Renovate PR creation for outdated repos that are rate-limited.
+# Finds repos without a Renovate PR for generic-boilerplate updates,
+# then checks the corresponding checkbox on each repo's Dependency Dashboard issue.
+# After updating, waits for Renovate to create the PRs and prints their URLs.
+#
+# Usage: scripts/trigger-renovate-boilerplate-prs [--dry-run] [REPO...]
+#
+# Options:
+#   --dry-run    Show what would be updated without actually editing issues
+#
+# Arguments:
+#   REPO...      Specific repo names to process (default: all outdated repos without PRs)
+#
+# Requires: gh, jq
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+DRY_RUN=false
+FILTER_REPOS=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+    *)
+      FILTER_REPOS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+# Collect outdated repos without Renovate PRs
+jq_args=(--raw-output)
+jq_filter='.[] | select(.renovate_pr == null)'
+if [[ ${#FILTER_REPOS[@]} -gt 0 ]]; then
+  repo_json=$(printf '%s\n' "${FILTER_REPOS[@]}" | jq -R . | jq -s .)
+  jq_args+=(--argjson filter_repos "$repo_json")
+  # shellcheck disable=SC2016
+  jq_filter+=' | select(.repo as $r | $filter_repos | index($r))'
+fi
+jq_filter+=' | .repo'
+
+mapfile -t repos < <(
+  "${SCRIPT_DIR}/list-boilerplate-usage" --outdated --json |
+    jq "${jq_args[@]}" "$jq_filter"
+)
+
+if [[ ${#repos[@]} -eq 0 ]]; then
+  echo "No outdated repos without Renovate PRs found."
+  exit 0
+fi
+
+CHECKBOX_PATTERN='unlimit-branch=renovate/https-github.com-fohte-generic-boilerplate'
+
+updated_repos=()
+
+for repo in "${repos[@]}"; do
+  # Find the Dependency Dashboard issue
+  issue_number=$(
+    gh issue list -R "fohte/$repo" --search "Dependency Dashboard" --json number,title |
+      jq -r '.[] | select(.title == "Dependency Dashboard") | .number' |
+      head -1
+  )
+
+  if [[ -z "$issue_number" ]]; then
+    echo "SKIP $repo: no Dependency Dashboard issue found"
+    continue
+  fi
+
+  # Get the issue body
+  body=$(gh issue view "$issue_number" -R "fohte/$repo" --json body -q .body)
+
+  # Check if there's a rate-limited generic-boilerplate checkbox
+  if ! echo "$body" | grep -q "\\- \\[ \\] <!-- ${CHECKBOX_PATTERN}"; then
+    echo "SKIP $repo: no rate-limited generic-boilerplate entry in Dashboard #$issue_number"
+    continue
+  fi
+
+  if "$DRY_RUN"; then
+    echo "WOULD UPDATE $repo: Dashboard #$issue_number"
+  else
+    updated_body="${body//- \[ \] <!-- ${CHECKBOX_PATTERN}/- [x] <!-- ${CHECKBOX_PATTERN}}"
+    gh issue edit "$issue_number" -R "fohte/$repo" --body "$updated_body"
+    echo "UPDATED $repo: Dashboard #$issue_number"
+    updated_repos+=("$repo")
+  fi
+done
+
+if "$DRY_RUN" || [[ ${#updated_repos[@]} -eq 0 ]]; then
+  exit 0
+fi
+
+# Wait for Renovate to create PRs
+echo ""
+echo "Waiting for Renovate to create PRs (checking every 30s, up to 5 min)..."
+
+max_attempts=10
+for ((attempt = 1; attempt <= max_attempts; attempt++)); do
+  sleep 30
+
+  remaining=()
+  for repo in "${updated_repos[@]}"; do
+    pr_url=$(
+      gh search prs --owner fohte --repo "$repo" "generic-boilerplate" --state open \
+        --json url,title \
+        --jq '.[] | select(.title | test("generic-boilerplate")) | .url' \
+        2> /dev/null | head -1
+    )
+    if [[ -n "$pr_url" ]]; then
+      echo "CREATED $repo: $pr_url"
+    else
+      remaining+=("$repo")
+    fi
+  done
+
+  if [[ ${#remaining[@]} -eq 0 ]]; then
+    echo "All PRs created."
+    exit 0
+  fi
+
+  updated_repos=("${remaining[@]}")
+  echo "  (${#remaining[@]} remaining, attempt $attempt/$max_attempts)"
+done
+
+echo ""
+echo "TIMEOUT: PRs not yet created for: ${updated_repos[*]}"
+exit 1

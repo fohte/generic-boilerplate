@@ -2,10 +2,13 @@
 # Auto-merge generic-boilerplate update PRs that only change the _commit
 # version in .copier-answers.yml (no actual template diff).
 #
-# Usage: scripts/auto-merge-boilerplate-prs [--dry-run]
+# Usage: scripts/auto-merge-boilerplate-prs [--dry-run] [REPO...]
 #
 # Options:
 #   --dry-run    Show what would be merged without actually merging
+#
+# Arguments:
+#   REPO...      Specific repo names to process (default: all outdated repos with PRs)
 #
 # Requires: gh, jq
 
@@ -14,6 +17,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 DRY_RUN=false
+FILTER_REPOS=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -21,17 +25,31 @@ while [[ $# -gt 0 ]]; do
       DRY_RUN=true
       shift
       ;;
-    *)
+    -*)
       echo "Unknown option: $1" >&2
       exit 1
+      ;;
+    *)
+      FILTER_REPOS+=("$1")
+      shift
       ;;
   esac
 done
 
 # Collect outdated repos with Renovate PRs
+jq_args=(--compact-output)
+jq_filter='.[] | select(.renovate_pr != null)'
+if [[ ${#FILTER_REPOS[@]} -gt 0 ]]; then
+  repo_json=$(printf '%s\n' "${FILTER_REPOS[@]}" | jq -R . | jq -s .)
+  jq_args+=(--argjson filter_repos "$repo_json")
+  # shellcheck disable=SC2016
+  jq_filter+=' | select(.repo as $r | $filter_repos | index($r))'
+fi
+jq_filter+=' | {repo: .repo, number: .renovate_pr.number, url: .renovate_pr.url}'
+
 mapfile -t entries < <(
   "${SCRIPT_DIR}/list-boilerplate-usage" --outdated --json |
-    jq -c '.[] | select(.renovate_pr != null) | {repo: .repo, number: .renovate_pr.number, url: .renovate_pr.url}'
+    jq "${jq_args[@]}" "$jq_filter"
 )
 
 if [[ ${#entries[@]} -eq 0 ]]; then
