@@ -15,8 +15,7 @@ Validate generic-boilerplate update PRs created by Renovate, merge those that ar
 4. **Auto-merge version-only PRs**: Run `scripts/auto-merge-boilerplate-prs` for trivial PRs
 5. **Validate remaining PRs**: Review diff, CI status for PRs with actual template changes
 6. **Report merge decisions**: Present findings to the user for approval
-7. **Resolve conflicts**: Delegate conflict resolution via `/delegate-claude`
-8. **Merge after CI pass**: Confirm CI passes, then merge
+7. **Delegate template application and merge**: Delegate via `/delegate-claude`, which handles fix, CI verification, and merge
 
 ## Step 1: Understand generic-boilerplate changes
 
@@ -164,4 +163,4 @@ Delegation goal: the latest generic-boilerplate template (v<latest>) is correctl
 - Commit and push (no new PR needed; push to the existing PR branch)
 - Wait for CI to complete after pushing and verify all checks pass
 - If CI fails, investigate the cause, fix, and re-push
-- Report to the user once CI passes (do not merge)
+- Merge the PR once CI passes
