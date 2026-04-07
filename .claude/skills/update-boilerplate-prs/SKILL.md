@@ -73,9 +73,9 @@ The script updates all checkboxes, then polls every 30 seconds (up to 5 minutes)
 
 PRs where the only change is the `_commit` version bump in `.copier-answers.yml` can be merged automatically without manual review.
 
-**Before running auto-merge**: Check if Step 1 revealed any new template parameters (e.g., `use_storybook`). If so, the auto-merge script alone is not sufficient -- new parameters are set to default values by copier, which may not match the repo's actual usage. In that case, skip auto-merge and validate all PRs in Step 5 instead.
+The script checks that the only diff lines are `_commit` version changes. When new template parameters are introduced (e.g., `use_storybook`), copier adds them to `.copier-answers.yml` with default values for repos that match the parameter's `when` condition. These PRs have additional diff lines beyond `_commit`, so the script automatically skips them -- they require manual validation in Step 5b.
 
-When no new parameters are introduced (pure version bump only):
+Parameters with a `when` condition that evaluates to false for a given repo are not written to `.copier-answers.yml` at all, so those repos remain version-only and are safe to auto-merge.
 
 ```bash
 # Dry-run first to verify
