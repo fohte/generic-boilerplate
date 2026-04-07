@@ -153,9 +153,9 @@ Include the following in the delegation prompt:
 - Repository-specific customizations to preserve (e.g., repo-specific dependencies, local settings)
 - Context for resolution decisions (e.g., lefthook-config referencing itself remotely is inappropriate)
 
-### copier update notes (include in prompt when relevant)
+### copier update notes (always include in prompt)
 
-When the delegate needs to run `copier update --trust`, include these notes:
+The delegate may need to run `copier update --trust`. Always include these notes:
 
 - `copier update` requires a clean working tree. Commit changes before running it
 - `copier update` may fail with "Argument list too long" in repos with large `node_modules`. Temporarily move `node_modules` out (e.g., `mv node_modules /tmp/...`), run copier update, then restore. Commit first to avoid the dirty tree error
