@@ -131,9 +131,9 @@ Evaluate each PR against these criteria:
 
 Report results in table format and obtain user approval. **Never finalize merge decisions independently. Always confirm with the user.**
 
-## Step 7: Resolve conflicts
+## Step 7: Delegate template application
 
-Delegate conflict resolution for affected PRs via the `/delegate-claude` skill.
+Delegate PRs that need manual intervention via the `/delegate-claude` skill. The goal is to ensure the latest template is correctly applied to each repository -- conflict resolution is just one means to that end.
 
 ### Fetch branch name (required)
 
@@ -150,15 +150,17 @@ Use the fetched value directly as the `<branch-name>` for `a wm new`.
 Include the following in the delegation prompt:
 
 - generic-boilerplate changes (Step 1 results)
-- Files with conflict markers and their contents
+- Issues found during validation (conflict markers, incorrect parameter values, missing files, etc.)
 - Repository-specific customizations to preserve (e.g., repo-specific dependencies, local settings)
 - Context for resolution decisions (e.g., lefthook-config referencing itself remotely is inappropriate)
 
-Delegation goals:
+Delegation goal: the latest generic-boilerplate template (v<latest>) is correctly applied to the repository. Specifically:
 
-- Resolve all conflict markers
-- Verify template propagation at the file level: check actual file contents on the branch (not just the diff) to ensure all expected template changes are correctly reflected
-- Run syntax checks (e.g., `jq .` for JSON, appropriate tools for TOML/YAML)
+- All copier conflict markers are resolved
+- Template parameters in `.copier-answers.yml` match the repo's actual usage (e.g., `use_storybook: true` if the repo uses Storybook)
+- All expected template-generated files are present and correct
+- Repository-specific customizations are preserved
+- Syntax checks pass (e.g., `jq .` for JSON, appropriate tools for TOML/YAML)
 - Commit and push (no new PR needed; push to the existing PR branch)
 - Wait for CI to complete after pushing and verify all checks pass
 - If CI fails, investigate the cause, fix, and re-push
