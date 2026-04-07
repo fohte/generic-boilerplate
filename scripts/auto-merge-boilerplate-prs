@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# Auto-merge generic-boilerplate update PRs that only change the _commit
+# version in .copier-answers.yml (no actual template diff).
+#
+# Usage: scripts/auto-merge-boilerplate-prs [--dry-run]
+#
+# Options:
+#   --dry-run    Show what would be merged without actually merging
+#
+# Requires: gh, jq
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+DRY_RUN=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Collect outdated repos with Renovate PRs
+mapfile -t entries < <(
+  "${SCRIPT_DIR}/list-boilerplate-usage" --outdated --json |
+    jq -c '.[] | select(.renovate_pr != null) | {repo: .repo, number: .renovate_pr.number, url: .renovate_pr.url}'
+)
+
+if [[ ${#entries[@]} -eq 0 ]]; then
+  echo "No outdated repos with Renovate PRs found."
+  exit 0
+fi
+
+for entry in "${entries[@]}"; do
+  repo=$(echo "$entry" | jq -r '.repo')
+  number=$(echo "$entry" | jq -r '.number')
+  url=$(echo "$entry" | jq -r '.url')
+
+  # Get the diff and check if it only touches _commit in .copier-answers.yml
+  diff=$(gh pr diff "$number" -R "fohte/$repo")
+
+  # Count changed files: expect exactly one (a/... b/... pair)
+  changed_files=$(echo "$diff" | grep -c '^diff --git')
+  if [[ "$changed_files" -ne 1 ]]; then
+    echo "SKIP $repo#$number ($url): $changed_files files changed"
+    continue
+  fi
+
+  # Verify the only changed file is .copier-answers.yml
+  changed_file=$(echo "$diff" | grep '^diff --git' | sed 's|diff --git a/\(.*\) b/.*|\1|')
+  if [[ "$changed_file" != ".copier-answers.yml" ]]; then
+    echo "SKIP $repo#$number ($url): changed file is $changed_file"
+    continue
+  fi
+
+  # Verify only _commit line changed (added/removed lines excluding diff headers)
+  non_version_changes=$(echo "$diff" | grep '^[+-]' | grep -v '^[+-][+-][+-]' | { grep -v '^[+-]_commit:' || true; } | wc -l | tr -d ' ')
+  if [[ "$non_version_changes" -ne 0 ]]; then
+    echo "SKIP $repo#$number ($url): non-version changes detected"
+    continue
+  fi
+
+  if "$DRY_RUN"; then
+    echo "WOULD MERGE $repo#$number ($url)"
+  else
+    echo "MERGING $repo#$number ($url)..."
+    gh pr merge "$number" -R "fohte/$repo" --squash --auto
+    echo "  -> auto-merge enabled"
+  fi
+done

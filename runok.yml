@@ -8,6 +8,7 @@ definitions:
         - ./scripts/generate-snapshots
         - ./scripts/verify-sync-completeness
         - ./scripts/list-boilerplate-usage
+        - ./scripts/auto-merge-boilerplate-prs
 
 rules:
   - allow: 'bash <var:project-scripts> *'
