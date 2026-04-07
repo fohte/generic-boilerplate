@@ -134,15 +134,21 @@ Report results in table format and obtain user approval. **Never finalize merge 
 
 Delegate PRs that need manual intervention via the `/delegate-claude` skill. The goal is to ensure the latest template is correctly applied to each repository -- conflict resolution is just one means to that end.
 
-### Fetch branch name (required)
+### Branch name (required)
 
-The branch name passed to `/delegate-claude` **must be fetched from the PR**. Never guess.
+The `<branch-name>` argument for `a wm new` **must be the PR's actual branch name**, so that commits are pushed to the existing PR branch. Never create a new branch name.
 
 ```bash
 gh pr view <number> -R fohte/<repo> --json headRefName -q .headRefName
 ```
 
-Use the fetched value directly as the `<branch-name>` for `a wm new`.
+Use the fetched value directly. For example, if the branch is `renovate/https-github.com-fohte-generic-boilerplate-0.x`, run:
+
+```bash
+a wm new renovate/https-github.com-fohte-generic-boilerplate-0.x -R ~/ghq/github.com/fohte/<repo> --from origin/renovate/https-github.com-fohte-generic-boilerplate-0.x --agent --label "..." --prompt "..."
+```
+
+**Do NOT invent a new branch name** like `renovate-foo-boilerplate`. The delegate must push to the PR's branch.
 
 ### Delegation prompt
 
