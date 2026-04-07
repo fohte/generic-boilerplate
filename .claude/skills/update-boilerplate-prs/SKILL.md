@@ -142,13 +142,13 @@ The `<branch-name>` argument for `a wm new` **must be the PR's actual branch nam
 gh pr view <number> -R fohte/<repo> --json headRefName -q .headRefName
 ```
 
-Use the fetched value directly. For example, if the branch is `renovate/https-github.com-fohte-generic-boilerplate-0.x`, run:
+Use the fetched value directly as the branch name. The existing remote branch will be checked out automatically.
 
 ```bash
-a wm new renovate/https-github.com-fohte-generic-boilerplate-0.x -R ~/ghq/github.com/fohte/<repo> --from origin/renovate/https-github.com-fohte-generic-boilerplate-0.x --agent --label "..." --prompt "..."
+a wm new renovate/https-github.com-fohte-generic-boilerplate-0.x -R ~/ghq/github.com/fohte/<repo> --agent --label "..." --prompt "..."
 ```
 
-**Do NOT invent a new branch name** like `renovate-foo-boilerplate`. The delegate must push to the PR's branch.
+**Do NOT invent a new branch name** like `renovate-foo-boilerplate`. **Do NOT add `--from`** -- the branch already exists on the remote.
 
 ### Delegation prompt
 
