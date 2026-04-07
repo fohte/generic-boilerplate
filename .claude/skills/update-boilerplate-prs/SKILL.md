@@ -153,7 +153,18 @@ Include the following in the delegation prompt:
 - Repository-specific customizations to preserve (e.g., repo-specific dependencies, local settings)
 - Context for resolution decisions (e.g., lefthook-config referencing itself remotely is inappropriate)
 
-Delegation goal: the latest generic-boilerplate template (v<latest>) is correctly applied to the repository. Specifically:
+### copier update notes (include in prompt when relevant)
+
+When the delegate needs to run `copier update --trust`, include these notes:
+
+- `copier update` requires a clean working tree. Commit changes before running it
+- `copier update` may fail with "Argument list too long" in repos with large `node_modules`. Temporarily move `node_modules` out (e.g., `mv node_modules /tmp/...`), run copier update, then restore. Commit first to avoid the dirty tree error
+- If `copier update` fails mid-way, the working tree may be in a partial state. `git checkout -- .` to reset, fix the root cause, then retry
+- After `copier update` succeeds, review the full diff carefully before committing. Do not commit partial/broken state
+
+### Delegation goal
+
+The latest generic-boilerplate template (v<latest>) is correctly applied to the repository. Specifically:
 
 - All copier conflict markers are resolved
 - Template parameters in `.copier-answers.yml` match the repo's actual usage (e.g., `use_storybook: true` if the repo uses Storybook)
