@@ -36,8 +36,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Collect outdated repos with Renovate PRs
-jq_args=(--compact-output)
+# Collect outdated repos with Renovate PRs (tab-separated: repo\tnumber\turl)
+jq_args=(--raw-output)
 jq_filter='.[] | select(.renovate_pr != null)'
 if [[ ${#FILTER_REPOS[@]} -gt 0 ]]; then
   repo_json=$(printf '%s\n' "${FILTER_REPOS[@]}" | jq -R . | jq -s .)
@@ -45,7 +45,7 @@ if [[ ${#FILTER_REPOS[@]} -gt 0 ]]; then
   # shellcheck disable=SC2016
   jq_filter+=' | select(.repo as $r | $filter_repos | index($r))'
 fi
-jq_filter+=' | {repo: .repo, number: .renovate_pr.number, url: .renovate_pr.url}'
+jq_filter+=' | "\(.repo)\t\(.renovate_pr.number)\t\(.renovate_pr.url)"'
 
 mapfile -t entries < <(
   "${SCRIPT_DIR}/list-boilerplate-usage" --outdated --json |
@@ -58,29 +58,29 @@ if [[ ${#entries[@]} -eq 0 ]]; then
 fi
 
 for entry in "${entries[@]}"; do
-  repo=$(echo "$entry" | jq -r '.repo')
-  number=$(echo "$entry" | jq -r '.number')
-  url=$(echo "$entry" | jq -r '.url')
+  IFS=$'\t' read -r repo number url <<< "$entry"
 
   # Get the diff and check if it only touches _commit in .copier-answers.yml
   diff=$(gh pr diff "$number" -R "fohte/$repo")
 
   # Count changed files: expect exactly one (a/... b/... pair)
-  changed_files=$(echo "$diff" | grep -c '^diff --git')
+  changed_files=$(printf '%s\n' "$diff" | grep -c '^diff --git')
   if [[ "$changed_files" -ne 1 ]]; then
     echo "SKIP $repo#$number ($url): $changed_files files changed"
     continue
   fi
 
   # Verify the only changed file is .copier-answers.yml
-  changed_file=$(echo "$diff" | grep '^diff --git' | sed 's|diff --git a/\(.*\) b/.*|\1|')
+  changed_file=$(printf '%s\n' "$diff" | grep '^diff --git' | sed 's|diff --git a/\(.*\) b/.*|\1|')
   if [[ "$changed_file" != ".copier-answers.yml" ]]; then
     echo "SKIP $repo#$number ($url): changed file is $changed_file"
     continue
   fi
 
-  # Verify only _commit line changed (added/removed lines excluding diff headers)
-  non_version_changes=$(echo "$diff" | grep '^[+-]' | grep -v '^[+-][+-][+-]' | { grep -v '^[+-]_commit:' || true; } | wc -l | tr -d ' ')
+  # Verify only _commit line changed (added/removed lines excluding diff headers).
+  # Use anchored patterns for diff headers to avoid matching content lines like
+  # `----` (which a removed YAML `---` marker would produce).
+  non_version_changes=$(printf '%s\n' "$diff" | grep '^[+-]' | grep -vE '^(--- |\+\+\+ )' | { grep -v '^[+-]_commit:' || true; } | wc -l)
   if [[ "$non_version_changes" -ne 0 ]]; then
     echo "SKIP $repo#$number ($url): non-version changes detected"
     continue
