@@ -7,6 +7,8 @@ remotes:
 
 pre-commit:
   commands:
+    # Non-workspace multi-package monorepo: each subpackage has its own
+    # eslint.config.js and dependencies, so lint per package from its root.
     eslint-frontend:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
       root: 'frontend/'
