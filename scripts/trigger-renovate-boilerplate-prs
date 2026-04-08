@@ -113,7 +113,7 @@ for ((attempt = 1; attempt <= max_attempts; attempt++)); do
       gh search prs --repo "fohte/$repo" "generic-boilerplate" --state open \
         --json url,title \
         --jq '.[] | select(.title | test("generic-boilerplate")) | .url' \
-        2> /dev/null | head -1
+        2> /dev/null | head -1 || true
     )
     if [[ -n "$pr_url" ]]; then
       echo "CREATED $repo: $pr_url"
