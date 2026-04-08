@@ -17,16 +17,25 @@ pre-commit:
   commands:
 {%- if has_node %}
 {%- if type == 'node' or (monorepo_node_workspace | default(false)) %}
+{%- if monorepo_node_workspace | default(false) %}
+    # lefthook's default glob uses gobwas/glob without a delimiter, so
+    # '*.{js,ts,...}' also matches nested paths (e.g. frontend/src/foo.ts).
+    # A single root-level eslint covers every workspace package, and running
+    # per-package eslint in parallel would race on --fix / stage_fixed writes.
+{%- endif %}
     eslint:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
       run: {{ eslint_run }}
-{%- endif %}
+{%- else %}
 {%- for pkg in node_pkgs %}
+    # Non-workspace multi-package monorepo: each subpackage has its own
+    # eslint.config.js and dependencies, so lint per package from its root.
     eslint-{{ pkg.name }}:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
       root: '{{ pkg.name }}/'
       run: {{ eslint_run }}
 {%- endfor %}
+{%- endif %}
 {%- endif %}
 {%- if has_rust %}
     ast-grep:
