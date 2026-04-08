@@ -1,6 +1,9 @@
 {%- set is_workspace = monorepo_node_workspace | default(false) -%}
 {%- set has_storybook = use_storybook | default(false) -%}
 import { config } from '@fohte/eslint-config'
+{%- if has_storybook %}
+import storybook from 'eslint-plugin-storybook'
+{%- endif %}
 
 export default config(
   { typescript: { typeChecked: true } },
@@ -15,8 +18,16 @@ export default config(
       },
     },
   },
-{%- elif is_workspace and has_storybook %}
+{%- elif has_storybook and is_workspace %}
+  // Each subpackage's .storybook/ uses its own tsconfig and is linted
+  // separately when needed; the root config skips them to avoid pulling
+  // them into the inferred default project (which lacks strict options).
+  // Story files under each subpackage's src/ are still linted via
+  // storybook.configs['flat/recommended'] below.
   { ignores: ['**/.storybook/'] },
+{%- endif %}
+{%- if has_storybook %}
+  ...storybook.configs['flat/recommended'],
 {%- endif %}
   {
     rules: {
