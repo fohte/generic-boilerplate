@@ -1,4 +1,4 @@
-import type { StorybookConfig } from 'storybook'
+import type { StorybookConfig } from 'storybook/internal/types'
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.stories.@(ts|tsx)'],

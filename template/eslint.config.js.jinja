@@ -1,44 +1,12 @@
 {%- set is_workspace = monorepo_node_workspace | default(false) -%}
 {%- set has_storybook = use_storybook | default(false) -%}
-{%- set storybook_subpkgs = subpackages | default([]) | selectattr('storybook', 'equalto', true) | list -%}
 import { config } from '@fohte/eslint-config'
-{%- if has_storybook and is_workspace %}
-import tsPlugin from '@typescript-eslint/eslint-plugin'
-{%- endif %}
 {%- if has_storybook %}
 import storybook from 'eslint-plugin-storybook'
 {%- endif %}
 
 export default config(
   { typescript: { typeChecked: true } },
-{%- if has_storybook and not is_workspace %}
-  {
-    files: ['**/*.ts{,x}'],
-    languageOptions: {
-      parserOptions: {
-        projectService: {
-          allowDefaultProject: ['.storybook/main.ts', '.storybook/preview.ts'],
-        },
-      },
-    },
-  },
-{%- elif has_storybook and is_workspace %}
-  {
-    files: ['**/*.ts{,x}'],
-    languageOptions: {
-      parserOptions: {
-        projectService: {
-          allowDefaultProject: [
-{%- for pkg in storybook_subpkgs %}
-            '{{ pkg.name }}/.storybook/main.ts',
-            '{{ pkg.name }}/.storybook/preview.ts',
-{%- endfor %}
-          ],
-        },
-      },
-    },
-  },
-{%- endif %}
 {%- if has_storybook %}
   ...storybook.configs['flat/recommended'],
 {%- endif %}
@@ -67,14 +35,6 @@ export default config(
     },
   },
 {%- elif has_storybook and is_workspace %}
-  // .storybook/ files are matched by allowDefaultProject (no real tsconfig
-  // includes them at the workspace root), so the inferred default project
-  // — which lacks strict compiler options — would otherwise break the
-  // type-aware rules. Disable type-aware rules there.
-  {
-    ...tsPlugin.configs['flat/disable-type-checked'],
-    files: ['**/.storybook/**/*.ts'],
-  },
   // .storybook/ is outside src/ where @ alias is unavailable
   {
     files: ['**/.storybook/**/*.ts'],
