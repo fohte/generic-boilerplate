@@ -1,14 +1,22 @@
 import { config } from '@fohte/eslint-config'
+import tsPlugin from '@typescript-eslint/eslint-plugin'
 import storybook from 'eslint-plugin-storybook'
 
 export default config(
   { typescript: { typeChecked: true } },
-  // Each subpackage's .storybook/ uses its own tsconfig and is linted
-  // separately when needed; the root config skips them to avoid pulling
-  // them into the inferred default project (which lacks strict options).
-  // Story files under each subpackage's src/ are still linted via
-  // storybook.configs['flat/recommended'] below.
-  { ignores: ['**/.storybook/'] },
+  {
+    files: ['**/*.ts{,x}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: {
+          allowDefaultProject: [
+            'frontend/.storybook/main.ts',
+            'frontend/.storybook/preview.ts',
+          ],
+        },
+      },
+    },
+  },
   ...storybook.configs['flat/recommended'],
   {
     rules: {
@@ -24,6 +32,21 @@ export default config(
           ],
         },
       ],
+    },
+  },
+  // .storybook/ files are matched by allowDefaultProject (no real tsconfig
+  // includes them at the workspace root), so the inferred default project
+  // — which lacks strict compiler options — would otherwise break the
+  // type-aware rules. Disable type-aware rules there.
+  {
+    ...tsPlugin.configs['flat/disable-type-checked'],
+    files: ['**/.storybook/**/*.ts'],
+  },
+  // .storybook/ is outside src/ where @ alias is unavailable
+  {
+    files: ['**/.storybook/**/*.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
 )

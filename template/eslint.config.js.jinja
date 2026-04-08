@@ -1,6 +1,10 @@
 {%- set is_workspace = monorepo_node_workspace | default(false) -%}
 {%- set has_storybook = use_storybook | default(false) -%}
+{%- set storybook_subpkgs = subpackages | default([]) | selectattr('storybook', 'equalto', true) | list -%}
 import { config } from '@fohte/eslint-config'
+{%- if has_storybook and is_workspace %}
+import tsPlugin from '@typescript-eslint/eslint-plugin'
+{%- endif %}
 {%- if has_storybook %}
 import storybook from 'eslint-plugin-storybook'
 {%- endif %}
@@ -19,12 +23,21 @@ export default config(
     },
   },
 {%- elif has_storybook and is_workspace %}
-  // Each subpackage's .storybook/ uses its own tsconfig and is linted
-  // separately when needed; the root config skips them to avoid pulling
-  // them into the inferred default project (which lacks strict options).
-  // Story files under each subpackage's src/ are still linted via
-  // storybook.configs['flat/recommended'] below.
-  { ignores: ['**/.storybook/'] },
+  {
+    files: ['**/*.ts{,x}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: {
+          allowDefaultProject: [
+{%- for pkg in storybook_subpkgs %}
+            '{{ pkg.name }}/.storybook/main.ts',
+            '{{ pkg.name }}/.storybook/preview.ts',
+{%- endfor %}
+          ],
+        },
+      },
+    },
+  },
 {%- endif %}
 {%- if has_storybook %}
   ...storybook.configs['flat/recommended'],
@@ -49,6 +62,22 @@ export default config(
   // .storybook/ and vitest.config.ts are outside src/ where @ alias is unavailable
   {
     files: ['.storybook/**/*.ts', 'vitest.config.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
+    },
+  },
+{%- elif has_storybook and is_workspace %}
+  // .storybook/ files are matched by allowDefaultProject (no real tsconfig
+  // includes them at the workspace root), so the inferred default project
+  // — which lacks strict compiler options — would otherwise break the
+  // type-aware rules. Disable type-aware rules there.
+  {
+    ...tsPlugin.configs['flat/disable-type-checked'],
+    files: ['**/.storybook/**/*.ts'],
+  },
+  // .storybook/ is outside src/ where @ alias is unavailable
+  {
+    files: ['**/.storybook/**/*.ts'],
     rules: {
       'no-restricted-imports': 'off',
     },
