@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.6.0](https://github.com/fohte/generic-boilerplate/compare/v0.5.3...v0.6.0) (2026-04-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* update dependency fohte/lefthook-config to v0.1.16 ([#272](https://github.com/fohte/generic-boilerplate/issues/272))
+
+### Features
+
+* **template:** add pinact to mise tools ([#268](https://github.com/fohte/generic-boilerplate/issues/268)) ([3df710c](https://github.com/fohte/generic-boilerplate/commit/3df710c360f68a5bbe53390d7cc4519d1ba2f44f))
+* **template:** import Storybook types via @storybook/react-vite ([#275](https://github.com/fohte/generic-boilerplate/issues/275)) ([939ae04](https://github.com/fohte/generic-boilerplate/commit/939ae04741dca1eb4ab713b1e3182ed51ee67db2))
+* **template:** set up eslint-plugin-storybook when use_storybook is enabled ([#274](https://github.com/fohte/generic-boilerplate/issues/274)) ([0a179d8](https://github.com/fohte/generic-boilerplate/commit/0a179d874a3cd5a941f3f4cd36400be14fcf0a23))
+
+
+### Bug Fixes
+
+* **template/lefthook:** consolidate workspace monorepo eslint into a single root command ([#270](https://github.com/fohte/generic-boilerplate/issues/270)) ([cd7b491](https://github.com/fohte/generic-boilerplate/commit/cd7b4910402c12b7bef956900be3e8dfafe68b52))
+* **template:** drop redundant eslint-disable from commitlint.config.cjs ([#271](https://github.com/fohte/generic-boilerplate/issues/271)) ([23afca4](https://github.com/fohte/generic-boilerplate/commit/23afca413e7486d3270e63b8e4e02b1b6454516e))
+
+
+### Dependencies
+
+* **ci:** Pin dependencies ([#273](https://github.com/fohte/generic-boilerplate/issues/273)) ([bca4b60](https://github.com/fohte/generic-boilerplate/commit/bca4b60946ca2516510654c68bb281ae524c6db7))
+* **ci:** Update actions/cache action to v5.0.4 ([#277](https://github.com/fohte/generic-boilerplate/issues/277)) ([8facdde](https://github.com/fohte/generic-boilerplate/commit/8facdde9e9b69a674b29d74db9d6c28e3ef70967))
+* **ci:** Update actions/checkout action to v6.0.2 ([#278](https://github.com/fohte/generic-boilerplate/issues/278)) ([cf0cfcd](https://github.com/fohte/generic-boilerplate/commit/cf0cfcd91d1176485e60f87d56f2c3a62eeda7f3))
+* **ci:** Update codecov/codecov-action action to v6 ([#264](https://github.com/fohte/generic-boilerplate/issues/264)) ([7f98aef](https://github.com/fohte/generic-boilerplate/commit/7f98aef601add8e8ab51eccc07bce30b44cce162))
+* **ci:** Update marocchino/sticky-pull-request-comment action to v3 ([#281](https://github.com/fohte/generic-boilerplate/issues/281)) ([60a4c26](https://github.com/fohte/generic-boilerplate/commit/60a4c26981a076a1c85d5bb942fc0f47e772fc1d))
+* **ci:** Update tj-actions/changed-files action to v47.0.5 ([#280](https://github.com/fohte/generic-boilerplate/issues/280)) ([ccc833d](https://github.com/fohte/generic-boilerplate/commit/ccc833d1e5896aa9531c8236fd010468585e594f))
+* Update dependency actionlint to v1.7.12 ([#276](https://github.com/fohte/generic-boilerplate/issues/276)) ([3d498c0](https://github.com/fohte/generic-boilerplate/commit/3d498c0b4419e6e752dce316299dd3122d67ce1e))
+* update dependency fohte/lefthook-config to v0.1.16 ([#272](https://github.com/fohte/generic-boilerplate/issues/272)) ([c1200ac](https://github.com/fohte/generic-boilerplate/commit/c1200ac2480969f19925b6ac412c7c7eb98c36c7))
+* Update dependency vitest to v4.1.2 ([#254](https://github.com/fohte/generic-boilerplate/issues/254)) ([bb4fc96](https://github.com/fohte/generic-boilerplate/commit/bb4fc961d5098458b0a827393fbde60bac5aa39f))
+* Update Node.js to v24.14.1 ([#256](https://github.com/fohte/generic-boilerplate/issues/256)) ([ae45f88](https://github.com/fohte/generic-boilerplate/commit/ae45f88c8ab5aad687b5a4ee9af120f6dced09d2))
+* update pnpm to v10.33.0 ([#258](https://github.com/fohte/generic-boilerplate/issues/258)) ([941c17e](https://github.com/fohte/generic-boilerplate/commit/941c17e89b88865748fbe4e48650210707a888f9))
+
 ## [0.5.3](https://github.com/fohte/generic-boilerplate/compare/v0.5.2...v0.5.3) (2026-04-02)
 
 
