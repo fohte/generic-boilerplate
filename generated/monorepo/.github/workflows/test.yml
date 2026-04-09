@@ -182,7 +182,7 @@ jobs:
       - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
 
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@e3f5de9dc07635c0989e7620a8768b93e675db16 # cargo-llvm-cov
+        uses: taiki-e/install-action@e3f5de9dc07635c0989e7620a8768b93e675db16
 
       - name: Install llvm-tools-preview
         run: rustup component add llvm-tools-preview
