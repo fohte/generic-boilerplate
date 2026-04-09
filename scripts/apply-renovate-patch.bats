@@ -1014,3 +1014,117 @@ version = "0.1.0"
 tokio = "1.1.0"
 EOF
 }
+
+@test "syncs GitHub Actions uses pinned to SHA with version comment" {
+  # Renovate's helpers:pinGitHubActionDigests rewrites @v3 into
+  # @<sha> # v3 — make sure that pin format propagates into template/.
+  mkdir -p template/.github/workflows generated/base/.github/workflows
+
+  cat > template/.github/workflows/ci.yml.jinja << 'EOF'
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jdx/mise-action@v4
+EOF
+
+  cat > generated/base/.github/workflows/ci.yml << 'EOF'
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jdx/mise-action@v4
+EOF
+
+  create_initial_commit
+
+  # Renovate pins both actions to a SHA with the original tag in a trailing comment
+  cat > generated/base/.github/workflows/ci.yml << 'EOF'
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
+EOF
+
+  git add .
+  git commit -q -m "deps(ci): pin dependencies"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Synced 2 version"* ]]
+
+  diff -u template/.github/workflows/ci.yml.jinja - << 'EOF'
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
+EOF
+}
+
+@test "is idempotent when template is already pinned to the same SHA" {
+  mkdir -p template/.github/workflows generated/base/.github/workflows
+
+  cat > template/.github/workflows/ci.yml.jinja << 'EOF'
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+EOF
+
+  cat > generated/base/.github/workflows/ci.yml << 'EOF'
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+EOF
+
+  create_initial_commit
+
+  # Renovate pins to the same SHA the template already uses
+  cat > generated/base/.github/workflows/ci.yml << 'EOF'
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+EOF
+
+  git add .
+  git commit -q -m "deps(ci): pin dependencies"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Already in sync"* ]]
+
+  diff -u template/.github/workflows/ci.yml.jinja - << 'EOF'
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+EOF
+}

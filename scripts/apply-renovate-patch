@@ -113,10 +113,10 @@ sync_versions_to_template() {
     # - TOML: key = "version" or "key" = "version"
     # - JSON: "key": "version"
     # - YAML: key: version or key: vX.Y.Z (unquoted, with optional v prefix)
-    # - GitHub Actions: uses: owner/repo@vX.Y.Z
+    # - GitHub Actions: uses: owner/repo@vX.Y.Z or uses: owner/repo@<sha> # vX.Y.Z
     # Semver range specifiers: =, ^, ~, >, >=, <, <= (for Cargo.toml pin, npm ranges)
-    if [[ "$line" =~ ^[[:space:]]*-?[[:space:]]*(uses:[[:space:]]*[^@]+)@(v?[0-9]+(\.[0-9]+)*[^[:space:]#]*) ]]; then
-      # GitHub Actions uses: directive - version after @
+    if [[ "$line" =~ ^[[:space:]]*-?[[:space:]]*(uses:[[:space:]]*[^@]+)@(([0-9a-f]{40}|v?[0-9]+(\.[0-9]+)*[^[:space:]#]*)([[:space:]]+#[[:space:]]*v?[0-9]+(\.[0-9]+)*[^[:space:]]*)?) ]]; then
+      # GitHub Actions uses: directive - version (or SHA pin with trailing version comment) after @
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}"
       local quoted=false
@@ -142,20 +142,24 @@ sync_versions_to_template() {
       ((keys_checked++)) || true
       # Skip if version already matches
       if [[ "$uses_syntax" == "true" ]]; then
-        # GitHub Actions uses: syntax - version after @
-        local escaped_version
-        escaped_version=$(printf '%s' "$version" | sed 's/[].[^$*+?(){}|\\]/\\&/g')
-        if grep -F -- "$key" "$template_file" | grep -Eq "@${escaped_version}([[:space:]]|#|$)"; then
+        # GitHub Actions uses: syntax - version (or SHA pin with version comment) after @
+        # Use a literal substring check so SHA hashes and inline comments compare correctly.
+        if grep -F -- "${key}@${version}" "$template_file" > /dev/null 2>&1; then
           continue
         fi
-        # Replace version for this key in template (match @version pattern)
-        # Escape regex metacharacters and sed delimiter (#) in key
+        # Replace value for this key in template. The captured value may contain a
+        # SHA followed by a version comment (e.g. "<sha> # v3"), so the match must
+        # cover the optional trailing comment as well — otherwise repeated runs would
+        # leave a stale "# v3" suffix after the replacement. The literal "@" between
+        # key and value is part of the pattern, so use "|" as the sed delimiter to
+        # avoid clashing with it.
+        # Escape regex metacharacters and the sed delimiter (|) in key.
         local escaped_key
-        escaped_key=$(printf '%s' "$key" | sed 's/[#.^$*[\\/]/\\&/g')
-        # Escape sed replacement special characters (& and \) and delimiter (#) in version
+        escaped_key=$(printf '%s' "$key" | sed 's/[|.^$*[\\/]/\\&/g')
+        # Escape sed replacement special characters (& and \) and delimiter (|) in version.
         local escaped_version_sed
-        escaped_version_sed=$(printf '%s' "$version" | sed 's/[#\\&]/\\&/g')
-        if sed -i.bak "s#\\(${escaped_key}@\\)[^[:space:]#]*#\\1${escaped_version_sed}#" "$template_file"; then
+        escaped_version_sed=$(printf '%s' "$version" | sed 's/[|\\&]/\\&/g')
+        if sed -i.bak -E "s|(${escaped_key}@)[^[:space:]#]*([[:space:]]+#[[:space:]]*v?[0-9]+(\.[0-9]+)*[^[:space:]]*)?|\\1${escaped_version_sed}|" "$template_file"; then
           rm -f "${template_file}.bak"
           ((changes_applied++)) || true
         fi
