@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
+      - uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
         id: app-token
         with:
           app-id: ${{ secrets.APP_ID }}
@@ -38,7 +38,7 @@ jobs:
             echo "skip_commit=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
 
       - run: corepack enable
 
@@ -97,25 +97,25 @@ jobs:
           fetch-depth: 2
 
       - name: Check for frontend changes
-        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         id: changes-frontend
         with:
           files: frontend/**
 
       - name: Check for backend changes
-        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         id: changes-backend
         with:
           files: backend/**
 
       - name: Check for workflow changes
-        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         id: changes-workflow
         with:
           files: .github/workflows/test.yml
 
       - name: Check for root lockfile changes
-        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         id: changes-root-lockfile
         with:
           files: |
@@ -133,7 +133,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
 
       - run: corepack enable
 
@@ -168,7 +168,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
 
       - run: corepack enable
 
