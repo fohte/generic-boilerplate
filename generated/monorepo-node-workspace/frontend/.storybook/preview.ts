@@ -1,9 +1,9 @@
 import { withThemeByClassName } from '@storybook/addon-themes'
-import type { Preview, Renderer } from 'storybook'
+import type { ProjectAnnotations } from 'storybook/internal/csf'
 
-const preview: Preview = {
+const preview: ProjectAnnotations = {
   decorators: [
-    withThemeByClassName<Renderer>({
+    withThemeByClassName({
       themes: {
         light: '',
         dark: 'dark',

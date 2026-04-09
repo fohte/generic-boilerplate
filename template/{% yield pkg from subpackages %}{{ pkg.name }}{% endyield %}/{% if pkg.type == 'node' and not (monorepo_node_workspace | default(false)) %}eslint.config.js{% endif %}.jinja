@@ -1,19 +1,13 @@
 {%- set has_storybook = pkg.storybook | default(false) -%}
 import { config } from '@fohte/eslint-config'
+{%- if has_storybook %}
+import storybook from 'eslint-plugin-storybook'
+{%- endif %}
 
 export default config(
   { typescript: { typeChecked: true } },
 {%- if has_storybook %}
-  {
-    files: ['**/*.ts{,x}'],
-    languageOptions: {
-      parserOptions: {
-        projectService: {
-          allowDefaultProject: ['.storybook/main.ts', '.storybook/preview.ts'],
-        },
-      },
-    },
-  },
+  ...storybook.configs['flat/recommended'],
 {%- endif %}
   {
     rules: {
