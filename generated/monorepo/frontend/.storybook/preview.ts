@@ -1,7 +1,7 @@
 import { withThemeByClassName } from '@storybook/addon-themes'
-import type { ProjectAnnotations } from 'storybook/internal/csf'
+import type { Preview } from '@storybook/react-vite'
 
-const preview: ProjectAnnotations = {
+const preview: Preview = {
   decorators: [
     withThemeByClassName({
       themes: {
