@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/create-github-app-token@v3
+      - uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
         id: app-token
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -59,7 +59,7 @@ jobs:
 
       - name: Commit changes to PR branch
         if: steps.changes.outputs.has_patches == 'true' && steps.sync.outputs.success == 'true'
-        uses: suzuki-shunsuke/commit-action@v0.1.1
+        uses: suzuki-shunsuke/commit-action@f12e2d628a4ab72dcefe7890ae07e8dbf1e201b9 # v0.1.1
         with:
           commit_message: 'chore(template): sync changes from generated/'
           github_token: ${{ steps.app-token.outputs.token }}
