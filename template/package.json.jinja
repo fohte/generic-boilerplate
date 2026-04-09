@@ -51,6 +51,9 @@
     "@types/node": "24.12.0",
     "concurrently": "9.2.1",
     "eslint": "10.1.0",
+{%- if has_storybook %}
+    "eslint-plugin-storybook": "10.3.3",
+{%- endif %}
     "prettier": "3.8.1",
 {%- if has_storybook and not is_workspace %}
     "storybook": "10.3.3",

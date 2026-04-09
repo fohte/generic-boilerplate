@@ -1,8 +1,9 @@
 import { config } from '@fohte/eslint-config'
+import storybook from 'eslint-plugin-storybook'
 
 export default config(
   { typescript: { typeChecked: true } },
-  { ignores: ['**/.storybook/'] },
+  ...storybook.configs['flat/recommended'],
   {
     rules: {
       'no-restricted-imports': [
@@ -17,6 +18,13 @@ export default config(
           ],
         },
       ],
+    },
+  },
+  // .storybook/ is outside src/ where @ alias is unavailable
+  {
+    files: ['**/.storybook/**/*.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
 )

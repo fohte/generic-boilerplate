@@ -1,8 +1,12 @@
+{%- set has_storybook = pkg.storybook | default(false) -%}
 {
   "extends": [
     "@tsconfig/node-lts/tsconfig.json",
     "@tsconfig/strictest/tsconfig.json"
   ],
+{%- if has_storybook %}
+  "include": ["**/*", ".storybook/**/*"],
+{%- endif %}
   "exclude": ["**/*.cjs"],
   "compilerOptions": {
     "module": "preserve",
