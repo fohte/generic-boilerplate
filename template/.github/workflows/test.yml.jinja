@@ -225,7 +225,9 @@ jobs:
 {%- if use_coverage %}
 
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@e3f5de9dc07635c0989e7620a8768b93e675db16
+        uses: taiki-e/install-action@7a4939c09608b2a1986b484eca1d16fd0db8ebef # v2.75.5
+        with:
+          tool: cargo-llvm-cov
 
       - name: Install llvm-tools-preview
         run: rustup component add llvm-tools-preview
@@ -373,7 +375,9 @@ jobs:
 {%- if use_coverage %}
 
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@e3f5de9dc07635c0989e7620a8768b93e675db16
+        uses: taiki-e/install-action@7a4939c09608b2a1986b484eca1d16fd0db8ebef # v2.75.5
+        with:
+          tool: cargo-llvm-cov
 
       - name: Install llvm-tools-preview
         run: rustup component add llvm-tools-preview
