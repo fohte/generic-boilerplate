@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/fohte/generic-boilerplate/compare/v0.6.0...v0.6.1) (2026-04-11)
+
+
+### Bug Fixes
+
+* **template:** pin taiki-e/install-action by version tag with tool input ([#285](https://github.com/fohte/generic-boilerplate/issues/285)) ([b2bd1ab](https://github.com/fohte/generic-boilerplate/commit/b2bd1ab6adb369745026077431ff61a001abbd4f))
+
 ## [0.6.0](https://github.com/fohte/generic-boilerplate/compare/v0.5.3...v0.6.0) (2026-04-09)
 
 
