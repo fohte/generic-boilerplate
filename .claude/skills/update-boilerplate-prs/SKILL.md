@@ -100,7 +100,7 @@ gh pr diff <number> -R fohte/<repo>
 ```
 
 - Check for copier conflict markers (`<<<<<<< before updating`, `=======`, `>>>>>>> after updating`)
-- For each conflict, compare versions on both sides. If the `before updating` side has a newer version than the `after updating` side, flag it as a potential downgrade (the repo may have been updated independently by Renovate or other means)
+- For each conflict, compare versions on both sides. If the `before updating` side has a newer version than the `after updating` side, flag it as a potential downgrade in the Step 6 report (the repo may have been updated independently by Renovate or other means)
 - Verify that Step 1 changes propagated correctly
   - Each repository's template configuration (copier-answers.yml settings) determines which changes apply. Judge "expected changes" vs "not applicable" based on the configuration
   - Ensure repository-specific customizations (non-template changes) are not broken
@@ -171,7 +171,8 @@ For each conflict, compare the versions on both sides:
 
 - If `before updating` has a newer version, keep it -- do not downgrade
 - If `after updating` introduces structural changes (e.g., new `with:` inputs, format changes like SHA pinning), apply the structural change but preserve the newer version from `before updating`
-- Example: `before updating` has `actions/create-github-app-token@SHA-A # v3.1.0`, `after updating` has `actions/create-github-app-token@SHA-B # v3.0.0` -> keep `@SHA-A # v3.1.0`
+- Example (version only): `before updating` has `actions/create-github-app-token@SHA-A # v3.1.0`, `after updating` has `actions/create-github-app-token@SHA-B # v3.0.0` -> keep `@SHA-A # v3.1.0`
+- Example (structural + version): `before updating` has `actions/setup-node@v4`, `after updating` has `actions/setup-node@v3` with a new `with: { cache: 'pnpm' }` input -> result should be `actions/setup-node@v4` with `with: { cache: 'pnpm' }`
 
 This rule must be explicitly included in every delegation prompt.
 
