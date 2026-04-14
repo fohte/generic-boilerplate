@@ -74,7 +74,14 @@ Group by decision axis. Use one H4 per axis, even if there is only one axis. Eac
 
 #### {{ '<判断軸>' if repo_language == 'ja' else '<Decision axis>' }}
 
+{% if repo_language == 'ja' -%}
 | Decision | Design | Pros | Cons |
 | -------- | ------ | ---- | ---- |
-| {{ '採用' if repo_language == 'ja' else 'Chosen' }}   |        |      |      |
-| {{ '却下' if repo_language == 'ja' else 'Rejected' }} |        |      |      |
+| 採用     |        |      |      |
+| 却下     |        |      |      |
+{%- else -%}
+| Decision | Design | Pros | Cons |
+| -------- | ------ | ---- | ---- |
+| Chosen   |        |      |      |
+| Rejected |        |      |      |
+{%- endif %}
