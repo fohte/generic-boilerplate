@@ -10,8 +10,11 @@ Why this PR exists. For bug fixes, describe the symptom. For new features,
 describe what you want to achieve. For dependency updates, give a concrete
 reason (EOL, security fix, new API you need, etc.).
 
-Keep it to 1-3 lines.
+Use a bullet list (`-`). One bullet per point; use nested bullets for
+supporting detail. Do not write prose paragraphs.
 -->
+
+-
 
 ### Reproduction steps
 
@@ -27,10 +30,14 @@ subsection (heading included) if the PR is not a bug fix.
 ## Approach
 
 <!--
-How you implemented the Purpose, in 1-3 lines. Describe the essence of the
-approach, not a file-by-file walkthrough — the diff already shows what
-changed.
+How you implemented the Purpose. Describe the essence of the approach, not a
+file-by-file walkthrough — the diff already shows what changed.
+
+Use a bullet list (`-`). One bullet per point; use nested bullets for
+supporting detail. Do not write prose paragraphs.
 -->
+
+-
 
 ### Breaking changes
 
