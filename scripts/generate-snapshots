@@ -72,6 +72,11 @@ generate_fixture() {
   local fixture=$1
   local output_dir=$2
 
+  # Intentionally omit --defaults: fixtures must declare every parameter
+  # explicitly. If a new template param is added without being set in every
+  # fixture, copier raises "Interactive session required" here — that failure
+  # is the desired signal. Silently falling back to defaults would hide the
+  # oversight and let unintended values leak into snapshots.
   $COPIER_CMD copy --trust --overwrite --data-file "tests/fixtures/$fixture.yml" . "$output_dir"
 
   # Remove answers file as it contains a commit hash that changes on every run
