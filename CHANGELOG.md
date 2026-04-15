@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.2](https://github.com/fohte/generic-boilerplate/compare/v0.6.1...v0.6.2) (2026-04-15)
+
+
+### Features
+
+* **template:** add PR body template ([#291](https://github.com/fohte/generic-boilerplate/issues/291)) ([298c7b4](https://github.com/fohte/generic-boilerplate/commit/298c7b46635e18446f099882ef8ebd8f5f90375b))
+
+
+### Bug Fixes
+
+* **template:** align `pr-title-check` scope regex with Conventional Commits spec ([#289](https://github.com/fohte/generic-boilerplate/issues/289)) ([4cb43b3](https://github.com/fohte/generic-boilerplate/commit/4cb43b3b029c8c19fc9afdaf9b72b5bf601d4f42))
+
 ## [0.6.1](https://github.com/fohte/generic-boilerplate/compare/v0.6.0...v0.6.1) (2026-04-11)
 
 
