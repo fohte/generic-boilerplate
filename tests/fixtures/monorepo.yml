@@ -13,3 +13,4 @@ subpackages:
     storybook: true
   - name: backend
     type: rust
+repo_language: ja

@@ -81,6 +81,14 @@ is_public:
   default: false
   help: Is this a public repository?
 
+repo_language:
+  type: str
+  choices:
+    - en
+    - ja
+  default: '{% if is_public %}en{% else %}ja{% endif %}'
+  help: Primary language for repository documentation
+
 # release-please settings
 use_release_please:
   type: bool

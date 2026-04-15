@@ -7,3 +7,4 @@ description: Test Node.js project description
 is_public: false
 use_release_please: false
 use_storybook: true
+repo_language: ja

@@ -7,3 +7,4 @@ use_release_please: true
 release_type: simple
 auto_merge_release_pr: false
 subpackages: []
+repo_language: ja
