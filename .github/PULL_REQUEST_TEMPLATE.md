@@ -39,15 +39,8 @@ supporting detail. Do not write prose paragraphs.
 
 -
 
-### Breaking changes
-
-<!--
-Include only when this PR breaks compatibility. State what breaks and what
-consumers need to do to adapt. Delete this entire subsection if there are
-no breaking changes.
--->
-
-### Design decisions
+<details>
+<summary>Design decisions</summary>
 
 <!--
 Group by decision axis. Use one H4 per axis, even if there is only one axis.
@@ -66,3 +59,13 @@ considered (e.g., typo fixes).
 | -------- | ------ | ---- | ---- |
 | Chosen   |        |      |      |
 | Rejected |        |      |      |
+
+</details>
+
+### Breaking changes
+
+<!--
+Include only when this PR breaks compatibility. State what breaks and what
+consumers need to do to adapt. Delete this entire subsection if there are
+no breaking changes.
+-->

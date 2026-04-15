@@ -52,17 +52,8 @@ Use a bullet list (`-`). One bullet per point; use nested bullets for supporting
 
 -
 
-### Breaking changes
-
-<!--
-{% if repo_language == 'ja' -%}
-互換性を壊す変更を含むときのみ。非互換の内容と、利用者が取るべき対応を書く。breaking change がなければこのセクション (見出しごと) を削除。
-{%- else -%}
-Include only when this PR breaks compatibility. State what breaks and what consumers need to do to adapt. Delete this entire subsection if there are no breaking changes.
-{%- endif %}
--->
-
-### Design decisions
+<details>
+<summary>Design decisions</summary>
 
 <!--
 {% if repo_language == 'ja' -%}
@@ -85,3 +76,14 @@ Group by decision axis. Use one H4 per axis, even if there is only one axis. Eac
 | Chosen   |        |      |      |
 | Rejected |        |      |      |
 {%- endif %}
+</details>
+
+### Breaking changes
+
+<!--
+{% if repo_language == 'ja' -%}
+互換性を壊す変更を含むときのみ。非互換の内容と、利用者が取るべき対応を書く。breaking change がなければこのセクション (見出しごと) を削除。
+{%- else -%}
+Include only when this PR breaks compatibility. State what breaks and what consumers need to do to adapt. Delete this entire subsection if there are no breaking changes.
+{%- endif %}
+-->

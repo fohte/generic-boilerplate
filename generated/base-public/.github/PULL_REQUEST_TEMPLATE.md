@@ -32,13 +32,8 @@ Use a bullet list (`-`). One bullet per point; use nested bullets for supporting
 
 -
 
-### Breaking changes
-
-<!--
-Include only when this PR breaks compatibility. State what breaks and what consumers need to do to adapt. Delete this entire subsection if there are no breaking changes.
--->
-
-### Design decisions
+<details>
+<summary>Design decisions</summary>
 
 <!--
 Group by decision axis. Use one H4 per axis, even if there is only one axis. Each axis has a table with the chosen design and the rejected alternatives. Both Pros and Cons are required for every row. If you cannot fill them in, the decision is too shallow — think again before writing. Delete this entire subsection only for trivial PRs where no alternative was considered (e.g., typo fixes).
@@ -50,3 +45,11 @@ Group by decision axis. Use one H4 per axis, even if there is only one axis. Eac
 | -------- | ------ | ---- | ---- |
 | Chosen   |        |      |      |
 | Rejected |        |      |      |
+
+</details>
+
+### Breaking changes
+
+<!--
+Include only when this PR breaks compatibility. State what breaks and what consumers need to do to adapt. Delete this entire subsection if there are no breaking changes.
+-->
