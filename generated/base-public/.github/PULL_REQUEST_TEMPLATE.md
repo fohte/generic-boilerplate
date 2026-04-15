@@ -45,7 +45,6 @@ Group by decision axis. Use one H4 per axis, even if there is only one axis. Eac
 | -------- | ------ | ---- | ---- |
 | Chosen   |        |      |      |
 | Rejected |        |      |      |
-
 </details>
 
 ### Breaking changes
