@@ -2,50 +2,124 @@
 {%- set node_pkgs = subpackages | selectattr('type', 'equalto', 'node') | list -%}
 {%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list -%}
 {%- set has_rust = (type == 'rust') or (rust_pkgs | length > 0) -%}
-{%- set eslint_run = 'pnpm exec eslint {staged_files}' -%}
-remotes:
-  - git_url: https://github.com/fohte/lefthook-config.git
-    ref: v0.1.16 # renovate: datasource=github-tags depName=fohte/lefthook-config
-    configs:
-      - base.yml
-{%- if has_rust %}
-      - rust.yml
-{%- endif %}
-{%- if has_node or has_rust %}
-
+{%- set root_pnpm = (type == 'node') or (monorepo_node_workspace | default(false)) -%}
+{%- if root_pnpm -%}
+{%-   set prettier_run = 'pnpm exec prettier --write --ignore-unknown --no-error-on-unmatched-pattern {staged_files}' -%}
+{%-   set commitlint_run = 'pnpm exec commitlint --edit {1}' -%}
+{%- else -%}
+{%-   set prettier_run = 'mise x -- prettier --write --ignore-unknown --no-error-on-unmatched-pattern {staged_files}' -%}
+{%-   set commitlint_run = 'mise x -- commitlint --edit {1}' -%}
+{%- endif -%}
+{#- Build node eslint block -#}
+{%- set node_block = '' -%}
+{%- if has_node and root_pnpm -%}
+{%-   if monorepo_node_workspace | default(false) -%}
+{%-     set node_block = '    # lefthook\'s default glob uses gobwas/glob without a delimiter, so\n    # \'*.{js,ts,...}\' also matches nested paths (e.g. frontend/src/foo.ts).\n    # A single root-level eslint covers every workspace package, and running\n    # per-package eslint in parallel would race on --fix / stage_fixed writes.\n    eslint:\n      glob: \'*.{js,ts,jsx,tsx,mjs,cjs}\'\n      run: pnpm exec eslint {staged_files}\n' -%}
+{%-   else -%}
+{%-     set node_block = '    eslint:\n      glob: \'*.{js,ts,jsx,tsx,mjs,cjs}\'\n      run: pnpm exec eslint {staged_files}\n' -%}
+{%-   endif -%}
+{%- elif has_node -%}
+{%-   set lines = [] -%}
+{%-   for pkg in node_pkgs -%}
+{%-     set _ = lines.append('    # Non-workspace multi-package monorepo: each subpackage has its own') -%}
+{%-     set _ = lines.append('    # eslint.config.js and dependencies, so lint per package from its root.') -%}
+{%-     set _ = lines.append('    eslint-' ~ pkg.name ~ ':') -%}
+{%-     set _ = lines.append('      glob: \'*.{js,ts,jsx,tsx,mjs,cjs}\'') -%}
+{%-     set _ = lines.append('      root: \'' ~ pkg.name ~ '/\'') -%}
+{%-     set _ = lines.append('      run: pnpm exec eslint {staged_files}') -%}
+{%-   endfor -%}
+{%-   set node_block = lines | join('\n') ~ '\n' -%}
+{%- endif -%}
+{#- Build rust block -#}
+{%- set rust_block = '' -%}
+{%- if has_rust -%}
+{%-   set rust_lines = [
+        '    ast-grep:',
+        '      glob: \'*.rs\'',
+        '      run: ast-grep scan {staged_files}',
+        '',
+        '    # Using glob instead of file_types because text/x-rust is not supported',
+        '    # by the mimetype library used by lefthook.',
+        '    # See: https://github.com/gabriel-vasile/mimetype/blob/master/supported_mimes.md',
+        '    cargo-fmt:',
+        '      glob: \'*.rs\''
+      ] -%}
+{%-   if rust_pkgs | length > 0 -%}
+{%-     set _ = rust_lines.append('      root: \'' ~ rust_pkgs[0].name ~ '/\'') -%}
+{%-   endif -%}
+{%-   set _ = rust_lines.append('      run: cargo fmt -- {staged_files}') -%}
+{%-   set _ = rust_lines.append('') -%}
+{%-   set _ = rust_lines.append('    cargo-clippy:') -%}
+{%-   set _ = rust_lines.append('      glob: \'*.rs\'') -%}
+{%-   if rust_pkgs | length > 0 -%}
+{%-     set _ = rust_lines.append('      root: \'' ~ rust_pkgs[0].name ~ '/\'') -%}
+{%-   endif -%}
+{%-   set _ = rust_lines.append('      run: cargo clippy --all-targets -- -D warnings') -%}
+{%-   set rust_block = rust_lines | join('\n') ~ '\n' -%}
+{%- endif -%}
+{#- Combine extra sections with proper blank line separation -#}
+{%- set extras = [] -%}
+{%- if node_block -%}{%- set _ = extras.append(node_block) -%}{%- endif -%}
+{%- if rust_block -%}{%- set _ = extras.append(rust_block) -%}{%- endif -%}
+{%- set extras_text = extras | join('\n') -%}
 pre-commit:
   commands:
-{%- if has_node %}
-{%- if type == 'node' or (monorepo_node_workspace | default(false)) %}
-{%- if monorepo_node_workspace | default(false) %}
-    # lefthook's default glob uses gobwas/glob without a delimiter, so
-    # '*.{js,ts,...}' also matches nested paths (e.g. frontend/src/foo.ts).
-    # A single root-level eslint covers every workspace package, and running
-    # per-package eslint in parallel would race on --fix / stage_fixed writes.
+    format:
+      # Remove trailing whitespace and ensure final newline
+      run: basefmt {staged_files}
+      glob: '*'
+      stage_fixed: true
+
+    prettier:
+      run: {{ prettier_run }}
+      stage_fixed: true
+
+    shellcheck:
+      file_types:
+        - text/x-shellscript
+      exclude:
+        - '*.zsh'
+      run: mise x shellcheck -- shellcheck {staged_files}
+
+    shfmt:
+      file_types:
+        - text/x-shellscript
+      exclude:
+        - '*.zsh'
+      run: mise x shfmt -- shfmt --apply-ignore -w {staged_files}
+      stage_fixed: true
+
+    pinact:
+      glob: '{.github/workflows/*.{yml,yaml},.github/actions/**/action.{yml,yaml}}'
+      run: mise x pinact -- pinact run {staged_files}
+      stage_fixed: true
+
+    actionlint:
+      glob: '.github/workflows/*.{yml,yaml}'
+      run: mise x actionlint -- actionlint {staged_files}
+
+    copier-src-path:
+      glob: '.copier-answers.yml'
+      run: |
+        # Renovate does not support the `gh:` prefix in _src_path.
+        # See: https://github.com/renovatebot/renovate/issues/39938
+        for file in {staged_files}; do
+          if [ -f "$file" ]; then
+            # Handle both quoted and unquoted values (e.g. gh:org/repo or "gh:org/repo")
+            if grep -qE "^_src_path:[[:space:]]*['\"]?gh:" "$file"; then
+              src_path=$(grep -E "^_src_path:" "$file" | head -n 1 | sed 's/^_src_path:[[:space:]]*//')
+              suggested_path=$(echo "$src_path" | sed -e "s|^['\"]\\{0,1\\}gh:|https://github.com/|" -e "s|['\"]\\{0,1\\}$||")
+              echo "Error: $file uses 'gh:' prefix in _src_path, which is not supported by Renovate." >&2
+              echo "Please use a full 'https://' URL instead." >&2
+              printf "  Current:   %s\n  Suggested: %s\n" "$src_path" "$suggested_path" >&2
+              exit 1
+            fi
+          fi
+        done
+{% if extras_text %}
+{{ extras_text }}
 {%- endif %}
-    eslint:
-      glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
-      run: {{ eslint_run }}
-{%- else %}
-{%- for pkg in node_pkgs %}
-    # Non-workspace multi-package monorepo: each subpackage has its own
-    # eslint.config.js and dependencies, so lint per package from its root.
-    eslint-{{ pkg.name }}:
-      glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
-      root: '{{ pkg.name }}/'
-      run: {{ eslint_run }}
-{%- endfor %}
-{%- endif %}
-{%- endif %}
-{%- if has_rust %}
-    ast-grep:
-      glob: '*.rs'
-      run: ast-grep scan {staged_files}
-{%- if rust_pkgs | length > 0 %}
-    cargo-fmt:
-      root: '{{ rust_pkgs[0].name }}/'
-    cargo-clippy:
-      root: '{{ rust_pkgs[0].name }}/'
-{%- endif %}
-{%- endif %}
-{%- endif %}
+commit-msg:
+  commands:
+    commitlint:
+      run: {{ commitlint_run }}
