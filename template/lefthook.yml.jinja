@@ -3,13 +3,6 @@
 {%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list -%}
 {%- set has_rust = (type == 'rust') or (rust_pkgs | length > 0) -%}
 {%- set root_pnpm = (type == 'node') or (monorepo_node_workspace | default(false)) -%}
-{%- if root_pnpm -%}
-{%-   set prettier_run = 'pnpm exec prettier --write --ignore-unknown --no-error-on-unmatched-pattern {staged_files}' -%}
-{%-   set commitlint_run = 'pnpm exec commitlint --edit {1}' -%}
-{%- else -%}
-{%-   set prettier_run = 'mise x -- prettier --write --ignore-unknown --no-error-on-unmatched-pattern {staged_files}' -%}
-{%-   set commitlint_run = 'mise x -- commitlint --edit {1}' -%}
-{%- endif -%}
 pre-commit:
   commands:
     format:
@@ -19,7 +12,7 @@ pre-commit:
       stage_fixed: true
 
     prettier:
-      run: {{ prettier_run }}
+      run: {{ 'pnpm exec' if root_pnpm else 'mise x --' }} prettier --write --ignore-unknown --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
 
     shellcheck:
@@ -118,4 +111,4 @@ pre-commit:
 commit-msg:
   commands:
     commitlint:
-      run: {{ commitlint_run }}
+      run: {{ 'pnpm exec' if root_pnpm else 'mise x --' }} commitlint --edit {1}
