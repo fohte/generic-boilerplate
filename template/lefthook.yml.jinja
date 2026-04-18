@@ -2,7 +2,7 @@
 {%- set node_pkgs = subpackages | selectattr('type', 'equalto', 'node') | list -%}
 {%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list -%}
 {%- set has_rust = (type == 'rust') or (rust_pkgs | length > 0) -%}
-{%- set root_pnpm = (type == 'node') or (monorepo_node_workspace | default(false)) -%}
+{%- set root_pnpm = has_node -%}
 pre-commit:
   commands:
     format:
@@ -67,7 +67,7 @@ pre-commit:
     eslint:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
       run: pnpm exec eslint {staged_files}
-{%- elif has_node and root_pnpm %}
+{%- elif type == 'node' %}
 
     eslint:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'

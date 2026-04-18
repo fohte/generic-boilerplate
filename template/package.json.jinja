@@ -1,8 +1,22 @@
 {%- set is_workspace = monorepo_node_workspace | default(false) -%}
 {%- set node_pkgs = subpackages | default([]) | selectattr('type', 'equalto', 'node') | list -%}
+{%- set has_node_subpackage = node_pkgs | length > 0 -%}
 {%- set has_storybook = use_storybook | default(false) -%}
-{%- if type != 'node' and not is_workspace -%}
-{#- Non-workspace monorepo: minimal package.json for corepack version pinning -#}
+{%- if type != 'node' and not is_workspace and has_node_subpackage -%}
+{#- Non-workspace monorepo with node subpackages:
+    root package.json hosts tools that run at the repo root
+    (prettier, commitlint) so lefthook can use `pnpm exec`. -#}
+{
+  "name": "{{ project_name }}",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "devDependencies": {
+    "@commitlint/cli": "20.5.0",
+    "prettier": "3.8.1"
+  }
+}
+{%- elif type != 'node' and not is_workspace -%}
+{#- Non-workspace monorepo without node subpackages: only corepack pinning -#}
 {
   "name": "{{ project_name }}",
   "private": true,

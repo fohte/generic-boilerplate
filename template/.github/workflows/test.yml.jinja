@@ -114,7 +114,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 {%- else %}
-{#- Non-workspace mode: per-package install #}
+{#- Non-workspace mode: root install for shared tools + per-package install #}
 
       - run: corepack enable
 
@@ -127,12 +127,15 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+            node_modules
 {%- for pkg in node_pkgs %}
             {{ pkg.name }}/node_modules
 {%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles({% endraw %}{% for pkg in node_pkgs %}'{{ pkg.name }}/pnpm-lock.yaml'{{ ', ' if not loop.last else '' }}{% endfor %}{% raw %}) }}{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', {% endraw %}{% for pkg in node_pkgs %}'{{ pkg.name }}/pnpm-lock.yaml'{{ ', ' if not loop.last else '' }}{% endfor %}{% raw %}) }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
 
+      - name: Install pnpm dependencies (root)
+        run: pnpm install --frozen-lockfile
 {%- for pkg in node_pkgs %}
 
       - name: Install pnpm dependencies ({{ pkg.name }})
