@@ -10,59 +10,6 @@
 {%-   set prettier_run = 'mise x -- prettier --write --ignore-unknown --no-error-on-unmatched-pattern {staged_files}' -%}
 {%-   set commitlint_run = 'mise x -- commitlint --edit {1}' -%}
 {%- endif -%}
-{#- Build node eslint block -#}
-{%- set node_block = '' -%}
-{%- if has_node and root_pnpm -%}
-{%-   if monorepo_node_workspace | default(false) -%}
-{%-     set node_block = '    # lefthook\'s default glob uses gobwas/glob without a delimiter, so\n    # \'*.{js,ts,...}\' also matches nested paths (e.g. frontend/src/foo.ts).\n    # A single root-level eslint covers every workspace package, and running\n    # per-package eslint in parallel would race on --fix / stage_fixed writes.\n    eslint:\n      glob: \'*.{js,ts,jsx,tsx,mjs,cjs}\'\n      run: pnpm exec eslint {staged_files}\n' -%}
-{%-   else -%}
-{%-     set node_block = '    eslint:\n      glob: \'*.{js,ts,jsx,tsx,mjs,cjs}\'\n      run: pnpm exec eslint {staged_files}\n' -%}
-{%-   endif -%}
-{%- elif has_node -%}
-{%-   set lines = [] -%}
-{%-   for pkg in node_pkgs -%}
-{%-     set _ = lines.append('    # Non-workspace multi-package monorepo: each subpackage has its own') -%}
-{%-     set _ = lines.append('    # eslint.config.js and dependencies, so lint per package from its root.') -%}
-{%-     set _ = lines.append('    eslint-' ~ pkg.name ~ ':') -%}
-{%-     set _ = lines.append('      glob: \'*.{js,ts,jsx,tsx,mjs,cjs}\'') -%}
-{%-     set _ = lines.append('      root: \'' ~ pkg.name ~ '/\'') -%}
-{%-     set _ = lines.append('      run: pnpm exec eslint {staged_files}') -%}
-{%-   endfor -%}
-{%-   set node_block = lines | join('\n') ~ '\n' -%}
-{%- endif -%}
-{#- Build rust block -#}
-{%- set rust_block = '' -%}
-{%- if has_rust -%}
-{%-   set rust_lines = [
-        '    ast-grep:',
-        '      glob: \'*.rs\'',
-        '      run: ast-grep scan {staged_files}',
-        '',
-        '    # Using glob instead of file_types because text/x-rust is not supported',
-        '    # by the mimetype library used by lefthook.',
-        '    # See: https://github.com/gabriel-vasile/mimetype/blob/master/supported_mimes.md',
-        '    cargo-fmt:',
-        '      glob: \'*.rs\''
-      ] -%}
-{%-   if rust_pkgs | length > 0 -%}
-{%-     set _ = rust_lines.append('      root: \'' ~ rust_pkgs[0].name ~ '/\'') -%}
-{%-   endif -%}
-{%-   set _ = rust_lines.append('      run: cargo fmt') -%}
-{%-   set _ = rust_lines.append('      stage_fixed: true') -%}
-{%-   set _ = rust_lines.append('') -%}
-{%-   set _ = rust_lines.append('    cargo-clippy:') -%}
-{%-   set _ = rust_lines.append('      glob: \'*.rs\'') -%}
-{%-   if rust_pkgs | length > 0 -%}
-{%-     set _ = rust_lines.append('      root: \'' ~ rust_pkgs[0].name ~ '/\'') -%}
-{%-   endif -%}
-{%-   set _ = rust_lines.append('      run: cargo clippy --all-targets -- -D warnings') -%}
-{%-   set rust_block = rust_lines | join('\n') ~ '\n' -%}
-{%- endif -%}
-{#- Combine extra sections with proper blank line separation -#}
-{%- set extras = [] -%}
-{%- if node_block -%}{%- set _ = extras.append(node_block) -%}{%- endif -%}
-{%- if rust_block -%}{%- set _ = extras.append(rust_block) -%}{%- endif -%}
-{%- set extras_text = extras | join('\n') -%}
 pre-commit:
   commands:
     format:
@@ -118,9 +65,50 @@ pre-commit:
               ;;
           esac
         done
-{% if extras_text %}
-{{ extras_text }}
-{%- endif %}
+{% if has_node and root_pnpm -%}
+
+    {% if monorepo_node_workspace | default(false) -%}
+    # lefthook's default glob uses gobwas/glob without a delimiter, so
+    # '*.{js,ts,...}' also matches nested paths (e.g. frontend/src/foo.ts).
+    # A single root-level eslint covers every workspace package, and running
+    # per-package eslint in parallel would race on --fix / stage_fixed writes.
+    {% endif -%}
+    eslint:
+      glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
+      run: pnpm exec eslint {staged_files}
+{% elif has_node -%}
+    {% for pkg in node_pkgs %}
+    # Non-workspace multi-package monorepo: each subpackage has its own
+    # eslint.config.js and dependencies, so lint per package from its root.
+    eslint-{{ pkg.name }}:
+      glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
+      root: '{{ pkg.name }}/'
+      run: pnpm exec eslint {staged_files}
+    {% endfor -%}
+{% endif -%}
+{% if has_rust %}
+    ast-grep:
+      glob: '*.rs'
+      run: ast-grep scan {staged_files}
+
+    # Using glob instead of file_types because text/x-rust is not supported
+    # by the mimetype library used by lefthook.
+    # See: https://github.com/gabriel-vasile/mimetype/blob/master/supported_mimes.md
+    cargo-fmt:
+      glob: '*.rs'
+      {%- if rust_pkgs | length > 0 %}
+      root: '{{ rust_pkgs[0].name }}/'
+      {%- endif %}
+      run: cargo fmt
+      stage_fixed: true
+
+    cargo-clippy:
+      glob: '*.rs'
+      {%- if rust_pkgs | length > 0 %}
+      root: '{{ rust_pkgs[0].name }}/'
+      {%- endif %}
+      run: cargo clippy --all-targets -- -D warnings
+{% endif %}
 commit-msg:
   commands:
     commitlint:
