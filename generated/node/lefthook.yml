@@ -53,7 +53,8 @@ pre-commit:
               ;;
           esac
         done
-eslint:
+
+    eslint:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
       run: pnpm exec eslint {staged_files}
 

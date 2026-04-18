@@ -65,28 +65,33 @@ pre-commit:
               ;;
           esac
         done
-{% if has_node and root_pnpm -%}
+{%- if has_node and (monorepo_node_workspace | default(false)) %}
 
-    {% if monorepo_node_workspace | default(false) -%}
     # lefthook's default glob uses gobwas/glob without a delimiter, so
     # '*.{js,ts,...}' also matches nested paths (e.g. frontend/src/foo.ts).
     # A single root-level eslint covers every workspace package, and running
     # per-package eslint in parallel would race on --fix / stage_fixed writes.
-    {% endif -%}
     eslint:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
       run: pnpm exec eslint {staged_files}
-{% elif has_node -%}
-    {% for pkg in node_pkgs %}
+{%- elif has_node and root_pnpm %}
+
+    eslint:
+      glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
+      run: pnpm exec eslint {staged_files}
+{%- elif has_node %}
+{%- for pkg in node_pkgs %}
+
     # Non-workspace multi-package monorepo: each subpackage has its own
     # eslint.config.js and dependencies, so lint per package from its root.
     eslint-{{ pkg.name }}:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
       root: '{{ pkg.name }}/'
       run: pnpm exec eslint {staged_files}
-    {% endfor -%}
-{% endif -%}
-{% if has_rust %}
+{%- endfor %}
+{%- endif %}
+{%- if has_rust %}
+
     ast-grep:
       glob: '*.rs'
       run: ast-grep scan {staged_files}
@@ -108,7 +113,8 @@ pre-commit:
       root: '{{ rust_pkgs[0].name }}/'
       {%- endif %}
       run: cargo clippy --all-targets -- -D warnings
-{% endif %}
+{%- endif %}
+
 commit-msg:
   commands:
     commitlint:
