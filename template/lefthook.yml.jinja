@@ -47,7 +47,8 @@
 {%-   if rust_pkgs | length > 0 -%}
 {%-     set _ = rust_lines.append('      root: \'' ~ rust_pkgs[0].name ~ '/\'') -%}
 {%-   endif -%}
-{%-   set _ = rust_lines.append('      run: cargo fmt -- {staged_files}') -%}
+{%-   set _ = rust_lines.append('      run: cargo fmt') -%}
+{%-   set _ = rust_lines.append('      stage_fixed: true') -%}
 {%-   set _ = rust_lines.append('') -%}
 {%-   set _ = rust_lines.append('    cargo-clippy:') -%}
 {%-   set _ = rust_lines.append('      glob: \'*.rs\'') -%}
@@ -104,17 +105,18 @@ pre-commit:
         # Renovate does not support the `gh:` prefix in _src_path.
         # See: https://github.com/renovatebot/renovate/issues/39938
         for file in {staged_files}; do
-          if [ -f "$file" ]; then
-            # Handle both quoted and unquoted values (e.g. gh:org/repo or "gh:org/repo")
-            if grep -qE "^_src_path:[[:space:]]*['\"]?gh:" "$file"; then
-              src_path=$(grep -E "^_src_path:" "$file" | head -n 1 | sed 's/^_src_path:[[:space:]]*//')
+          [ -f "$file" ] || continue
+          # Handle both quoted and unquoted values (e.g. gh:org/repo or "gh:org/repo")
+          src_path=$(sed -n 's/^_src_path:[[:space:]]*//p' "$file" | head -n 1)
+          case "$src_path" in
+            gh:* | "'gh:"* | '"gh:'*)
               suggested_path=$(echo "$src_path" | sed -e "s|^['\"]\\{0,1\\}gh:|https://github.com/|" -e "s|['\"]\\{0,1\\}$||")
               echo "Error: $file uses 'gh:' prefix in _src_path, which is not supported by Renovate." >&2
               echo "Please use a full 'https://' URL instead." >&2
               printf "  Current:   %s\n  Suggested: %s\n" "$src_path" "$suggested_path" >&2
               exit 1
-            fi
-          fi
+              ;;
+          esac
         done
 {% if extras_text %}
 {{ extras_text }}
