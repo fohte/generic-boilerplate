@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.4](https://github.com/fohte/generic-boilerplate/compare/v0.6.3...v0.6.4) (2026-04-19)
+
+
+### Bug Fixes
+
+* **template:** stop leaking mise template-author comments into rendered output ([#295](https://github.com/fohte/generic-boilerplate/issues/295)) ([81efacc](https://github.com/fohte/generic-boilerplate/commit/81efacc5000e64292f0381c20d965ff6bb3a5468))
+
 ## [0.6.3](https://github.com/fohte/generic-boilerplate/compare/v0.6.2...v0.6.3) (2026-04-19)
 
 
