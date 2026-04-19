@@ -1,5 +1,3 @@
-{%- set has_node = (type == 'node') or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) -%}
-{%- set has_rust = (type == 'rust') or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) -%}
 #!/usr/bin/env bash
 #
 # Bootstrap the development environment.
@@ -46,16 +44,16 @@ fi
 
 # Install Node.js dependencies
 pnpm install
-{%- elif monorepo_node_workspace | default(false) %}
+{%- elif is_workspace %}
 
 # Install Node.js dependencies (workspace)
 pnpm install
-{%- elif has_node and not (monorepo_node_workspace | default(false)) %}
+{%- elif has_node and not is_workspace %}
 
 # Install shared dev tools (prettier, commitlint) at the repo root
 pnpm install
 # Install Node.js dependencies for each subpackage
-{%- for pkg in subpackages if pkg.type == 'node' %}
+{%- for pkg in node_pkgs %}
 (cd {{ pkg.name }} && pnpm install)
 {%- endfor %}
 {%- endif %}
@@ -66,7 +64,7 @@ cargo fetch
 {%- elif has_rust and type != 'rust' %}
 
 # Fetch Rust dependencies
-{%- for pkg in subpackages if pkg.type == 'rust' %}
+{%- for pkg in rust_pkgs %}
 cargo fetch --manifest-path {{ pkg.name }}/Cargo.toml
 {%- endfor %}
 {%- endif %}

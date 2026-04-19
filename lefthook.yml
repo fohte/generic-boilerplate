@@ -15,6 +15,7 @@ pre-commit:
         - text/x-shellscript
       exclude:
         - '*.zsh'
+        - '*.jinja'
       run: mise x shellcheck -- shellcheck {staged_files}
 
     shfmt:
@@ -22,6 +23,7 @@ pre-commit:
         - text/x-shellscript
       exclude:
         - '*.zsh'
+        - '*.jinja'
       run: mise x shfmt -- shfmt --apply-ignore -w {staged_files}
       stage_fixed: true
 
