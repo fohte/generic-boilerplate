@@ -48,12 +48,12 @@ _exclude:
   - '{% if not use_release_please %}.github/workflows/pr-title-check.yml{% endif %}'
   # Exclude Node.js specific files when type is not 'node'
   # Use leading / to match root only (not yield subpackage directories)
-  - "{% if type != 'node' and not (monorepo_node_workspace | default(false)) and not node_pkgs %}/package.json{% endif %}"
+  - "{% if type != 'node' and not is_workspace and not has_node_pkg %}/package.json{% endif %}"
   - "{% if type != 'node' %}/tsconfig.json{% endif %}"
-  - "{% if type != 'node' and not (monorepo_node_workspace | default(false)) %}/eslint.config.js{% endif %}"
+  - "{% if type != 'node' and not is_workspace %}/eslint.config.js{% endif %}"
   - "{% if type != 'node' %}/vitest.config.ts{% endif %}"
   # pnpm-workspace.yaml only when workspace is enabled (workspace requires pnpm)
-  - '{% if not (monorepo_node_workspace | default(false)) %}/pnpm-workspace.yaml{% endif %}'
+  - '{% if not is_workspace %}/pnpm-workspace.yaml{% endif %}'
   # Exclude CLAUDE.md when no Rust code (only contains Rust test rules)
   - '{% if not has_rust %}/CLAUDE.md{% endif %}'
   # Exclude Rust specific files when type is not 'rust'
@@ -72,7 +72,7 @@ _exclude:
   - "{% if not use_storybook | default(false) or (type == 'base' and not has_storybook_pkg) %}.github/workflows/storybook.yml{% endif %}"
   - "{% if type != 'node' or not use_storybook | default(false) %}/.storybook{% endif %}"
   # Exclude type-specific files
-  - "{% if type not in ['node', 'rust'] and not (monorepo_node_workspace | default(false)) and not rust_pkgs %}/.gitignore{% endif %}"
+  - "{% if type not in ['node', 'rust'] and not is_workspace and not has_rust_pkg %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
 
 # Template parameters
@@ -174,19 +174,29 @@ storybook_pkgs:
   default: "{{ subpackages | default([]) | selectattr('storybook', 'defined') | selectattr('storybook', 'equalto', true) | list }}"
   when: false
 
-has_node:
+has_node_pkg:
   type: bool
-  default: "{{ type == 'node' or (node_pkgs | length > 0) }}"
+  default: '{{ node_pkgs | length > 0 }}'
   when: false
 
-has_rust:
+has_rust_pkg:
   type: bool
-  default: "{{ type == 'rust' or (rust_pkgs | length > 0) }}"
+  default: '{{ rust_pkgs | length > 0 }}'
   when: false
 
 has_storybook_pkg:
   type: bool
   default: '{{ storybook_pkgs | length > 0 }}'
+  when: false
+
+has_node:
+  type: bool
+  default: "{{ type == 'node' or has_node_pkg }}"
+  when: false
+
+has_rust:
+  type: bool
+  default: "{{ type == 'rust' or has_rust_pkg }}"
   when: false
 
 is_workspace:

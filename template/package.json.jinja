@@ -1,5 +1,5 @@
 {%- set has_storybook = use_storybook | default(false) -%}
-{%- if type != 'node' and not is_workspace and (node_pkgs | length > 0) -%}
+{%- if type != 'node' and not is_workspace and has_node_pkg -%}
 {#- Non-workspace monorepo with node subpackages:
     root package.json hosts tools that run at the repo root
     (prettier, commitlint) so lefthook can use `pnpm exec`. -#}
