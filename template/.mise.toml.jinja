@@ -11,7 +11,8 @@ actionlint = "1.7.12"
 node = "24.14.1"
 pinact = "3.9.0"
 "github:fohte/basefmt" = "0.1.0"
-{% if type != 'node' and not (monorepo_node_workspace | default(false)) -%}
+{% if not has_node -%}
+{#- Without a package.json, prettier and commitlint must be hosted by mise. -#}
 "npm:@commitlint/cli" = "20.5.0"
 "npm:prettier" = "3.8.1"
 {% endif -%}
