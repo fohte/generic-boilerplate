@@ -2,50 +2,113 @@
 {%- set node_pkgs = subpackages | selectattr('type', 'equalto', 'node') | list -%}
 {%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list -%}
 {%- set has_rust = (type == 'rust') or (rust_pkgs | length > 0) -%}
-{%- set eslint_run = 'pnpm exec eslint {staged_files}' -%}
-remotes:
-  - git_url: https://github.com/fohte/lefthook-config.git
-    ref: v0.1.16 # renovate: datasource=github-tags depName=fohte/lefthook-config
-    configs:
-      - base.yml
-{%- if has_rust %}
-      - rust.yml
-{%- endif %}
-{%- if has_node or has_rust %}
-
+{%- set root_pnpm = has_node -%}
 pre-commit:
   commands:
-{%- if has_node %}
-{%- if type == 'node' or (monorepo_node_workspace | default(false)) %}
-{%- if monorepo_node_workspace | default(false) %}
+    format:
+      # Remove trailing whitespace and ensure final newline
+      run: basefmt {staged_files}
+      glob: '*'
+      stage_fixed: true
+
+    prettier:
+      run: {{ 'pnpm exec' if root_pnpm else 'mise x --' }} prettier --write --ignore-unknown --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
+
+    shellcheck:
+      file_types:
+        - text/x-shellscript
+      exclude:
+        - '*.zsh'
+      run: mise x shellcheck -- shellcheck {staged_files}
+
+    shfmt:
+      file_types:
+        - text/x-shellscript
+      exclude:
+        - '*.zsh'
+      run: mise x shfmt -- shfmt --apply-ignore -w {staged_files}
+      stage_fixed: true
+
+    pinact:
+      glob: '{.github/workflows/*.{yml,yaml},.github/actions/**/action.{yml,yaml}}'
+      run: mise x pinact -- pinact run {staged_files}
+      stage_fixed: true
+
+    actionlint:
+      glob: '.github/workflows/*.{yml,yaml}'
+      run: mise x actionlint -- actionlint {staged_files}
+
+    copier-src-path:
+      glob: '.copier-answers.yml'
+      run: |
+        # Renovate does not support the `gh:` prefix in _src_path.
+        # See: https://github.com/renovatebot/renovate/issues/39938
+        for file in {staged_files}; do
+          [ -f "$file" ] || continue
+          # Handle both quoted and unquoted values (e.g. gh:org/repo or "gh:org/repo")
+          src_path=$(sed -n 's/^_src_path:[[:space:]]*//p' "$file" | head -n 1)
+          case "$src_path" in
+            gh:* | "'gh:"* | '"gh:'*)
+              suggested_path=$(echo "$src_path" | sed -e "s|^['\"]\\{0,1\\}gh:|https://github.com/|" -e "s|['\"]\\{0,1\\}$||")
+              echo "Error: $file uses 'gh:' prefix in _src_path, which is not supported by Renovate." >&2
+              echo "Please use a full 'https://' URL instead." >&2
+              printf "  Current:   %s\n  Suggested: %s\n" "$src_path" "$suggested_path" >&2
+              exit 1
+              ;;
+          esac
+        done
+{%- if has_node and (monorepo_node_workspace | default(false)) %}
+
     # lefthook's default glob uses gobwas/glob without a delimiter, so
     # '*.{js,ts,...}' also matches nested paths (e.g. frontend/src/foo.ts).
     # A single root-level eslint covers every workspace package, and running
     # per-package eslint in parallel would race on --fix / stage_fixed writes.
-{%- endif %}
     eslint:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
-      run: {{ eslint_run }}
-{%- else %}
+      run: pnpm exec eslint {staged_files}
+{%- elif type == 'node' %}
+
+    eslint:
+      glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
+      run: pnpm exec eslint {staged_files}
+{%- elif has_node %}
 {%- for pkg in node_pkgs %}
+
     # Non-workspace multi-package monorepo: each subpackage has its own
     # eslint.config.js and dependencies, so lint per package from its root.
     eslint-{{ pkg.name }}:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
       root: '{{ pkg.name }}/'
-      run: {{ eslint_run }}
+      run: pnpm exec eslint {staged_files}
 {%- endfor %}
 {%- endif %}
-{%- endif %}
 {%- if has_rust %}
+
     ast-grep:
       glob: '*.rs'
       run: ast-grep scan {staged_files}
-{%- if rust_pkgs | length > 0 %}
+
+    # Using glob instead of file_types because text/x-rust is not supported
+    # by the mimetype library used by lefthook.
+    # See: https://github.com/gabriel-vasile/mimetype/blob/master/supported_mimes.md
     cargo-fmt:
+      glob: '*.rs'
+      {%- if rust_pkgs | length > 0 %}
       root: '{{ rust_pkgs[0].name }}/'
+      {%- endif %}
+      run: cargo fmt
+      stage_fixed: true
+
     cargo-clippy:
+      glob: '*.rs'
+      {%- if rust_pkgs | length > 0 %}
       root: '{{ rust_pkgs[0].name }}/'
+      {%- endif %}
+      run: cargo clippy --all-targets -- -D warnings
 {%- endif %}
-{%- endif %}
-{%- endif %}
+
+commit-msg:
+  commands:
+    commitlint:
+      run: {{ 'pnpm exec' if root_pnpm else 'mise x --' }} commitlint --edit {1}
