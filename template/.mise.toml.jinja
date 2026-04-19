@@ -12,8 +12,7 @@ node = "24.14.1"
 pinact = "3.9.0"
 "github:fohte/basefmt" = "0.1.0"
 {% if not has_node -%}
-# When no node project is present in the repo, prettier and commitlint are
-# provided via mise since there is no package.json to host them.
+{#- Without a package.json, prettier and commitlint must be hosted by mise. -#}
 "npm:@commitlint/cli" = "20.5.0"
 "npm:prettier" = "3.8.1"
 {% endif -%}
