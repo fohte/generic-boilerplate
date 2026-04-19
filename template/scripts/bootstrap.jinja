@@ -52,7 +52,9 @@ pnpm install
 pnpm install
 {%- elif has_node and not (monorepo_node_workspace | default(false)) %}
 
-# Install Node.js dependencies
+# Install shared dev tools (prettier, commitlint) at the repo root
+pnpm install
+# Install Node.js dependencies for each subpackage
 {%- for pkg in subpackages if pkg.type == 'node' %}
 (cd {{ pkg.name }} && pnpm install)
 {%- endfor %}
