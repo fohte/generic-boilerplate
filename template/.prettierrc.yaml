@@ -1,1 +1,4 @@
-../.prettierrc.yaml
+trailingComma: all
+semi: false
+singleQuote: true
+proseWrap: preserve
