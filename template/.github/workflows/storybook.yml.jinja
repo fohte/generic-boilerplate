@@ -1,8 +1,5 @@
 {#- Helper variables -#}
 {%- set is_monorepo = subpackages | default([]) | length > 0 -%}
-{%- set storybook_pkgs = subpackages | default([]) | selectattr('storybook', 'defined') | selectattr('storybook', 'equalto', true) | list -%}
-{%- set node_pkgs = subpackages | default([]) | selectattr('type', 'equalto', 'node') | list -%}
-{%- set is_workspace = monorepo_node_workspace | default(false) -%}
 {#- Slugify: lowercase, replace _ and / with -, remove @ -#}
 {%- macro slug(name) %}{{ name | replace('_', '-') | replace('@', '') | replace('/', '-') | lower }}{% endmacro -%}
 name: Storybook

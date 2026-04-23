@@ -1,7 +1,3 @@
-{%- set has_node = (type == 'node') or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) -%}
-{%- set node_pkgs = subpackages | selectattr('type', 'equalto', 'node') | list -%}
-{%- set rust_pkgs = subpackages | selectattr('type', 'equalto', 'rust') | list -%}
-{%- set has_rust = (type == 'rust') or (rust_pkgs | length > 0) -%}
 {%- set root_pnpm = has_node -%}
 pre-commit:
   commands:
@@ -58,7 +54,7 @@ pre-commit:
               ;;
           esac
         done
-{%- if has_node and (monorepo_node_workspace | default(false)) %}
+{%- if has_node and is_workspace %}
 
     # lefthook's default glob uses gobwas/glob without a delimiter, so
     # '*.{js,ts,...}' also matches nested paths (e.g. frontend/src/foo.ts).

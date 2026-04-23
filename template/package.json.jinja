@@ -1,8 +1,5 @@
-{%- set is_workspace = monorepo_node_workspace | default(false) -%}
-{%- set node_pkgs = subpackages | default([]) | selectattr('type', 'equalto', 'node') | list -%}
-{%- set has_node_subpackage = node_pkgs | length > 0 -%}
 {%- set has_storybook = use_storybook | default(false) -%}
-{%- if type != 'node' and not is_workspace and has_node_subpackage -%}
+{%- if type != 'node' and not is_workspace and has_node_pkg -%}
 {#- Non-workspace monorepo with node subpackages:
     root package.json hosts tools that run at the repo root
     (prettier, commitlint) so lefthook can use `pnpm exec`. -#}
