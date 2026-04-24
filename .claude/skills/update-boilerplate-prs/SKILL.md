@@ -204,7 +204,7 @@ The latest generic-boilerplate template (v<latest>) is correctly applied to the 
 - Commit and push (no new PR needed; push to the existing PR branch)
 - **Follow the same post-push flow as `/create-pr`**: wait for CI to finish, wait for Gemini Code Assist review via `a ai review wait`, and address reviewer feedback via the `check-pr-review` skill (`a gh pr-review check`) until every unresolved thread is handled
 - If CI fails, investigate the cause, fix, and re-push (same loop as `/create-pr`)
-- **Do NOT merge the PR.** Never run `gh pr merge` (including with `--auto` / `--admin`) and do not enable auto-merge. The user merges manually after reviewing. End by reporting the PR URL and current state (CI green, review resolved) back to the caller
+- **Do NOT merge or approve the PR.** Never run `gh pr merge` (including with `--auto` / `--admin`), do not enable auto-merge, and do not approve the PR (approval can trigger auto-merge in repos where it is wired up). The user merges manually after reviewing. End by reporting the PR URL and current state (CI green, review resolved) back to the caller
 
 ### Delegation prompt checklist
 
