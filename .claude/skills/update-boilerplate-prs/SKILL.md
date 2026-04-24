@@ -11,7 +11,7 @@ Validate generic-boilerplate update PRs created by Renovate and resolve conflict
 
 - **Never run `gh pr merge`** as part of this skill, including `--auto`. The user reviews and merges every PR manually.
 - The only exception is `scripts/auto-merge-boilerplate-prs` in Step 4, which is a user-sanctioned helper for the narrowly-defined "version-only" case (pre-validated diff shape). Do not generalize this to any other path.
-- For everything else -- including MERGE-READY PRs surfaced in Step 5 -- stop after validation and reporting. Do not enable auto-merge, do not approve, do not merge.
+- For everything else -- including MERGE-READY PRs surfaced in Step 6 -- stop after validation and reporting. Do not enable auto-merge, do not approve, do not merge.
 - This policy must also be passed down to every `/delegate-claude` prompt in Step 7.
 
 ## Overall Flow
