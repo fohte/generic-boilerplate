@@ -1,21 +1,28 @@
 ---
 name: update-boilerplate-prs
-description: Batch-process generic-boilerplate update PRs (Renovate copier) across fohte org repositories. Validate, triage, resolve conflicts, and merge boilerplate update PRs.
+description: Batch-process generic-boilerplate update PRs (Renovate copier) across fohte org repositories. Validate, triage, resolve conflicts, and prepare PRs for human merge.
 ---
 
 # Batch Processing generic-boilerplate Update PRs
 
-Validate generic-boilerplate update PRs created by Renovate, merge those that are ready, and resolve conflicts via `/delegate-claude` for the rest.
+Validate generic-boilerplate update PRs created by Renovate and resolve conflicts via `/delegate-claude` for PRs that need intervention. Final merge is always performed manually by the user -- never merge on their behalf.
+
+## Merge policy (read before doing anything)
+
+- **Never run `gh pr merge`** as part of this skill, including `--auto`. The user reviews and merges every PR manually.
+- The only exception is `scripts/auto-merge-boilerplate-prs` in Step 4, which is a user-sanctioned helper for the narrowly-defined "version-only" case (pre-validated diff shape). Do not generalize this to any other path.
+- For everything else -- including MERGE-READY PRs surfaced in Step 6 -- stop after validation and reporting. Do not enable auto-merge, do not approve, do not merge.
+- This policy must also be passed down to every `/delegate-claude` prompt in Step 7.
 
 ## Overall Flow
 
 1. **Understand changes**: Review what changed in generic-boilerplate itself
 2. **Identify outdated repos**: Run `scripts/list-boilerplate-usage --outdated` to find targets
 3. **Trigger PR creation for repos without PRs**: Check Renovate Dashboard checkboxes to bypass rate limits
-4. **Auto-merge version-only PRs**: Run `scripts/auto-merge-boilerplate-prs` for trivial PRs
+4. **Auto-merge version-only PRs**: Run `scripts/auto-merge-boilerplate-prs` for trivial PRs (the only sanctioned auto-merge path)
 5. **Validate remaining PRs**: Review diff, CI status for PRs with actual template changes
-6. **Report merge decisions**: Present findings to the user for approval
-7. **Delegate template application and merge**: Delegate via `/delegate-claude`, which handles fix, CI verification, and merge
+6. **Report findings**: Present MERGE-READY and NEEDS-INTERVENTION lists to the user. Do not merge; the user merges manually after review
+7. **Delegate template application**: Delegate via `/delegate-claude` for NEEDS-INTERVENTION PRs. Each delegate fixes conflicts, pushes, waits for CI, addresses reviewer comments, then hands the PR back to the user for merge
 
 ## Step 1: Understand generic-boilerplate changes
 
@@ -122,14 +129,14 @@ gh pr view <number> -R fohte/<repo> \
 
 If CI is failing, review logs to identify the cause.
 
-## Step 6: Report merge decisions to user
+## Step 6: Report findings to user
 
 Evaluate each PR against these criteria:
 
-- **Merge-ready**: No conflict markers + CI pass + changes correctly propagated
-- **Not merge-ready**: Conflict markers present, or propagation issues detected
+- **MERGE-READY**: No conflict markers + CI pass + changes correctly propagated
+- **NEEDS-INTERVENTION**: Conflict markers present, or propagation issues detected
 
-Report results in table format and obtain user approval. **Never finalize merge decisions independently. Always confirm with the user.**
+Report results in a table and hand over to the user. **Do not merge MERGE-READY PRs** -- the user reviews and merges them manually. Proceed to Step 7 only for NEEDS-INTERVENTION PRs, and only after the user confirms delegation.
 
 ## Step 7: Delegate template application
 
@@ -187,7 +194,7 @@ The delegate may need to run `copier update --trust`. Always include these notes
 
 ### Delegation goal
 
-The latest generic-boilerplate template (v<latest>) is correctly applied to the repository. Specifically:
+The latest generic-boilerplate template (v<latest>) is correctly applied to the repository and the PR is left in a state where the user can review and merge it. Specifically:
 
 - All copier conflict markers are resolved
 - Template parameters in `.copier-answers.yml` match the repo's actual usage (e.g., `use_storybook: true` if the repo uses Storybook)
@@ -195,6 +202,16 @@ The latest generic-boilerplate template (v<latest>) is correctly applied to the 
 - Repository-specific customizations are preserved
 - Syntax checks pass (e.g., `jq .` for JSON, appropriate tools for TOML/YAML)
 - Commit and push (no new PR needed; push to the existing PR branch)
-- Wait for CI to complete after pushing and verify all checks pass
-- If CI fails, investigate the cause, fix, and re-push
-- Merge the PR once CI passes
+- **Follow the same post-push flow as `/create-pr`**: wait for CI to finish, wait for Gemini Code Assist review via `a ai review wait`, and address reviewer feedback via the `check-pr-review` skill (`a gh pr-review check`) until every unresolved thread is handled
+- If CI fails, investigate the cause, fix, and re-push (same loop as `/create-pr`)
+- **Do NOT merge or approve the PR.** Never run `gh pr merge` (including with `--auto` / `--admin`), do not enable auto-merge, and do not approve the PR (approval can trigger auto-merge in repos where it is wired up). The user merges manually after reviewing. End by reporting the PR URL and current state (CI green, review resolved) back to the caller
+
+### Delegation prompt checklist
+
+Every delegation prompt must explicitly state all of the following so the child session cannot shortcut the flow:
+
+1. **Conflict resolution rule** (copy the "do NOT blindly choose `after updating`" section)
+2. **copier update notes** (clean tree, node_modules workaround, partial-state reset)
+3. **Post-push flow**: wait for CI, `a ai review wait`, `check-pr-review` for reviewer feedback, re-push and re-wait until clean
+4. **Merge prohibition**: do not run `gh pr merge`, do not enable auto-merge, do not approve. Hand the PR back to the user for manual merge. State this in imperative form -- implicit hints are routinely ignored by child sessions
+5. **Completion report format**: PR URL, CI status, review status, any follow-ups the user needs to be aware of
