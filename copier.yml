@@ -72,7 +72,7 @@ _exclude:
   - "{% if not use_storybook | default(false) or (type == 'base' and not has_storybook_pkg) %}.github/workflows/storybook.yml{% endif %}"
   - "{% if type != 'node' or not use_storybook | default(false) %}/.storybook{% endif %}"
   # Exclude type-specific files
-  - "{% if type not in ['node', 'rust'] and not is_workspace and not has_rust_pkg %}/.gitignore{% endif %}"
+  - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
 
 # Template parameters
