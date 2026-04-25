@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.5](https://github.com/fohte/generic-boilerplate/compare/v0.6.4...v0.6.5) (2026-04-25)
+
+
+### Features
+
+* **gemini:** add code-comment rules to the code styleguide ([#302](https://github.com/fohte/generic-boilerplate/issues/302)) ([c900c43](https://github.com/fohte/generic-boilerplate/commit/c900c43fe4db008569b966874ace9924194dbfb9))
+
+
+### Bug Fixes
+
+* **template:** ignore root node_modules for non-workspace monorepos with node subpackages ([#299](https://github.com/fohte/generic-boilerplate/issues/299)) ([0a7f8ba](https://github.com/fohte/generic-boilerplate/commit/0a7f8ba76fa6f9e5478b24a9be9308fbc1ffc15f))
+
 ## [0.6.4](https://github.com/fohte/generic-boilerplate/compare/v0.6.3...v0.6.4) (2026-04-19)
 
 
