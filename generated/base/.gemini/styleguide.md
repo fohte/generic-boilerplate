@@ -16,7 +16,9 @@ A comment must carry information that stays true for the lifetime of the code: a
 
 ### Do not write flow information in code comments
 
-Flow information — change history, alternatives that were considered and rejected, review feedback, "previously we did X / now we do Y", links to past PRs or issues — belongs in commit messages and PR descriptions, not in source files. Code comments are read out of chronological context and rot as the code evolves.
+Flow information — change history, alternatives that were considered and rejected, review feedback, "previously we did X / now we do Y", or links kept purely as a record of past decisions — belongs in commit messages and PR descriptions, not in source files. Code comments are read out of chronological context and rot as the code evolves.
+
+A link to a PR or issue is fine when it documents an _active_ external constraint the reader needs right now: an upstream bug being worked around, a tracking issue for a TODO, an RFC the code conforms to. The test is whether the link still helps explain the current code; if it only records "this is how we got here", it is flow information and belongs in the commit log.
 
 ```bash
 # bad: history and rationale that belongs in the PR / commit log
