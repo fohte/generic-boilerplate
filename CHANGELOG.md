@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.0](https://github.com/fohte/generic-boilerplate/compare/v0.6.5...v0.7.0) (2026-04-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update dependency typescript to v6 ([#255](https://github.com/fohte/generic-boilerplate/issues/255))
+
+### Dependencies
+
+* Update dependency eslint to v10.2.1 ([#284](https://github.com/fohte/generic-boilerplate/issues/284)) ([bf18128](https://github.com/fohte/generic-boilerplate/commit/bf181284e37bf32265d8a0fa9477d8494a5e1923))
+* Update dependency github:ast-grep/ast-grep to v0.42.1 ([#287](https://github.com/fohte/generic-boilerplate/issues/287)) ([7b292e8](https://github.com/fohte/generic-boilerplate/commit/7b292e8750c0cb67556dea5d33a17005d20d8b15))
+* Update dependency typescript to v6 ([#255](https://github.com/fohte/generic-boilerplate/issues/255)) ([6cc6556](https://github.com/fohte/generic-boilerplate/commit/6cc6556237e7122c9d2378762a6cfe9141bc741d))
+* Update Node.js to v24.15.0 ([#283](https://github.com/fohte/generic-boilerplate/issues/283)) ([993b268](https://github.com/fohte/generic-boilerplate/commit/993b268521d0c91046fdacb4bf88a346b95fa59b))
+
 ## [0.6.5](https://github.com/fohte/generic-boilerplate/compare/v0.6.4...v0.6.5) (2026-04-25)
 
 
