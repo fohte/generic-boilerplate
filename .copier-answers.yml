@@ -1,10 +1,9 @@
 # Changes here will be overwritten by Copier
-_commit: v0.6.4
+_commit: v0.6.5
 _src_path: https://github.com/fohte/generic-boilerplate
 auto_merge_release_pr: false
-description:
-  Copier template repository for generating GitHub Actions workflows and
-  project scaffolding.
+description: Copier template repository for generating GitHub Actions workflows and
+    project scaffolding.
 is_public: true
 project_name: generic-boilerplate
 release_type: simple
