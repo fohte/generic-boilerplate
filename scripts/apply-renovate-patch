@@ -193,15 +193,12 @@ sync_versions_to_template() {
   elif [[ $keys_checked -gt 0 ]]; then
     echo "    Already in sync"
   else
-    # No version keys found — check if the file content matches the template directly.
-    # This handles non-version changes (e.g., API migration) that were already applied manually.
-    if diff -q "$generated_file" "$template_file" > /dev/null 2>&1; then
-      echo "    No version keys, but content matches template"
-      return 0
-    fi
+    # No version keys matched in the template. This script only syncs version
+    # strings; structural changes are out of scope and must be applied to the
+    # template manually before running generate-snapshots.
+    echo "    No version keys — skipped (out of scope for version sync)"
   fi
-  # Return success if any keys were found (even if already in sync)
-  [[ $keys_checked -gt 0 ]]
+  return 0
 }
 
 # Exclude files from version syncing. Patterns are grep regex, anchored to end of filename.

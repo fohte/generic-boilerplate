@@ -170,6 +170,55 @@ EOF
   [[ "$output" == *"Synced 1 version"* ]]
 }
 
+@test "skips files with no version keys (out of scope for version sync)" {
+  cat > template/tsconfig.json.jinja << 'EOF'
+{
+  "compilerOptions": {
+    "module": "preserve",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+EOF
+
+  cat > generated/base/tsconfig.json << 'EOF'
+{
+  "compilerOptions": {
+    "module": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
+}
+EOF
+
+  create_initial_commit
+
+  # Structural change (not a version bump): remove baseUrl, add ./ prefix
+  cat > generated/base/tsconfig.json << 'EOF'
+{
+  "compilerOptions": {
+    "module": "preserve",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+EOF
+
+  git add .
+  git commit -q -m "chore: migrate tsconfig"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+
+  # Should skip without failing — version sync is out of scope for structural changes
+  [[ "$output" == *"No version keys"* ]]
+  [[ "$output" != *"requiring manual update"* ]]
+}
+
 @test "succeeds when all versions already in sync" {
   cat > template/.mise.toml.jinja << 'EOF'
 [tools]
