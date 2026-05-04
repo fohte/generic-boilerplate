@@ -173,8 +173,10 @@ sync_versions_to_template() {
         # "storybook" is both a script name and a devDependencies entry) does
         # not rewrite the script command. The shape allows an optional package@
         # prefix (packageManager: "pnpm@1.2.3") and an optional semver range
-        # specifier or "v" prefix.
-        if sed -i.bak -E "s#(${key}[[:space:]]*[=:][[:space:]]*\")([^\"]+@)?([=^~><]{0,2}v?[0-9]+(\.[0-9]+)+[^\"]*)(\")#\\1${version}\\5#" "$template_file"; then
+        # specifier or "v" prefix. The closing quote is hardcoded in the
+        # replacement so capture-group numbering does not depend on whether
+        # ${key} contains parentheses.
+        if sed -i.bak -E "s#(${key}[[:space:]]*[=:][[:space:]]*\")([^\"]+@)?[=^~><]{0,2}v?[0-9]+(\.[0-9]+)+[^\"]*\"#\\1${version}\"#" "$template_file"; then
           rm -f "${template_file}.bak"
           ((changes_applied++)) || true
         fi
