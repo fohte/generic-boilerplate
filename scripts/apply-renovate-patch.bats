@@ -937,6 +937,72 @@ EOF
 EOF
 }
 
+@test "does not rewrite scripts entry that shares a name with a devDependency" {
+  # Regression: package.json may use the same key in scripts and dependencies
+  # (e.g. storybook). The script value is a shell command, not a version, and
+  # must be preserved when the version of the dependency changes.
+  cat > template/package.json.jinja << 'EOF'
+{
+  "name": "{{ project_name }}",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"
+  },
+  "devDependencies": {
+    "storybook": "10.3.3"
+  }
+}
+EOF
+
+  cat > generated/base/package.json << 'EOF'
+{
+  "name": "base",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"
+  },
+  "devDependencies": {
+    "storybook": "10.3.3"
+  }
+}
+EOF
+
+  create_initial_commit
+
+  cat > generated/base/package.json << 'EOF'
+{
+  "name": "base",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"
+  },
+  "devDependencies": {
+    "storybook": "10.3.5"
+  }
+}
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update storybook"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Synced 1 version"* ]]
+
+  diff -u template/package.json.jinja - << 'EOF'
+{
+  "name": "{{ project_name }}",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"
+  },
+  "devDependencies": {
+    "storybook": "10.3.5"
+  }
+}
+EOF
+}
+
 # ========================================
 # Monorepo subpackage tests
 # ========================================
