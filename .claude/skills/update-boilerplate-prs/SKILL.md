@@ -10,7 +10,7 @@ Validate generic-boilerplate update PRs created by Renovate and resolve conflict
 ## Merge policy (read before doing anything)
 
 - **MERGE-READY PRs are merged.** Once a PR is validated as MERGE-READY (no conflict markers + CI pass + changes correctly propagated), merge it with `gh pr merge --squash --auto`. No per-PR user confirmation is required.
-- `scripts/auto-merge-boilerplate-prs` in Step 4 is the fast path for the version-only case (pre-validated diff shape).
+- `scripts/auto-merge-boilerplate-prs` in Step 4 is the fast path for the version-only case: it batch-merges PRs whose diff shape is pre-validated (only `_commit` bumps), skipping the per-PR validation that Steps 5-6 perform.
 - NEEDS-INTERVENTION PRs are merged only after their conflicts are resolved. When a `/delegate-claude` delegate finishes resolving conflicts and CI passes, the PR is MERGE-READY -- the delegate merges it the same way.
 
 ## Overall Flow
@@ -128,7 +128,7 @@ gh pr view <number> -R fohte/<repo> \
 
 If CI is failing, review logs to identify the cause.
 
-## Step 6: Report findings to user
+## Step 6: Report and merge
 
 Evaluate each PR against these criteria:
 
