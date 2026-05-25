@@ -1,7 +1,7 @@
 {
   "name": "monorepo",
   "private": true,
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@10.33.4",
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
     "prettier": "3.8.1"
