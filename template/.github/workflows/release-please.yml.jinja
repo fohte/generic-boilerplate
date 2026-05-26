@@ -43,7 +43,7 @@ jobs:
           identity: release-please
           domain: octo-sts.fohte.net
 
-      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
           token: {% raw %}${{ steps.octo-sts.outputs.token }}{% endraw %}
@@ -105,7 +105,7 @@ jobs:
       - run: rustup target add {% raw %}${{ matrix.target }}{% endraw %}
 
       - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
+        uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
 
       - name: Build
         run: cargo build --release --target {% raw %}${{ matrix.target }}{% endraw %}

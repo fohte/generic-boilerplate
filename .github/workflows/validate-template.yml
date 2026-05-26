@@ -69,21 +69,21 @@ jobs:
         run: scripts/check-renovate-diff-preserved /tmp/before-regen.diff
 
       - name: Check if node template changed
-        uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         id: check-node-changes
         with:
           base_sha: master
           files: generated/node/**
 
       - name: Check if rust template changed
-        uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         id: check-rust-changes
         with:
           base_sha: master
           files: generated/rust/**
 
       - name: Commit changes
-        uses: suzuki-shunsuke/commit-action@f12e2d628a4ab72dcefe7890ae07e8dbf1e201b9 # v0.1.1
+        uses: suzuki-shunsuke/commit-action@06e3b49d4706498d325d29bd85adc82ecf2f5d8f # v1.0.0
         with:
           commit_message: 'chore(generated): regenerate from template'
           github_token: ${{ steps.app-token.outputs.token }}
@@ -184,7 +184,7 @@ jobs:
         run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: Cache pnpm store
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
             ${{ steps.pnpm-store.outputs.path }}
@@ -215,7 +215,7 @@ jobs:
       # Run sccache-action before mise-action so that sccache binary is
       # available when mise installs cargo tools (RUSTC_WRAPPER=sccache).
       - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
+        uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
 
       - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
         with:
