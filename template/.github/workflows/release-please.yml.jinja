@@ -21,8 +21,6 @@ jobs:
 {%- endif %}
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
       id-token: write
 {%- if auto_merge_release_pr or release_binary %}
     outputs:

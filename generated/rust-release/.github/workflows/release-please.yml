@@ -17,8 +17,6 @@ jobs:
     if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
       id-token: write
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
