@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize]
 
 permissions:
-  contents: write
+  id-token: write
 
 jobs:
   copier-update:
@@ -15,18 +15,19 @@ jobs:
       {% raw %}startsWith(github.head_ref, 'renovate/https-github.com-fohte-generic-boilerplate-'){% endraw %}
 
     steps:
-      - name: Generate GitHub App token
-        id: app-token
-        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
+      - name: Federate GitHub token via octo-sts
+        id: octo-sts
+        uses: octo-sts/action@f603d3be9d8dd9871a265776e625a27b00effe05 # v1.1.1
         with:
-          app-id: {% raw %}${{ secrets.APP_ID }}{% endraw %}
-          private-key: {% raw %}${{ secrets.APP_PRIVATE_KEY }}{% endraw %}
+          scope: fohte
+          identity: {% raw %}${{ github.event.repository.name }}{% endraw %}-renovate-copier
+          domain: octo-sts.fohte.net
 
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: {% raw %}${{ github.head_ref }}{% endraw %}
-          token: {% raw %}${{ steps.app-token.outputs.token }}{% endraw %}
+          token: {% raw %}${{ steps.octo-sts.outputs.token }}{% endraw %}
 
       - name: Restore executable bit on scripts/bootstrap
         run: |
@@ -39,4 +40,4 @@ jobs:
         with:
           commit_message: 'chore: restore executable bit on scripts/bootstrap'
           workflow: deny
-          github_token: {% raw %}${{ steps.app-token.outputs.token }}{% endraw %}
+          github_token: {% raw %}${{ steps.octo-sts.outputs.token }}{% endraw %}

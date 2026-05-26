@@ -20,6 +20,8 @@ jobs:
     if: github.event_name != 'workflow_dispatch'
 {%- endif %}
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
 {%- if auto_merge_release_pr or release_binary %}
     outputs:
 {%- if release_binary %}
@@ -32,16 +34,17 @@ jobs:
 {%- endif %}
 {%- endif %}
     steps:
-      - uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
-        id: app-token
+      - uses: octo-sts/action@f603d3be9d8dd9871a265776e625a27b00effe05 # v1.1.1
+        id: octo-sts
         with:
-          app-id: {% raw %}${{ secrets.APP_ID }}{% endraw %}
-          private-key: {% raw %}${{ secrets.APP_PRIVATE_KEY }}{% endraw %}
+          scope: fohte
+          identity: {% raw %}${{ github.event.repository.name }}{% endraw %}-release-please
+          domain: octo-sts.fohte.net
 
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
-          token: {% raw %}${{ steps.app-token.outputs.token }}{% endraw %}
+          token: {% raw %}${{ steps.octo-sts.outputs.token }}{% endraw %}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 {%- if auto_merge_release_pr %}
@@ -50,7 +53,7 @@ jobs:
       - name: Auto-merge release PR
         if: steps.release.outputs.prs_created == 'true'
         env:
-          GH_TOKEN: {% raw %}${{ steps.app-token.outputs.token }}{% endraw %}
+          GH_TOKEN: {% raw %}${{ steps.octo-sts.outputs.token }}{% endraw %}
           PR_JSON: {% raw %}${{ steps.release.outputs.pr }}{% endraw %}
         run: |
           PR_NUMBER=$(echo "$PR_JSON" | jq -r '.number')
