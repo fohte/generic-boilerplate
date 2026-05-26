@@ -1,6 +1,0 @@
-issuer: https://token.actions.githubusercontent.com
-subject_pattern: ^repo:fohte/base-release:.*$
-claim_pattern:
-  job_workflow_ref: ^fohte/base-release/\.github/workflows/test\.yml@[^@]+$
-permissions:
-  contents: write

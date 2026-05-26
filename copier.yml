@@ -46,7 +46,6 @@ _exclude:
   - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
   - '{% if not use_release_please %}.github/workflows/test-release-please.yml{% endif %}'
   - '{% if not use_release_please %}.github/workflows/pr-title-check.yml{% endif %}'
-  - '{% if not use_release_please %}.github/chainguard/release-please.sts.yaml{% endif %}'
   # Exclude Node.js specific files when type is not 'node'
   # Use leading / to match root only (not yield subpackage directories)
   - "{% if type != 'node' and not is_workspace and not has_node_pkg %}/package.json{% endif %}"

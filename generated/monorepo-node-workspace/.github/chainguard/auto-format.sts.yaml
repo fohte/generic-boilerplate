@@ -1,6 +1,0 @@
-issuer: https://token.actions.githubusercontent.com
-subject_pattern: ^repo:fohte/monorepo-node-workspace-pnpm:.*$
-claim_pattern:
-  job_workflow_ref: ^fohte/monorepo-node-workspace-pnpm/\.github/workflows/test\.yml@[^@]+$
-permissions:
-  contents: write

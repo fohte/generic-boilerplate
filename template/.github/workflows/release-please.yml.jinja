@@ -39,8 +39,8 @@ jobs:
       - uses: octo-sts/action@f603d3be9d8dd9871a265776e625a27b00effe05 # v1.1.1
         id: octo-sts
         with:
-          scope: {% raw %}${{ github.repository }}{% endraw %}
-          identity: release-please
+          scope: fohte
+          identity: {% raw %}${{ github.event.repository.name }}{% endraw %}-release-please
           domain: octo-sts.fohte.net
 
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0

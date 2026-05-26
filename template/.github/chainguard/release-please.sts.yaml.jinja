@@ -1,7 +1,0 @@
-issuer: https://token.actions.githubusercontent.com
-subject_pattern: ^repo:fohte/{{ project_name }}:.*$
-claim_pattern:
-  job_workflow_ref: ^fohte/{{ project_name }}/\.github/workflows/release-please\.yml@[^@]+$
-permissions:
-  contents: write
-  pull_requests: write
