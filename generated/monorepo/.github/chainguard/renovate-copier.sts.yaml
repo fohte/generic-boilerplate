@@ -1,0 +1,6 @@
+issuer: https://token.actions.githubusercontent.com
+subject_pattern: ^repo:fohte/monorepo:.*$
+claim_pattern:
+  job_workflow_ref: ^fohte/monorepo/\.github/workflows/renovate-copier\.yml@[^@]+$
+permissions:
+  contents: write

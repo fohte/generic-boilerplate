@@ -1,0 +1,6 @@
+issuer: https://token.actions.githubusercontent.com
+subject_pattern: ^repo:fohte/rust-release:.*$
+claim_pattern:
+  job_workflow_ref: ^fohte/rust-release/\.github/workflows/renovate-copier\.yml@[^@]+$
+permissions:
+  contents: write
