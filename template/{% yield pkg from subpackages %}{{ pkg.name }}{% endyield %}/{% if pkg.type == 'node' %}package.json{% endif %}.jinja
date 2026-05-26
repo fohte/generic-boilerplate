@@ -45,6 +45,12 @@
 {%- endif %}
     "typescript": "6.0.3",
     "vitest": "4.1.6"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "unrs-resolver"
+    ]
   }
 {%- elif has_storybook %}
   "devDependencies": {
