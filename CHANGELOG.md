@@ -1,5 +1,62 @@
 # Changelog
 
+## [0.7.0](https://github.com/fohte/generic-boilerplate/compare/v0.6.5...v0.7.0) (2026-05-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update pnpm to v11 ([#334](https://github.com/fohte/generic-boilerplate/issues/334))
+* Update @commitlint/cli to v21 ([#333](https://github.com/fohte/generic-boilerplate/issues/333))
+* Update dependency typescript to v6 ([#255](https://github.com/fohte/generic-boilerplate/issues/255))
+
+### Features
+
+* **template:** federate GitHub App tokens through octo-sts ([#341](https://github.com/fohte/generic-boilerplate/issues/341)) ([21713f3](https://github.com/fohte/generic-boilerplate/commit/21713f3c1dbbd52ca0aedf25ae52febb4bc99694))
+
+
+### Bug Fixes
+
+* **scripts:** preserve scripts entry when a devDependencies key has the same name ([#309](https://github.com/fohte/generic-boilerplate/issues/309)) ([7c143c7](https://github.com/fohte/generic-boilerplate/commit/7c143c714bbe2c709520fb30a463432f4c022f81))
+
+
+### Dependencies
+
+* **ci:** Update actions/cache action to v5.0.5 ([#316](https://github.com/fohte/generic-boilerplate/issues/316)) ([ada75a6](https://github.com/fohte/generic-boilerplate/commit/ada75a63a4c98bd12650db526ff1aafa2ac507e4))
+* **ci:** Update cloudflare/wrangler-action action to v4 ([#335](https://github.com/fohte/generic-boilerplate/issues/335)) ([49a5d88](https://github.com/fohte/generic-boilerplate/commit/49a5d884e62bf0351cac48115734f983f55c33c4))
+* **ci:** Update codecov/codecov-action action to v6.0.1 ([#317](https://github.com/fohte/generic-boilerplate/issues/317)) ([dbca4a7](https://github.com/fohte/generic-boilerplate/commit/dbca4a7d1df110190227340d37bf7c8e0dfc2fe4))
+* **ci:** Update googleapis/release-please-action action to v4.4.1 ([#318](https://github.com/fohte/generic-boilerplate/issues/318)) ([9214596](https://github.com/fohte/generic-boilerplate/commit/921459625a3fc2048f4dc51036f88b8671b80538))
+* **ci:** Update googleapis/release-please-action action to v5 ([#336](https://github.com/fohte/generic-boilerplate/issues/336)) ([07fa1b4](https://github.com/fohte/generic-boilerplate/commit/07fa1b48687d4e7291435a3995ac5cc6f2e894a2))
+* **ci:** Update marocchino/sticky-pull-request-comment action to v3.0.4 ([#319](https://github.com/fohte/generic-boilerplate/issues/319)) ([4b8467e](https://github.com/fohte/generic-boilerplate/commit/4b8467e2d4fc8749ac5f815827db40771dd68538))
+* **ci:** Update mozilla-actions/sccache-action action to v0.0.10 ([#320](https://github.com/fohte/generic-boilerplate/issues/320)) ([99d1b95](https://github.com/fohte/generic-boilerplate/commit/99d1b95daa14fd243905fc82a82fa30cc3b3ab08))
+* **ci:** Update suzuki-shunsuke/commit-action action to v0.1.2 ([#321](https://github.com/fohte/generic-boilerplate/issues/321)) ([335b662](https://github.com/fohte/generic-boilerplate/commit/335b66237c8f55438f7e7641b65bd1d4d956859b))
+* **ci:** Update suzuki-shunsuke/commit-action action to v1 ([#337](https://github.com/fohte/generic-boilerplate/issues/337)) ([faaa327](https://github.com/fohte/generic-boilerplate/commit/faaa3274ca66ea29f68c14ef53eeb1e0dd316d6d))
+* **ci:** Update taiki-e/install-action action to v2.79.1 ([#332](https://github.com/fohte/generic-boilerplate/issues/332)) ([f4e7373](https://github.com/fohte/generic-boilerplate/commit/f4e737353225d3645d724781ee9320fda1f0d093))
+* **ci:** Update taiki-e/install-action action to v2.79.2 ([#339](https://github.com/fohte/generic-boilerplate/issues/339)) ([f0632ad](https://github.com/fohte/generic-boilerplate/commit/f0632ad10de5678c648db09e0b4a0950a623fee0))
+* **ci:** Update tj-actions/changed-files action to v47.0.6 ([#322](https://github.com/fohte/generic-boilerplate/issues/322)) ([cec73c3](https://github.com/fohte/generic-boilerplate/commit/cec73c3676d3cfea00ee9616eba865e6027dbc6f))
+* Update @commitlint/cli to v20.5.3 ([#311](https://github.com/fohte/generic-boilerplate/issues/311)) ([b761087](https://github.com/fohte/generic-boilerplate/commit/b761087c873daf5874b247cdbef5b5468fb11310))
+* Update @commitlint/cli to v21 ([#333](https://github.com/fohte/generic-boilerplate/issues/333)) ([8d94afe](https://github.com/fohte/generic-boilerplate/commit/8d94afe78623292196d3de7ca8496dc4b2720280))
+* Update dependency @types/node to v24.12.4 ([#328](https://github.com/fohte/generic-boilerplate/issues/328)) ([6fac23d](https://github.com/fohte/generic-boilerplate/commit/6fac23d8d1d6daffcd41db9bfe9e3cb7ef370f1a))
+* Update dependency bats to v1.13.0 ([#323](https://github.com/fohte/generic-boilerplate/issues/323)) ([af3037e](https://github.com/fohte/generic-boilerplate/commit/af3037ed71588dbd8ffb08edbc0f5eee45a9aa38))
+* Update dependency eslint to v10.2.1 ([#284](https://github.com/fohte/generic-boilerplate/issues/284)) ([bf18128](https://github.com/fohte/generic-boilerplate/commit/bf181284e37bf32265d8a0fa9477d8494a5e1923))
+* Update dependency eslint to v10.4.0 ([#324](https://github.com/fohte/generic-boilerplate/issues/324)) ([25a7f0f](https://github.com/fohte/generic-boilerplate/commit/25a7f0f0ab006e11ffd41b01533fa4eac8f68f69))
+* Update dependency github:ast-grep/ast-grep to v0.42.1 ([#287](https://github.com/fohte/generic-boilerplate/issues/287)) ([7b292e8](https://github.com/fohte/generic-boilerplate/commit/7b292e8750c0cb67556dea5d33a17005d20d8b15))
+* Update dependency github:ast-grep/ast-grep to v0.42.2 ([#313](https://github.com/fohte/generic-boilerplate/issues/313)) ([f7b90ea](https://github.com/fohte/generic-boilerplate/commit/f7b90eae7c1218c1bbe80aca84f9f9dc2c3b8572))
+* Update dependency github:ast-grep/ast-grep to v0.42.3 ([#340](https://github.com/fohte/generic-boilerplate/issues/340)) ([8e6c46d](https://github.com/fohte/generic-boilerplate/commit/8e6c46d2c08bb0509f3d4b3d94ba6135299eb656))
+* Update dependency lefthook to v2.1.6 ([#304](https://github.com/fohte/generic-boilerplate/issues/304)) ([54f1b47](https://github.com/fohte/generic-boilerplate/commit/54f1b47a81fa2801779b2c0704a0d857998e9e9c))
+* Update dependency lefthook to v2.1.7 ([#329](https://github.com/fohte/generic-boilerplate/issues/329)) ([2208061](https://github.com/fohte/generic-boilerplate/commit/22080616f8975b70905f60b584a59437ac3aafc0))
+* Update dependency lefthook to v2.1.8 ([#338](https://github.com/fohte/generic-boilerplate/issues/338)) ([41d586e](https://github.com/fohte/generic-boilerplate/commit/41d586ea3965c1858ff27f49b50946be7e9f52fd))
+* Update dependency pinact to v3.10.1 ([#325](https://github.com/fohte/generic-boilerplate/issues/325)) ([ac3b80f](https://github.com/fohte/generic-boilerplate/commit/ac3b80f36d1247e91524d79bd4c56dae59491d1e))
+* Update dependency shfmt to v3.13.1 ([#305](https://github.com/fohte/generic-boilerplate/issues/305)) ([43ee71c](https://github.com/fohte/generic-boilerplate/commit/43ee71c21d730cff2100fc5b0fb4960788d0d2e6))
+* Update dependency typescript to v6 ([#255](https://github.com/fohte/generic-boilerplate/issues/255)) ([6cc6556](https://github.com/fohte/generic-boilerplate/commit/6cc6556237e7122c9d2378762a6cfe9141bc741d))
+* Update dependency typescript to v6.0.3 ([#306](https://github.com/fohte/generic-boilerplate/issues/306)) ([af3a8b6](https://github.com/fohte/generic-boilerplate/commit/af3a8b62c213c71feac153e9acfb4d415d716d8e))
+* Update dependency vitest to v4.1.6 ([#308](https://github.com/fohte/generic-boilerplate/issues/308)) ([ef41471](https://github.com/fohte/generic-boilerplate/commit/ef41471ad36c47416d84206abed9679efcff6ea7))
+* Update Node.js to v24.15.0 ([#283](https://github.com/fohte/generic-boilerplate/issues/283)) ([993b268](https://github.com/fohte/generic-boilerplate/commit/993b268521d0c91046fdacb4bf88a346b95fa59b))
+* update pnpm to v10.33.4 ([#314](https://github.com/fohte/generic-boilerplate/issues/314)) ([14ba0fa](https://github.com/fohte/generic-boilerplate/commit/14ba0fa580095d1b1a86e58d38c99b1069f5d1ad))
+* Update pnpm to v11 ([#334](https://github.com/fohte/generic-boilerplate/issues/334)) ([fa86a07](https://github.com/fohte/generic-boilerplate/commit/fa86a073a901f3b5d1826328e5767a92ac0a2e71))
+* Update prettier to v3.8.3 ([#315](https://github.com/fohte/generic-boilerplate/issues/315)) ([2d11ee3](https://github.com/fohte/generic-boilerplate/commit/2d11ee35592736ea7211c6c5a88c871a0128a628))
+* update rust to v1.95.0 ([#326](https://github.com/fohte/generic-boilerplate/issues/326)) ([cf02610](https://github.com/fohte/generic-boilerplate/commit/cf02610ec3bf99af72b8a313189de9c7268d6971))
+* Update storybook monorepo to v10.4.0 ([#282](https://github.com/fohte/generic-boilerplate/issues/282)) ([90f1b59](https://github.com/fohte/generic-boilerplate/commit/90f1b5994afb15012c9c8afb7e060d845a9d0b16))
+
 ## [0.6.5](https://github.com/fohte/generic-boilerplate/compare/v0.6.4...v0.6.5) (2026-04-25)
 
 
