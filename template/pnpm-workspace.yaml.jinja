@@ -1,4 +1,10 @@
+{% if is_workspace -%}
 packages:
 {%- for pkg in node_pkgs %}
   - '{{ pkg.name }}'
 {%- endfor %}
+
+{% endif -%}
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
