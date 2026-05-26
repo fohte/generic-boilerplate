@@ -52,8 +52,10 @@ _exclude:
   - "{% if type != 'node' %}/tsconfig.json{% endif %}"
   - "{% if type != 'node' and not is_workspace %}/eslint.config.js{% endif %}"
   - "{% if type != 'node' %}/vitest.config.ts{% endif %}"
-  # pnpm-workspace.yaml only when workspace is enabled (workspace requires pnpm)
-  - '{% if not is_workspace %}/pnpm-workspace.yaml{% endif %}'
+  # pnpm-workspace.yaml holds workspace packages and pnpm settings (allowBuilds).
+  # Required for any project with a node root package; non-workspace node subpackages
+  # get their own pnpm-workspace.yaml under the subpackage directory instead.
+  - "{% if not is_workspace and type != 'node' %}/pnpm-workspace.yaml{% endif %}"
   # Exclude CLAUDE.md when no Rust code (only contains Rust test rules)
   - '{% if not has_rust %}/CLAUDE.md{% endif %}'
   # Exclude Rust specific files when type is not 'rust'
