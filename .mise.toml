@@ -10,4 +10,7 @@ pinact = "3.10.1"
 "npm:prettier" = "3.8.3"
 shellcheck = "0.11.0"
 shfmt = "3.13.1"
+<<<<<<< before updating
 bats = "1.13.0"
+=======
+>>>>>>> after updating
