@@ -11,7 +11,7 @@ Validate generic-boilerplate update PRs created by Renovate and resolve conflict
 
 - **MERGE-READY PRs are merged.** Once a PR is validated as MERGE-READY (no conflict markers + CI pass + changes correctly propagated), merge it with `gh pr merge --squash --auto`. No per-PR user confirmation is required.
 - `scripts/auto-merge-boilerplate-prs` in Step 4 is the fast path for the version-only case: it batch-merges PRs whose diff shape is pre-validated (only `_commit` bumps), skipping the per-PR validation that Steps 5-6 perform.
-- NEEDS-INTERVENTION PRs are merged only after their conflicts are resolved. When a `/delegate-claude` delegate finishes resolving conflicts and CI passes, the PR is MERGE-READY -- the delegate merges it the same way.
+- NEEDS-INTERVENTION PRs are merged only after their conflicts are resolved. When a `/delegate-claude` delegate finishes resolving conflicts, the delegate executes Step 7's "CI watch and merge protocol" (it cannot stop at scheduling `--auto` -- it must observe CI to completion and confirm `state == "MERGED"`).
 
 ## Overall Flow
 
@@ -21,7 +21,7 @@ Validate generic-boilerplate update PRs created by Renovate and resolve conflict
 4. **Auto-merge version-only PRs**: Run `scripts/auto-merge-boilerplate-prs` for trivial PRs (the only sanctioned auto-merge path)
 5. **Validate remaining PRs**: Review diff, CI status for PRs with actual template changes
 6. **Report and merge**: Merge MERGE-READY PRs; present the NEEDS-INTERVENTION list to the user
-7. **Delegate template application**: Delegate via `/delegate-claude` for NEEDS-INTERVENTION PRs. Each delegate fixes conflicts, pushes, waits for CI, then merges the PR once CI passes
+7. **Delegate template application**: Delegate via `/delegate-claude` for NEEDS-INTERVENTION PRs. Each delegate fixes conflicts, pushes, then executes the CI watch and merge protocol (Step 7) end to end until the PR reaches `state == "MERGED"`
 
 ## Step 1: Understand generic-boilerplate changes
 
@@ -191,9 +191,20 @@ The delegate may need to run `copier update --trust`. Always include these notes
 - If `copier update` fails mid-way, the working tree may be in a partial state. `git checkout -- .` to reset, fix the root cause, then retry
 - After `copier update` succeeds, review the full diff carefully before committing. Do not commit partial/broken state
 
+### CI watch and merge protocol (always include in prompt verbatim)
+
+`gh pr merge --squash --auto` is a _reservation_ that fires only if CI eventually passes. Scheduling it and reporting "done" without observing CI is a violation -- if CI fails, the PR sits unmerged indefinitely and the delegator never finds out. Soft phrases like "wait for CI" are routinely ignored by child sessions, so this protocol must be copied into every delegation prompt verbatim and executed step by step:
+
+1. **Watch every check to completion.** After pushing, run `gh pr checks <number> -R fohte/<repo> --watch --fail-fast=false` and wait until it exits. Then re-run `gh pr checks <number> -R fohte/<repo>` (without `--watch`) and read every row with your own eyes -- do not infer. Every row must be `pass` or `skipping` (path-filtered jobs and neutral conclusions are acceptable); any `pending` / `queued` / `in_progress` row means step 1 is not done yet; any `fail` row blocks merge
+2. **On any failure, debug and re-push.** If any row is `fail`, run `gh run view <run-id> -R fohte/<repo> --log-failed` (find the failing run id in the `gh pr checks` output) to read the failure, fix the cause, commit, push, and return to step 1. Repeat until step 1 shows only `pass` / `skipping`
+3. **Only then enable auto-merge.** Once step 1's non-watch output shows only `pass` / `skipping`, run `gh pr merge <number> -R fohte/<repo> --squash --auto`
+4. **Confirm the PR is MERGED.** Run `gh pr view <number> -R fohte/<repo> --json state,mergedAt` and verify `state == "MERGED"`. If it is still `OPEN`, the merge has not happened -- wait and re-check, or investigate why auto-merge did not fire (branch protection, required reviews, mergeability). Do not report completion until `state == "MERGED"`
+
+Reporting completion with only step 3 done (auto-merge scheduled but CI never observed and `MERGED` never confirmed) is a violation of this protocol.
+
 ### Delegation goal
 
-The latest generic-boilerplate template (v<latest>) is correctly applied to the repository and the PR is merged once CI passes. Specifically:
+The latest generic-boilerplate template (v<latest>) is correctly applied to the repository and the PR is merged. Specifically:
 
 - All copier conflict markers are resolved
 - Template parameters in `.copier-answers.yml` match the repo's actual usage (e.g., `use_storybook: true` if the repo uses Storybook)
@@ -201,15 +212,13 @@ The latest generic-boilerplate template (v<latest>) is correctly applied to the 
 - Repository-specific customizations are preserved
 - Syntax checks pass (e.g., `jq .` for JSON, appropriate tools for TOML/YAML)
 - Commit and push (no new PR needed; push to the existing PR branch)
-- **Wait for CI to finish.** If CI fails, investigate the cause, fix, and re-push, repeating until CI is green
-- **Merge the PR once CI passes** with `gh pr merge --squash --auto`. End by reporting the PR URL and final state (merged, or CI status if not yet merged) back to the caller
+- Execute the **CI watch and merge protocol** above end to end -- the PR must reach `state == "MERGED"` before reporting completion
 
 ### Delegation prompt checklist
 
-Every delegation prompt must explicitly state all of the following so the child session cannot shortcut the flow:
+Every delegation prompt must explicitly state all of the following so the child session cannot shortcut the flow. Items marked _verbatim_ must be copied as full sections (not paraphrased) -- abbreviated or implicit versions are routinely ignored by child sessions:
 
-1. **Conflict resolution rule** (copy the "do NOT blindly choose `after updating`" section)
-2. **copier update notes** (clean tree, node_modules workaround, partial-state reset)
-3. **Post-push flow**: wait for CI; if CI fails, fix and re-push, repeating until CI is green
-4. **Merge**: once CI is green, merge the PR with `gh pr merge --squash --auto`. State this in imperative form -- implicit hints are routinely ignored by child sessions
-5. **Completion report format**: PR URL, merge/CI status, any follow-ups the user needs to be aware of
+1. **Conflict resolution rule** -- copy the "do NOT blindly choose `after updating`" section _verbatim_
+2. **copier update notes** -- copy the "copier update notes" section _verbatim_ (clean tree, node_modules workaround, partial-state reset)
+3. **CI watch and merge protocol** -- copy the "CI watch and merge protocol" section _verbatim_, including the four numbered steps and the "violation" sentence. Do not summarize as "wait for CI and merge"; the explicit `gh pr checks --watch` / `gh run view --log-failed` / `gh pr view --json state` commands and the all-SUCCESS / `MERGED` confirmation requirements must appear in the prompt
+4. **Completion report format**: PR URL, the final `state` from `gh pr view --json state` (must be `MERGED`), a summary of conflicts resolved and CI failures fixed, and any follow-ups the user needs to be aware of
