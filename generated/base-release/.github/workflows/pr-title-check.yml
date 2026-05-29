@@ -99,13 +99,16 @@ jobs:
           }
 
           # In workspace mode each scope must be a package name. A glob/path
-          # entry (e.g. `packages/*`) is not a scope; fail loudly rather than
-          # accepting titles release-please cannot map to a package.
+          # entry (e.g. `packages/*`) cannot be resolved to package names from a
+          # sparse checkout, so disable scope enforcement instead of failing the
+          # PR — a hard failure would block every PR in downstream repos that use
+          # globs once this workflow propagates to them.
           if [[ "${workspace_mode}" == true ]]; then
             for s in "${scopes[@]}"; do
               if [[ "${s}" == *"*"* || "${s}" == *"/"* ]]; then
-                echo "::error::Workspace entry \"${s}\" is a glob/path, not a package name; this check needs flat package-name entries in pnpm-workspace.yaml."
-                exit 1
+                echo "::warning::Workspace entry \"${s}\" is a glob/path; disabling workspace scope enforcement because globs cannot be resolved from a sparse checkout."
+                workspace_mode=false
+                break
               fi
             done
           fi
