@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [opened, synchronize]
 
+permissions:
+  id-token: write
+
 jobs:
   sync:
     # Only run on Renovate PRs that change generated/ files
@@ -11,15 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
-        id: app-token
+      - uses: octo-sts/action@f603d3be9d8dd9871a265776e625a27b00effe05 # v1.1.1
+        id: octo-sts
         with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          scope: fohte
+          identity: generic-boilerplate-sync-generated-to-template
+          domain: octo-sts.fohte.net
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ steps.octo-sts.outputs.token }}
           ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Fetch base branch
@@ -62,7 +66,7 @@ jobs:
         uses: suzuki-shunsuke/commit-action@06e3b49d4706498d325d29bd85adc82ecf2f5d8f # v1.0.0
         with:
           commit_message: 'chore(template): sync changes from generated/'
-          github_token: ${{ steps.app-token.outputs.token }}
+          github_token: ${{ steps.octo-sts.outputs.token }}
 
       - name: Fail if manual updates required
         if: steps.sync.outputs.success == 'false'
