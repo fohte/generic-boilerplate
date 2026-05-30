@@ -246,6 +246,109 @@ jobs:
         run: cargo test
 {%- endif %}
 {%- elif subpackages %}
+{%- if is_workspace %}
+{% raw %}
+  # Build the unit-test matrix at runtime: branch protection pins the fixed-name
+  # `unit-test` gate below, so the per-package legs are enumerated here instead.
+  setup:
+    runs-on: ubuntu-slim
+    outputs:
+      packages: ${{ steps.set-packages.outputs.packages }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed files
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        id: changed
+        with:
+          json: true
+          # Emit valid JSON; the default escapes quotes and breaks jq parsing.
+          escape_json: false
+
+      - name: Build package matrix
+        id: set-packages
+        env:
+          # Changes to these files affect every package, so they trigger the full matrix.
+          GLOBAL_PATHS_REGEX: '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.github/workflows/test\.yml)$'
+          CHANGED_FILES: ${{ steps.changed.outputs.all_changed_files }}
+        run: |
+          # Workspace packages are the directories holding a non-root package.json.
+          mapfile -t pkgs < <(git ls-files '*/package.json' | grep -v node_modules | sed 's#/package.json$##' | sort -u)
+
+          if echo "$CHANGED_FILES" | jq -r '.[]' | grep -qE "$GLOBAL_PATHS_REGEX"; then
+            selected=("${pkgs[@]}")
+          else
+            selected=()
+            for dir in "${pkgs[@]}"; do
+              if echo "$CHANGED_FILES" | jq -e --arg d "${dir}/" 'any(.[]; startswith($d))' >/dev/null; then
+                selected+=("$dir")
+              fi
+            done
+          fi
+
+          if [ ${#selected[@]} -eq 0 ]; then
+            packages='[]'
+          else
+            packages=$(printf '%s\n' "${selected[@]}" | jq -R . | jq -sc .)
+          fi
+          echo "packages=$packages" >> "$GITHUB_OUTPUT"
+          echo "Selected packages: $packages"
+
+  unit-test-run:
+    needs: setup
+    if: ${{ needs.setup.outputs.packages != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.setup.outputs.packages) }}
+    name: 'unit-test (${{ matrix.package }})'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+
+      - run: corepack enable
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            ${{ steps.pnpm-store.outputs.path }}
+            node_modules
+            */node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+
+      # Install only the matrix package and its workspace dependencies, not the
+      # whole workspace, so each parallel leg skips unrelated packages' installs.
+      - run: pnpm install --filter ./${{ matrix.package }}... --frozen-lockfile
+
+      - name: Run tests
+        working-directory: ${{ matrix.package }}
+        run: pnpm run test
+
+  # Aggregation gate for the unit-test matrix. Matrix leg names are dynamic and
+  # cannot be pinned as a required status check, so this single fixed-name job is
+  # the branch protection gate instead. It fails only when a needed job failed;
+  # when every leg succeeds (or the matrix is skipped because nothing changed) it
+  # is skipped, and a skipped required check counts as success.
+  unit-test:
+    runs-on: ubuntu-slim
+    needs:
+      - setup
+      - unit-test-run
+    if: failure()
+    steps:
+      - run: exit 1
+{%- endraw %}
+{%- else %}
 
   detect-changes:
     runs-on: ubuntu-slim
@@ -400,4 +503,5 @@ jobs:
 {%- endif %}
 {%- endif %}
 {%- endfor %}
+{%- endif %}
 {%- endif %}
