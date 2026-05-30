@@ -86,8 +86,8 @@ jobs:
         if: steps.lefthook.outcome == 'failure'
         run: exit 1
 
-  # Enumerate the workspace packages whose tests should run for this push, and
-  # emit them as a JSON array consumed by the unit-test matrix below.
+  # Build the unit-test matrix at runtime: branch protection pins the fixed-name
+  # `unit-test` gate below, so the per-package legs are enumerated here instead.
   setup:
     runs-on: ubuntu-slim
     outputs:
