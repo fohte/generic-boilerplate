@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.7.1](https://github.com/fohte/generic-boilerplate/compare/v0.7.0...v0.7.1) (2026-05-30)
+
+
+### Features
+
+* **template:** require a workspace scope in the PR title check ([#351](https://github.com/fohte/generic-boilerplate/issues/351)) ([5e3f744](https://github.com/fohte/generic-boilerplate/commit/5e3f744b1c5f9b10110d39274f89b4bbe12e1ad9))
+* **template:** use a matrix + aggregation gate for pnpm workspace monorepo CI ([#356](https://github.com/fohte/generic-boilerplate/issues/356)) ([f002f99](https://github.com/fohte/generic-boilerplate/commit/f002f99912e5435a5453e1b906db7b9e3b433c01))
+
+
+### Bug Fixes
+
+* **template:** install lefthook hooks even in worktrees ([#350](https://github.com/fohte/generic-boilerplate/issues/350)) ([6694824](https://github.com/fohte/generic-boilerplate/commit/66948244a8fa72fbaf60d33174a2d4867a9f3b87))
+
+
+### Dependencies
+
+* **ci:** Update taiki-e/install-action action to v2.79.3 ([#345](https://github.com/fohte/generic-boilerplate/issues/345)) ([1a9b037](https://github.com/fohte/generic-boilerplate/commit/1a9b03798b19d1bf1c48bb6ee7505c6aeb037e18))
+* **ci:** Update taiki-e/install-action action to v2.79.4 ([#349](https://github.com/fohte/generic-boilerplate/issues/349)) ([a53369a](https://github.com/fohte/generic-boilerplate/commit/a53369ae4ab39b7f9a0a98a5ae1ec13d73aea7d4))
+* **ci:** Update taiki-e/install-action action to v2.79.5 ([#355](https://github.com/fohte/generic-boilerplate/issues/355)) ([7196b16](https://github.com/fohte/generic-boilerplate/commit/7196b16a19896a3a6fdd2dc6e4fe61d29324f2c4))
+* **ci:** Update taiki-e/install-action action to v2.79.6 ([#358](https://github.com/fohte/generic-boilerplate/issues/358)) ([f3f46b1](https://github.com/fohte/generic-boilerplate/commit/f3f46b164f4bd16a2fb9d41dcde64930c73b90bc))
+* Update devDependencies (non-major) ([#353](https://github.com/fohte/generic-boilerplate/issues/353)) ([c123f5f](https://github.com/fohte/generic-boilerplate/commit/c123f5fa0e4622c66ac56927f977f00dbf059209))
+* Update Node.js to v24.16.0 ([#348](https://github.com/fohte/generic-boilerplate/issues/348)) ([e6d73a5](https://github.com/fohte/generic-boilerplate/commit/e6d73a525d319443df7ff92bf815cd1e2c9f6430))
+* update pnpm to v11.2.2 ([#346](https://github.com/fohte/generic-boilerplate/issues/346)) ([e458010](https://github.com/fohte/generic-boilerplate/commit/e458010f955d5eb94fea99fb875d991a057dbc58))
+
 ## [0.7.0](https://github.com/fohte/generic-boilerplate/compare/v0.6.5...v0.7.0) (2026-05-26)
 
 
