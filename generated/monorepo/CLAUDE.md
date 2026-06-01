@@ -4,7 +4,7 @@
 
 ### Assert on the whole output with a single equality check
 
-Treat each test as a spec: build the expected output as one literal value (object, struct, JSON, array, etc.) and compare it to the actual output with a single equality assertion (`assert_eq!`, `expect(...).toEqual(...)`, etc.). Do not split the assertion into per-field checks, and do not use partial matchers (`contains`, `includes`, `toContain`, `toMatchObject`, `starts_with`/`ends_with`, regex-on-substring, etc.). Partial matches silently ignore unexpected fields and extra elements, so the test stops working as a spec the moment the shape of the output changes.
+Treat each test as a spec: build the expected output as one literal value (object, struct, JSON, array, etc.) and compare it to the actual output with a single equality assertion (`assert_eq!`, `expect(...).toEqual(...)`, etc.). Do not split the assertion into per-field checks, and do not use partial matchers (`contains`, `includes`, `toContain`, `toMatchObject`, `starts_with`/`ends_with` or `startsWith`/`endsWith`, regex-on-substring, etc.). Partial matches silently ignore unexpected fields and extra elements, so the test stops working as a spec the moment the shape of the output changes.
 
 ```ts
 // bad: picks fields one by one — silent on any new/changed field
@@ -39,7 +39,7 @@ assert_eq!(
 );
 ```
 
-For dynamic fields (timestamps, UUIDs, random ids), normalize them in a helper before the comparison (e.g. replace with a fixed placeholder) so the full output can still be asserted in one equality check. Do not weaken the assertion to dodge the dynamic value.
+For dynamic fields (timestamps, UUIDs, random IDs), normalize them in a helper before the comparison (e.g. replace with a fixed placeholder) so the full output can still be asserted in one equality check. Do not weaken the assertion to dodge the dynamic value.
 
 The `no-assert-contains` ast-grep rule rejects `assert!(x.contains(...))` at the expression level; this guideline is the broader principle that the rule is one instance of.
 
