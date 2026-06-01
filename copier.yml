@@ -56,8 +56,8 @@ _exclude:
   # Required for any project with a node root package; non-workspace node subpackages
   # get their own pnpm-workspace.yaml under the subpackage directory instead.
   - "{% if not is_workspace and type != 'node' %}/pnpm-workspace.yaml{% endif %}"
-  # Exclude CLAUDE.md when no Rust code (only contains Rust test rules)
-  - '{% if not has_rust %}/CLAUDE.md{% endif %}'
+  # Exclude CLAUDE.md when there is no test code (no Rust and no Node)
+  - '{% if not has_rust and not has_node %}/CLAUDE.md{% endif %}'
   # Exclude Rust specific files when type is not 'rust'
   - "{% if type != 'rust' %}/Cargo.toml{% endif %}"
   - "{% if type != 'rust' %}/rust-toolchain.toml{% endif %}"
