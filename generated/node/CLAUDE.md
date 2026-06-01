@@ -4,7 +4,7 @@
 
 ### Assert on the whole output with a single equality check
 
-Treat each test as a spec: build the expected output as one literal value (object, struct, JSON, array, etc.) and compare it to the actual output with a single equality assertion (`assert_eq!`, `expect(...).toEqual(...)`, etc.). Do not split the assertion into per-field checks, and do not use partial matchers (`contains`, `includes`, `toContain`, `toMatchObject`, `starts_with`/`ends_with` or `startsWith`/`endsWith`, regex-on-substring, etc.). Partial matches silently ignore unexpected fields and extra elements, so the test stops working as a spec the moment the shape of the output changes.
+Treat each test as a spec: build the expected output as one literal value (object, struct, JSON, array, etc.) and compare it to the actual output with a single equality assertion. Do not split the assertion into per-field checks, and do not use partial matchers (substring contains, `toContain`, `toMatchObject`, prefix/suffix checks, regex-on-substring, etc.). Partial matches silently ignore unexpected fields and extra elements, so the test stops working as a spec the moment the shape of the output changes.
 
 ```ts
 // bad: picks fields one by one — silent on any new/changed field
@@ -19,24 +19,6 @@ expect(run()).toEqual({
   event: 'ok',
   message: 'done',
 })
-```
-
-```rust
-// bad
-let ev = run();
-assert_eq!(ev["path"], "/a");
-assert_eq!(ev["event"], "ok");
-assert!(ev["message"].as_str().unwrap().contains("done"));
-
-// good
-assert_eq!(
-    run(),
-    json!({
-        "path": "/a",
-        "event": "ok",
-        "message": "done",
-    }),
-);
 ```
 
 For dynamic fields (timestamps, UUIDs, random IDs), normalize them in a helper before the comparison (e.g. replace with a fixed placeholder) so the full output can still be asserted in one equality check. Do not weaken the assertion to dodge the dynamic value.
