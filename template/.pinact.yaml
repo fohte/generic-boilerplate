@@ -2,8 +2,6 @@
 # pinact - https://github.com/suzuki-shunsuke/pinact
 version: 3
 
-# Reduce the risk of pinning a malicious SHA that was retagged shortly after release.
-# `always: true` enforces the check on existing pins as well, not just new ones.
 min_age:
   value: 7
   always: true
