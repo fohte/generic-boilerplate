@@ -11,8 +11,6 @@
   packageRules: [
     // Override base.json5's devDependencies (chore:) and github-actions (ci:)
     // prefixes to deps: / deps(ci):.
-    // Use commitMessagePrefix (not semanticCommitType) because it takes
-    // precedence and base.json5 sets these rules via commitMessagePrefix.
     {
       matchDepTypes: ['devDependencies'],
       commitMessagePrefix: 'deps:',
