@@ -9,23 +9,14 @@
   // template/ contains Copier templates (*.jinja), not actual project files
   ignorePaths: ['template/**'],
   packageRules: [
-    // Override base.json5's devDependencies rule (chore:) and github-actions
-    // rule (ci:) to use deps: instead.
-    // generic-boilerplate manages Copier templates, so package updates here
-    // should propagate to all downstream repos via semantic version bumps.
-    //
-    // Use commitMessagePrefix (not semanticCommitType) because base.json5
-    // uses commitMessagePrefix for these rules, and commitMessagePrefix
-    // takes precedence over semanticCommitType.
+    // Override base.json5's devDependencies (chore:) and github-actions (ci:)
+    // prefixes to deps: / deps(ci):.
+    // commitMessagePrefix takes precedence over semanticCommitType, and
+    // base.json5 uses commitMessagePrefix for these rules — so override with
+    // the same key.
     {
       matchDepTypes: ['devDependencies'],
-      matchUpdateTypes: ['minor', 'patch'],
       commitMessagePrefix: 'deps:',
-    },
-    {
-      matchDepTypes: ['devDependencies'],
-      matchUpdateTypes: ['major'],
-      commitMessagePrefix: 'deps!:',
     },
     {
       matchManagers: ['github-actions'],
@@ -33,13 +24,7 @@
     },
     {
       matchManagers: ['mise'],
-      matchUpdateTypes: ['minor', 'patch'],
       commitMessagePrefix: 'deps:',
-    },
-    {
-      matchManagers: ['mise'],
-      matchUpdateTypes: ['major'],
-      commitMessagePrefix: 'deps!:',
     },
 
     // Group mise npm backend packages with their npm counterparts.
