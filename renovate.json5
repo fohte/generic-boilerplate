@@ -9,8 +9,6 @@
   // template/ contains Copier templates (*.jinja), not actual project files
   ignorePaths: ['template/**'],
   packageRules: [
-    // Override base.json5's devDependencies rule (chore:) and github-actions
-    // rule (ci:) to use deps: instead.
     // generic-boilerplate manages Copier templates, so package updates here
     // should propagate to all downstream repos via semantic version bumps.
     //
@@ -38,6 +36,23 @@
     },
     {
       matchManagers: ['mise'],
+      matchUpdateTypes: ['major'],
+      commitMessagePrefix: 'deps!:',
+    },
+    // Upstream node.json5 pins packageManager updates to chore: on the basis
+    // that the field is corepack-only and never reaches published artifacts.
+    // That reasoning does not hold here: generic-boilerplate is a Copier
+    // template, so packageManager strings propagate to downstream repos via
+    // copier update and require a release tag to be picked up.
+    {
+      matchManagers: ['npm'],
+      matchDepTypes: ['packageManager'],
+      matchUpdateTypes: ['minor', 'patch'],
+      commitMessagePrefix: 'deps:',
+    },
+    {
+      matchManagers: ['npm'],
+      matchDepTypes: ['packageManager'],
       matchUpdateTypes: ['major'],
       commitMessagePrefix: 'deps!:',
     },
