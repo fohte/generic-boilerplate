@@ -39,6 +39,11 @@
       matchUpdateTypes: ['major'],
       commitMessagePrefix: 'deps!:',
     },
+    // Upstream node.json5 pins packageManager updates to chore: on the basis
+    // that the field is corepack-only and never reaches published artifacts.
+    // That reasoning does not hold here: generic-boilerplate is a Copier
+    // template, so packageManager strings propagate to downstream repos via
+    // copier update and require a release tag to be picked up.
     {
       matchManagers: ['npm'],
       matchDepTypes: ['packageManager'],
