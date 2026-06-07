@@ -2,6 +2,11 @@ name: Validate Template
 
 on:
   push:
+    # Skip tag pushes: the octo-sts trust policy only allows branch refs, so
+    # token issuance for tag refs returns 403. The tagged commit has already
+    # been validated on its branch, so re-running on the tag is redundant.
+    branches:
+      - '**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
