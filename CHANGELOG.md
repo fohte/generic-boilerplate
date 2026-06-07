@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.8.0](https://github.com/fohte/generic-boilerplate/compare/v0.7.1...v0.8.0) (2026-06-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update dependency concurrently to v10 ([#375](https://github.com/fohte/generic-boilerplate/issues/375))
+* Update dependency pinact to v4 ([#364](https://github.com/fohte/generic-boilerplate/issues/364))
+
+### Features
+
+* guard against pinning fresh SHAs with pinact min_age ([#371](https://github.com/fohte/generic-boilerplate/issues/371)) ([ee3739d](https://github.com/fohte/generic-boilerplate/commit/ee3739d60e45e0a9cb1e1060e6f38927a3aa8202))
+* **lefthook:** add betterleaks secret scan to pre-commit ([#388](https://github.com/fohte/generic-boilerplate/issues/388)) ([989f876](https://github.com/fohte/generic-boilerplate/commit/989f8765358eee14e9f28be441c3eec2d5cde014))
+* **node:** set a 7-day minimumReleaseAge in generated projects ([#387](https://github.com/fohte/generic-boilerplate/issues/387)) ([6831fd6](https://github.com/fohte/generic-boilerplate/commit/6831fd6f9e7ebfe6fd59f9a4246f524e679eba90))
+* **template:** require whole-output equality in test assertion rule ([#363](https://github.com/fohte/generic-boilerplate/issues/363)) ([df1013d](https://github.com/fohte/generic-boilerplate/commit/df1013de337bb6ee2eaa4488d3154fcedf0cb1f7))
+
+
+### Bug Fixes
+
+* **ci/test-workflow:** authenticate pinact's GitHub API calls ([#384](https://github.com/fohte/generic-boilerplate/issues/384)) ([533285b](https://github.com/fohte/generic-boilerplate/commit/533285bc14518c71d512813522420eaac9cd6fe0))
+
+
+### Dependencies
+
+* **ci:** Update taiki-e/install-action action to v2.79.10 ([#369](https://github.com/fohte/generic-boilerplate/issues/369)) ([15e3b41](https://github.com/fohte/generic-boilerplate/commit/15e3b4189f29982fcc14b0d4fbc9567f75e910ce))
+* **ci:** Update taiki-e/install-action action to v2.79.11 ([#373](https://github.com/fohte/generic-boilerplate/issues/373)) ([d243c14](https://github.com/fohte/generic-boilerplate/commit/d243c14d04cb75171647135256736036875036c6))
+* **ci:** Update taiki-e/install-action action to v2.79.12 ([#374](https://github.com/fohte/generic-boilerplate/issues/374)) ([f0f4982](https://github.com/fohte/generic-boilerplate/commit/f0f4982121abb9d82febf20a28c872862a592ba0))
+* **ci:** Update taiki-e/install-action action to v2.79.13 ([#376](https://github.com/fohte/generic-boilerplate/issues/376)) ([f4f95ed](https://github.com/fohte/generic-boilerplate/commit/f4f95edb55b52deaea7933d7acc15fc451affe7e))
+* **ci:** Update taiki-e/install-action action to v2.79.14 ([#379](https://github.com/fohte/generic-boilerplate/issues/379)) ([0f597f7](https://github.com/fohte/generic-boilerplate/commit/0f597f7007459029e1d7ab7627a3fbefc6c6786d))
+* **ci:** Update taiki-e/install-action action to v2.79.15 ([#382](https://github.com/fohte/generic-boilerplate/issues/382)) ([9b2cfb5](https://github.com/fohte/generic-boilerplate/commit/9b2cfb5536f3da78e50653a5602a8377ebe8c11a))
+* **ci:** Update taiki-e/install-action action to v2.79.7 ([#361](https://github.com/fohte/generic-boilerplate/issues/361)) ([08b0917](https://github.com/fohte/generic-boilerplate/commit/08b091738bd964744aa2d0edf37414981bb619d3))
+* **ci:** Update taiki-e/install-action action to v2.79.8 ([#366](https://github.com/fohte/generic-boilerplate/issues/366)) ([d244fae](https://github.com/fohte/generic-boilerplate/commit/d244fae683334608c3a7a3ac8abf8f0119ddcb56))
+* **ci:** Update taiki-e/install-action action to v2.79.9 ([#367](https://github.com/fohte/generic-boilerplate/issues/367)) ([ae4b0fa](https://github.com/fohte/generic-boilerplate/commit/ae4b0faf0b00901166d0a8754da78ce3be0ef274))
+* **ci:** Update taiki-e/install-action action to v2.80.0 ([#385](https://github.com/fohte/generic-boilerplate/issues/385)) ([1a9d33b](https://github.com/fohte/generic-boilerplate/commit/1a9d33b99c82d46c1e4f8cc4ba5a5dc794dda90d))
+* Update @commitlint/cli to v21.0.2 ([#377](https://github.com/fohte/generic-boilerplate/issues/377)) ([da24dd6](https://github.com/fohte/generic-boilerplate/commit/da24dd663935e4ab396124bc7a0bee2aea9da97e))
+* Update dependency concurrently to v10 ([#375](https://github.com/fohte/generic-boilerplate/issues/375)) ([66e5a8c](https://github.com/fohte/generic-boilerplate/commit/66e5a8cd3f21094aabc7d7616166f45a0a0a31ba))
+* Update dependency github:ast-grep/ast-grep to v0.43.0 ([#365](https://github.com/fohte/generic-boilerplate/issues/365)) ([a7d2f3d](https://github.com/fohte/generic-boilerplate/commit/a7d2f3db15da91dcb98d174ee97dc1ba1c3b19ca))
+* Update dependency lefthook to v2.1.9 ([#378](https://github.com/fohte/generic-boilerplate/issues/378)) ([fbd9843](https://github.com/fohte/generic-boilerplate/commit/fbd9843c244d8e2fc3a1c7f2eb8f9fd547b77081))
+* Update dependency pinact to v4 ([#364](https://github.com/fohte/generic-boilerplate/issues/364)) ([eac10de](https://github.com/fohte/generic-boilerplate/commit/eac10de49360bed11fe9fe52c2eb31bbc8668fe5))
+* Update devDependencies (non-major) to v10.4.1 ([#381](https://github.com/fohte/generic-boilerplate/issues/381)) ([144346d](https://github.com/fohte/generic-boilerplate/commit/144346d4b6077e31930398740983bd0396278d3a))
+* update pnpm to v11.3.0 ([#359](https://github.com/fohte/generic-boilerplate/issues/359)) ([edfeee6](https://github.com/fohte/generic-boilerplate/commit/edfeee6e89c23c80d491099d12c1aeb6585996ea))
+* update pnpm to v11.4.0 ([#370](https://github.com/fohte/generic-boilerplate/issues/370)) ([900bd67](https://github.com/fohte/generic-boilerplate/commit/900bd6705491252f5237f47cdb2bafd6732673d9))
+* Update pnpm to v11.5.0 ([#380](https://github.com/fohte/generic-boilerplate/issues/380)) ([cc3b546](https://github.com/fohte/generic-boilerplate/commit/cc3b54601c79e0ca80c457ed8f2cba15e7966acd))
+* update rust to v1.96.0 ([#372](https://github.com/fohte/generic-boilerplate/issues/372)) ([03d1e0e](https://github.com/fohte/generic-boilerplate/commit/03d1e0e59999013a919d02b6508eccdab656a873))
+
 ## [0.7.1](https://github.com/fohte/generic-boilerplate/compare/v0.7.0...v0.7.1) (2026-05-30)
 
 
