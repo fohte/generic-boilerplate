@@ -7,3 +7,9 @@ allowBuilds:
   esbuild: true
   # required by @fohte/eslint-config -> eslint-plugin-import-x for "@/*" resolution
   unrs-resolver: true
+
+# Reject package versions published less than 7 days ago to dodge
+# short-lived supply-chain attacks (e.g. shai-hulud, tinycolor).
+minimumReleaseAge: 10080
+# Add package names here to bypass the cooldown for specific deps.
+minimumReleaseAgeExclude: []
