@@ -59,9 +59,12 @@ if [[ ${#repos[@]} -eq 0 ]]; then
   exit 0
 fi
 
-CHECKBOX_PATTERN='unlimit-branch=renovate/https-github.com-fohte-generic-boilerplate'
+# `branchNameStrict` normalizes dots in branch names to hyphens, so the
+# checkbox marker contains `https-github-com-...`.
+CHECKBOX_PATTERN='unlimit-branch=renovate/https-github-com-fohte-generic-boilerplate'
 
 updated_repos=()
+failed_repos=()
 
 for repo in "${repos[@]}"; do
   # Find the Dependency Dashboard issue
@@ -80,7 +83,7 @@ for repo in "${repos[@]}"; do
   body=$(gh issue view "$issue_number" -R "fohte/$repo" --json body -q .body)
 
   # Check if there's a rate-limited generic-boilerplate checkbox
-  if ! echo "$body" | grep -q "\\- \\[ \\] <!-- ${CHECKBOX_PATTERN}"; then
+  if ! printf '%s\n' "$body" | grep -qF -- "- [ ] <!-- ${CHECKBOX_PATTERN}"; then
     echo "SKIP $repo: no rate-limited generic-boilerplate entry in Dashboard #$issue_number"
     continue
   fi
@@ -89,14 +92,24 @@ for repo in "${repos[@]}"; do
     echo "WOULD UPDATE $repo: Dashboard #$issue_number"
   else
     updated_body="${body//- \[ \] <!-- ${CHECKBOX_PATTERN}/- [x] <!-- ${CHECKBOX_PATTERN}}"
+    if [[ "$updated_body" == "$body" ]]; then
+      echo "FAIL $repo: checkbox substitution produced no change (pattern drift?) in Dashboard #$issue_number" >&2
+      failed_repos+=("$repo")
+      continue
+    fi
     gh issue edit "$issue_number" -R "fohte/$repo" --body "$updated_body"
     echo "UPDATED $repo: Dashboard #$issue_number"
     updated_repos+=("$repo")
   fi
 done
 
+exit_code=0
+if [[ ${#failed_repos[@]} -gt 0 ]]; then
+  exit_code=1
+fi
+
 if "$DRY_RUN" || [[ ${#updated_repos[@]} -eq 0 ]]; then
-  exit 0
+  exit "$exit_code"
 fi
 
 # Wait for Renovate to create PRs
@@ -124,7 +137,7 @@ for ((attempt = 1; attempt <= max_attempts; attempt++)); do
 
   if [[ ${#remaining[@]} -eq 0 ]]; then
     echo "All PRs created."
-    exit 0
+    exit "$exit_code"
   fi
 
   updated_repos=("${remaining[@]}")
