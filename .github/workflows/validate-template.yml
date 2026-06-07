@@ -2,6 +2,8 @@ name: Validate Template
 
 on:
   push:
+    branches:
+      - '**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
