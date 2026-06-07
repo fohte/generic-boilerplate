@@ -27,18 +27,18 @@ fi
 {%- if type == 'node' %}
 
 # Install Node.js dependencies
-pnpm install
+pnpm install --frozen-lockfile
 {%- elif is_workspace %}
 
 # Install Node.js dependencies (workspace)
-pnpm install
+pnpm install --frozen-lockfile
 {%- elif has_node and not is_workspace %}
 
 # Install shared dev tools (prettier, commitlint) at the repo root
-pnpm install
+pnpm install --frozen-lockfile
 # Install Node.js dependencies for each subpackage
 {%- for pkg in node_pkgs %}
-(cd {{ pkg.name }} && pnpm install)
+(cd {{ pkg.name }} && pnpm install --frozen-lockfile)
 {%- endfor %}
 {%- endif %}
 {%- if type == 'rust' %}

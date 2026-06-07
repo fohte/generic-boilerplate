@@ -24,4 +24,4 @@ if command -v lefthook > /dev/null 2>&1; then
 fi
 
 # Install Node.js dependencies (workspace)
-pnpm install
+pnpm install --frozen-lockfile

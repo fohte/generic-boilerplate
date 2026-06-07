@@ -24,9 +24,9 @@ if command -v lefthook > /dev/null 2>&1; then
 fi
 
 # Install shared dev tools (prettier, commitlint) at the repo root
-pnpm install
+pnpm install --frozen-lockfile
 # Install Node.js dependencies for each subpackage
-(cd frontend && pnpm install)
+(cd frontend && pnpm install --frozen-lockfile)
 
 # Fetch Rust dependencies
 cargo fetch --manifest-path backend/Cargo.toml
