@@ -18,6 +18,18 @@ fi
 
 # Enable corepack so that pnpm version from package.json packageManager field is used
 corepack enable
+
+# Use --frozen-lockfile when a lockfile exists so a Renovate-bumped dep still
+# inside the pnpm-workspace.yaml minimumReleaseAge window does not re-trigger
+# the supply-chain policy check and block bootstrap. Fall back to plain
+# `pnpm install` on freshly generated projects without a lockfile yet.
+pnpm_install() {
+  if [ -f pnpm-lock.yaml ]; then
+    pnpm install --frozen-lockfile
+  else
+    pnpm install
+  fi
+}
 {%- endif %}
 
 # Install git hooks via lefthook (hooks live in the common .git/hooks, shared across worktrees)
@@ -27,18 +39,18 @@ fi
 {%- if type == 'node' %}
 
 # Install Node.js dependencies
-pnpm install --frozen-lockfile
+pnpm_install
 {%- elif is_workspace %}
 
 # Install Node.js dependencies (workspace)
-pnpm install --frozen-lockfile
+pnpm_install
 {%- elif has_node and not is_workspace %}
 
 # Install shared dev tools (prettier, commitlint) at the repo root
-pnpm install --frozen-lockfile
+pnpm_install
 # Install Node.js dependencies for each subpackage
 {%- for pkg in node_pkgs %}
-(cd {{ pkg.name }} && pnpm install --frozen-lockfile)
+(cd {{ pkg.name }} && pnpm_install)
 {%- endfor %}
 {%- endif %}
 {%- if type == 'rust' %}
