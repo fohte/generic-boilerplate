@@ -83,7 +83,7 @@ for repo in "${repos[@]}"; do
   body=$(gh issue view "$issue_number" -R "fohte/$repo" --json body -q .body)
 
   # Check if there's a rate-limited generic-boilerplate checkbox
-  if ! echo "$body" | grep -qF -- "- [ ] <!-- ${CHECKBOX_PATTERN}"; then
+  if ! printf '%s\n' "$body" | grep -qF -- "- [ ] <!-- ${CHECKBOX_PATTERN}"; then
     echo "SKIP $repo: no rate-limited generic-boilerplate entry in Dashboard #$issue_number"
     continue
   fi
