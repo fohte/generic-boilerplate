@@ -71,7 +71,7 @@ _exclude:
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
   # Exclude Storybook files when storybook is disabled or no storybook packages exist
-  - "{% if not use_storybook | default(false) or (type == 'base' and not has_storybook_pkg) %}.github/workflows/storybook.yml{% endif %}"
+  - "{% if not use_storybook | default(false) or (type != 'node' and not has_storybook_pkg) %}.github/workflows/storybook.yml{% endif %}"
   - "{% if type != 'node' or not use_storybook | default(false) %}/.storybook{% endif %}"
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
@@ -137,13 +137,17 @@ subpackages:
   help: |
     Subpackage definitions for monorepo.
     Example: [{name: frontend, type: node}, {name: backend, type: rust}]
-  when: "{{ type == 'base' }}"
+  # Set only via --data-file; not promptable (multiline YAML inputs).
+  when: false
 
 monorepo_node_workspace:
   type: bool
   help: Enable pnpm workspace for monorepo (hoists shared devDependencies to root)
-  when: "{{ type == 'base' and (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
-  default: "{{ (subpackages | selectattr('type', 'equalto', 'node') | list | length) >= 2 }}"
+  when: "{{ type == 'base' and (subpackages | selectattr('type', 'equalto', 'node') | list | length) > 0 }}"
+  # `default` is evaluated even when `when` is false, so the `type == 'base'`
+  # guard must also live here — otherwise a non-base root with >= 2 node
+  # subpackages silently picks up `is_workspace=true`.
+  default: "{{ type == 'base' and (subpackages | selectattr('type', 'equalto', 'node') | list | length) >= 2 }}"
 
 use_coverage:
   type: bool
