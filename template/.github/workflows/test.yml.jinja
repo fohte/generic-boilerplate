@@ -83,6 +83,34 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 {%- elif type == 'rust' %}
+{%- if has_node_pkg and not is_workspace %}
+
+      - run: corepack enable
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+            node_modules
+{%- for pkg in node_pkgs %}
+            {{ pkg.name }}/node_modules
+{%- endfor %}
+          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', {% endraw %}{% for pkg in node_pkgs %}'{{ pkg.name }}/pnpm-lock.yaml'{{ ', ' if not loop.last else '' }}{% endfor %}{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+
+      - name: Install pnpm dependencies (root)
+        run: pnpm install --frozen-lockfile
+{%- for pkg in node_pkgs %}
+
+      - name: Install pnpm dependencies ({{ pkg.name }})
+        run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
+{%- endfor %}
+{%- endif %}
 
       - run: cargo fetch
 {%- elif subpackages %}

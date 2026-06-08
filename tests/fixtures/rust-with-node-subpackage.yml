@@ -1,0 +1,15 @@
+# Mixed-root fixture: Rust crate at the repo root with a single Node
+# subpackage (e.g. a docs site). Exercises the lifted type==base constraint
+# on subpackages so a non-base root can still host node subpackages.
+type: rust
+project_name: rust-with-node-subpackage
+description: Test Rust root with a node docs subpackage
+is_public: false
+use_release_please: false
+use_coverage: false
+use_storybook: false
+monorepo_node_workspace: false
+subpackages:
+  - name: docs
+    type: node
+repo_language: ja
