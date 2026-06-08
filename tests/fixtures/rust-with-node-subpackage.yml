@@ -10,4 +10,6 @@ monorepo_node_workspace: false
 subpackages:
   - name: docs
     type: node
+    # The docs subpackage will bring its own setup (Astro/Starlight etc.).
+    tests: false
 repo_language: ja

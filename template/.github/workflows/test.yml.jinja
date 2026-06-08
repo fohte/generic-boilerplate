@@ -1,3 +1,13 @@
+{#- Subpackages that get a unit-test job: all rust subpackages, plus node
+    subpackages unless they opt out with `tests: false`. Built once here so
+    detect-changes outputs / change-detection steps / unit-test jobs stay in
+    sync; mismatched filters would emit jobs referencing non-existent outputs. -#}
+{%- set testable_subpackages = [] -%}
+{%- for pkg in subpackages -%}
+{%- if pkg.type == 'rust' or (pkg.type == 'node' and pkg.tests | default(true)) -%}
+{%- set _ = testable_subpackages.append(pkg) -%}
+{%- endif -%}
+{%- endfor -%}
 name: Test
 
 on:
@@ -278,7 +288,7 @@ jobs:
         run: cargo test
 {%- endif %}
 {%- if has_node_pkg %}
-{%- for pkg in node_pkgs %}
+{%- for pkg in node_pkgs if pkg.tests | default(true) %}
 
   unit-test-{{ pkg.name }}:
     runs-on: ubuntu-latest
@@ -417,7 +427,7 @@ jobs:
   detect-changes:
     runs-on: ubuntu-slim
     outputs:
-{%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
+{%- for pkg in testable_subpackages %}
       {{ pkg.name }}: {% raw %}${{ steps.changes-{% endraw %}{{ pkg.name }}{% raw %}.outputs.any_changed }}{% endraw %}
 {%- endfor %}
       workflow: {% raw %}${{ steps.changes-workflow.outputs.any_changed }}{% endraw %}
@@ -428,7 +438,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 2
-{%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
+{%- for pkg in testable_subpackages %}
 
       - name: Check for {{ pkg.name }} changes
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
@@ -453,7 +463,7 @@ jobs:
             pnpm-lock.yaml
             pnpm-workspace.yaml
 {%- endif %}
-{%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
+{%- for pkg in testable_subpackages %}
 
   unit-test-{{ pkg.name }}:
     needs: detect-changes
