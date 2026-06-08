@@ -71,7 +71,7 @@ _exclude:
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
   # Exclude Storybook files when storybook is disabled or no storybook packages exist
-  - '{% if not use_storybook | default(false) or (subpackages and not has_storybook_pkg) %}.github/workflows/storybook.yml{% endif %}'
+  - "{% if not use_storybook | default(false) or (type != 'node' and not has_storybook_pkg) %}.github/workflows/storybook.yml{% endif %}"
   - "{% if type != 'node' or not use_storybook | default(false) %}/.storybook{% endif %}"
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
