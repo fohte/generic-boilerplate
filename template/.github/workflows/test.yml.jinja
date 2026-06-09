@@ -348,8 +348,17 @@ jobs:
           GLOBAL_PATHS_REGEX: '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.github/workflows/test\.yml)$'
           CHANGED_FILES: ${{ steps.changed.outputs.all_changed_files }}
         run: |
-          # Workspace packages are the directories holding a non-root package.json.
-          mapfile -t pkgs < <(git ls-files '*/package.json' | grep -v node_modules | sed 's#/package.json$##' | sort -u)
+          # Workspace packages are the directories holding a non-root package.json
+          # that declares a `test` script. Packages without one (e.g. node
+          # subpackages opted out with `tests: false`) would otherwise be picked
+          # up here and then crash `pnpm run test` in unit-test-run.
+          mapfile -t all_pkgs < <(git ls-files '*/package.json' | grep -v node_modules | sed 's#/package.json$##' | sort -u)
+          pkgs=()
+          for dir in "${all_pkgs[@]}"; do
+            if jq -e '.scripts.test' "${dir}/package.json" >/dev/null 2>&1; then
+              pkgs+=("${dir}")
+            fi
+          done
 
           if echo "$CHANGED_FILES" | jq -r '.[]' | grep -qE "$GLOBAL_PATHS_REGEX"; then
             selected=("${pkgs[@]}")
