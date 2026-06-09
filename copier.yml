@@ -58,6 +58,8 @@ _exclude:
   - "{% if not is_workspace and type != 'node' %}/pnpm-workspace.yaml{% endif %}"
   # Exclude CLAUDE.md when there is no test code (no Rust and no Node)
   - '{% if not has_rust and not has_node %}/CLAUDE.md{% endif %}'
+  # Exclude bootstrap workflow when no lockfile-producing language is involved
+  - '{% if not has_node and not has_rust %}.github/workflows/bootstrap.yml{% endif %}'
   # Exclude Rust specific files when type is not 'rust'
   - "{% if type != 'rust' %}/Cargo.toml{% endif %}"
   - "{% if type != 'rust' %}/rust-toolchain.toml{% endif %}"

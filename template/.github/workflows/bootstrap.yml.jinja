@@ -1,0 +1,91 @@
+{%- set bootstrap_commit_msg = 'chore: bootstrap lockfiles' -%}
+name: Bootstrap
+
+# Generates lockfiles on the first push after the repository is initialized
+# from the template, then deletes itself so it never runs again.
+
+on:
+  push:
+    # Branch-only to avoid running on tag pushes; the self-removal step's
+    # `git push HEAD:<ref>` is not designed for refs/tags.
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    # Defensive guard against an infinite loop if GitHub re-evaluates this
+    # workflow at the self-removal commit's new ref.
+    if: "github.event.head_commit.message != '{{ bootstrap_commit_msg }}'"
+{%- if has_rust %}
+    env:
+      SCCACHE_GHA_ENABLED: 'true'
+      RUSTC_WRAPPER: 'sccache'
+{%- endif %}
+
+    steps:
+      - uses: octo-sts/action@f603d3be9d8dd9871a265776e625a27b00effe05 # v1.1.1
+        id: octo-sts
+        with:
+          scope: fohte
+          identity: {% raw %}${{ github.event.repository.name }}{% endraw %}
+          domain: octo-sts.fohte.net
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: {% raw %}${{ steps.octo-sts.outputs.token }}{% endraw %}
+
+      - name: Check whether any lockfile is missing
+        id: check
+        run: |
+          missing=false
+{%- if has_node %}
+          if [ ! -f pnpm-lock.yaml ]; then missing=true; fi
+{%- if not is_workspace and type != 'node' %}
+{%- for pkg in node_pkgs %}
+          if [ ! -f {{ pkg.name }}/pnpm-lock.yaml ]; then missing=true; fi
+{%- endfor %}
+{%- endif %}
+{%- endif %}
+{%- if type == 'rust' %}
+          if [ ! -f Cargo.lock ]; then missing=true; fi
+{%- endif %}
+{%- for pkg in rust_pkgs %}
+          if [ ! -f {{ pkg.name }}/Cargo.lock ]; then missing=true; fi
+{%- endfor %}
+          echo "missing=$missing" >> "$GITHUB_OUTPUT"
+{%- if has_rust %}
+
+      # Run rustup before mise-action to prevent race condition.
+      - if: steps.check.outputs.missing == 'true'
+        run: rustup show
+
+      - name: Run sccache-cache
+        if: steps.check.outputs.missing == 'true'
+        uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
+{%- endif %}
+
+      - if: steps.check.outputs.missing == 'true'
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+
+      - name: Generate lockfiles
+        if: steps.check.outputs.missing == 'true'
+        run: scripts/bootstrap
+
+      - name: Self-remove and commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/bootstrap.yml
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+          git commit -m "{{ bootstrap_commit_msg }}"
+          git push origin "HEAD:{% raw %}${GITHUB_REF#refs/heads/}{% endraw %}"
