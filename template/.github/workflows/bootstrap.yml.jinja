@@ -19,8 +19,6 @@ permissions:
 jobs:
   bootstrap:
     runs-on: ubuntu-latest
-    # Defensive guard against an infinite loop if GitHub re-evaluates this
-    # workflow at the self-removal commit's new ref.
     if: "github.event.head_commit.message != '{{ bootstrap_commit_msg }}'"
 {%- if has_rust %}
     env:
@@ -82,7 +80,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm .github/workflows/bootstrap.yml
-          git add -A
+{%- if has_node %}
+          if [ -f pnpm-lock.yaml ]; then git add pnpm-lock.yaml; fi
+{%- if not is_workspace and type != 'node' %}
+{%- for pkg in node_pkgs %}
+          if [ -f {{ pkg.name }}/pnpm-lock.yaml ]; then git add {{ pkg.name }}/pnpm-lock.yaml; fi
+{%- endfor %}
+{%- endif %}
+{%- endif %}
+{%- if type == 'rust' %}
+          if [ -f Cargo.lock ]; then git add Cargo.lock; fi
+{%- endif %}
+{%- for pkg in rust_pkgs %}
+          if [ -f {{ pkg.name }}/Cargo.lock ]; then git add {{ pkg.name }}/Cargo.lock; fi
+{%- endfor %}
           if git diff --cached --quiet; then
             echo "Nothing to commit"
             exit 0

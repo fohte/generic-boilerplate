@@ -18,8 +18,6 @@ permissions:
 jobs:
   bootstrap:
     runs-on: ubuntu-latest
-    # Defensive guard against an infinite loop if GitHub re-evaluates this
-    # workflow at the self-removal commit's new ref.
     if: "github.event.head_commit.message != 'chore: bootstrap lockfiles'"
 
     steps:
@@ -53,7 +51,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm .github/workflows/bootstrap.yml
-          git add -A
+          if [ -f pnpm-lock.yaml ]; then git add pnpm-lock.yaml; fi
           if git diff --cached --quiet; then
             echo "Nothing to commit"
             exit 0
