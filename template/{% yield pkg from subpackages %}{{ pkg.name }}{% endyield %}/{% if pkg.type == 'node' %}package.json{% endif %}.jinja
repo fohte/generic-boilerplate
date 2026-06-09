@@ -6,7 +6,7 @@
   "name": "{{ pkg.name }}",
   "private": true,
 {%- if not is_workspace %}
-  "packageManager": "pnpm@11.5.0",
+  "packageManager": "pnpm@11.5.1",
 {%- endif %}
   "type": "module"{{ "," if has_scripts else "" }}
 {%- if has_scripts %}
@@ -41,7 +41,7 @@
     "@tsconfig/node-lts": "24.0.0",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.12.4",
-    "concurrently": "10.0.1",
+    "concurrently": "10.0.3",
     "eslint": "10.4.1",
 {%- if has_storybook %}
     "eslint-plugin-storybook": "10.4.1",
