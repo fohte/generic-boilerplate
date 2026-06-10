@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.8.1](https://github.com/fohte/generic-boilerplate/compare/v0.8.0...v0.8.1) (2026-06-10)
+
+
+### Features
+
+* **copier:** add tests flag to opt node subpackage out of test scaffolding ([#398](https://github.com/fohte/generic-boilerplate/issues/398)) ([9327438](https://github.com/fohte/generic-boilerplate/commit/9327438a0fbc9e2f872756bb42e15283abcb8136))
+* **copier:** allow subpackages on any root type ([#397](https://github.com/fohte/generic-boilerplate/issues/397)) ([d0ceb53](https://github.com/fohte/generic-boilerplate/commit/d0ceb530c9e38e245ee8a8cc252c62f5475320c4))
+* **template:** add bootstrap workflow to generate lockfiles on first push ([#401](https://github.com/fohte/generic-boilerplate/issues/401)) ([8f1e4c6](https://github.com/fohte/generic-boilerplate/commit/8f1e4c69d093b643fb3340e4a80acb0f35334363))
+
+
+### Bug Fixes
+
+* **scripts:** actually tick Renovate Dashboard checkboxes in trigger-renovate-boilerplate-prs ([#391](https://github.com/fohte/generic-boilerplate/issues/391)) ([312de8e](https://github.com/fohte/generic-boilerplate/commit/312de8e94fd18f5ae3806d33d8ca7da6624e52fa))
+* **scripts:** use pnpm install --frozen-lockfile in bootstrap ([#394](https://github.com/fohte/generic-boilerplate/issues/394)) ([cf9b841](https://github.com/fohte/generic-boilerplate/commit/cf9b841e27e2189c910dad03047c5af32382b69d))
+* **template:** exempt @fohte/* packages from minimumReleaseAge ([#396](https://github.com/fohte/generic-boilerplate/issues/396)) ([be40033](https://github.com/fohte/generic-boilerplate/commit/be40033d6c760a2b7b99a1b7cba746347b611713))
+
+
+### Dependencies
+
+* **ci:** Update actions/checkout action to v6.0.3 ([#404](https://github.com/fohte/generic-boilerplate/issues/404)) ([cb8fa4c](https://github.com/fohte/generic-boilerplate/commit/cb8fa4c8c14c1e31cf4d7a36d820e9c5be27dcc0))
+* **ci:** Update actions/checkout action to v6.0.3 ([#405](https://github.com/fohte/generic-boilerplate/issues/405)) ([ae10936](https://github.com/fohte/generic-boilerplate/commit/ae1093614ed64372c627f27fd9d8e5ab5b5df7cd))
+* **ci:** Update taiki-e/install-action action to v2.81.1 ([#393](https://github.com/fohte/generic-boilerplate/issues/393)) ([bbf1f5c](https://github.com/fohte/generic-boilerplate/commit/bbf1f5c96162961971cbd137b555f87751346cfd))
+* **ci:** Update taiki-e/install-action action to v2.81.2 ([#403](https://github.com/fohte/generic-boilerplate/issues/403)) ([7ccc55d](https://github.com/fohte/generic-boilerplate/commit/7ccc55dcb679bc0edc3e800842abf6d6c1743880))
+* **ci:** Update taiki-e/install-action action to v2.81.3 ([#406](https://github.com/fohte/generic-boilerplate/issues/406)) ([72a5f0e](https://github.com/fohte/generic-boilerplate/commit/72a5f0ec034414ee2b3d7aed4d962b2242d4794e))
+* Update devDependencies (non-major) to v0.3.3 ([#395](https://github.com/fohte/generic-boilerplate/issues/395)) ([7f026bf](https://github.com/fohte/generic-boilerplate/commit/7f026bfa02f1e90ac0eed78e0f15d7c9ab196a0d))
+* Update devDependencies (non-major) to v10.0.3 ([#399](https://github.com/fohte/generic-boilerplate/issues/399)) ([7dc691e](https://github.com/fohte/generic-boilerplate/commit/7dc691ecb638ebf1896a361f13beb39bbabf2502))
+* Update devDependencies (non-major) to v10.4.2 ([#402](https://github.com/fohte/generic-boilerplate/issues/402)) ([bab9fdb](https://github.com/fohte/generic-boilerplate/commit/bab9fdb88e2ef101eafac17c5d5aabbf7c750518))
+* Update pnpm to v11.5.1 ([#400](https://github.com/fohte/generic-boilerplate/issues/400)) ([4a6fb3e](https://github.com/fohte/generic-boilerplate/commit/4a6fb3e0a88c7d46977af83817eda97eb069c313))
+
 ## [0.8.0](https://github.com/fohte/generic-boilerplate/compare/v0.7.1...v0.8.0) (2026-06-07)
 
 
