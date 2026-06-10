@@ -1,3 +1,13 @@
+{#- Subpackages that get a unit-test job: all rust subpackages, plus node
+    subpackages unless they opt out with `tests: false`. Built once here so
+    detect-changes outputs / change-detection steps / unit-test jobs stay in
+    sync; mismatched filters would emit jobs referencing non-existent outputs. -#}
+{%- set testable_subpackages = [] -%}
+{%- for pkg in subpackages -%}
+{%- if pkg.type == 'rust' or (pkg.type == 'node' and pkg.tests | default(true)) -%}
+{%- set _ = testable_subpackages.append(pkg) -%}
+{%- endif -%}
+{%- endfor -%}
 name: Test
 
 on:
@@ -278,7 +288,7 @@ jobs:
         run: cargo test
 {%- endif %}
 {%- if has_node_pkg %}
-{%- for pkg in node_pkgs %}
+{%- for pkg in node_pkgs if pkg.tests | default(true) %}
 
   unit-test-{{ pkg.name }}:
     runs-on: ubuntu-latest
@@ -338,8 +348,17 @@ jobs:
           GLOBAL_PATHS_REGEX: '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.github/workflows/test\.yml)$'
           CHANGED_FILES: ${{ steps.changed.outputs.all_changed_files }}
         run: |
-          # Workspace packages are the directories holding a non-root package.json.
-          mapfile -t pkgs < <(git ls-files '*/package.json' | grep -v node_modules | sed 's#/package.json$##' | sort -u)
+          # Workspace packages are the directories holding a non-root package.json
+          # that declares a `test` script. Packages without one (e.g. node
+          # subpackages opted out with `tests: false`) would otherwise be picked
+          # up here and then crash `pnpm run test` in unit-test-run.
+          mapfile -t all_pkgs < <(git ls-files '*/package.json' | grep -v node_modules | sed 's#/package.json$##' | sort -u)
+          pkgs=()
+          for dir in "${all_pkgs[@]}"; do
+            if jq -e '.scripts.test' "${dir}/package.json" >/dev/null 2>&1; then
+              pkgs+=("${dir}")
+            fi
+          done
 
           if echo "$CHANGED_FILES" | jq -r '.[]' | grep -qE "$GLOBAL_PATHS_REGEX"; then
             selected=("${pkgs[@]}")
@@ -417,7 +436,7 @@ jobs:
   detect-changes:
     runs-on: ubuntu-slim
     outputs:
-{%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
+{%- for pkg in testable_subpackages %}
       {{ pkg.name }}: {% raw %}${{ steps.changes-{% endraw %}{{ pkg.name }}{% raw %}.outputs.any_changed }}{% endraw %}
 {%- endfor %}
       workflow: {% raw %}${{ steps.changes-workflow.outputs.any_changed }}{% endraw %}
@@ -428,7 +447,7 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 2
-{%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
+{%- for pkg in testable_subpackages %}
 
       - name: Check for {{ pkg.name }} changes
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
@@ -453,7 +472,7 @@ jobs:
             pnpm-lock.yaml
             pnpm-workspace.yaml
 {%- endif %}
-{%- for pkg in subpackages if pkg.type in ['node', 'rust'] %}
+{%- for pkg in testable_subpackages %}
 
   unit-test-{{ pkg.name }}:
     needs: detect-changes

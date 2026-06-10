@@ -1,27 +1,34 @@
 {%- set has_storybook = pkg.storybook | default(false) -%}
+{%- set has_tests = pkg.tests | default(true) -%}
+{%- set has_scripts = has_tests or has_storybook -%}
+{%- set has_dev_deps = (has_tests and not is_workspace) or has_storybook -%}
 {
   "name": "{{ pkg.name }}",
   "private": true,
 {%- if not is_workspace %}
   "packageManager": "pnpm@11.5.1",
 {%- endif %}
-  "type": "module",
+  "type": "module"{{ "," if has_scripts else "" }}
+{%- if has_scripts %}
   "scripts": {
-{%- if not is_workspace %}
+{%- if has_tests and not is_workspace %}
     "lint": "eslint .",
     "format:eslint": "eslint --fix .",
     "format:prettier": "prettier --write .",
     "format": "conc -m 1 pnpm:format:eslint pnpm:format:prettier",
 {%- endif %}
+{%- if has_tests %}
     "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
     "test:unit": "vitest run"{{ "," if has_storybook else "" }}
+{%- endif %}
 {%- if has_storybook %}
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"
 {%- endif %}
-  }{{ "," if not is_workspace or has_storybook else "" }}
-{%- if not is_workspace %}
+  }{{ "," if has_dev_deps else "" }}
+{%- endif %}
+{%- if has_tests and not is_workspace %}
   "devDependencies": {
     "@commitlint/cli": "21.0.2",
     "@eslint/eslintrc": "3.3.5",
