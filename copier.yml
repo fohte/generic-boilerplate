@@ -2,6 +2,14 @@ _min_copier_version: '9.5.0'
 _subdirectory: template
 _answers_file: .copier-answers.yml
 
+# Drop the bootstrap workflow when the destination already has lockfiles
+# (existing repos updating via copier — they would otherwise gain a stray
+# self-removal commit on the next push).
+_tasks:
+  - >-
+    sh -c 'if [ -f pnpm-lock.yaml ] || [ -f Cargo.lock ]; then rm -f
+    .github/workflows/bootstrap.yml; fi'
+
 type:
   type: str
   choices:
