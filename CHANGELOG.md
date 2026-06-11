@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/fohte/generic-boilerplate/compare/v0.8.1...v0.8.2) (2026-06-11)
+
+
+### Bug Fixes
+
+* **copier:** replace _tasks with _copier_operation exclude for bootstrap.yml ([#408](https://github.com/fohte/generic-boilerplate/issues/408)) ([b281853](https://github.com/fohte/generic-boilerplate/commit/b281853c5180d23f37e3819ed1f5a521c9ca43e1))
+
 ## [0.8.1](https://github.com/fohte/generic-boilerplate/compare/v0.8.0...v0.8.1) (2026-06-10)
 
 
