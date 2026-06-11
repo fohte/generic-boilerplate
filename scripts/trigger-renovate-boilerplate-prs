@@ -82,7 +82,6 @@ for entry in "${entries[@]}"; do
   [[ -z "$repo" ]] && continue
 
   if [[ -z "$pr_number" ]]; then
-    # === Create mode: rate-limited, no PR yet ===
     issue_number=$(
       gh issue list -R "fohte/$repo" --search "Dependency Dashboard" --json number,title |
         jq -r '.[] | select(.title == "Dependency Dashboard") | .number' |
@@ -115,8 +114,11 @@ for entry in "${entries[@]}"; do
       create_pending+=("$repo")
     fi
   else
-    # === Rebase mode: stale PR, force a fresh rebase via rebase-check box ===
-    pr_data=$(gh pr view "$pr_number" -R "fohte/$repo" --json body,headRefOid)
+    pr_data=$(gh pr view "$pr_number" -R "fohte/$repo" --json body,headRefOid 2> /dev/null || true)
+    if [[ -z "$pr_data" ]]; then
+      echo "SKIP $repo [rebase]: PR #$pr_number no longer accessible"
+      continue
+    fi
     body=$(printf '%s' "$pr_data" | jq -r '.body')
     old_oid=$(printf '%s' "$pr_data" | jq -r '.headRefOid')
 
@@ -164,7 +166,6 @@ max_attempts=10
 for ((attempt = 1; attempt <= max_attempts; attempt++)); do
   sleep 30
 
-  # --- Poll create_pending: new PR has appeared ---
   remaining_create=()
   for repo in "${create_pending[@]}"; do
     pr_url=$(
@@ -181,7 +182,6 @@ for ((attempt = 1; attempt <= max_attempts; attempt++)); do
   done
   create_pending=("${remaining_create[@]}")
 
-  # --- Poll rebase_repos: headRefOid changed ---
   remaining_rebase_repos=()
   remaining_rebase_pr_numbers=()
   remaining_rebase_old_oids=()
