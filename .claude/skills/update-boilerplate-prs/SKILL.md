@@ -54,25 +54,28 @@ scripts/list-boilerplate-usage --outdated
 
 The output shows each repository's current version, latest version, and whether a Renovate PR exists.
 
-- `renovate PR: #<number> <url>` present -> proceed to Step 4
-- `renovate PR: (none)` -> proceed to Step 3 to trigger PR creation
+- `renovate PR: (none)` -> Step 3 will trigger PR creation via the Dependency Dashboard
+- `renovate PR: #<number> <url>` -> Step 3 will rebase it via the PR's rebase-check box (re-triggers Renovate even if the PR already targets the latest `_commit`); proceed to Step 4 once `REBASED` is printed
 
-## Step 3: Trigger PR creation from Renovate Dashboard
+## Step 3: Trigger PR creation or rebase
 
-Repositories without a Renovate PR may be blocked by Renovate's rate limit (max concurrent PRs). Use the trigger script to check the Renovate Dependency Dashboard checkbox in each repository.
+The trigger script handles two cases per outdated repo:
+
+- No Renovate PR yet (rate-limited): checks the Dependency Dashboard checkbox so Renovate creates the PR.
+- Renovate PR already exists but is stale (e.g. opened against an older boilerplate version and never regenerated): checks the PR's rebase-check box so Renovate force-pushes a fresh branch against the latest version.
 
 ```bash
 # Dry-run first to verify targets
 scripts/trigger-renovate-boilerplate-prs --dry-run
 
-# Update Dashboard checkboxes and wait for PRs to be created (all repos)
+# Trigger create + rebase, then wait for results (all outdated repos)
 scripts/trigger-renovate-boilerplate-prs
 
 # Or target specific repos
 scripts/trigger-renovate-boilerplate-prs <repo1> <repo2>
 ```
 
-The script updates all checkboxes, then polls every 30 seconds (up to 5 minutes) until Renovate creates the PRs, printing each PR URL as it appears.
+Each line is tagged `[create]` or `[rebase]`. The script polls every 30 seconds (up to 5 minutes), printing `CREATED <repo>: <url>` for new PRs and `REBASED <repo>: PR #<n>` once `headRefOid` changes.
 
 ## Step 4: Auto-merge version-only PRs
 
