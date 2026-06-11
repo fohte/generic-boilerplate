@@ -72,7 +72,9 @@ pre-commit:
       glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
       run: pnpm exec eslint {staged_files}
 {%- elif has_node %}
-{%- for pkg in node_pkgs %}
+{#- Subpackages with `tests: false` bring their own setup and have no
+    generated eslint config, so they're skipped here. -#}
+{%- for pkg in node_pkgs if pkg.tests | default(true) %}
 
     # Non-workspace multi-package monorepo: each subpackage has its own
     # eslint.config.js and dependencies, so lint per package from its root.

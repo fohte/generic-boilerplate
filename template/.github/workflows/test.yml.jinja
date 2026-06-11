@@ -94,6 +94,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
 {%- elif type == 'rust' %}
 {%- if has_node_pkg and not is_workspace %}
+{#- Subpackages with `tests: false` bring their own pnpm setup, so their
+    lockfile is excluded from the cache key and install step. #}
 
       - run: corepack enable
 
@@ -107,15 +109,15 @@ jobs:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
             node_modules
-{%- for pkg in node_pkgs %}
+{%- for pkg in node_pkgs if pkg.tests | default(true) %}
             {{ pkg.name }}/node_modules
 {%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', {% endraw %}{% for pkg in node_pkgs %}'{{ pkg.name }}/pnpm-lock.yaml'{{ ', ' if not loop.last else '' }}{% endfor %}{% raw %}) }}{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml'{% endraw %}{% for pkg in node_pkgs if pkg.tests | default(true) %}, '{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
 
       - name: Install pnpm dependencies (root)
         run: pnpm install --frozen-lockfile
-{%- for pkg in node_pkgs %}
+{%- for pkg in node_pkgs if pkg.tests | default(true) %}
 
       - name: Install pnpm dependencies ({{ pkg.name }})
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
@@ -148,7 +150,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 {%- else %}
-{#- Non-workspace mode: root install for shared tools + per-package install #}
+{#- Non-workspace mode: root install for shared tools + per-package install.
+    Subpackages with `tests: false` bring their own pnpm setup, so their
+    lockfile is intentionally excluded from the cache key and install step. #}
 
       - run: corepack enable
 
@@ -162,15 +166,15 @@ jobs:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
             node_modules
-{%- for pkg in node_pkgs %}
+{%- for pkg in node_pkgs if pkg.tests | default(true) %}
             {{ pkg.name }}/node_modules
 {%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', {% endraw %}{% for pkg in node_pkgs %}'{{ pkg.name }}/pnpm-lock.yaml'{{ ', ' if not loop.last else '' }}{% endfor %}{% raw %}) }}{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml'{% endraw %}{% for pkg in node_pkgs if pkg.tests | default(true) %}, '{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
 
       - name: Install pnpm dependencies (root)
         run: pnpm install --frozen-lockfile
-{%- for pkg in node_pkgs %}
+{%- for pkg in node_pkgs if pkg.tests | default(true) %}
 
       - name: Install pnpm dependencies ({{ pkg.name }})
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
