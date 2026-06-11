@@ -136,6 +136,12 @@ binary_name:
 # When non-empty, infrastructure files (test.yml, lefthook, renovate, etc.)
 # are generated in monorepo mode.
 # Input via --data-file is recommended for this parameter.
+#
+# Do NOT set `when: false`: copier discards the stored answer for hidden
+# questions (see copier _main.py question loop), which would erase subpackage
+# files on every `copier update` for existing monorepo consumers. Keeping the
+# question askable lets `--skip-answered` preserve the stored list, while
+# `--defaults` (used by Renovate) falls back to `[]` without prompting.
 subpackages:
   type: yaml
   multiline: true
@@ -149,8 +155,6 @@ subpackages:
                           and the unit-test CI job. Use for node subpackages
                           that bring their own setup, such as docs sites
                           (Astro, Starlight) or framework apps (Next.js).
-  # Set only via --data-file; not promptable (multiline YAML inputs).
-  when: false
 
 monorepo_node_workspace:
   type: bool
