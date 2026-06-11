@@ -103,7 +103,7 @@ for entry in "${entries[@]}"; do
     if "$DRY_RUN"; then
       echo "WOULD CREATE $repo: check Dashboard #$issue_number"
     else
-      updated_body="${body//- \[ \] <!-- ${CHECKBOX_PATTERN}/- [x] <!-- ${CHECKBOX_PATTERN}}"
+      updated_body="${body//"- [ ] <!-- ${CHECKBOX_PATTERN}"/"- [x] <!-- ${CHECKBOX_PATTERN}"}"
       if [[ "$updated_body" == "$body" ]]; then
         echo "FAIL $repo [create]: checkbox substitution produced no change (pattern drift?) in Dashboard #$issue_number" >&2
         failed_repos+=("$repo")
@@ -134,7 +134,7 @@ for entry in "${entries[@]}"; do
     if "$DRY_RUN"; then
       echo "WOULD REBASE $repo: check rebase box in PR #$pr_number"
     else
-      updated_body="${body//- \[ \] ${REBASE_MARKER}/- [x] ${REBASE_MARKER}}"
+      updated_body="${body//"- [ ] ${REBASE_MARKER}"/"- [x] ${REBASE_MARKER}"}"
       if [[ "$updated_body" == "$body" ]]; then
         echo "FAIL $repo [rebase]: rebase checkbox substitution produced no change in PR #$pr_number" >&2
         failed_repos+=("$repo")
