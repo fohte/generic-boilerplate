@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
-# Trigger Renovate PR creation for outdated repos that are rate-limited.
-# Finds repos without a Renovate PR for generic-boilerplate updates,
-# then checks the corresponding checkbox on each repo's Dependency Dashboard issue.
-# After updating, waits for Renovate to create the PRs and prints their URLs.
+# Trigger Renovate PR creation or rebase for outdated repos.
+#
+# For each outdated repo found via list-boilerplate-usage:
+#   - If no Renovate PR exists (rate-limited): checks the Dependency Dashboard
+#     checkbox so Renovate creates the PR.
+#   - If a Renovate PR already exists: checks the rebase-check checkbox in the
+#     PR body so Renovate force-pushes a fresh branch.
+#
+# After triggering, waits for new PRs to appear and for existing PRs to be
+# rebased (headRefOid change), polling both in the same loop.
 #
 # Usage: scripts/trigger-renovate-boilerplate-prs [--dry-run] [REPO...]
 #
 # Options:
-#   --dry-run    Show what would be updated without actually editing issues
+#   --dry-run    Show what would be triggered without editing issues/PRs
 #
 # Arguments:
-#   REPO...      Specific repo names to process (default: all outdated repos without PRs)
+#   REPO...      Specific repo names to process (default: all outdated repos)
 #
 # Requires: gh, jq
 
@@ -38,68 +44,106 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Collect outdated repos without Renovate PRs
+# Collect outdated repos along with their current Renovate PR (if any).
+# Emit "<repo>\t<pr_number>" rows; pr_number is empty when no PR exists.
 jq_args=(--raw-output)
-jq_filter='.[] | select(.renovate_pr == null)'
+jq_filter='.[]'
 if [[ ${#FILTER_REPOS[@]} -gt 0 ]]; then
   repo_json=$(printf '%s\n' "${FILTER_REPOS[@]}" | jq -R . | jq -s .)
   jq_args+=(--argjson filter_repos "$repo_json")
   # shellcheck disable=SC2016
   jq_filter+=' | select(.repo as $r | $filter_repos | index($r))'
 fi
-jq_filter+=' | .repo'
+jq_filter+=' | [.repo, (.renovate_pr.number // "" | tostring)] | @tsv'
 
-mapfile -t repos < <(
+mapfile -t entries < <(
   "${SCRIPT_DIR}/list-boilerplate-usage" --outdated --json |
     jq "${jq_args[@]}" "$jq_filter"
 )
 
-if [[ ${#repos[@]} -eq 0 ]]; then
-  echo "No outdated repos without Renovate PRs found."
+if [[ ${#entries[@]} -eq 0 ]]; then
+  echo "No outdated repos found."
   exit 0
 fi
 
 # `branchNameStrict` normalizes dots in branch names to hyphens, so the
 # checkbox marker contains `https-github-com-...`.
 CHECKBOX_PATTERN='unlimit-branch=renovate/https-github-com-fohte-generic-boilerplate'
+REBASE_MARKER='<!-- rebase-check -->'
 
-updated_repos=()
+declare -a create_pending=()
+declare -a rebase_repos=()
+declare -a rebase_pr_numbers=()
+declare -a rebase_old_oids=()
 failed_repos=()
 
-for repo in "${repos[@]}"; do
-  # Find the Dependency Dashboard issue
-  issue_number=$(
-    gh issue list -R "fohte/$repo" --search "Dependency Dashboard" --json number,title |
-      jq -r '.[] | select(.title == "Dependency Dashboard") | .number' |
-      head -1
-  )
+for entry in "${entries[@]}"; do
+  IFS=$'\t' read -r repo pr_number <<< "$entry"
+  [[ -z "$repo" ]] && continue
 
-  if [[ -z "$issue_number" ]]; then
-    echo "SKIP $repo: no Dependency Dashboard issue found"
-    continue
-  fi
+  if [[ -z "$pr_number" ]]; then
+    # === Create mode: rate-limited, no PR yet ===
+    issue_number=$(
+      gh issue list -R "fohte/$repo" --search "Dependency Dashboard" --json number,title |
+        jq -r '.[] | select(.title == "Dependency Dashboard") | .number' |
+        head -1
+    )
 
-  # Get the issue body
-  body=$(gh issue view "$issue_number" -R "fohte/$repo" --json body -q .body)
-
-  # Check if there's a rate-limited generic-boilerplate checkbox
-  if ! printf '%s\n' "$body" | grep -qF -- "- [ ] <!-- ${CHECKBOX_PATTERN}"; then
-    echo "SKIP $repo: no rate-limited generic-boilerplate entry in Dashboard #$issue_number"
-    continue
-  fi
-
-  if "$DRY_RUN"; then
-    echo "WOULD UPDATE $repo: Dashboard #$issue_number"
-  else
-    updated_body="${body//- \[ \] <!-- ${CHECKBOX_PATTERN}/- [x] <!-- ${CHECKBOX_PATTERN}}"
-    if [[ "$updated_body" == "$body" ]]; then
-      echo "FAIL $repo: checkbox substitution produced no change (pattern drift?) in Dashboard #$issue_number" >&2
-      failed_repos+=("$repo")
+    if [[ -z "$issue_number" ]]; then
+      echo "SKIP $repo [create]: no Dependency Dashboard issue found"
       continue
     fi
-    gh issue edit "$issue_number" -R "fohte/$repo" --body "$updated_body"
-    echo "UPDATED $repo: Dashboard #$issue_number"
-    updated_repos+=("$repo")
+
+    body=$(gh issue view "$issue_number" -R "fohte/$repo" --json body -q .body)
+
+    if ! printf '%s\n' "$body" | grep -qF -- "- [ ] <!-- ${CHECKBOX_PATTERN}"; then
+      echo "SKIP $repo [create]: no rate-limited generic-boilerplate entry in Dashboard #$issue_number"
+      continue
+    fi
+
+    if "$DRY_RUN"; then
+      echo "WOULD CREATE $repo: check Dashboard #$issue_number"
+    else
+      updated_body="${body//- \[ \] <!-- ${CHECKBOX_PATTERN}/- [x] <!-- ${CHECKBOX_PATTERN}}"
+      if [[ "$updated_body" == "$body" ]]; then
+        echo "FAIL $repo [create]: checkbox substitution produced no change (pattern drift?) in Dashboard #$issue_number" >&2
+        failed_repos+=("$repo")
+        continue
+      fi
+      gh issue edit "$issue_number" -R "fohte/$repo" --body "$updated_body"
+      echo "TRIGGERED $repo [create]: Dashboard #$issue_number"
+      create_pending+=("$repo")
+    fi
+  else
+    # === Rebase mode: stale PR, force a fresh rebase via rebase-check box ===
+    pr_data=$(gh pr view "$pr_number" -R "fohte/$repo" --json body,headRefOid)
+    body=$(printf '%s' "$pr_data" | jq -r '.body')
+    old_oid=$(printf '%s' "$pr_data" | jq -r '.headRefOid')
+
+    if ! printf '%s\n' "$body" | grep -qF -- "- [ ] ${REBASE_MARKER}"; then
+      if printf '%s\n' "$body" | grep -qF -- "- [x] ${REBASE_MARKER}"; then
+        echo "SKIP $repo [rebase]: rebase checkbox already checked in PR #$pr_number"
+      else
+        echo "SKIP $repo [rebase]: no rebase checkbox found in PR #$pr_number"
+      fi
+      continue
+    fi
+
+    if "$DRY_RUN"; then
+      echo "WOULD REBASE $repo: check rebase box in PR #$pr_number"
+    else
+      updated_body="${body//- \[ \] ${REBASE_MARKER}/- [x] ${REBASE_MARKER}}"
+      if [[ "$updated_body" == "$body" ]]; then
+        echo "FAIL $repo [rebase]: rebase checkbox substitution produced no change in PR #$pr_number" >&2
+        failed_repos+=("$repo")
+        continue
+      fi
+      gh pr edit "$pr_number" -R "fohte/$repo" --body "$updated_body" > /dev/null
+      echo "TRIGGERED $repo [rebase]: PR #$pr_number (oid=${old_oid:0:7})"
+      rebase_repos+=("$repo")
+      rebase_pr_numbers+=("$pr_number")
+      rebase_old_oids+=("$old_oid")
+    fi
   fi
 done
 
@@ -108,20 +152,21 @@ if [[ ${#failed_repos[@]} -gt 0 ]]; then
   exit_code=1
 fi
 
-if "$DRY_RUN" || [[ ${#updated_repos[@]} -eq 0 ]]; then
+total_pending=$((${#create_pending[@]} + ${#rebase_repos[@]}))
+if "$DRY_RUN" || [[ $total_pending -eq 0 ]]; then
   exit "$exit_code"
 fi
 
-# Wait for Renovate to create PRs
 echo ""
-echo "Waiting for Renovate to create PRs (checking every 30s, up to 5 min)..."
+echo "Waiting for Renovate (checking every 30s, up to 5 min)..."
 
 max_attempts=10
 for ((attempt = 1; attempt <= max_attempts; attempt++)); do
   sleep 30
 
-  remaining=()
-  for repo in "${updated_repos[@]}"; do
+  # --- Poll create_pending: new PR has appeared ---
+  remaining_create=()
+  for repo in "${create_pending[@]}"; do
     pr_url=$(
       gh search prs --repo "fohte/$repo" "generic-boilerplate" --state open \
         --json url,title \
@@ -131,19 +176,49 @@ for ((attempt = 1; attempt <= max_attempts; attempt++)); do
     if [[ -n "$pr_url" ]]; then
       echo "CREATED $repo: $pr_url"
     else
-      remaining+=("$repo")
+      remaining_create+=("$repo")
     fi
   done
+  create_pending=("${remaining_create[@]}")
 
-  if [[ ${#remaining[@]} -eq 0 ]]; then
-    echo "All PRs created."
+  # --- Poll rebase_repos: headRefOid changed ---
+  remaining_rebase_repos=()
+  remaining_rebase_pr_numbers=()
+  remaining_rebase_old_oids=()
+  for i in "${!rebase_repos[@]}"; do
+    repo="${rebase_repos[$i]}"
+    pr_number="${rebase_pr_numbers[$i]}"
+    old_oid="${rebase_old_oids[$i]}"
+    new_oid=$(
+      gh pr view "$pr_number" -R "fohte/$repo" --json headRefOid \
+        --jq '.headRefOid' 2> /dev/null || true
+    )
+    if [[ -n "$new_oid" && "$new_oid" != "$old_oid" ]]; then
+      echo "REBASED $repo: PR #$pr_number (${old_oid:0:7} -> ${new_oid:0:7})"
+    else
+      remaining_rebase_repos+=("$repo")
+      remaining_rebase_pr_numbers+=("$pr_number")
+      remaining_rebase_old_oids+=("$old_oid")
+    fi
+  done
+  rebase_repos=("${remaining_rebase_repos[@]}")
+  rebase_pr_numbers=("${remaining_rebase_pr_numbers[@]}")
+  rebase_old_oids=("${remaining_rebase_old_oids[@]}")
+
+  remaining_total=$((${#create_pending[@]} + ${#rebase_repos[@]}))
+  if [[ $remaining_total -eq 0 ]]; then
+    echo "All triggers completed."
     exit "$exit_code"
   fi
 
-  updated_repos=("${remaining[@]}")
-  echo "  (${#remaining[@]} remaining, attempt $attempt/$max_attempts)"
+  echo "  ($remaining_total remaining: ${#create_pending[@]} create, ${#rebase_repos[@]} rebase; attempt $attempt/$max_attempts)"
 done
 
 echo ""
-echo "TIMEOUT: PRs not yet created for: ${updated_repos[*]}"
+if [[ ${#create_pending[@]} -gt 0 ]]; then
+  echo "TIMEOUT [create]: PRs not yet created for: ${create_pending[*]}"
+fi
+if [[ ${#rebase_repos[@]} -gt 0 ]]; then
+  echo "TIMEOUT [rebase]: PRs not yet rebased for: ${rebase_repos[*]}"
+fi
 exit 1
