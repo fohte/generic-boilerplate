@@ -2,14 +2,6 @@ _min_copier_version: '9.5.0'
 _subdirectory: template
 _answers_file: .copier-answers.yml
 
-# Drop the bootstrap workflow when the destination already has lockfiles
-# (existing repos updating via copier — they would otherwise gain a stray
-# self-removal commit on the next push).
-_tasks:
-  - >-
-    sh -c 'if [ -f pnpm-lock.yaml ] || [ -f Cargo.lock ]; then rm -f
-    .github/workflows/bootstrap.yml; fi'
-
 type:
   type: str
   choices:
@@ -68,6 +60,10 @@ _exclude:
   - '{% if not has_rust and not has_node %}/CLAUDE.md{% endif %}'
   # Exclude bootstrap workflow when no lockfile-producing language is involved
   - '{% if not has_node and not has_rust %}.github/workflows/bootstrap.yml{% endif %}'
+  # Skip bootstrap workflow on `copier update`: existing repos already have
+  # lockfiles, so the workflow would self-delete on the next push and leave a
+  # stray commit.
+  - '{% if _copier_operation == "update" %}.github/workflows/bootstrap.yml{% endif %}'
   # Exclude Rust specific files when type is not 'rust'
   - "{% if type != 'rust' %}/Cargo.toml{% endif %}"
   - "{% if type != 'rust' %}/rust-toolchain.toml{% endif %}"
