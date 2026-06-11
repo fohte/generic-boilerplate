@@ -140,17 +140,26 @@ echo "$result" | jq -c '
   if [[ -n "$pr_json" ]]; then
     pr_url=$(echo "$pr_json" | jq -r '.url')
     pr_number=$(echo "$pr_json" | jq -r '.number')
+    pr_title=$(echo "$pr_json" | jq -r '.title')
+    # Renovate titles look like `... Update generic-boilerplate to v0.8.2`,
+    # so the trailing version reflects which template release the PR targets.
+    pr_target_commit=$(printf '%s' "$pr_title" | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+[^[:space:]]*$' || true)
     has_pr=true
   else
     pr_url=""
     pr_number=""
+    pr_target_commit=""
     has_pr=false
   fi
 
   if "$JSON_OUTPUT"; then
     pr_obj="null"
     if "$has_pr"; then
-      pr_obj=$(jq -n --arg url "$pr_url" --argjson number "$pr_number" '{number: $number, url: $url}')
+      pr_obj=$(jq -n \
+        --arg url "$pr_url" \
+        --argjson number "$pr_number" \
+        --arg target_commit "$pr_target_commit" \
+        '{number: $number, url: $url, target_commit: (if $target_commit == "" then null else $target_commit end)}')
     fi
     jq -n \
       --arg name "$name" \
