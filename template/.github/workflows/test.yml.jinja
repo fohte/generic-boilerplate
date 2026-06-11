@@ -95,9 +95,7 @@ jobs:
 {%- elif type == 'rust' %}
 {%- if has_node_pkg and not is_workspace %}
 {#- Subpackages with `tests: false` bring their own pnpm setup, so their
-    lockfile is intentionally excluded from the cache key and install step:
-    a lockfile change there must not invalidate this job's cache, and the
-    boilerplate must not install their deps. #}
+    lockfile is excluded from the cache key and install step. #}
 
       - run: corepack enable
 
