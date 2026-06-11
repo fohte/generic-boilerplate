@@ -67,15 +67,11 @@ jobs:
           path: |
             ${{ steps.pnpm-store.outputs.path }}
             node_modules
-            docs/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', 'docs/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-pnpm-
 
       - name: Install pnpm dependencies (root)
         run: pnpm install --frozen-lockfile
-
-      - name: Install pnpm dependencies (docs)
-        run: cd "docs" && pnpm install --frozen-lockfile
 
       - run: cargo fetch
 

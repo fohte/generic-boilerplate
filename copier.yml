@@ -145,10 +145,12 @@ subpackages:
     Example: [{name: frontend, type: node}, {name: backend, type: rust}]
     Per-entry flags (optional):
       storybook: true  -- enable Storybook for a node subpackage
-      tests: false     -- skip test scaffolding (vitest, tsconfig, src/, eslint)
-                          and the unit-test CI job. Use for node subpackages
-                          that bring their own setup, such as docs sites
-                          (Astro, Starlight) or framework apps (Next.js).
+      tests: false     -- skip test scaffolding (vitest, tsconfig, src/, eslint),
+                          the unit-test CI job, the per-package eslint
+                          lefthook hook, and the pnpm install/cache step in
+                          the lefthook CI job. Use for node subpackages that
+                          bring their own setup, such as docs sites (Astro,
+                          Starlight) or framework apps (Next.js).
   # Set only via --data-file; not promptable (multiline YAML inputs).
   when: false
 
