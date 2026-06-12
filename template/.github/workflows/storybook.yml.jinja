@@ -65,12 +65,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-{%- for p in node_pkgs %}
-            {{ p.name }}/node_modules
-{%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --filter "{{ pkg.name }}..." --frozen-lockfile
 {%- else %}
@@ -84,9 +80,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            {{ pkg.name }}/node_modules
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - name: Install pnpm dependencies
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
@@ -162,9 +157,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --frozen-lockfile
 

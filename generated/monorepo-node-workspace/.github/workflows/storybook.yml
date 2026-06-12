@@ -56,11 +56,8 @@ jobs:
         with:
           path: |
             ${{ steps.pnpm-store.outputs.path }}
-            node_modules
-            frontend/node_modules
-            backend/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
 
       - run: pnpm install --filter "frontend..." --frozen-lockfile
 

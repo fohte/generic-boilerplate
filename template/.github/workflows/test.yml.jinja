@@ -87,9 +87,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --frozen-lockfile
 {%- elif type == 'rust' %}
@@ -108,12 +107,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-{%- for pkg in node_pkgs if pkg.tests | default(true) %}
-            {{ pkg.name }}/node_modules
-{%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml'{% endraw %}{% for pkg in node_pkgs if pkg.tests | default(true) %}, '{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml'{% endraw %}{% for pkg in node_pkgs if pkg.tests | default(true) %}, '{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - name: Install pnpm dependencies (root)
         run: pnpm install --frozen-lockfile
@@ -141,12 +136,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-{%- for pkg in node_pkgs %}
-            {{ pkg.name }}/node_modules
-{%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --frozen-lockfile
 {%- else %}
@@ -165,12 +156,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-{%- for pkg in node_pkgs if pkg.tests | default(true) %}
-            {{ pkg.name }}/node_modules
-{%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml'{% endraw %}{% for pkg in node_pkgs if pkg.tests | default(true) %}, '{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml'{% endraw %}{% for pkg in node_pkgs if pkg.tests | default(true) %}, '{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - name: Install pnpm dependencies (root)
         run: pnpm install --frozen-lockfile
@@ -240,9 +227,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --frozen-lockfile
 
@@ -312,9 +298,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            {{ pkg.name }}/node_modules
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
 
@@ -408,10 +393,8 @@ jobs:
         with:
           path: |
             ${{ steps.pnpm-store.outputs.path }}
-            node_modules
-            */node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
 
       # Install only the matrix package and its workspace dependencies, not the
       # whole workspace, so each parallel leg skips unrelated packages' installs.
@@ -524,12 +507,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-{%- for p in node_pkgs %}
-            {{ p.name }}/node_modules
-{%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --frozen-lockfile
 
@@ -550,9 +529,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            {{ pkg.name }}/node_modules
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
 
