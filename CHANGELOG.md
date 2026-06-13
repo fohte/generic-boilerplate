@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.8.3](https://github.com/fohte/generic-boilerplate/compare/v0.8.2...v0.8.3) (2026-06-13)
+
+
+### Bug Fixes
+
+* **ci/template:** always run pnpm 11 allowBuilds check in generated CI ([#419](https://github.com/fohte/generic-boilerplate/issues/419)) ([50cacf6](https://github.com/fohte/generic-boilerplate/commit/50cacf6fe30ab7f88fa2a08b174f64f8cf55447e))
+* **copier:** restore subpackages prompt to preserve answers on update ([#418](https://github.com/fohte/generic-boilerplate/issues/418)) ([ff999f9](https://github.com/fohte/generic-boilerplate/commit/ff999f9470e1b25fb54d16d5e5e88509d18238b3))
+* **copier:** skip unused setup for `tests: false` subpackages ([#412](https://github.com/fohte/generic-boilerplate/issues/412)) ([b86a0a1](https://github.com/fohte/generic-boilerplate/commit/b86a0a1f1fafbd6993f6d0402787a6429398cc85))
+* **template:** unify prettier/commitlint hosting on mise ([#422](https://github.com/fohte/generic-boilerplate/issues/422)) ([d242ea7](https://github.com/fohte/generic-boilerplate/commit/d242ea751f6e9573641db53e0a69a07c8b6ad8cb))
+
+
+### Dependencies
+
+* **ci:** Update jdx/mise-action action to v4.1.0 ([#415](https://github.com/fohte/generic-boilerplate/issues/415)) ([1cfb191](https://github.com/fohte/generic-boilerplate/commit/1cfb19167386c4188997efd09787739c6ba95c93))
+* **ci:** Update taiki-e/install-action action to v2.81.4 ([#414](https://github.com/fohte/generic-boilerplate/issues/414)) ([4ff42b1](https://github.com/fohte/generic-boilerplate/commit/4ff42b13f64fcc4d3951ca6445a404b293484ff7))
+* **ci:** Update taiki-e/install-action action to v2.81.5 ([#416](https://github.com/fohte/generic-boilerplate/issues/416)) ([55bae8f](https://github.com/fohte/generic-boilerplate/commit/55bae8f1d50c278c4fd4c221331ad23ce0182ff6))
+* **ci:** Update taiki-e/install-action action to v2.81.6 ([#421](https://github.com/fohte/generic-boilerplate/issues/421)) ([86808f7](https://github.com/fohte/generic-boilerplate/commit/86808f70a9da4584535e7531e581e01c5045e7a5))
+* Update devDependencies (non-major) to v0.3.4 ([#420](https://github.com/fohte/generic-boilerplate/issues/420)) ([2e9bf83](https://github.com/fohte/generic-boilerplate/commit/2e9bf83d15e6c96cf44424136d950c0b31086772))
+* Update node to v24.13.1 ([#411](https://github.com/fohte/generic-boilerplate/issues/411)) ([55aa781](https://github.com/fohte/generic-boilerplate/commit/55aa781d7483dd804f040bbaf7ec52e85686d174))
+* Update pnpm to v11.5.2 ([#417](https://github.com/fohte/generic-boilerplate/issues/417)) ([380d172](https://github.com/fohte/generic-boilerplate/commit/380d1724e8cc5555ed625442c99df0ad30c3da52))
+
 ## [0.8.2](https://github.com/fohte/generic-boilerplate/compare/v0.8.1...v0.8.2) (2026-06-11)
 
 
