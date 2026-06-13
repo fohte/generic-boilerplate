@@ -1,4 +1,4 @@
-{%- set root_pnpm = has_node -%}
+{%- set root_pnpm = type == 'node' or is_workspace -%}
 pre-commit:
   commands:
     format:

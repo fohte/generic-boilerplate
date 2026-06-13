@@ -8,6 +8,12 @@
 {%- set _ = testable_subpackages.append(pkg) -%}
 {%- endif -%}
 {%- endfor -%}
+{#- Node subpackages that participate in pnpm install on CI: same `tests: false`
+    opt-out as testable_subpackages, but scoped to node only. -#}
+{%- set testable_node_pkgs = [] -%}
+{%- for pkg in node_pkgs if pkg.tests | default(true) -%}
+{%- set _ = testable_node_pkgs.append(pkg) -%}
+{%- endfor -%}
 name: Test
 
 on:
@@ -92,9 +98,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 {%- elif type == 'rust' %}
-{%- if has_node_pkg and not is_workspace %}
-{#- Subpackages with `tests: false` bring their own pnpm setup, so their
-    lockfile is excluded from the cache key and install step. #}
+{%- if has_node_pkg and not is_workspace and testable_node_pkgs %}
+{#- prettier/commitlint are hosted by mise so the root has no package.json;
+    only testable node subpackages install dependencies here. -#}
 
       - run: corepack enable
 
@@ -107,12 +113,9 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml'{% endraw %}{% for pkg in node_pkgs if pkg.tests | default(true) %}, '{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}{% for pkg in testable_node_pkgs %}{% if not loop.first %}, {% endif %}'{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
-
-      - name: Install pnpm dependencies (root)
-        run: pnpm install --frozen-lockfile
-{%- for pkg in node_pkgs if pkg.tests | default(true) %}
+{%- for pkg in testable_node_pkgs %}
 
       - name: Install pnpm dependencies ({{ pkg.name }})
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
@@ -141,9 +144,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 {%- else %}
-{#- Non-workspace mode: root install for shared tools + per-package install.
+{#- Non-workspace mode: prettier/commitlint are hosted by mise (no root
+    package.json), so only per-subpackage pnpm install runs here.
     Subpackages with `tests: false` bring their own pnpm setup, so their
     lockfile is intentionally excluded from the cache key and install step. #}
+{%- if testable_node_pkgs %}
 
       - run: corepack enable
 
@@ -156,16 +161,14 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml'{% endraw %}{% for pkg in node_pkgs if pkg.tests | default(true) %}, '{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}{% for pkg in testable_node_pkgs %}{% if not loop.first %}, {% endif %}'{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
-
-      - name: Install pnpm dependencies (root)
-        run: pnpm install --frozen-lockfile
-{%- for pkg in node_pkgs if pkg.tests | default(true) %}
+{%- for pkg in testable_node_pkgs %}
 
       - name: Install pnpm dependencies ({{ pkg.name }})
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
 {%- endfor %}
+{%- endif %}
 {%- endif %}
 {%- endif %}
 {%- if has_rust %}

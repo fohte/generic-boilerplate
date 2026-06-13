@@ -48,7 +48,9 @@ _exclude:
   - '{% if not use_release_please %}.github/workflows/pr-title-check.yml{% endif %}'
   # Exclude Node.js specific files when type is not 'node'
   # Use leading / to match root only (not yield subpackage directories)
-  - "{% if type != 'node' and not is_workspace and not has_node_pkg %}/package.json{% endif %}"
+  # Non-workspace monorepos (even with node subpackages) keep prettier/commitlint
+  # hosted by mise instead of a root package.json, so no root package.json is emitted.
+  - "{% if type != 'node' and not is_workspace %}/package.json{% endif %}"
   - "{% if type != 'node' %}/tsconfig.json{% endif %}"
   - "{% if type != 'node' and not is_workspace %}/eslint.config.js{% endif %}"
   - "{% if type != 'node' %}/vitest.config.ts{% endif %}"

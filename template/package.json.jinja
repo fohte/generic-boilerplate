@@ -1,25 +1,7 @@
 {%- set has_storybook = use_storybook | default(false) -%}
-{%- if type != 'node' and not is_workspace and has_node_pkg -%}
-{#- Non-workspace monorepo with node subpackages:
-    root package.json hosts tools that run at the repo root
-    (prettier, commitlint) so lefthook can use `pnpm exec`. -#}
-{
-  "name": "{{ project_name }}",
-  "private": true,
-  "packageManager": "pnpm@11.5.2",
-  "devDependencies": {
-    "@commitlint/cli": "21.0.2",
-    "prettier": "3.8.3"
-  }
-}
-{%- elif type != 'node' and not is_workspace -%}
-{#- Non-workspace monorepo without node subpackages: only corepack pinning -#}
-{
-  "name": "{{ project_name }}",
-  "private": true,
-  "packageManager": "pnpm@11.5.2"
-}
-{%- else -%}
+{#- Root package.json is only emitted for `type == 'node'` or pnpm workspace
+    setups. Non-workspace monorepos host prettier/commitlint via mise instead,
+    so they never gain a root package.json (see copier.yml _exclude). -#}
 {
   "name": "{{ project_name }}",
   "private": true,
@@ -74,4 +56,3 @@
     "vitest": "4.1.8"
   }
 }
-{%- endif %}

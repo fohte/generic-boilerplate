@@ -1,4 +1,8 @@
 {%- set bootstrap_commit_msg = 'chore: bootstrap lockfiles' -%}
+{#- has_root_lockfile: whether the repo has a root pnpm-lock.yaml. Non-workspace
+    monorepos host prettier/commitlint via mise so there is no root package.json
+    and lockfiles live only inside each node subpackage. -#}
+{%- set has_root_lockfile = type == 'node' or is_workspace -%}
 name: Bootstrap
 
 # Generates lockfiles on the first push after the repository is initialized
@@ -43,8 +47,9 @@ jobs:
         run: |
           missing=false
 {%- if has_node %}
+{%- if has_root_lockfile %}
           if [ ! -f pnpm-lock.yaml ]; then missing=true; fi
-{%- if not is_workspace and type != 'node' %}
+{%- else %}
 {%- for pkg in node_pkgs %}
           if [ ! -f {{ pkg.name }}/pnpm-lock.yaml ]; then missing=true; fi
 {%- endfor %}
@@ -81,8 +86,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm .github/workflows/bootstrap.yml
 {%- if has_node %}
+{%- if has_root_lockfile %}
           if [ -f pnpm-lock.yaml ]; then git add pnpm-lock.yaml; fi
-{%- if not is_workspace and type != 'node' %}
+{%- else %}
 {%- for pkg in node_pkgs %}
           if [ -f {{ pkg.name }}/pnpm-lock.yaml ]; then git add {{ pkg.name }}/pnpm-lock.yaml; fi
 {%- endfor %}
