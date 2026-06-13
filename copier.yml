@@ -151,8 +151,9 @@ subpackages:
                           the lefthook CI job. Use for node subpackages that
                           bring their own setup, such as docs sites (Astro,
                           Starlight) or framework apps (Next.js).
-  # Set only via --data-file; not promptable (multiline YAML inputs).
-  when: false
+  # `when: true` is the default but explicit here: hidden questions (when: false)
+  # discard the stored answer, which would erase subpackages on every update.
+  when: true
 
 monorepo_node_workspace:
   type: bool
