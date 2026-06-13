@@ -87,13 +87,14 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --frozen-lockfile
 {%- elif type == 'rust' %}
 {%- if has_node_pkg and not is_workspace %}
+{#- Subpackages with `tests: false` bring their own pnpm setup, so their
+    lockfile is excluded from the cache key and install step. #}
 
       - run: corepack enable
 
@@ -106,16 +107,12 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-{%- for pkg in node_pkgs %}
-            {{ pkg.name }}/node_modules
-{%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', {% endraw %}{% for pkg in node_pkgs %}'{{ pkg.name }}/pnpm-lock.yaml'{{ ', ' if not loop.last else '' }}{% endfor %}{% raw %}) }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml'{% endraw %}{% for pkg in node_pkgs if pkg.tests | default(true) %}, '{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - name: Install pnpm dependencies (root)
         run: pnpm install --frozen-lockfile
-{%- for pkg in node_pkgs %}
+{%- for pkg in node_pkgs if pkg.tests | default(true) %}
 
       - name: Install pnpm dependencies ({{ pkg.name }})
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
@@ -139,16 +136,14 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-{%- for pkg in node_pkgs %}
-            {{ pkg.name }}/node_modules
-{%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --frozen-lockfile
 {%- else %}
-{#- Non-workspace mode: root install for shared tools + per-package install #}
+{#- Non-workspace mode: root install for shared tools + per-package install.
+    Subpackages with `tests: false` bring their own pnpm setup, so their
+    lockfile is intentionally excluded from the cache key and install step. #}
 
       - run: corepack enable
 
@@ -161,16 +156,12 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-{%- for pkg in node_pkgs %}
-            {{ pkg.name }}/node_modules
-{%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml', {% endraw %}{% for pkg in node_pkgs %}'{{ pkg.name }}/pnpm-lock.yaml'{{ ', ' if not loop.last else '' }}{% endfor %}{% raw %}) }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml'{% endraw %}{% for pkg in node_pkgs if pkg.tests | default(true) %}, '{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - name: Install pnpm dependencies (root)
         run: pnpm install --frozen-lockfile
-{%- for pkg in node_pkgs %}
+{%- for pkg in node_pkgs if pkg.tests | default(true) %}
 
       - name: Install pnpm dependencies ({{ pkg.name }})
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
@@ -236,9 +227,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --frozen-lockfile
 
@@ -266,7 +256,7 @@ jobs:
 {%- if use_coverage %}
 
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@25435dc8dd3baed7417e0c96d3fe89013a5b2e09 # v2.81.3
+        uses: taiki-e/install-action@59012be0884e296ca2da49b530610e72c49039ad # v2.81.6
         with:
           tool: cargo-llvm-cov
 
@@ -308,9 +298,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            {{ pkg.name }}/node_modules
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
 
@@ -404,10 +393,8 @@ jobs:
         with:
           path: |
             ${{ steps.pnpm-store.outputs.path }}
-            node_modules
-            */node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
 
       # Install only the matrix package and its workspace dependencies, not the
       # whole workspace, so each parallel leg skips unrelated packages' installs.
@@ -520,12 +507,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            node_modules
-{%- for p in node_pkgs %}
-            {{ p.name }}/node_modules
-{%- endfor %}
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --frozen-lockfile
 
@@ -546,9 +529,8 @@ jobs:
         with:
           path: |
             {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-            {{ pkg.name }}/node_modules
-          key: {% raw %}${{ runner.os }}-pnpm-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
 
@@ -560,7 +542,7 @@ jobs:
 {%- if use_coverage %}
 
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@25435dc8dd3baed7417e0c96d3fe89013a5b2e09 # v2.81.3
+        uses: taiki-e/install-action@59012be0884e296ca2da49b530610e72c49039ad # v2.81.6
         with:
           tool: cargo-llvm-cov
 

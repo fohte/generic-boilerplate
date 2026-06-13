@@ -6,7 +6,7 @@
   "name": "{{ pkg.name }}",
   "private": true,
 {%- if not is_workspace %}
-  "packageManager": "pnpm@11.5.1",
+  "packageManager": "pnpm@11.5.2",
 {%- endif %}
   "type": "module"{{ "," if has_scripts else "" }}
 {%- if has_scripts %}
@@ -32,7 +32,7 @@
   "devDependencies": {
     "@commitlint/cli": "21.0.2",
     "@eslint/eslintrc": "3.3.5",
-    "@fohte/eslint-config": "0.3.3",
+    "@fohte/eslint-config": "0.3.4",
 {%- if has_storybook %}
     "@storybook/addon-docs": "10.4.2",
     "@storybook/addon-themes": "10.4.2",
