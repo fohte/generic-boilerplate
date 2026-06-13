@@ -1,3 +1,4 @@
+{%- set root_pnpm = type == 'node' or is_workspace -%}
 pre-commit:
   commands:
     format:
@@ -7,7 +8,7 @@ pre-commit:
       stage_fixed: true
 
     prettier:
-      run: mise x -- prettier --write --ignore-unknown --no-error-on-unmatched-pattern {staged_files}
+      run: {{ 'pnpm exec' if root_pnpm else 'mise x --' }} prettier --write --ignore-unknown --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
 
     shellcheck:
@@ -111,4 +112,4 @@ pre-commit:
 commit-msg:
   commands:
     commitlint:
-      run: mise x -- commitlint --edit {1}
+      run: {{ 'pnpm exec' if root_pnpm else 'mise x --' }} commitlint --edit {1}
