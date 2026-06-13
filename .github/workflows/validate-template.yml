@@ -55,7 +55,7 @@ jobs:
       - name: Fetch master branch
         run: git fetch origin master --depth=1
 
-      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
 
       - name: Save diff before regeneration
         id: save-diff
@@ -107,7 +107,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
         with:
           working_directory: generated/${{ matrix.fixture }}
 
@@ -182,7 +182,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
         with:
           working_directory: generated/node
 
@@ -227,7 +227,7 @@ jobs:
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
 
-      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
         with:
           working_directory: generated/rust
 
