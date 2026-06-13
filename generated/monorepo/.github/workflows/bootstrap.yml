@@ -39,7 +39,6 @@ jobs:
         id: check
         run: |
           missing=false
-          if [ ! -f pnpm-lock.yaml ]; then missing=true; fi
           if [ ! -f frontend/pnpm-lock.yaml ]; then missing=true; fi
           if [ ! -f backend/Cargo.lock ]; then missing=true; fi
           echo "missing=$missing" >> "$GITHUB_OUTPUT"
@@ -64,7 +63,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm .github/workflows/bootstrap.yml
-          if [ -f pnpm-lock.yaml ]; then git add pnpm-lock.yaml; fi
           if [ -f frontend/pnpm-lock.yaml ]; then git add frontend/pnpm-lock.yaml; fi
           if [ -f backend/Cargo.lock ]; then git add backend/Cargo.lock; fi
           if git diff --cached --quiet; then

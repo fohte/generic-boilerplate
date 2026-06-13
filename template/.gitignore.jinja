@@ -145,7 +145,6 @@ lcov.info
 {%- endif %}
 {% elif type == 'rust' -%}
 {% if has_node_pkg -%}
-# Dependency directories (pnpm install at repo root creates node_modules/)
 node_modules/
 
 {% endif -%}
@@ -157,7 +156,6 @@ lcov.info
 {%- endif %}
 {% elif has_node_pkg or has_rust_pkg -%}
 {% if has_node_pkg -%}
-# Dependency directories (pnpm install at repo root creates node_modules/)
 node_modules/
 {% endif -%}
 {% if has_rust_pkg -%}

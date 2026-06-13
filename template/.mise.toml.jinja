@@ -10,11 +10,10 @@ actionlint = "1.7.12"
 node = "24.16.0"
 pinact = "4.0.0"
 "github:fohte/basefmt" = "0.1.0"
-{% if not has_node -%}
-{#- Without a package.json, prettier and commitlint must be hosted by mise. -#}
+{# prettier and commitlint are always hosted by mise so lefthook invokes them
+   via `mise x --` regardless of whether a root package.json exists. -#}
 "npm:@commitlint/cli" = "21.0.2"
 "npm:prettier" = "3.8.3"
-{% endif -%}
 shellcheck = "0.11.0"
 shfmt = "3.13.1"
 

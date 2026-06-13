@@ -46,9 +46,8 @@ pnpm_install
 pnpm_install
 {%- elif has_node and not is_workspace %}
 
-# Install shared dev tools (prettier, commitlint) at the repo root
-pnpm_install
-# Install Node.js dependencies for each subpackage
+# prettier and commitlint live in mise (see .mise.toml); install each
+# node subpackage's dependencies separately.
 {%- for pkg in node_pkgs %}
 (cd {{ pkg.name }} && pnpm_install)
 {%- endfor %}
