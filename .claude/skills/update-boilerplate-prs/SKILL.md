@@ -54,28 +54,29 @@ scripts/list-boilerplate-usage --outdated
 
 The output shows each repository's current version, latest version, and whether a Renovate PR exists.
 
-- `renovate PR: (none)` -> Step 3 will trigger PR creation via the Dependency Dashboard
+- `renovate PR: (none)` -> Step 3 will either trigger PR creation via the Dependency Dashboard (when a rate-limited entry exists) or request a full repository scan (when Renovate has not yet noticed the new boilerplate release)
 - `renovate PR: #<number> <url>` -> Step 3 will rebase it via the PR's rebase-check box (re-triggers Renovate even if the PR already targets the latest `_commit`); proceed to Step 4 once `REBASED` is printed
 
-## Step 3: Trigger PR creation or rebase
+## Step 3: Trigger PR creation, rebase, or full-repo scan
 
-The trigger script handles two cases per outdated repo:
+The trigger script picks one action per outdated repo by priority:
 
-- No Renovate PR yet (rate-limited): checks the Dependency Dashboard checkbox so Renovate creates the PR.
-- Renovate PR already exists but is stale (e.g. opened against an older boilerplate version and never regenerated): checks the PR's rebase-check box so Renovate force-pushes a fresh branch against the latest version.
+1. `[rebase]` -- Renovate PR already exists but is stale (e.g. opened against an older boilerplate version): checks the PR's rebase-check box so Renovate force-pushes a fresh branch against the latest version.
+2. `[create]` -- No PR, but the Dependency Dashboard has a rate-limited entry for the generic-boilerplate branch: checks that entry so Renovate creates the PR.
+3. `[scan]` -- No PR and no rate-limited entry (typical immediately after a new boilerplate release): checks the Dashboard's `<!-- manual job -->` checkbox so Renovate re-scans the repository. Once the scan completes, the repo will either gain a new PR or a rate-limited entry; re-run the script in the rate-limited case to convert the entry into a `[create]`.
 
 ```bash
 # Dry-run first to verify targets
 scripts/trigger-renovate-boilerplate-prs --dry-run
 
-# Trigger create + rebase, then wait for results (all outdated repos)
+# Trigger create + rebase + scan, then wait for results (all outdated repos)
 scripts/trigger-renovate-boilerplate-prs
 
 # Or target specific repos
 scripts/trigger-renovate-boilerplate-prs <repo1> <repo2>
 ```
 
-Each line is tagged `[create]` or `[rebase]`. The script polls every 30 seconds (up to 5 minutes), printing `CREATED <repo>: <url>` for new PRs and `REBASED <repo>: PR #<n>` once `headRefOid` changes.
+Each line is tagged `[create]`, `[rebase]`, or `[scan]`. The script polls every 30 seconds (up to 5 minutes), printing `CREATED <repo>: <url>` for new PRs, `REBASED <repo>: PR #<n>` once `headRefOid` changes, and `SCANNED <repo>: ...` once a scan request produces a PR, a new rate-limited entry, or is acknowledged by Renovate (the manual-job checkbox returns to unchecked).
 
 ## Step 4: Auto-merge version-only PRs
 
