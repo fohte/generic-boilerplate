@@ -80,6 +80,8 @@ jobs:
 {%- endif %}
 
       - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+        with:
+          version: 2026.6.6
 {%- if type == 'node' %}
 
       - run: corepack enable
@@ -218,6 +220,8 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+        with:
+          version: 2026.6.6
 
       - run: corepack enable
 
@@ -256,6 +260,8 @@ jobs:
         uses: mozilla-actions/sccache-action@9e7fa8a12102821edf02ca5dbea1acd0f89a2696 # v0.0.10
 
       - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+        with:
+          version: 2026.6.6
 {%- if use_coverage %}
 
       - name: Install cargo-llvm-cov
@@ -289,6 +295,8 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+        with:
+          version: 2026.6.6
 
       - run: corepack enable
 
@@ -384,6 +392,8 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+        with:
+          version: 2026.6.6
 
       - run: corepack enable
 
@@ -495,6 +505,8 @@ jobs:
 {%- endif %}
 
       - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+        with:
+          version: 2026.6.6
 {%- if pkg.type == 'node' %}
 {%- if is_workspace %}
 {#- Workspace mode: install from root (pnpm only) #}
