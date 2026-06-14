@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.8.4](https://github.com/fohte/generic-boilerplate/compare/v0.8.3...v0.8.4) (2026-06-14)
+
+
+### Bug Fixes
+
+* **ci:** pin mise version to 2026.6.6 in mise-action calls ([#428](https://github.com/fohte/generic-boilerplate/issues/428)) ([257396a](https://github.com/fohte/generic-boilerplate/commit/257396a1a7451f41479d5b0807d3a5af1b47b447))
+
+
+### Dependencies
+
+* **ci:** Update codecov/codecov-action action to v6.0.2 ([#427](https://github.com/fohte/generic-boilerplate/issues/427)) ([a4a6fed](https://github.com/fohte/generic-boilerplate/commit/a4a6fed7f845c9b5a655250fd450fd3d6822cff5))
+* **ci:** Update taiki-e/install-action action to v2.81.7 ([#424](https://github.com/fohte/generic-boilerplate/issues/424)) ([86dac50](https://github.com/fohte/generic-boilerplate/commit/86dac50f478bd1252e189a94f0b314387c5b1299))
+
 ## [0.8.3](https://github.com/fohte/generic-boilerplate/compare/v0.8.2...v0.8.3) (2026-06-13)
 
 
