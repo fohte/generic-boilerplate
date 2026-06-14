@@ -63,7 +63,7 @@ The trigger script picks one action per outdated repo by priority:
 
 1. `[rebase]` -- Renovate PR already exists but is stale (e.g. opened against an older boilerplate version): checks the PR's rebase-check box so Renovate force-pushes a fresh branch against the latest version.
 2. `[create]` -- No PR, but the Dependency Dashboard has a rate-limited entry for the generic-boilerplate branch: checks that entry so Renovate creates the PR.
-3. `[scan]` -- No PR and no rate-limited entry (typical immediately after a new boilerplate release): checks the Dashboard's `<!-- manual job -->` checkbox so Renovate re-scans the repository. Once the scan completes, the repo will either gain a new PR or a rate-limited entry; re-run the script in the rate-limited case to convert the entry into a `[create]`.
+3. `[scan]` -- No PR and no rate-limited entry (typical immediately after a new boilerplate release): checks the Dashboard's `<!-- manual job -->` checkbox so Renovate re-scans the repository. While polling, the script automatically chains into `[create]` if Renovate surfaces a rate-limited entry, so no manual re-run is needed.
 
 ```bash
 # Dry-run first to verify targets
