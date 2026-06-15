@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.5](https://github.com/fohte/generic-boilerplate/compare/v0.8.4...v0.8.5) (2026-06-15)
+
+
+### Bug Fixes
+
+* **template:** use &lt;repo&gt;-bootstrap identity for octo-sts in bootstrap.yml ([#431](https://github.com/fohte/generic-boilerplate/issues/431)) ([b421064](https://github.com/fohte/generic-boilerplate/commit/b421064b921bd15f86689192f291f6e690032340))
+
+
+### Dependencies
+
+* **ci:** Update taiki-e/install-action action to v2.81.8 ([#433](https://github.com/fohte/generic-boilerplate/issues/433)) ([070e459](https://github.com/fohte/generic-boilerplate/commit/070e459e8c4756d00d5afcaa63ba5bb6b5fdf43c))
+
 ## [0.8.4](https://github.com/fohte/generic-boilerplate/compare/v0.8.3...v0.8.4) (2026-06-14)
 
 
