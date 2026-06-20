@@ -81,6 +81,8 @@ _exclude:
   # Exclude Storybook files when storybook is disabled or no storybook packages exist
   - "{% if not use_storybook | default(false) or (type != 'node' and not has_storybook_pkg) %}.github/workflows/storybook.yml{% endif %}"
   - "{% if type != 'node' or not use_storybook | default(false) %}/.storybook{% endif %}"
+  # Exclude observability scaffolding unless this is a node web app opting in
+  - "{% if type != 'node' or not use_observability | default(false) %}/src/observability{% endif %}"
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
@@ -178,6 +180,13 @@ use_storybook:
   default: false
   help: Enable Storybook deployment to Cloudflare Pages?
   when: "{{ type == 'node' or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
+
+# Observability settings
+use_observability:
+  type: bool
+  default: false
+  help: Enable OpenTelemetry + Sentry observability scaffolding? Set to true only for web apps (long-running services exposing an HTTP server).
+  when: "{{ type == 'node' }}"
 
 # Computed variables (not asked, derived from other answers).
 # Centralized here so individual templates can reference them directly
