@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.8.5](https://github.com/fohte/generic-boilerplate/compare/v0.8.4...v0.8.5) (2026-06-23)
+
+
+### Bug Fixes
+
+* **template:** use &lt;repo&gt;-bootstrap identity for octo-sts in bootstrap.yml ([#431](https://github.com/fohte/generic-boilerplate/issues/431)) ([b421064](https://github.com/fohte/generic-boilerplate/commit/b421064b921bd15f86689192f291f6e690032340))
+
+
+### Dependencies
+
+* **ci:** Update codecov/codecov-action action to v7 ([#426](https://github.com/fohte/generic-boilerplate/issues/426)) ([3925dc0](https://github.com/fohte/generic-boilerplate/commit/3925dc0f88752ec8dea4714e31b7f9fb44d81682))
+* **ci:** Update taiki-e/install-action action to v2.81.10 ([#440](https://github.com/fohte/generic-boilerplate/issues/440)) ([61bd387](https://github.com/fohte/generic-boilerplate/commit/61bd3873972c3e0b5dd07352fff1b91dd527b711))
+* **ci:** Update taiki-e/install-action action to v2.81.11 ([#447](https://github.com/fohte/generic-boilerplate/issues/447)) ([bde01b1](https://github.com/fohte/generic-boilerplate/commit/bde01b1222af02c34ed5cc2103f97a8502271b6e))
+* **ci:** Update taiki-e/install-action action to v2.81.8 ([#433](https://github.com/fohte/generic-boilerplate/issues/433)) ([070e459](https://github.com/fohte/generic-boilerplate/commit/070e459e8c4756d00d5afcaa63ba5bb6b5fdf43c))
+* **ci:** Update taiki-e/install-action action to v2.81.9 ([#437](https://github.com/fohte/generic-boilerplate/issues/437)) ([adbe538](https://github.com/fohte/generic-boilerplate/commit/adbe538466a213f54b47ae704e46cf6b052a2bd0))
+* Update dependency github:betterleaks/betterleaks to v1.5.0 ([#443](https://github.com/fohte/generic-boilerplate/issues/443)) ([0b493c0](https://github.com/fohte/generic-boilerplate/commit/0b493c016faddd1079bdf87417ec75b87e93c010))
+* update dependency jdx/mise to v2026.6.10 ([#444](https://github.com/fohte/generic-boilerplate/issues/444)) ([7237a8b](https://github.com/fohte/generic-boilerplate/commit/7237a8bf74f39d6dd3bd06f5352c73fa8a936a66))
+* Update dependency pinact to v4.1.0 ([#434](https://github.com/fohte/generic-boilerplate/issues/434)) ([06cc771](https://github.com/fohte/generic-boilerplate/commit/06cc771fcff31c81aaf02ba0d73c300e1f70fb97))
+* Update devDependencies (non-major) ([#445](https://github.com/fohte/generic-boilerplate/issues/445)) ([4866d0e](https://github.com/fohte/generic-boilerplate/commit/4866d0ea3c8bdb20eab5e52ba5704a2eb0486577))
+* Update devDependencies (non-major) to v10.4.3 ([#435](https://github.com/fohte/generic-boilerplate/issues/435)) ([f6be3d5](https://github.com/fohte/generic-boilerplate/commit/f6be3d5a5e36582b5170f2481ad7538b6c1edac5))
+* Update devDependencies (non-major) to v10.4.4 ([#441](https://github.com/fohte/generic-boilerplate/issues/441)) ([b59e080](https://github.com/fohte/generic-boilerplate/commit/b59e0800a22a69925ab198865a2e7ef684905dcc))
+* Update devDependencies (non-major) to v24.13.2 ([#439](https://github.com/fohte/generic-boilerplate/issues/439)) ([470bfb6](https://github.com/fohte/generic-boilerplate/commit/470bfb6fb53b6dd502311c27c5d172bc4a8d8d6b))
+* Update eslint monorepo ([#446](https://github.com/fohte/generic-boilerplate/issues/446)) ([9c01c82](https://github.com/fohte/generic-boilerplate/commit/9c01c82acbc518119f85f8a096fab3ad28d327bb))
+* Update pnpm to v11.5.3 ([#438](https://github.com/fohte/generic-boilerplate/issues/438)) ([afa12cd](https://github.com/fohte/generic-boilerplate/commit/afa12cdad10c6c4b3a1b5b613e4b7002e6e330ed))
+* Update pnpm to v11.7.0 ([#442](https://github.com/fohte/generic-boilerplate/issues/442)) ([9727212](https://github.com/fohte/generic-boilerplate/commit/972721209efef0e7040ee3bbda8ffa3cc09e5ebb))
+* Update prettier to v3.8.4 ([#436](https://github.com/fohte/generic-boilerplate/issues/436)) ([2f7f6a5](https://github.com/fohte/generic-boilerplate/commit/2f7f6a54f22e5caac0e2b2763fa710ffa4390dab))
+
 ## [0.8.4](https://github.com/fohte/generic-boilerplate/compare/v0.8.3...v0.8.4) (2026-06-14)
 
 
