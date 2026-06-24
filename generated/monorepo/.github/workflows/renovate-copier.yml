@@ -62,6 +62,7 @@ jobs:
           # Going through mise/aqua would re-read the repo's .mise.toml, which
           # is itself often a copier conflict file and fails to parse.
           tmpdir="$(mktemp -d)"
+          trap 'rm -rf "$tmpdir"' EXIT
           case "$(uname -m)" in
             x86_64) target=x86_64-unknown-linux-musl ;;
             aarch64) target=aarch64-unknown-linux-musl ;;
