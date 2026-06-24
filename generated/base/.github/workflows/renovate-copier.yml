@@ -35,12 +35,10 @@ jobs:
             chmod +x scripts/bootstrap
           fi
 
-      # Copier emits non-standard conflict markers (`<<<<<<< before updating`
-      # instead of git's `<<<<<<< HEAD`), so the grep pattern below is anchored
-      # to copier's literal label.
       - name: Detect copier conflicts
         id: detect
         run: |
+          # copier-specific marker (not git's `<<<<<<< HEAD`)
           if git grep --untracked -l '<<<<<<< before updating' > /tmp/copier-conflicts.txt && [ -s /tmp/copier-conflicts.txt ]; then
             echo "has_conflicts=true" >> "$GITHUB_OUTPUT"
           else
