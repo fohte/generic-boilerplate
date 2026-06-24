@@ -5,6 +5,9 @@
     'github>fohte/renovate-config:lefthook.json5',
     'github>fohte/renovate-config:node.json5',
     'github>fohte/renovate-config:rust.json5',
+    // Picks up `# renovate: datasource=... depName=...` on `*_VERSION` env
+    // vars inside generated/*/.github/workflows/.
+    'customManagers:githubActionsVersions',
   ],
   // template/ contains Copier templates (*.jinja), not actual project files
   ignorePaths: ['template/**'],
