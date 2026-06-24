@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-slim
     if: >-
       github.actor == 'renovate[bot]' &&
-      {% raw %}startsWith(github.head_ref, 'renovate/https-github.com-fohte-generic-boilerplate-'){% endraw %}
+      {% raw %}startsWith(github.head_ref, 'renovate/https-github-com-fohte-generic-boilerplate-'){% endraw %}
 
     steps:
       - name: Federate GitHub token via octo-sts
