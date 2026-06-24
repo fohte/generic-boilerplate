@@ -28,9 +28,9 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           token: ${{ steps.octo-sts.outputs.token }}
-          # mergiraf reconstructs pre-update revisions from git history; the
-          # default shallow clone leaves them unreachable.
-          fetch-depth: 0
+          # mergiraf reconstructs the pre-update revision from HEAD~1; the
+          # default shallow clone (depth 1) leaves it unreachable.
+          fetch-depth: 2
 
       - name: Restore executable bit on scripts/bootstrap
         run: |
