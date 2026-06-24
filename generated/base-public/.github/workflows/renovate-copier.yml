@@ -69,7 +69,7 @@ jobs:
           fi
           while IFS= read -r f; do
             echo "mergiraf solve: $f"
-            if ! mise exec "aqua:codeberg.org/mergiraf/mergiraf@${MERGIRAF_VERSION}" -- mergiraf solve "$f"; then
+            if ! mise exec "aqua:codeberg.org/mergiraf/mergiraf@${MERGIRAF_VERSION}" -- mergiraf solve --keep-backup=false "$f"; then
               echo "  -> mergiraf left conflicts in $f"
             fi
           done < /tmp/copier-conflicts.txt
