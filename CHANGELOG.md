@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.6](https://github.com/fohte/generic-boilerplate/compare/v0.8.5...v0.8.6) (2026-06-24)
+
+
+### Features
+
+* **template:** auto-resolve copier conflicts with mergiraf ([#453](https://github.com/fohte/generic-boilerplate/issues/453)) ([a7bb658](https://github.com/fohte/generic-boilerplate/commit/a7bb65894058cb85540ee5338067e5c5f621b26f))
+
+
+### Dependencies
+
+* Update devDependencies (non-major) to v10.4.6 ([#449](https://github.com/fohte/generic-boilerplate/issues/449)) ([6e998fc](https://github.com/fohte/generic-boilerplate/commit/6e998fc52f24a2fd71ff9ef2df665a128a9ab999))
+
 ## [0.8.5](https://github.com/fohte/generic-boilerplate/compare/v0.8.4...v0.8.5) (2026-06-23)
 
 
