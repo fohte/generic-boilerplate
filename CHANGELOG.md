@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.8](https://github.com/fohte/generic-boilerplate/compare/v0.8.7...v0.8.8) (2026-06-24)
+
+
+### Bug Fixes
+
+* **template:** drop mergiraf .orig backups in renovate-copier workflow ([#458](https://github.com/fohte/generic-boilerplate/issues/458)) ([244f09b](https://github.com/fohte/generic-boilerplate/commit/244f09be0393a2fd3c2a7f7eefb3e9f97dbd68bf))
+
 ## [0.8.7](https://github.com/fohte/generic-boilerplate/compare/v0.8.6...v0.8.7) (2026-06-24)
 
 
