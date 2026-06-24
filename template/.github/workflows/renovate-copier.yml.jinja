@@ -35,9 +35,55 @@ jobs:
             chmod +x scripts/bootstrap
           fi
 
+      # Copier emits non-standard conflict markers (`<<<<<<< before updating`
+      # instead of git's `<<<<<<< HEAD`), so the grep pattern below is anchored
+      # to copier's literal label.
+      - name: Detect copier conflicts
+        id: detect
+        run: |
+          if git grep --untracked -l '<<<<<<< before updating' > /tmp/copier-conflicts.txt && [ -s /tmp/copier-conflicts.txt ]; then
+            echo "has_conflicts=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_conflicts=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install mergiraf
+        if: steps.detect.outputs.has_conflicts == 'true'
+        continue-on-error: true
+        env:
+          MERGIRAF_VERSION: v0.17.0
+          MERGIRAF_SHA256: 2c75cc3a6ed013fa3993009d11ebf69d845ae20afa78684e27665ef376fc5780
+        run: |
+          set -euo pipefail
+          url="https://codeberg.org/mergiraf/mergiraf/releases/download/${MERGIRAF_VERSION}/mergiraf_x86_64-unknown-linux-gnu.tar.gz"
+          tmpdir=$(mktemp -d)
+          curl -fsSL "$url" -o "$tmpdir/mergiraf.tar.gz"
+          echo "${MERGIRAF_SHA256}  $tmpdir/mergiraf.tar.gz" | sha256sum -c -
+          tar -xzf "$tmpdir/mergiraf.tar.gz" -C "$tmpdir"
+          mkdir -p "$HOME/.local/bin"
+          install -m 0755 "$tmpdir/mergiraf" "$HOME/.local/bin/mergiraf"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/mergiraf" --version
+
+      - name: Resolve copier conflicts with mergiraf
+        if: steps.detect.outputs.has_conflicts == 'true'
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          if ! command -v mergiraf > /dev/null; then
+            echo "mergiraf not installed; leaving conflict markers in place."
+            exit 0
+          fi
+          while IFS= read -r f; do
+            echo "mergiraf solve: $f"
+            if ! mergiraf solve "$f"; then
+              echo "  -> mergiraf left conflicts in $f"
+            fi
+          done < /tmp/copier-conflicts.txt
+
       - name: Commit and push changes
         uses: suzuki-shunsuke/commit-action@06e3b49d4706498d325d29bd85adc82ecf2f5d8f # v1.0.0
         with:
-          commit_message: 'chore: restore executable bit on scripts/bootstrap'
+          commit_message: 'chore: post-process copier update'
           workflow: deny
           github_token: {% raw %}${{ steps.octo-sts.outputs.token }}{% endraw %}
