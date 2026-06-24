@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.7](https://github.com/fohte/generic-boilerplate/compare/v0.8.6...v0.8.7) (2026-06-24)
+
+
+### Bug Fixes
+
+* **template:** add aggregate unit-test gate for non-workspace monorepo ([#455](https://github.com/fohte/generic-boilerplate/issues/455)) ([62785e4](https://github.com/fohte/generic-boilerplate/commit/62785e47c0aec4652c02d81c96906e1995b4e414))
+* **template:** track branchNameStrict in renovate-copier branch prefix ([#456](https://github.com/fohte/generic-boilerplate/issues/456)) ([5cd5001](https://github.com/fohte/generic-boilerplate/commit/5cd5001b0c2a51d758d7bf28484579ed28c2644e))
+
 ## [0.8.6](https://github.com/fohte/generic-boilerplate/compare/v0.8.5...v0.8.6) (2026-06-24)
 
 
