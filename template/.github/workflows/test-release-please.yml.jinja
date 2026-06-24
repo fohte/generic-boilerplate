@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Skip tests for release-please PR (only updates CHANGELOG and version)"
-{%- if type in ['node', 'rust'] or is_workspace %}
+{%- if type in ['node', 'rust'] or is_workspace or subpackages %}
 
   unit-test:
     runs-on: ubuntu-latest

@@ -583,5 +583,21 @@ jobs:
 {%- endif %}
 {%- endif %}
 {%- endfor %}
+
+  # Aggregation gate for the per-package unit-test jobs. The dynamic per-package
+  # job names cannot be pinned as required status checks, so this single
+  # fixed-name job is the branch protection gate instead. It fails only when a
+  # needed job failed; when every leg succeeds (or is skipped because nothing
+  # changed) it is skipped, and a skipped required check counts as success.
+  unit-test:
+    runs-on: ubuntu-slim
+    needs:
+      - detect-changes
+{%- for pkg in testable_subpackages %}
+      - unit-test-{{ pkg.name }}
+{%- endfor %}
+    if: failure()
+    steps:
+      - run: exit 1
 {%- endif %}
 {%- endif %}
