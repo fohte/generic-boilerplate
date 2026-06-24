@@ -38,8 +38,10 @@ jobs:
       - name: Detect copier conflicts
         id: detect
         run: |
-          # copier-specific marker (not git's `<<<<<<< HEAD`)
-          if git grep --untracked -l '<<<<<<< before updating' > /tmp/copier-conflicts.txt && [ -s /tmp/copier-conflicts.txt ]; then
+          # copier-specific marker (not git's `<<<<<<< HEAD`).
+          # The pattern is split (`'before '` + `updating`) so this workflow
+          # does not self-match when checked into the repo.
+          if git grep --untracked -l '<<<<<<< before '"updating" > /tmp/copier-conflicts.txt && [ -s /tmp/copier-conflicts.txt ]; then
             echo "has_conflicts=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_conflicts=false" >> "$GITHUB_OUTPUT"
