@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.8.9](https://github.com/fohte/generic-boilerplate/compare/v0.8.8...v0.8.9) (2026-06-25)
+
+
+### Bug Fixes
+
+* **template:** bootstrap mergiraf without mise in renovate-copier ([#461](https://github.com/fohte/generic-boilerplate/issues/461)) ([6351aac](https://github.com/fohte/generic-boilerplate/commit/6351aac0564909bffd1a3da36cf2d667b67a2678))
+
+
+### Dependencies
+
+* update dependency jdx/mise to v2026.6.11 ([#451](https://github.com/fohte/generic-boilerplate/issues/451)) ([da2fe2c](https://github.com/fohte/generic-boilerplate/commit/da2fe2ccbb1d27fd8b4aa1194e75b10dfbbfb1d3))
+* Update node ([#452](https://github.com/fohte/generic-boilerplate/issues/452)) ([2475866](https://github.com/fohte/generic-boilerplate/commit/2475866ca7b324f7caa27a7d0835364073bd74a0))
+
 ## [0.8.8](https://github.com/fohte/generic-boilerplate/compare/v0.8.7...v0.8.8) (2026-06-24)
 
 
