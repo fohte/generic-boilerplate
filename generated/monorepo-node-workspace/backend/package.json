@@ -8,7 +8,7 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
-    "@fohte/service-kit": "0.1.0",
+    "@fohte/service-kit": "0.1.1",
     "@opentelemetry/api": "1.9.1",
     "@opentelemetry/auto-instrumentations-node": "0.77.0",
     "@opentelemetry/exporter-trace-otlp-proto": "0.219.0",
