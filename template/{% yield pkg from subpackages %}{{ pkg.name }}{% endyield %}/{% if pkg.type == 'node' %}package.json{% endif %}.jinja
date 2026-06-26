@@ -1,6 +1,9 @@
 {%- set has_storybook = pkg.storybook | default(false) -%}
 {%- set has_tests = pkg.tests | default(true) -%}
-{%- set pkg_is_web_app = pkg.web_app | default(false) -%}
+{#- bootstrap.ts only emits when both web_app and tests are true (tests=false
+    collapses the src/ segment). Keep the dependency block on the same gate
+    so we never ship deps without the file that uses them. -#}
+{%- set pkg_is_web_app = (pkg.web_app | default(false)) and (pkg.tests | default(true)) -%}
 {%- set has_scripts = has_tests or has_storybook -%}
 {%- set has_dev_deps = (has_tests and not is_workspace) or has_storybook -%}
 {
