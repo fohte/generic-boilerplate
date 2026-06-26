@@ -8,6 +8,10 @@ packages:
 allowBuilds:
   # required by vitest's transformer
   esbuild: true
+{%- if has_web_app %}
+  # required by @opentelemetry/exporter-trace-otlp-proto
+  protobufjs: true
+{%- endif %}
   # required by @fohte/eslint-config -> eslint-plugin-import-x for "@/*" resolution
   unrs-resolver: true
 
