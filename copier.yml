@@ -76,6 +76,11 @@ _exclude:
   # Exclude Node.js specific src files when type is not 'node'
   - "{% if type != 'node' %}/src/index.ts{% endif %}"
   - "{% if type != 'node' %}/src/index.test.ts{% endif %}"
+  # Exclude observability bootstrap when the root project is not a node web app.
+  # Monorepo subpackages declare their own web app status via `web_app: true`
+  # on the subpackages entry; the per-pkg bootstrap path is gated separately
+  # in the subpackage filename template.
+  - "{% if type != 'node' or not is_web_app | default(false) %}/src/bootstrap.ts{% endif %}"
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
   # Exclude Storybook files when storybook is disabled or no storybook packages exist
@@ -147,6 +152,9 @@ subpackages:
     Example: [{name: frontend, type: node}, {name: backend, type: rust}]
     Per-entry flags (optional):
       storybook: true  -- enable Storybook for a node subpackage
+      web_app: true    -- mark a node subpackage as a web app (long-running
+                          HTTP server). Gates the observability bootstrap
+                          emission for that subpackage.
       tests: false     -- skip test scaffolding (vitest, tsconfig, src/, eslint),
                           the unit-test CI job, the per-package eslint
                           lefthook hook, and the pnpm install/cache step in
@@ -179,6 +187,15 @@ use_storybook:
   help: Enable Storybook deployment to Cloudflare Pages?
   when: "{{ type == 'node' or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
 
+# Web app flag. Drives the observability bootstrap emission (and is intended
+# to gate any future long-running-service scaffolding). For monorepos, set
+# `web_app: true` on the relevant subpackages entry instead.
+is_web_app:
+  type: bool
+  default: false
+  help: Is this project a web app (a long-running process exposing an HTTP server)?
+  when: "{{ type == 'node' }}"
+
 # Computed variables (not asked, derived from other answers).
 # Centralized here so individual templates can reference them directly
 # instead of redefining the same {%- set ... -%} expressions.
@@ -197,6 +214,11 @@ storybook_pkgs:
   default: "{{ subpackages | default([]) | selectattr('storybook', 'defined') | selectattr('storybook', 'equalto', true) | list }}"
   when: false
 
+web_app_pkgs:
+  type: yaml
+  default: "{{ subpackages | default([]) | selectattr('web_app', 'defined') | selectattr('web_app', 'equalto', true) | list }}"
+  when: false
+
 has_node_pkg:
   type: bool
   default: '{{ node_pkgs | length > 0 }}'
@@ -212,9 +234,19 @@ has_storybook_pkg:
   default: '{{ storybook_pkgs | length > 0 }}'
   when: false
 
+has_web_app_pkg:
+  type: bool
+  default: '{{ web_app_pkgs | length > 0 }}'
+  when: false
+
 has_node:
   type: bool
   default: "{{ type == 'node' or has_node_pkg }}"
+  when: false
+
+has_web_app:
+  type: bool
+  default: '{{ is_web_app | default(false) or has_web_app_pkg }}'
   when: false
 
 has_rust:
