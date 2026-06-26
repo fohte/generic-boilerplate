@@ -76,6 +76,8 @@ _exclude:
   # Exclude Node.js specific src files when type is not 'node'
   - "{% if type != 'node' %}/src/index.ts{% endif %}"
   - "{% if type != 'node' %}/src/index.test.ts{% endif %}"
+  # Exclude observability bootstrap when not a node web app
+  - "{% if type != 'node' or not use_observability %}/src/bootstrap.ts{% endif %}"
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
   # Exclude Storybook files when storybook is disabled or no storybook packages exist
@@ -178,6 +180,13 @@ use_storybook:
   default: false
   help: Enable Storybook deployment to Cloudflare Pages?
   when: "{{ type == 'node' or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
+
+# Observability settings
+use_observability:
+  type: bool
+  default: false
+  help: Enable observability (OpenTelemetry + Sentry) bootstrap? Set true only for a web app (a long-running process exposing an HTTP server).
+  when: "{{ type == 'node' }}"
 
 # Computed variables (not asked, derived from other answers).
 # Centralized here so individual templates can reference them directly
