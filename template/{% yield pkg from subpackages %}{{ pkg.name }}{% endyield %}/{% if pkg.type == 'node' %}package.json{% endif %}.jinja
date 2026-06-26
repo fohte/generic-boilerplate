@@ -1,5 +1,9 @@
 {%- set has_storybook = pkg.storybook | default(false) -%}
 {%- set has_tests = pkg.tests | default(true) -%}
+{#- bootstrap.ts only emits when both web_app and tests are true (tests=false
+    collapses the src/ segment). Keep the dependency block on the same gate
+    so we never ship deps without the file that uses them. -#}
+{%- set pkg_is_web_app = (pkg.web_app | default(false)) and (pkg.tests | default(true)) -%}
 {%- set has_scripts = has_tests or has_storybook -%}
 {%- set has_dev_deps = (has_tests and not is_workspace) or has_storybook -%}
 {
@@ -8,7 +12,7 @@
 {%- if not is_workspace %}
   "packageManager": "pnpm@11.7.0",
 {%- endif %}
-  "type": "module"{{ "," if has_scripts else "" }}
+  "type": "module"{{ "," if has_scripts or pkg_is_web_app else "" }}
 {%- if has_scripts %}
   "scripts": {
 {%- if has_tests and not is_workspace %}
@@ -26,6 +30,20 @@
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"
 {%- endif %}
+  }{{ "," if has_dev_deps or pkg_is_web_app else "" }}
+{%- endif %}
+{%- if pkg_is_web_app %}
+  "dependencies": {
+    "@fohte/service-kit": "0.1.1",
+    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/auto-instrumentations-node": "0.77.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "0.219.0",
+    "@opentelemetry/resources": "2.8.0",
+    "@opentelemetry/sdk-node": "0.219.0",
+    "@opentelemetry/sdk-trace-base": "2.8.0",
+    "@opentelemetry/semantic-conventions": "1.41.1",
+    "@sentry/node": "10.57.0",
+    "@sentry/opentelemetry": "10.58.0"
   }{{ "," if has_dev_deps else "" }}
 {%- endif %}
 {%- if has_tests and not is_workspace %}

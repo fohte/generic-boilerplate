@@ -11,4 +11,5 @@ subpackages:
     storybook: true
   - name: backend
     type: node
+    web_app: true
 repo_language: ja
