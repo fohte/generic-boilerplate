@@ -80,7 +80,7 @@ _exclude:
   # Monorepo subpackages declare their own web app status via `web_app: true`
   # on the subpackages entry; the per-pkg bootstrap path is gated separately
   # in the subpackage filename template.
-  - "{% if type != 'node' or not is_web_app %}/src/bootstrap.ts{% endif %}"
+  - "{% if type != 'node' or not is_web_app | default(false) %}/src/bootstrap.ts{% endif %}"
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
   # Exclude Storybook files when storybook is disabled or no storybook packages exist
@@ -214,6 +214,11 @@ storybook_pkgs:
   default: "{{ subpackages | default([]) | selectattr('storybook', 'defined') | selectattr('storybook', 'equalto', true) | list }}"
   when: false
 
+web_app_pkgs:
+  type: yaml
+  default: "{{ subpackages | default([]) | selectattr('web_app', 'defined') | selectattr('web_app', 'equalto', true) | list }}"
+  when: false
+
 has_node_pkg:
   type: bool
   default: '{{ node_pkgs | length > 0 }}'
@@ -229,9 +234,19 @@ has_storybook_pkg:
   default: '{{ storybook_pkgs | length > 0 }}'
   when: false
 
+has_web_app_pkg:
+  type: bool
+  default: '{{ web_app_pkgs | length > 0 }}'
+  when: false
+
 has_node:
   type: bool
   default: "{{ type == 'node' or has_node_pkg }}"
+  when: false
+
+has_web_app:
+  type: bool
+  default: '{{ is_web_app | default(false) or has_web_app_pkg }}'
   when: false
 
 has_rust:
