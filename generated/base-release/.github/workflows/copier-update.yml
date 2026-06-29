@@ -2,9 +2,12 @@ name: Copier update
 
 on:
   schedule:
-    # Weekly on Mondays at 09:00 UTC
     - cron: '0 9 * * 1'
   workflow_dispatch:
+
+concurrency:
+  group: copier-update
+  cancel-in-progress: false
 
 permissions:
   id-token: write
@@ -77,6 +80,10 @@ jobs:
             if [ -z "${UNRESOLVED}" ]; then
               # Previous run may have left the PR as draft when conflicts existed.
               gh pr ready "$pr_number" || true
+            else
+              # Re-mark draft and cancel any auto-merge left over from a previous resolved run.
+              gh pr ready "$pr_number" --undo || true
+              gh pr merge "$pr_number" --disable-auto || true
             fi
           else
             draft_flag=()
