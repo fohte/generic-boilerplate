@@ -4,7 +4,7 @@ _answers_file: .copier-answers.yml
 
 # Remove obsolete workflows when a generated repo is updated past the listed version.
 _migrations:
-  - version: '0.9.0'
+  - version: '0.8.10'
     before:
       - command: rm -f .github/workflows/renovate-copier.yml
 
