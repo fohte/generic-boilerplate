@@ -1,0 +1,100 @@
+name: Copier update
+
+on:
+  schedule:
+    # Weekly on Mondays at 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+
+jobs:
+  copier-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Federate GitHub token via octo-sts
+        id: octo-sts
+        uses: octo-sts/action@f603d3be9d8dd9871a265776e625a27b00effe05 # v1.1.1
+        with:
+          scope: fohte
+          identity: ${{ github.event.repository.name }}-copier-update
+          domain: octo-sts.fohte.net
+
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+          token: ${{ steps.octo-sts.outputs.token }}
+
+      - name: Run copier-update-action
+        id: copier
+        uses: fohte/copier-update-action@v0
+        with:
+          template-repo: fohte/generic-boilerplate
+          github-token: ${{ steps.octo-sts.outputs.token }}
+
+      - name: Restore executable bit on scripts/bootstrap
+        if: steps.copier.outputs.changed == 'true'
+        run: |
+          if [ -f scripts/bootstrap ]; then
+            chmod +x scripts/bootstrap
+          fi
+
+      - name: Commit and push to branch
+        if: steps.copier.outputs.changed == 'true'
+        env:
+          TARGET_VERSION: ${{ steps.copier.outputs.target-version }}
+        run: |
+          set -euo pipefail
+          branch="copier-update/${TARGET_VERSION}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -B "$branch"
+          git add -A
+          git commit -m "chore: copier update to ${TARGET_VERSION}"
+          git push --force-with-lease origin "HEAD:refs/heads/${branch}"
+
+      - name: Create or update pull request
+        if: steps.copier.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          TARGET_VERSION: ${{ steps.copier.outputs.target-version }}
+          UNRESOLVED: ${{ steps.copier.outputs.unresolved-files }}
+        run: |
+          set -euo pipefail
+          branch="copier-update/${TARGET_VERSION}"
+          title="chore: copier update to ${TARGET_VERSION}"
+          if [ -n "${UNRESOLVED}" ]; then
+            body="Automated copier update to ${TARGET_VERSION}."$'\n\n'"Unresolved conflicts remain in:"$'\n'"${UNRESOLVED}"$'\n\n'"Resolve manually before merging."
+          else
+            body="Automated copier update to ${TARGET_VERSION}."
+          fi
+
+          pr_number=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // ""')
+          if [ -n "$pr_number" ]; then
+            gh pr edit "$pr_number" --title "$title" --body "$body"
+            if [ -z "${UNRESOLVED}" ]; then
+              # Previous run may have left the PR as draft when conflicts existed.
+              gh pr ready "$pr_number" || true
+            fi
+          else
+            draft_flag=()
+            if [ -n "${UNRESOLVED}" ]; then
+              draft_flag=(--draft)
+            fi
+            pr_url=$(gh pr create "${draft_flag[@]}" --title "$title" --body "$body" --head "$branch" --base "${{ github.event.repository.default_branch }}")
+            pr_number="${pr_url##*/}"
+          fi
+
+          if [ -z "${UNRESOLVED}" ]; then
+            if OUTPUT=$(gh pr merge "$pr_number" --squash --auto 2>&1); then
+              echo "$OUTPUT"
+            elif echo "$OUTPUT" | grep -q "clean status"; then
+              echo "$OUTPUT"
+              gh pr merge "$pr_number" --squash
+            else
+              echo "$OUTPUT"
+              exit 1
+            fi
+          fi
