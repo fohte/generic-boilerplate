@@ -74,7 +74,7 @@ jobs:
             body="Automated copier update to ${TARGET_VERSION}."
           fi
 
-          pr_number=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // ""')
+          pr_number=$(gh pr list --head "$branch" --state open --json number --jq 'map(.number)[0] // ""')
           if [ -n "$pr_number" ]; then
             gh pr edit "$pr_number" --title "$title" --body "$body"
             if [ -z "${UNRESOLVED}" ]; then
@@ -100,6 +100,9 @@ jobs:
             elif echo "$OUTPUT" | grep -q "clean status"; then
               echo "$OUTPUT"
               gh pr merge "$pr_number" --squash
+            elif echo "$OUTPUT" | grep -q "auto-merge is not enabled"; then
+              echo "$OUTPUT"
+              gh pr merge "$pr_number" --squash || echo "Direct merge failed (likely due to pending checks). Leaving PR open."
             else
               echo "$OUTPUT"
               exit 1
