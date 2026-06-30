@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.8.10](https://github.com/fohte/generic-boilerplate/compare/v0.8.9...v0.8.10) (2026-06-30)
+
+
+### Features
+
+* **copier:** add is_web_app gate for node web app bootstrap ([#467](https://github.com/fohte/generic-boilerplate/issues/467)) ([8d0fb3c](https://github.com/fohte/generic-boilerplate/commit/8d0fb3c7381e0377cf87e684f4ec26e247c4b8b0))
+* **template:** emit observability bootstrap for node web apps ([#469](https://github.com/fohte/generic-boilerplate/issues/469)) ([8d51f92](https://github.com/fohte/generic-boilerplate/commit/8d51f927f3cb5feee4d5f26afa80977cfdf6c41d))
+* **template:** replace renovate-copier with scheduled boilerplate-update workflow ([#470](https://github.com/fohte/generic-boilerplate/issues/470)) ([92bb7ce](https://github.com/fohte/generic-boilerplate/commit/92bb7ced205e5b298474e07768638fedd5d4ff4c))
+
 ## [0.8.9](https://github.com/fohte/generic-boilerplate/compare/v0.8.8...v0.8.9) (2026-06-25)
 
 
