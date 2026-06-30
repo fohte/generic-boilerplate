@@ -28,14 +28,14 @@ jobs:
         uses: octo-sts/action@f603d3be9d8dd9871a265776e625a27b00effe05 # v1.1.1
         with:
           scope: fohte
-          identity: {% raw %}${{ github.event.repository.name }}{% endraw %}-copier-update
+          identity: ${{ github.event.repository.name }}-copier-update
           domain: octo-sts.fohte.net
 
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
-          token: {% raw %}${{ steps.octo-sts.outputs.token }}{% endraw %}
+          token: ${{ steps.octo-sts.outputs.token }}
 
       - name: Capture current template version
         id: current-version
@@ -52,11 +52,11 @@ jobs:
 
       - name: Run copier-update-action
         id: copier-update
-        uses: fohte/copier-update-action@v0
+        uses: fohte/copier-update-action@52313ccc7ba83641a9a617252f378e54800de129 # v0.1.1
         with:
-          template-repo: {% raw %}${{ env.TEMPLATE_REPO }}{% endraw %}
-          target-version: {% raw %}${{ github.event.inputs.target-version }}{% endraw %}
-          github-token: {% raw %}${{ steps.octo-sts.outputs.token }}{% endraw %}
+          template-repo: ${{ env.TEMPLATE_REPO }}
+          target-version: ${{ github.event.inputs.target-version }}
+          github-token: ${{ steps.octo-sts.outputs.token }}
 
       - name: Restore executable bit on scripts/bootstrap
         if: steps.copier-update.outputs.changed == 'true'
@@ -69,7 +69,7 @@ jobs:
         if: steps.copier-update.outputs.changed == 'true'
         id: branch
         env:
-          TARGET_VERSION: {% raw %}${{ steps.copier-update.outputs.target-version }}{% endraw %}
+          TARGET_VERSION: ${{ steps.copier-update.outputs.target-version }}
         run: |
           set -euo pipefail
           branch="copier-update/${TARGET_VERSION}"
@@ -83,8 +83,8 @@ jobs:
         if: steps.copier-update.outputs.changed == 'true'
         id: title
         env:
-          FROM_VERSION: {% raw %}${{ steps.current-version.outputs.version }}{% endraw %}
-          TARGET_VERSION: {% raw %}${{ steps.copier-update.outputs.target-version }}{% endraw %}
+          FROM_VERSION: ${{ steps.current-version.outputs.version }}
+          TARGET_VERSION: ${{ steps.copier-update.outputs.target-version }}
         run: |
           set -euo pipefail
           echo "value=chore: update ${TEMPLATE_REPO} from ${FROM_VERSION} to ${TARGET_VERSION}" >> "$GITHUB_OUTPUT"
@@ -92,8 +92,8 @@ jobs:
       - name: Commit and push changes
         if: steps.copier-update.outputs.changed == 'true'
         env:
-          BRANCH: {% raw %}${{ steps.branch.outputs.name }}{% endraw %}
-          COMMIT_MESSAGE: {% raw %}${{ steps.title.outputs.value }}{% endraw %}
+          BRANCH: ${{ steps.branch.outputs.name }}
+          COMMIT_MESSAGE: ${{ steps.title.outputs.value }}
         run: |
           set -euo pipefail
           git -c 'user.name=fohte-bot[bot]' \
@@ -111,13 +111,13 @@ jobs:
       - name: Create or update pull request
         if: steps.copier-update.outputs.changed == 'true'
         env:
-          GH_TOKEN: {% raw %}${{ steps.octo-sts.outputs.token }}{% endraw %}
-          TITLE: {% raw %}${{ steps.title.outputs.value }}{% endraw %}
-          FROM_VERSION: {% raw %}${{ steps.current-version.outputs.version }}{% endraw %}
-          TARGET_VERSION: {% raw %}${{ steps.copier-update.outputs.target-version }}{% endraw %}
-          UNRESOLVED_FILES: {% raw %}${{ steps.copier-update.outputs.unresolved-files }}{% endraw %}
-          BRANCH: {% raw %}${{ steps.branch.outputs.name }}{% endraw %}
-          RUN_URL: {% raw %}${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}{% endraw %}
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          TITLE: ${{ steps.title.outputs.value }}
+          FROM_VERSION: ${{ steps.current-version.outputs.version }}
+          TARGET_VERSION: ${{ steps.copier-update.outputs.target-version }}
+          UNRESOLVED_FILES: ${{ steps.copier-update.outputs.unresolved-files }}
+          BRANCH: ${{ steps.branch.outputs.name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
         run: |
           set -euo pipefail
 
