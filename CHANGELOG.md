@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.12](https://github.com/fohte/generic-boilerplate/compare/v0.8.11...v0.8.12) (2026-07-01)
+
+
+### Dependencies
+
+* update dependency @fohte/service-kit to v0.1.2 ([#474](https://github.com/fohte/generic-boilerplate/issues/474)) ([a35d97e](https://github.com/fohte/generic-boilerplate/commit/a35d97eb9043b2c05cf9d943b8117bdd9f33b46a))
+
 ## [0.8.11](https://github.com/fohte/generic-boilerplate/compare/v0.8.10...v0.8.11) (2026-07-01)
 
 
