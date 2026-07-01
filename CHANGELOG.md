@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.11](https://github.com/fohte/generic-boilerplate/compare/v0.8.10...v0.8.11) (2026-07-01)
+
+
+### Bug Fixes
+
+* **copier:** correct _migrations command syntax to unblock copier update ([#471](https://github.com/fohte/generic-boilerplate/issues/471)) ([6c92907](https://github.com/fohte/generic-boilerplate/commit/6c92907031dc15667550b8f5e155e4adaf4d65bf))
+
 ## [0.8.10](https://github.com/fohte/generic-boilerplate/compare/v0.8.9...v0.8.10) (2026-06-30)
 
 
