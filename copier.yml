@@ -6,7 +6,7 @@ _answers_file: .copier-answers.yml
 _migrations:
   - version: '0.8.10'
     before:
-      - command: rm -f .github/workflows/renovate-copier.yml
+      - rm -f .github/workflows/renovate-copier.yml
 
 type:
   type: str
