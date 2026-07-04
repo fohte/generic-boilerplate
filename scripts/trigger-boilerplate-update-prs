@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+# Dispatch the boilerplate-update.yml workflow for outdated repos and wait for
+# the resulting workflow run to complete.
+#
+# Usage: scripts/trigger-boilerplate-update-prs [--dry-run] [--target-version VERSION] [REPO...]
+#
+# Options:
+#   --dry-run              Show what would be dispatched without running workflows
+#   --target-version VER   Passed through to the workflow's target-version input (default: latest release)
+#
+# Arguments:
+#   REPO...      Specific repo names to process (default: all outdated repos)
+#
+# Requires: gh, jq
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+WORKFLOW="boilerplate-update.yml"
+
+DRY_RUN=false
+TARGET_VERSION=""
+FILTER_REPOS=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --target-version)
+      TARGET_VERSION="$2"
+      shift 2
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+    *)
+      FILTER_REPOS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+# Collect outdated repo names.
+jq_args=(--raw-output)
+jq_filter='.[] | .repo'
+if [[ ${#FILTER_REPOS[@]} -gt 0 ]]; then
+  repo_json=$(printf '%s\n' "${FILTER_REPOS[@]}" | jq -R . | jq -s .)
+  jq_args+=(--argjson filter_repos "$repo_json")
+  # shellcheck disable=SC2016
+  jq_filter='.[] | select(.repo as $r | $filter_repos | index($r)) | .repo'
+fi
+
+mapfile -t repos < <(
+  "${SCRIPT_DIR}/list-boilerplate-usage" --outdated --json |
+    jq "${jq_args[@]}" "$jq_filter"
+)
+
+if [[ ${#repos[@]} -eq 0 ]]; then
+  echo "No outdated repos found."
+  exit 0
+fi
+
+exit_code=0
+declare -a dispatched_repos=()
+declare -a dispatch_times=()
+
+for repo in "${repos[@]}"; do
+  if "$DRY_RUN"; then
+    if [[ -n "$TARGET_VERSION" ]]; then
+      echo "WOULD DISPATCH $repo: $WORKFLOW (target-version=$TARGET_VERSION)"
+    else
+      echo "WOULD DISPATCH $repo: $WORKFLOW"
+    fi
+    continue
+  fi
+
+  # Recorded before dispatch so the polling loop below can tell the run it
+  # triggered apart from an unrelated concurrent run (e.g. the weekly cron).
+  dispatch_time=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  workflow_args=(-R "fohte/$repo")
+  if [[ -n "$TARGET_VERSION" ]]; then
+    workflow_args+=(-f "target-version=$TARGET_VERSION")
+  fi
+
+  if gh workflow run "$WORKFLOW" "${workflow_args[@]}"; then
+    echo "DISPATCHED $repo: $WORKFLOW"
+    dispatched_repos+=("$repo")
+    dispatch_times+=("$dispatch_time")
+  else
+    echo "FAIL $repo: could not dispatch $WORKFLOW" >&2
+    exit_code=1
+  fi
+done
+
+if "$DRY_RUN" || [[ ${#dispatched_repos[@]} -eq 0 ]]; then
+  exit "$exit_code"
+fi
+
+echo ""
+echo "Waiting for workflow runs to complete (checking every 20s, up to 5 min)..."
+
+declare -A run_ids=()
+max_attempts=15
+for ((attempt = 1; attempt <= max_attempts; attempt++)); do
+  sleep 20
+
+  remaining_repos=()
+  remaining_times=()
+  for i in "${!dispatched_repos[@]}"; do
+    repo="${dispatched_repos[$i]}"
+    dispatch_time="${dispatch_times[$i]}"
+    run_id="${run_ids[$repo]:-}"
+
+    if [[ -z "$run_id" ]]; then
+      # Subtract a 60s buffer in case the local clock is slightly ahead of
+      # GitHub's, which would otherwise filter out the just-dispatched run.
+      run_id=$(
+        gh run list -R "fohte/$repo" --workflow "$WORKFLOW" --event workflow_dispatch \
+          --json databaseId,createdAt --limit 5 \
+          --jq "[.[] | select((.createdAt | fromdateiso8601) >= ((\"$dispatch_time\" | fromdateiso8601) - 60))] | sort_by(.createdAt) | .[0].databaseId // empty" \
+          2> /dev/null || true
+      )
+      if [[ -n "$run_id" ]]; then
+        run_ids["$repo"]="$run_id"
+      fi
+    fi
+
+    if [[ -z "$run_id" ]]; then
+      remaining_repos+=("$repo")
+      remaining_times+=("$dispatch_time")
+      continue
+    fi
+
+    run_data=$(gh run view "$run_id" -R "fohte/$repo" --json status,conclusion,url 2> /dev/null || echo "")
+    status=$(printf '%s' "$run_data" | jq -r '.status // empty')
+    if [[ "$status" != "completed" ]]; then
+      remaining_repos+=("$repo")
+      remaining_times+=("$dispatch_time")
+      continue
+    fi
+
+    conclusion=$(printf '%s' "$run_data" | jq -r '.conclusion // "unknown"')
+    url=$(printf '%s' "$run_data" | jq -r '.url // ""')
+    echo "COMPLETED $repo: conclusion=$conclusion ($url)"
+    if [[ "$conclusion" != "success" ]]; then
+      exit_code=1
+    fi
+  done
+
+  dispatched_repos=("${remaining_repos[@]}")
+  dispatch_times=("${remaining_times[@]}")
+
+  if [[ ${#dispatched_repos[@]} -eq 0 ]]; then
+    echo "All workflow runs completed."
+    exit "$exit_code"
+  fi
+
+  echo "  (${#dispatched_repos[@]} remaining; attempt $attempt/$max_attempts)"
+done
+
+echo ""
+never_found=()
+still_running=()
+for repo in "${dispatched_repos[@]}"; do
+  if [[ -n "${run_ids[$repo]:-}" ]]; then
+    still_running+=("$repo")
+  else
+    never_found+=("$repo")
+  fi
+done
+if [[ ${#never_found[@]} -gt 0 ]]; then
+  echo "TIMEOUT (no run found -- dispatch may have failed silently): ${never_found[*]}"
+fi
+if [[ ${#still_running[@]} -gt 0 ]]; then
+  echo "TIMEOUT (run still in progress): ${still_running[*]}"
+fi
+exit 1

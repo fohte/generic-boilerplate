@@ -36,16 +36,16 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Collect outdated repos with Renovate PRs (tab-separated: repo\tnumber\turl)
+# Collect outdated repos with open update PRs (tab-separated: repo\tnumber\turl)
 jq_args=(--raw-output)
-jq_filter='.[] | select(.renovate_pr != null)'
+jq_filter='.[] | select(.update_pr != null)'
 if [[ ${#FILTER_REPOS[@]} -gt 0 ]]; then
   repo_json=$(printf '%s\n' "${FILTER_REPOS[@]}" | jq -R . | jq -s .)
   jq_args+=(--argjson filter_repos "$repo_json")
   # shellcheck disable=SC2016
   jq_filter+=' | select(.repo as $r | $filter_repos | index($r))'
 fi
-jq_filter+=' | "\(.repo)\t\(.renovate_pr.number)\t\(.renovate_pr.url)"'
+jq_filter+=' | "\(.repo)\t\(.update_pr.number)\t\(.update_pr.url)"'
 
 mapfile -t entries < <(
   "${SCRIPT_DIR}/list-boilerplate-usage" --outdated --json |
@@ -53,7 +53,7 @@ mapfile -t entries < <(
 )
 
 if [[ ${#entries[@]} -eq 0 ]]; then
-  echo "No outdated repos with Renovate PRs found."
+  echo "No outdated repos with open update PRs found."
   exit 0
 fi
 
