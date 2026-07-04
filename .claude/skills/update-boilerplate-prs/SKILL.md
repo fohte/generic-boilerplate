@@ -73,7 +73,7 @@ scripts/trigger-boilerplate-update-prs <repo1> <repo2>
 scripts/trigger-boilerplate-update-prs --target-version v0.8.12
 ```
 
-The script polls every 20 seconds (up to 5 minutes), printing `DISPATCHED <repo>: boilerplate-update.yml` immediately after dispatch and `COMPLETED <repo>: conclusion=<success|failure> (<run url>)` once each run finishes. Re-run `scripts/list-boilerplate-usage --outdated` afterward to see the resulting PRs.
+The script polls every 20 seconds (up to 5 minutes), printing `DISPATCHED <repo>: boilerplate-update.yml` immediately after dispatch and `COMPLETED <repo>: conclusion=<value> (<run url>)` once each run finishes (`conclusion` is GitHub's run conclusion, e.g. `success`, `failure`, `cancelled`; any value other than `success` is treated as a failure). Re-run `scripts/list-boilerplate-usage --outdated` afterward to see the resulting PRs.
 
 ## Step 4: Auto-merge version-only PRs
 

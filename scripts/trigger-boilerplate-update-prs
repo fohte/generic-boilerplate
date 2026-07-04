@@ -159,5 +159,19 @@ for ((attempt = 1; attempt <= max_attempts; attempt++)); do
 done
 
 echo ""
-echo "TIMEOUT: workflow runs not completed for: ${dispatched_repos[*]}"
+never_found=()
+still_running=()
+for repo in "${dispatched_repos[@]}"; do
+  if [[ -n "${run_ids[$repo]:-}" ]]; then
+    still_running+=("$repo")
+  else
+    never_found+=("$repo")
+  fi
+done
+if [[ ${#never_found[@]} -gt 0 ]]; then
+  echo "TIMEOUT (no run found -- dispatch may have failed silently): ${never_found[*]}"
+fi
+if [[ ${#still_running[@]} -gt 0 ]]; then
+  echo "TIMEOUT (run still in progress): ${still_running[*]}"
+fi
 exit 1
