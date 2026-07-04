@@ -115,10 +115,12 @@ for ((attempt = 1; attempt <= max_attempts; attempt++)); do
     run_id="${run_ids[$repo]:-}"
 
     if [[ -z "$run_id" ]]; then
+      # Subtract a 60s buffer in case the local clock is slightly ahead of
+      # GitHub's, which would otherwise filter out the just-dispatched run.
       run_id=$(
         gh run list -R "fohte/$repo" --workflow "$WORKFLOW" --event workflow_dispatch \
           --json databaseId,createdAt --limit 5 \
-          --jq "[.[] | select(.createdAt >= \"$dispatch_time\")] | sort_by(.createdAt) | .[0].databaseId // empty" \
+          --jq "[.[] | select((.createdAt | fromdateiso8601) >= (($dispatch_time | fromdateiso8601) - 60))] | sort_by(.createdAt) | .[0].databaseId // empty" \
           2> /dev/null || true
       )
       if [[ -n "$run_id" ]]; then
@@ -132,15 +134,16 @@ for ((attempt = 1; attempt <= max_attempts; attempt++)); do
       continue
     fi
 
-    status=$(gh run view "$run_id" -R "fohte/$repo" --json status --jq '.status' 2> /dev/null || echo "")
+    run_data=$(gh run view "$run_id" -R "fohte/$repo" --json status,conclusion,url 2> /dev/null || echo "")
+    status=$(printf '%s' "$run_data" | jq -r '.status // empty')
     if [[ "$status" != "completed" ]]; then
       remaining_repos+=("$repo")
       remaining_times+=("$dispatch_time")
       continue
     fi
 
-    conclusion=$(gh run view "$run_id" -R "fohte/$repo" --json conclusion --jq '.conclusion' 2> /dev/null || echo "unknown")
-    url=$(gh run view "$run_id" -R "fohte/$repo" --json url --jq '.url' 2> /dev/null || echo "")
+    conclusion=$(printf '%s' "$run_data" | jq -r '.conclusion // "unknown"')
+    url=$(printf '%s' "$run_data" | jq -r '.url // ""')
     echo "COMPLETED $repo: conclusion=$conclusion ($url)"
     if [[ "$conclusion" != "success" ]]; then
       exit_code=1
