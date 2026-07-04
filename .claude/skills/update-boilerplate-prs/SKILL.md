@@ -1,11 +1,11 @@
 ---
 name: update-boilerplate-prs
-description: Batch-process generic-boilerplate update PRs (Renovate copier) across fohte org repositories. Validate, triage, resolve conflicts, and merge.
+description: Batch-process generic-boilerplate update PRs (boilerplate-update.yml / copier-update-action) across fohte org repositories. Validate, triage, resolve conflicts, and merge.
 ---
 
 # Batch Processing generic-boilerplate Update PRs
 
-Validate generic-boilerplate update PRs created by Renovate and resolve conflicts via `/delegate-claude` for PRs that need intervention. MERGE-READY PRs are merged automatically once validated.
+Validate generic-boilerplate update PRs created by the `boilerplate-update.yml` workflow (via `fohte/copier-update-action`) and resolve conflicts via `/delegate-claude` for PRs that need intervention. MERGE-READY PRs are merged automatically once validated.
 
 ## Merge policy (read before doing anything)
 
@@ -17,8 +17,8 @@ Validate generic-boilerplate update PRs created by Renovate and resolve conflict
 
 1. **Understand changes**: Review what changed in generic-boilerplate itself
 2. **Identify outdated repos**: Run `scripts/list-boilerplate-usage --outdated` to find targets
-3. **Trigger PR creation for repos without PRs**: Check Renovate Dashboard checkboxes to bypass rate limits
-4. **Auto-merge version-only PRs**: Run `scripts/auto-merge-boilerplate-prs` for trivial PRs (the only sanctioned auto-merge path)
+3. **Trigger boilerplate-update workflow runs**: Dispatch `boilerplate-update.yml` immediately instead of waiting for the weekly cron
+4. **Auto-merge version-only PRs**: Run `scripts/auto-merge-boilerplate-prs` for trivial PRs left over after Step 3 (a fallback path; `boilerplate-update.yml` already auto-merges most of these itself)
 5. **Validate remaining PRs**: Review diff, CI status for PRs with actual template changes
 6. **Report and merge**: Merge MERGE-READY PRs; present the NEEDS-INTERVENTION list to the user
 7. **Delegate template application**: Delegate via `/delegate-claude` for NEEDS-INTERVENTION PRs. Each delegate fixes conflicts, pushes, then executes the CI watch and merge protocol (Step 7) end to end until the PR reaches `state == "MERGED"`
@@ -52,35 +52,34 @@ Key areas to review:
 scripts/list-boilerplate-usage --outdated
 ```
 
-The output shows each repository's current version, latest version, and whether a Renovate PR exists.
+The output shows each repository's current version, latest version, and whether an open update PR exists.
 
-- `renovate PR: (none)` -> Step 3 will either trigger PR creation via the Dependency Dashboard (when a rate-limited entry exists) or request a full repository scan (when Renovate has not yet noticed the new boilerplate release)
-- `renovate PR: #<number> <url>` -> Step 3 will rebase it via the PR's rebase-check box (re-triggers Renovate even if the PR already targets the latest `_commit`); proceed to Step 4 once `REBASED` is printed
+- `update PR: (none)` -> Step 3 will dispatch `boilerplate-update.yml` to create one
+- `update PR: #<number> <url>` -> Step 3 will re-dispatch `boilerplate-update.yml`, which force-pushes the branch with the latest template state (updates the existing PR in place); proceed to Step 4 once `COMPLETED` is printed
 
-## Step 3: Trigger PR creation, rebase, or full-repo scan
+## Step 3: Trigger boilerplate-update workflow runs
 
-The trigger script picks one action per outdated repo by priority:
-
-1. `[rebase]` -- Renovate PR already exists but is stale (e.g. opened against an older boilerplate version): checks the PR's rebase-check box so Renovate force-pushes a fresh branch against the latest version.
-2. `[create]` -- No PR, but the Dependency Dashboard has a rate-limited entry for the generic-boilerplate branch: checks that entry so Renovate creates the PR.
-3. `[scan]` -- No PR and no rate-limited entry (typical immediately after a new boilerplate release): checks the Dashboard's `<!-- manual job -->` checkbox so Renovate re-scans the repository. While polling, the script automatically chains into `[create]` if Renovate surfaces a rate-limited entry, so no manual re-run is needed.
+Every outdated repo already has `.github/workflows/boilerplate-update.yml` (calls `fohte/copier-update-action`), which normally runs on a weekly cron and creates or refreshes the update PR itself -- including auto-merging it when `copier-update-action` reports no unresolved conflicts. This step dispatches that workflow immediately instead of waiting for the next scheduled run.
 
 ```bash
 # Dry-run first to verify targets
-scripts/trigger-renovate-boilerplate-prs --dry-run
+scripts/trigger-boilerplate-update-prs --dry-run
 
-# Trigger create + rebase + scan, then wait for results (all outdated repos)
-scripts/trigger-renovate-boilerplate-prs
+# Dispatch the workflow for all outdated repos, then wait for the runs to finish
+scripts/trigger-boilerplate-update-prs
 
-# Or target specific repos
-scripts/trigger-renovate-boilerplate-prs <repo1> <repo2>
+# Or target specific repos, or a specific template version
+scripts/trigger-boilerplate-update-prs <repo1> <repo2>
+scripts/trigger-boilerplate-update-prs --target-version v0.8.12
 ```
 
-Each line is tagged `[create]`, `[rebase]`, or `[scan]`. The script polls every 30 seconds (up to 5 minutes), printing `CREATED <repo>: <url>` for new PRs, `REBASED <repo>: PR #<n>` once `headRefOid` changes, and `SCANNED <repo>: ...` once a scan request produces a PR, a new rate-limited entry, or is acknowledged by Renovate (the manual-job checkbox returns to unchecked).
+The script polls every 20 seconds (up to 5 minutes), printing `DISPATCHED <repo>: boilerplate-update.yml` immediately after dispatch and `COMPLETED <repo>: conclusion=<success|failure> (<run url>)` once each run finishes. Re-run `scripts/list-boilerplate-usage --outdated` afterward to see the resulting PRs.
 
 ## Step 4: Auto-merge version-only PRs
 
 PRs where the only change is the `_commit` version bump in `.copier-answers.yml` can be merged automatically without manual review.
+
+`boilerplate-update.yml` already schedules `gh pr merge --auto --squash` itself whenever `copier-update-action` reports no unresolved conflicts, so most version-only PRs from Step 3 are already auto-merging by the time you reach this step. This step is a fallback for PRs where that scheduling did not happen (e.g. the workflow run failed before reaching the merge step, or the PR predates this migration).
 
 The script checks that the only diff lines are `_commit` version changes. When new template parameters are introduced (e.g., `use_storybook`), copier adds them to `.copier-answers.yml` with default values for repos that match the parameter's `when` condition. These PRs have additional diff lines beyond `_commit`, so the script automatically skips them -- they require manual validation in Step 5b.
 
@@ -110,7 +109,7 @@ gh pr diff <number> -R fohte/<repo>
 ```
 
 - Check for copier conflict markers (`<<<<<<< before updating`, `=======`, `>>>>>>> after updating`)
-- For each conflict, compare versions on both sides. If the `before updating` side has a newer version than the `after updating` side, flag it as a potential downgrade in the Step 6 report (the repo may have been updated independently by Renovate or other means)
+- For each conflict, compare versions on both sides. If the `before updating` side has a newer version than the `after updating` side, flag it as a potential downgrade in the Step 6 report (the repo may have been updated independently, e.g. merged manually or via an earlier workflow run)
 - Verify that Step 1 changes propagated correctly
   - Each repository's template configuration (copier-answers.yml settings) determines which changes apply. Judge "expected changes" vs "not applicable" based on the configuration
   - Ensure repository-specific customizations (non-template changes) are not broken
@@ -156,10 +155,10 @@ gh pr view <number> -R fohte/<repo> --json headRefName -q .headRefName
 Use the fetched value directly as the branch name. The existing remote branch will be checked out automatically.
 
 ```bash
-a wm new renovate/https-github.com-fohte-generic-boilerplate-0.x -R ~/ghq/github.com/fohte/<repo> --agent --label "..." --prompt "..."
+a wm new copier-update/v0.8.9 -R ~/ghq/github.com/fohte/<repo> --agent --label "..." --prompt "..."
 ```
 
-**Do NOT invent a new branch name** like `renovate-foo-boilerplate`. **Do NOT add `--from`** -- the branch already exists on the remote.
+**Do NOT invent a new branch name** like `copier-update-foo-boilerplate`. **Do NOT add `--from`** -- the branch already exists on the remote.
 
 ### Delegation prompt
 
@@ -174,7 +173,7 @@ Include the following in the delegation prompt:
 
 Copier conflict markers have two sides:
 
-- `before updating`: the repository's current state, which may have been updated independently (e.g., by Renovate) to a newer version than the template
+- `before updating`: the repository's current state, which may have been updated independently (e.g., merged manually or via an earlier workflow run) to a newer version than the template
 - `after updating`: the template's rendered result, which is NOT always the correct choice
 
 For each conflict, compare the versions on both sides:

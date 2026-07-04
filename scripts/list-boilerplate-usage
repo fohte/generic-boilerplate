@@ -38,20 +38,23 @@ done
 # Get the latest release tag from the boilerplate repo
 latest_version=$(gh release view --repo "${OWNER}/${BOILERPLATE_REPO}" --json tagName --jq '.tagName')
 
-# Fetch open Renovate PRs for generic-boilerplate updates (keyed by repo name)
-renovate_prs=$(
-  gh search prs --owner "$OWNER" "Update generic-boilerplate" --state open \
+# Fetch open generic-boilerplate update PRs (keyed by repo name). Note: "generic-boilerplate"
+# is searched as a single term, not the phrase "update generic-boilerplate" -- boilerplate-update.yml
+# titles read "chore: update fohte/generic-boilerplate from ... to ...", where "fohte/" sits
+# between "update" and "generic-boilerplate", so a phrase query would miss them.
+update_prs=$(
+  gh search prs --owner "$OWNER" "generic-boilerplate" --state open \
     --json repository,title,url,number \
     --jq '.[] | select(.title | test("generic-boilerplate")) | {repo: .repository.name, title: .title, number: .number, url: .url}'
 )
 
 # Build associative array for O(1) PR lookups by repo name
-declare -A renovate_pr_map
+declare -A update_pr_map
 while IFS= read -r pr_json; do
   [[ -z "$pr_json" ]] && continue
   repo_name=$(echo "$pr_json" | jq -r '.repo')
-  renovate_pr_map["$repo_name"]="$pr_json"
-done <<< "$renovate_prs"
+  update_pr_map["$repo_name"]="$pr_json"
+done <<< "$update_prs"
 
 # Search for repos containing .copier-answers.yml (root only, exclude templates/fixtures)
 repos=$(
@@ -135,13 +138,14 @@ echo "$result" | jq -c '
     continue
   fi
 
-  # Look up Renovate PR for this repo
-  pr_json="${renovate_pr_map[$name]:-}"
+  # Look up the open update PR for this repo
+  pr_json="${update_pr_map[$name]:-}"
   if [[ -n "$pr_json" ]]; then
     pr_url=$(echo "$pr_json" | jq -r '.url')
     pr_number=$(echo "$pr_json" | jq -r '.number')
     pr_title=$(echo "$pr_json" | jq -r '.title')
-    # Renovate titles look like `... Update generic-boilerplate to v0.8.2`,
+    # Titles look like `... Update generic-boilerplate to v0.8.2` (Renovate) or
+    # `chore: update fohte/generic-boilerplate from v0.8.4 to v0.8.9` (boilerplate-update.yml),
     # so the trailing version reflects which template release the PR targets.
     pr_target_commit=$(printf '%s' "$pr_title" | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+[^[:space:]]*$' || true)
     has_pr=true
@@ -167,8 +171,8 @@ echo "$result" | jq -c '
       --arg latest "$latest_version" \
       --argjson outdated "$outdated" \
       --argjson params "$params" \
-      --argjson renovate_pr "$pr_obj" \
-      '{repo: $name, commit: $commit, latest: $latest, outdated: $outdated, renovate_pr: $renovate_pr, params: $params}'
+      --argjson update_pr "$pr_obj" \
+      '{repo: $name, commit: $commit, latest: $latest, outdated: $outdated, update_pr: $update_pr, params: $params}'
   else
     if "$outdated"; then
       echo "$name (commit: $commit <- latest: $latest_version)"
@@ -177,9 +181,9 @@ echo "$result" | jq -c '
     fi
     echo "  type: $type"
     if "$has_pr"; then
-      echo "  renovate PR: #${pr_number} ${pr_url}"
+      echo "  update PR: #${pr_number} ${pr_url}"
     elif "$outdated"; then
-      echo "  renovate PR: (none)"
+      echo "  update PR: (none)"
     fi
     echo "$params" | jq -r 'to_entries[] | select(.key != "type" and .key != "project_name") | "  \(.key): \(.value)"'
     echo ""
