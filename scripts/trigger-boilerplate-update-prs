@@ -120,7 +120,7 @@ for ((attempt = 1; attempt <= max_attempts; attempt++)); do
       run_id=$(
         gh run list -R "fohte/$repo" --workflow "$WORKFLOW" --event workflow_dispatch \
           --json databaseId,createdAt --limit 5 \
-          --jq "[.[] | select((.createdAt | fromdateiso8601) >= (($dispatch_time | fromdateiso8601) - 60))] | sort_by(.createdAt) | .[0].databaseId // empty" \
+          --jq "[.[] | select((.createdAt | fromdateiso8601) >= ((\"$dispatch_time\" | fromdateiso8601) - 60))] | sort_by(.createdAt) | .[0].databaseId // empty" \
           2> /dev/null || true
       )
       if [[ -n "$run_id" ]]; then
