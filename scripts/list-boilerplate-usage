@@ -41,9 +41,11 @@ latest_version=$(gh release view --repo "${OWNER}/${BOILERPLATE_REPO}" --json ta
 # Fetch open generic-boilerplate update PRs (keyed by repo name). Note: "generic-boilerplate"
 # is searched as a single term, not the phrase "update generic-boilerplate" -- boilerplate-update.yml
 # titles read "chore: update fohte/generic-boilerplate from ... to ...", where "fohte/" sits
-# between "update" and "generic-boilerplate", so a phrase query would miss them.
+# between "update" and "generic-boilerplate", so a phrase query would miss them. `--match title`
+# keeps the single-term search scoped to titles, so unrelated PRs that merely mention
+# "generic-boilerplate" in their body/comments don't consume gh search's default result limit.
 update_prs=$(
-  gh search prs --owner "$OWNER" "generic-boilerplate" --state open \
+  gh search prs --owner "$OWNER" "generic-boilerplate" --match title --state open \
     --json repository,title,url,number \
     --jq '.[] | select(.title | test("generic-boilerplate")) | {repo: .repository.name, title: .title, number: .number, url: .url}'
 )
