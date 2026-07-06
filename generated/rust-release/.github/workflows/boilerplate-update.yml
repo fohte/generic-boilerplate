@@ -59,14 +59,23 @@ jobs:
           target-version: ${{ github.event.inputs.target-version }}
           github-token: ${{ steps.octo-sts.outputs.token }}
 
-      - name: Check whether the template version actually changed
-        id: version-changed
+      - name: Determine whether to proceed with a PR
+        id: should-update
         env:
+          CHANGED: ${{ steps.copier-update.outputs.changed }}
           FROM_VERSION: ${{ steps.current-version.outputs.version }}
           TARGET_VERSION: ${{ steps.copier-update.outputs.target-version }}
+          # Only set when workflow_dispatch explicitly pins a target version.
+          MANUAL_TARGET_VERSION: ${{ github.event.inputs.target-version }}
         run: |
           set -euo pipefail
-          if [ "${FROM_VERSION}" = "${TARGET_VERSION}" ]; then
+          if [ "${CHANGED}" != "true" ]; then
+            echo "value=false" >> "$GITHUB_OUTPUT"
+          elif [ -z "${MANUAL_TARGET_VERSION}" ] && [ "${FROM_VERSION}" = "${TARGET_VERSION}" ]; then
+            # copier-update-action's `changed` output reflects any diff (e.g. YAML
+            # quote-style drift), not whether the template version itself moved.
+            # Skip the no-op case for scheduled/latest-release runs; an explicit
+            # manual target-version means the caller wants to re-apply regardless.
             echo "Template version unchanged (${FROM_VERSION}); skipping." >&2
             echo "value=false" >> "$GITHUB_OUTPUT"
           else
@@ -74,14 +83,14 @@ jobs:
           fi
 
       - name: Restore executable bit on scripts/bootstrap
-        if: steps.copier-update.outputs.changed == 'true' && steps.version-changed.outputs.value == 'true'
+        if: steps.should-update.outputs.value == 'true'
         run: |
           if [ -f scripts/bootstrap ]; then
             chmod +x scripts/bootstrap
           fi
 
       - name: Create branch
-        if: steps.copier-update.outputs.changed == 'true' && steps.version-changed.outputs.value == 'true'
+        if: steps.should-update.outputs.value == 'true'
         id: branch
         env:
           TARGET_VERSION: ${{ steps.copier-update.outputs.target-version }}
@@ -95,7 +104,7 @@ jobs:
           git checkout -B "${branch}"
 
       - name: Compose commit and PR title
-        if: steps.copier-update.outputs.changed == 'true' && steps.version-changed.outputs.value == 'true'
+        if: steps.should-update.outputs.value == 'true'
         id: title
         env:
           FROM_VERSION: ${{ steps.current-version.outputs.version }}
@@ -105,7 +114,7 @@ jobs:
           echo "value=chore: update ${TEMPLATE_REPO} from ${FROM_VERSION} to ${TARGET_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Commit and push changes
-        if: steps.copier-update.outputs.changed == 'true' && steps.version-changed.outputs.value == 'true'
+        if: steps.should-update.outputs.value == 'true'
         env:
           BRANCH: ${{ steps.branch.outputs.name }}
           COMMIT_MESSAGE: ${{ steps.title.outputs.value }}
@@ -124,7 +133,7 @@ jobs:
           git push --force origin "${BRANCH}"
 
       - name: Create or update pull request
-        if: steps.copier-update.outputs.changed == 'true' && steps.version-changed.outputs.value == 'true'
+        if: steps.should-update.outputs.value == 'true'
         env:
           GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
           TITLE: ${{ steps.title.outputs.value }}
