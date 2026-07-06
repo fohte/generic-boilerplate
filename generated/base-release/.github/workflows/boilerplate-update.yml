@@ -59,15 +59,29 @@ jobs:
           target-version: ${{ github.event.inputs.target-version }}
           github-token: ${{ steps.octo-sts.outputs.token }}
 
+      - name: Check whether the template version actually changed
+        id: version-changed
+        env:
+          FROM_VERSION: ${{ steps.current-version.outputs.version }}
+          TARGET_VERSION: ${{ steps.copier-update.outputs.target-version }}
+        run: |
+          set -euo pipefail
+          if [ "${FROM_VERSION}" = "${TARGET_VERSION}" ]; then
+            echo "Template version unchanged (${FROM_VERSION}); skipping." >&2
+            echo "value=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Restore executable bit on scripts/bootstrap
-        if: steps.copier-update.outputs.changed == 'true'
+        if: steps.copier-update.outputs.changed == 'true' && steps.version-changed.outputs.value == 'true'
         run: |
           if [ -f scripts/bootstrap ]; then
             chmod +x scripts/bootstrap
           fi
 
       - name: Create branch
-        if: steps.copier-update.outputs.changed == 'true'
+        if: steps.copier-update.outputs.changed == 'true' && steps.version-changed.outputs.value == 'true'
         id: branch
         env:
           TARGET_VERSION: ${{ steps.copier-update.outputs.target-version }}
@@ -81,7 +95,7 @@ jobs:
           git checkout -B "${branch}"
 
       - name: Compose commit and PR title
-        if: steps.copier-update.outputs.changed == 'true'
+        if: steps.copier-update.outputs.changed == 'true' && steps.version-changed.outputs.value == 'true'
         id: title
         env:
           FROM_VERSION: ${{ steps.current-version.outputs.version }}
@@ -91,7 +105,7 @@ jobs:
           echo "value=chore: update ${TEMPLATE_REPO} from ${FROM_VERSION} to ${TARGET_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Commit and push changes
-        if: steps.copier-update.outputs.changed == 'true'
+        if: steps.copier-update.outputs.changed == 'true' && steps.version-changed.outputs.value == 'true'
         env:
           BRANCH: ${{ steps.branch.outputs.name }}
           COMMIT_MESSAGE: ${{ steps.title.outputs.value }}
@@ -110,7 +124,7 @@ jobs:
           git push --force origin "${BRANCH}"
 
       - name: Create or update pull request
-        if: steps.copier-update.outputs.changed == 'true'
+        if: steps.copier-update.outputs.changed == 'true' && steps.version-changed.outputs.value == 'true'
         env:
           GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
           TITLE: ${{ steps.title.outputs.value }}
