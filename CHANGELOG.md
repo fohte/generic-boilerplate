@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.13](https://github.com/fohte/generic-boilerplate/compare/v0.8.12...v0.8.13) (2026-07-07)
+
+
+### Bug Fixes
+
+* **template:** use a fixed branch name for boilerplate-update ([#497](https://github.com/fohte/generic-boilerplate/issues/497)) ([6bf6f06](https://github.com/fohte/generic-boilerplate/commit/6bf6f068852b7d60a4a988017203b959da8b6bb6))
+
+
+### Dependencies
+
+* **ci:** Update fohte/copier-update-action action to v0.1.3 ([#494](https://github.com/fohte/generic-boilerplate/issues/494)) ([3d09fbe](https://github.com/fohte/generic-boilerplate/commit/3d09fbed857f114d15dab142d17d37d412783c46))
+
 ## [0.8.12](https://github.com/fohte/generic-boilerplate/compare/v0.8.11...v0.8.12) (2026-07-07)
 
 
