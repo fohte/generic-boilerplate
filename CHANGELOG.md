@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.8.12](https://github.com/fohte/generic-boilerplate/compare/v0.8.11...v0.8.12) (2026-07-07)
+
+
+### Bug Fixes
+
+* **template:** skip no-op PR creation when the template version is unchanged ([#487](https://github.com/fohte/generic-boilerplate/issues/487)) ([1f90cb0](https://github.com/fohte/generic-boilerplate/commit/1f90cb0c0281ea7abdf1a650de18b345b956ad2a))
+
+
+### Dependencies
+
+* **ci:** Update actions/cache action to v6 ([#484](https://github.com/fohte/generic-boilerplate/issues/484)) ([008c271](https://github.com/fohte/generic-boilerplate/commit/008c27115fcee715daeeb632c87125af93aaab79))
+* **ci:** Update actions/checkout action to v7 ([#466](https://github.com/fohte/generic-boilerplate/issues/466)) ([bf5c3bc](https://github.com/fohte/generic-boilerplate/commit/bf5c3bcced6661068fc975751a42885245699deb))
+* **ci:** Update fohte/copier-update-action action to v0.1.2 ([#476](https://github.com/fohte/generic-boilerplate/issues/476)) ([1feb25a](https://github.com/fohte/generic-boilerplate/commit/1feb25ace06927a1836575bb9c804818b5839e8d))
+* **ci:** Update jdx/mise-action action to v4.2.0 ([#462](https://github.com/fohte/generic-boilerplate/issues/462)) ([9463837](https://github.com/fohte/generic-boilerplate/commit/9463837730ef92446fbe6dd73bc5e5d39b036daf))
+* **ci:** Update taiki-e/install-action action to v2.82.5 ([#463](https://github.com/fohte/generic-boilerplate/issues/463)) ([7b01455](https://github.com/fohte/generic-boilerplate/commit/7b01455b36312f1a18f43c5f15fd526e55f232ac))
+* **ci:** Update taiki-e/install-action action to v2.82.6 ([#489](https://github.com/fohte/generic-boilerplate/issues/489)) ([8a025d3](https://github.com/fohte/generic-boilerplate/commit/8a025d343fdff711aced9f906e399f4431ac635c))
+* Update @commitlint/cli to v21.1.0 ([#481](https://github.com/fohte/generic-boilerplate/issues/481)) ([c9267dd](https://github.com/fohte/generic-boilerplate/commit/c9267dd17904665a40d1ea3f46e4e8aabeb2c7e5))
+* Update dependency @fohte/eslint-config to v0.3.5 ([#478](https://github.com/fohte/generic-boilerplate/issues/478)) ([a39203b](https://github.com/fohte/generic-boilerplate/commit/a39203bfce679a5381c5b9f74e415cbdb4ccd884))
+* update dependency @fohte/service-kit to v0.1.2 ([#474](https://github.com/fohte/generic-boilerplate/issues/474)) ([a35d97e](https://github.com/fohte/generic-boilerplate/commit/a35d97eb9043b2c05cf9d943b8117bdd9f33b46a))
+* update dependency @fohte/service-kit to v0.1.3 ([#479](https://github.com/fohte/generic-boilerplate/issues/479)) ([306d947](https://github.com/fohte/generic-boilerplate/commit/306d947311b4cc07433f0877bb0f77ac59a3c5e5))
+* Update dependency eslint to v10.6.0 ([#482](https://github.com/fohte/generic-boilerplate/issues/482)) ([48b0692](https://github.com/fohte/generic-boilerplate/commit/48b0692efb833d4be94e640a9678c7b29e27a0d2))
+* Update dependency github:ast-grep/ast-grep to v0.44.0 ([#483](https://github.com/fohte/generic-boilerplate/issues/483)) ([61aa7ac](https://github.com/fohte/generic-boilerplate/commit/61aa7ac41b5307afcbebe17284f0631ccf273d3f))
+* Update Node.js to v24.18.0 ([#490](https://github.com/fohte/generic-boilerplate/issues/490)) ([aa53caa](https://github.com/fohte/generic-boilerplate/commit/aa53caa6bc2ea2f1b2b62d8f1d96b84ca57cf048))
+* Update pnpm to v11.9.0 ([#465](https://github.com/fohte/generic-boilerplate/issues/465)) ([9f1335b](https://github.com/fohte/generic-boilerplate/commit/9f1335b45d7530970f674c6ecc52ffc550b9944d))
+* Update prettier to v3.9.4 ([#491](https://github.com/fohte/generic-boilerplate/issues/491)) ([0c7e2e3](https://github.com/fohte/generic-boilerplate/commit/0c7e2e393329ee1275a5441a64d0d73b2be290af))
+* update rust to v1.96.1 ([#488](https://github.com/fohte/generic-boilerplate/issues/488)) ([94616a6](https://github.com/fohte/generic-boilerplate/commit/94616a612a0c14cae90ed6e8afcebeb7e85fa234))
+* update sentry-javascript monorepo to v10.62.0 ([#492](https://github.com/fohte/generic-boilerplate/issues/492)) ([48466c2](https://github.com/fohte/generic-boilerplate/commit/48466c240446c2e66ffd2652febfa814f79e6c17))
+
 ## [0.8.11](https://github.com/fohte/generic-boilerplate/compare/v0.8.10...v0.8.11) (2026-07-01)
 
 
