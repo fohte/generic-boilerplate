@@ -155,7 +155,7 @@ gh pr view <number> -R fohte/<repo> --json headRefName -q .headRefName
 Use the fetched value directly as the branch name. The existing remote branch will be checked out automatically.
 
 ```bash
-a wm new copier-update/v0.8.9 -R ~/ghq/github.com/fohte/<repo> --agent --label "..." --prompt "..."
+a wm new copier-update/generic-boilerplate -R ~/ghq/github.com/fohte/<repo> --agent --label "..." --prompt "..."
 ```
 
 **Do NOT invent a new branch name** like `copier-update-foo-boilerplate`. **Do NOT add `--from`** -- the branch already exists on the remote.
