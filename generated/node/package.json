@@ -27,7 +27,7 @@
     "@sentry/opentelemetry": "10.58.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "21.0.2",
+    "@commitlint/cli": "21.1.0",
     "@eslint/eslintrc": "3.3.5",
     "@fohte/eslint-config": "0.3.5",
     "@storybook/addon-docs": "10.4.6",
