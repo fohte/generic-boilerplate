@@ -1,5 +1,13 @@
 # CLAUDE.md
 
+## Code organization rules
+
+### Split files before they grow past ~500 lines of production code
+
+When a change would push a file's non-test code past ~500 lines, split it along responsibility seams before adding more. Splits must be move-only commits: no logic changes, renames, or reformatting mixed in. Keep external import paths unchanged by converting the file into a directory module that re-exports its contents (e.g. `foo.rs` → `foo/mod.rs`). Tests move together with the code they verify.
+
+Prefer creating a new focused file over appending to the largest existing one.
+
 ## Test code rules
 
 ### Assert on the whole output with a single equality check
