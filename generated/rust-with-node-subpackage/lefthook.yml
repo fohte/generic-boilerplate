@@ -57,6 +57,13 @@ pre-commit:
           esac
         done
 
+    # Non-workspace multi-package monorepo: each subpackage has its own
+    # eslint.config.js and dependencies, so lint per package from its root.
+    eslint-cli:
+      glob: '*.{js,ts,jsx,tsx,mjs,cjs}'
+      root: 'cli/'
+      run: pnpm exec eslint {staged_files}
+
     ast-grep:
       glob: '*.rs'
       run: ast-grep scan {staged_files}

@@ -105,7 +105,7 @@ jobs:
 {%- elif type == 'rust' %}
 {%- if has_node_pkg and not is_workspace and testable_node_pkgs %}
 {#- prettier/commitlint are hosted by mise so the root has no package.json;
-    only testable node subpackages install dependencies here. -#}
+    only testable node subpackages install dependencies here. #}
 
       - run: corepack enable
 
