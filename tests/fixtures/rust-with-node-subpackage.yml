@@ -1,7 +1,4 @@
-# Test fixture for a Rust root with Node subpackages: one that brings its own
-# setup (tests: false) and one that uses the template's own test scaffolding,
-# so both the `tests: false` opt-out and the default testable-subpackage path
-# render and get validated.
+# Test fixture for a Rust root with a single Node subpackage (e.g. a docs site).
 type: rust
 project_name: rust-with-node-subpackage
 description: Test Rust root with a node docs subpackage
@@ -15,6 +12,4 @@ subpackages:
     type: node
     # The docs subpackage will bring its own setup (Astro/Starlight etc.).
     tests: false
-  - name: cli
-    type: node
 repo_language: ja
