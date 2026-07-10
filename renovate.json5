@@ -29,6 +29,14 @@
       matchManagers: ['github-actions'],
       commitMessagePrefix: 'deps(ci):',
     },
+    // jdx/mise is extracted from jdx/mise-action's `with: version:` by a
+    // customManager (manager name `regex`), so the github-actions rule above
+    // does not match it. It represents a GitHub Actions workflow input, so
+    // apply the same deps(ci): prefix here.
+    {
+      matchPackageNames: ['jdx/mise'],
+      commitMessagePrefix: 'deps(ci):',
+    },
     {
       matchManagers: ['mise'],
       matchUpdateTypes: ['minor', 'patch'],
