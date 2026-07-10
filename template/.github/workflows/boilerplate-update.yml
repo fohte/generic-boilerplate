@@ -183,8 +183,30 @@ jobs:
             pr_url=$(gh pr create "${create_args[@]}")
           fi
 
-          if [ -z "${UNRESOLVED_FILES}" ]; then
-            if OUTPUT=$(gh pr merge --auto --squash "${pr_url}" 2>&1); then
+          if [ -n "${UNRESOLVED_FILES}" ]; then
+            # Unresolved copier conflicts already keep the PR in draft (see above).
+            # Disable auto-merge too, in case a conflict-free earlier run of this
+            # same reused branch had already armed it.
+            gh pr merge --disable-auto "${pr_url}" || true
+          else
+            # `unresolved-files` only reflects copier's own 3-way merge; it says
+            # nothing about whether this branch can still merge into the base
+            # branch. GitHub computes mergeability asynchronously and reports it
+            # as "UNKNOWN" for a few seconds after a push, so poll for a
+            # definite answer before trusting it.
+            mergeable=UNKNOWN
+            for _ in $(seq 1 10); do
+              mergeable=$(gh pr view "${pr_url}" --json mergeable --jq .mergeable)
+              if [ "${mergeable}" != "UNKNOWN" ]; then
+                break
+              fi
+              sleep 2
+            done
+
+            if [ "${mergeable}" != "MERGEABLE" ]; then
+              echo "PR is not cleanly mergeable with the base branch (mergeable=${mergeable}); leaving it for manual review." >&2
+              gh pr merge --disable-auto "${pr_url}" || true
+            elif OUTPUT=$(gh pr merge --auto --squash "${pr_url}" 2>&1); then
               echo "$OUTPUT"
             elif echo "$OUTPUT" | grep -q "clean status"; then
               echo "$OUTPUT"
