@@ -31,8 +31,7 @@
     },
     // jdx/mise is extracted from jdx/mise-action's `with: version:` by a
     // customManager (manager name `regex`), so the github-actions rule above
-    // does not match it. It represents a GitHub Actions workflow input, so
-    // apply the same deps(ci): prefix here.
+    // does not match it.
     //
     // This intentionally overrides base.json5's `ci:` prefix for jdx/mise,
     // which release-please-config.json hides from the CHANGELOG. Unlike
