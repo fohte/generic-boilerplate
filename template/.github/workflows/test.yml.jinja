@@ -99,10 +99,17 @@ jobs:
           restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --frozen-lockfile
+
+      - name: Check peer dependencies
+        run: pnpm peers check
 {%- elif type == 'rust' %}
 {%- if has_node_pkg and not is_workspace and testable_node_pkgs %}
 {#- prettier/commitlint are hosted by mise so the root has no package.json;
-    only testable node subpackages install dependencies here. -#}
+    only testable node subpackages install dependencies here.
+    No fixture combines type: rust with a testable node subpackage (testable
+    multi-package setups use monorepo mode instead), so this branch has no
+    snapshot coverage. Render it manually via `copier copy --overwrite
+    --defaults --data-file <fixture>.yml . .` when editing. #}
 
       - run: corepack enable
 
@@ -121,6 +128,9 @@ jobs:
 
       - name: Install pnpm dependencies ({{ pkg.name }})
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
+
+      - name: Check peer dependencies ({{ pkg.name }})
+        run: cd "{{ pkg.name }}" && pnpm peers check
 {%- endfor %}
 {%- endif %}
 
@@ -145,6 +155,9 @@ jobs:
           restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: pnpm install --frozen-lockfile
+
+      - name: Check peer dependencies
+        run: pnpm peers check
 {%- else %}
 {#- Non-workspace mode: prettier/commitlint are hosted by mise (no root
     package.json), so only per-subpackage pnpm install runs here.
@@ -169,6 +182,9 @@ jobs:
 
       - name: Install pnpm dependencies ({{ pkg.name }})
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
+
+      - name: Check peer dependencies ({{ pkg.name }})
+        run: cd "{{ pkg.name }}" && pnpm peers check
 {%- endfor %}
 {%- endif %}
 {%- endif %}
