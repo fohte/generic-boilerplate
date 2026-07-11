@@ -223,5 +223,5 @@ Every delegation prompt must explicitly state all of the following so the child 
 
 1. **Conflict resolution rule** -- copy the "do NOT blindly choose `after updating`" section _verbatim_
 2. **copier update notes** -- copy the "copier update notes" section _verbatim_ (clean tree, node_modules workaround, partial-state reset)
-3. **CI watch and merge protocol** -- copy the "CI watch and merge protocol" section _verbatim_, including the four numbered steps and the "violation" sentence. Do not summarize as "wait for CI and merge"; the explicit `gh pr checks --watch` / `gh run view --log-failed` / `gh pr view --json state` commands and the all-SUCCESS / `MERGED` confirmation requirements must appear in the prompt
+3. **CI watch and merge protocol** -- copy the "CI watch and merge protocol" section _verbatim_, including the four numbered steps and the "violation" sentence. Do not summarize as "wait for CI and merge"; the explicit `gh pr checks --watch` / `gh run view --log-failed` / `gh pr view --json isDraft` / `gh pr ready` / `gh pr view --json state` commands and the all-SUCCESS / `MERGED` confirmation requirements must appear in the prompt
 4. **Completion report format**: PR URL, the final `state` from `gh pr view --json state` (must be `MERGED`), a summary of conflicts resolved and CI failures fixed, and any follow-ups the user needs to be aware of
