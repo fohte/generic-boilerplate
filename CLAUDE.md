@@ -30,7 +30,7 @@ The repository root itself is a consumer of this template, managed via `.copier-
 
 - `regenerate-and-commit`: runs `scripts/generate-snapshots` and auto-commits any diff in `generated/`. If you forget to regenerate locally, CI will commit the regeneration for you, but any push that also touches `generated/` inconsistently will still need to reconcile
 - `validate (<fixture>)`: for each fixture in `tests/fixtures/`, initializes a git repo inside `generated/<fixture>/`, runs `lefthook run pre-commit --all-files` (prettier, eslint, etc. as configured by that fixture's own lefthook), then fails if any file has a diff. **This means every file under `generated/` must already be in the exact form its own lefthook would produce.**
-- `validate-node` / `validate-monorepo-node-workspace` / `validate-rust`: run the generated project's test suite (plus `pnpm peers check` for node-based fixtures) when the corresponding `generated/` tree changed
+- `validate-node` / `validate-monorepo-node-workspace` / `validate-rust`: run the generated project's test suite (plus `pnpm peers check` for node-based fixtures) when the corresponding `generated/<fixture>` tree changed
 
 ### Implications for `template/` authors
 
