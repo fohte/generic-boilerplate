@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.8.14](https://github.com/fohte/generic-boilerplate/compare/v0.8.13...v0.8.14) (2026-07-11)
+
+
+### Features
+
+* **template:** add CLAUDE.md file-splitting rule ([#501](https://github.com/fohte/generic-boilerplate/issues/501)) ([bd687a3](https://github.com/fohte/generic-boilerplate/commit/bd687a3616e6baa5447460a52337e64662823236))
+* **template:** detect pnpm peer dependency mismatches in CI ([#505](https://github.com/fohte/generic-boilerplate/issues/505)) ([bae7100](https://github.com/fohte/generic-boilerplate/commit/bae71004c609d398c2ad063a4f094c05d332be7b))
+
+
+### Bug Fixes
+
+* **template:** don't enable auto-merge on PRs that can't merge cleanly ([#509](https://github.com/fohte/generic-boilerplate/issues/509)) ([91a3f3c](https://github.com/fohte/generic-boilerplate/commit/91a3f3c5da38caa5162f71f7e46254a0050a402c))
+
+
+### Dependencies
+
+* **ci:** Update fohte/copier-update-action action to v0.1.4 ([#512](https://github.com/fohte/generic-boilerplate/issues/512)) ([cdccb23](https://github.com/fohte/generic-boilerplate/commit/cdccb239e41c426d0f1694ef96709287dcaeab74))
+* **ci:** Update fohte/copier-update-action digest to 5f9f847 ([#498](https://github.com/fohte/generic-boilerplate/issues/498)) ([943e036](https://github.com/fohte/generic-boilerplate/commit/943e036f075f1ded7130ac32ba8e5e56f968c0bc))
+* **ci:** Update taiki-e/install-action action to v2.82.7 ([#502](https://github.com/fohte/generic-boilerplate/issues/502)) ([bd7d9af](https://github.com/fohte/generic-boilerplate/commit/bd7d9aff7cd65ac1b9f8101ed0dc287888d59424))
+* **ci:** Update taiki-e/install-action action to v2.82.8 ([#513](https://github.com/fohte/generic-boilerplate/issues/513)) ([44a3e27](https://github.com/fohte/generic-boilerplate/commit/44a3e274af68fd74018d6e804a2759afd4da0db1))
+* Update @commitlint/cli to v21.2.0 ([#495](https://github.com/fohte/generic-boilerplate/issues/495)) ([58b516f](https://github.com/fohte/generic-boilerplate/commit/58b516fdf972f653f802ab21a5e07f524b0563cc))
+* Update dependency @fohte/eslint-config to v0.3.6 ([#511](https://github.com/fohte/generic-boilerplate/issues/511)) ([5585b49](https://github.com/fohte/generic-boilerplate/commit/5585b49eda609fa7f2968a84cc327cfa9fe716bf))
+* update dependency @fohte/service-kit to v0.1.4 ([#504](https://github.com/fohte/generic-boilerplate/issues/504)) ([cc84bea](https://github.com/fohte/generic-boilerplate/commit/cc84beadfbf41ff0ae655fac0dbf62c703ace261))
+* Update dependency github:betterleaks/betterleaks to v1.6.1 ([#485](https://github.com/fohte/generic-boilerplate/issues/485)) ([354053c](https://github.com/fohte/generic-boilerplate/commit/354053cb5bc2b97e0910790c494b33074fd01600))
+* update sentry-javascript monorepo to v10.63.0 ([#503](https://github.com/fohte/generic-boilerplate/issues/503)) ([985ccc3](https://github.com/fohte/generic-boilerplate/commit/985ccc398332966b8bcdb69e02cfe7837f966ee1))
+
 ## [0.8.13](https://github.com/fohte/generic-boilerplate/compare/v0.8.12...v0.8.13) (2026-07-07)
 
 
