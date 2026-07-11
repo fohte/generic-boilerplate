@@ -250,6 +250,8 @@ jobs:
       - name: Cache pnpm store
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
+          # node_modules is split across the workspace root and each package,
+          # so unlike validate-node only the shared pnpm store is cached.
           path: |
             ${{ steps.pnpm-store.outputs.path }}
           key: ${{ runner.os }}-pnpm-validate-monorepo-node-workspace-${{ hashFiles('generated/monorepo-node-workspace/**/package.json') }}
@@ -258,8 +260,6 @@ jobs:
       - run: pnpm install
         working-directory: generated/monorepo-node-workspace
 
-      # Installing from the workspace root covers every workspace package, so a
-      # single root-level check also validates subpackage peer dependencies.
       - name: Check peer dependencies
         working-directory: generated/monorepo-node-workspace
         run: pnpm peers check
