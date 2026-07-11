@@ -208,11 +208,14 @@ jobs:
       - name: Cache pnpm store
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
+          # node_modules must not be cached: pnpm treats a restored
+          # node_modules as up to date and keeps its auto-installed peers, so
+          # `pnpm peers check` would validate the stale cached resolution
+          # instead of a fresh one.
           path: |
             ${{ steps.pnpm-store.outputs.path }}
-            generated/node/node_modules
-          key: ${{ runner.os }}-pnpm-validate-node-${{ hashFiles('generated/node/package.json') }}
-          restore-keys: ${{ runner.os }}-pnpm-validate-node-
+          key: ${{ runner.os }}-pnpm-store-validate-node-${{ hashFiles('generated/node/package.json') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-validate-node-
 
       - run: pnpm install
         working-directory: generated/node
@@ -250,12 +253,10 @@ jobs:
       - name: Cache pnpm store
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          # node_modules is split across the workspace root and each package,
-          # so unlike validate-node only the shared pnpm store is cached.
           path: |
             ${{ steps.pnpm-store.outputs.path }}
-          key: ${{ runner.os }}-pnpm-validate-monorepo-node-workspace-${{ hashFiles('generated/monorepo-node-workspace/**/package.json') }}
-          restore-keys: ${{ runner.os }}-pnpm-validate-monorepo-node-workspace-
+          key: ${{ runner.os }}-pnpm-store-validate-monorepo-node-workspace-${{ hashFiles('generated/monorepo-node-workspace/**/package.json') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-validate-monorepo-node-workspace-
 
       - run: pnpm install
         working-directory: generated/monorepo-node-workspace
