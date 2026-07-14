@@ -58,7 +58,7 @@ jobs:
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: 2026.7.0
+          version: 2026.7.1
 
       - name: Save diff before regeneration
         id: save-diff
@@ -119,7 +119,7 @@ jobs:
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: 2026.7.0
+          version: 2026.7.1
           working_directory: generated/${{ matrix.fixture }}
 
       - name: Enable corepack
@@ -195,7 +195,7 @@ jobs:
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: 2026.7.0
+          version: 2026.7.1
           working_directory: generated/node
 
       - name: Enable corepack
@@ -240,7 +240,7 @@ jobs:
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: 2026.7.0
+          version: 2026.7.1
           working_directory: generated/monorepo-node-workspace
 
       - name: Enable corepack
@@ -289,7 +289,7 @@ jobs:
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: 2026.7.0
+          version: 2026.7.1
           working_directory: generated/rust
 
       - name: Run tests

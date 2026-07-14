@@ -81,7 +81,7 @@ jobs:
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: 2026.7.0
+          version: 2026.7.1
 {%- if type == 'node' %}
 
       - run: corepack enable
@@ -237,7 +237,7 @@ jobs:
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: 2026.7.0
+          version: 2026.7.1
 
       - run: corepack enable
 
@@ -277,7 +277,7 @@ jobs:
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: 2026.7.0
+          version: 2026.7.1
 {%- if use_coverage %}
 
       - name: Install cargo-llvm-cov
@@ -312,7 +312,7 @@ jobs:
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: 2026.7.0
+          version: 2026.7.1
 
       - run: corepack enable
 
@@ -409,7 +409,7 @@ jobs:
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: 2026.7.0
+          version: 2026.7.1
 
       - run: corepack enable
 
@@ -522,7 +522,7 @@ jobs:
 
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: 2026.7.0
+          version: 2026.7.1
 {%- if pkg.type == 'node' %}
 {%- if is_workspace %}
 {#- Workspace mode: install from root (pnpm only) #}
