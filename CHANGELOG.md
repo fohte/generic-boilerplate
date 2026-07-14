@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.8.15](https://github.com/fohte/generic-boilerplate/compare/v0.8.14...v0.8.15) (2026-07-14)
+
+
+### Dependencies
+
+* **ci:** Update dependency jdx/mise to v2026.7.1 ([#524](https://github.com/fohte/generic-boilerplate/issues/524)) ([a513813](https://github.com/fohte/generic-boilerplate/commit/a513813d3d8ce9e8122de657a3573aabd1204de8))
+* **ci:** Update marocchino/sticky-pull-request-comment action to v3.0.5 ([#518](https://github.com/fohte/generic-boilerplate/issues/518)) ([0c99342](https://github.com/fohte/generic-boilerplate/commit/0c99342f91dad859d9566724fc0b30c762a7c01d))
+* **ci:** Update taiki-e/install-action action to v2.82.10 ([#523](https://github.com/fohte/generic-boilerplate/issues/523)) ([c3a8084](https://github.com/fohte/generic-boilerplate/commit/c3a80845ba89084c7a6c334c061d164f70a44199))
+* **ci:** Update taiki-e/install-action action to v2.82.9 ([#521](https://github.com/fohte/generic-boilerplate/issues/521)) ([51b62cf](https://github.com/fohte/generic-boilerplate/commit/51b62cff143592776bf9aff550e93af66c5b23f6))
+* Update dependency vitest to v4.1.10 ([#522](https://github.com/fohte/generic-boilerplate/issues/522)) ([544921e](https://github.com/fohte/generic-boilerplate/commit/544921e015f6bdead94a84c27fd8adafa54a8b33))
+
 ## [0.8.14](https://github.com/fohte/generic-boilerplate/compare/v0.8.13...v0.8.14) (2026-07-11)
 
 
