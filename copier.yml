@@ -87,6 +87,7 @@ _exclude:
   # on the subpackages entry; the per-pkg bootstrap path is gated separately
   # in the subpackage filename template.
   - "{% if type != 'node' or not is_web_app | default(false) %}/src/bootstrap.ts{% endif %}"
+  - "{% if type != 'node' or not is_web_app | default(false) %}/otel-register.mjs{% endif %}"
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
   # Exclude Storybook files when storybook is disabled or no storybook packages exist
