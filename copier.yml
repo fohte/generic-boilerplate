@@ -82,6 +82,8 @@ _exclude:
   # Exclude Node.js specific src files when type is not 'node'
   - "{% if type != 'node' %}/src/index.ts{% endif %}"
   - "{% if type != 'node' %}/src/index.test.ts{% endif %}"
+  - "{% if type != 'node' %}/src/errors.ts{% endif %}"
+  - "{% if type != 'node' %}/src/errors.test.ts{% endif %}"
   # Exclude observability bootstrap when the root project is not a node web app.
   # Monorepo subpackages declare their own web app status via `web_app: true`
   # on the subpackages entry; the per-pkg bootstrap path is gated separately

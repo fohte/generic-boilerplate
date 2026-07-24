@@ -12,3 +12,16 @@ import {
 if (isObservabilityConfigured(process.env)) {
   initObservability(process.env)
 }
+
+// `@fohte/service-kit/observability` also exports `captureWithFingerprint`,
+// for reporting an error at an interop boundary under a stable fingerprint
+// (for Sentry grouping) without changing control flow. Call it once, right
+// before re-throwing a wrapped BoundaryError (see src/errors.ts):
+//
+//   import { captureWithFingerprint } from '@fohte/service-kit/observability'
+//
+//   catch (caughtErr) {
+//     const wrapped = new TaskStorePersistenceError('failed to save', caughtErr)
+//     captureWithFingerprint(wrapped, 'task-store.persistence-error')
+//     throw wrapped
+//   }

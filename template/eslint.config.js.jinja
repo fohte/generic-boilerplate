@@ -5,7 +5,16 @@ import storybook from 'eslint-plugin-storybook'
 {%- endif %}
 
 export default config(
-  { typescript: { typeChecked: true } },
+  {
+    typescript: { typeChecked: true },
+    errorHandling: {
+      // Glob paths for files that interop with an external SDK/framework or
+      // run at process startup (e.g. env validation, DB migrations, main
+      // entrypoints) and therefore need throw/try-catch. Everywhere else,
+      // model failures as neverthrow Result/ResultAsync values instead.
+      interopBoundaryFiles: [],
+    },
+  },
 {%- if has_storybook %}
   ...storybook.configs['flat/recommended'],
 {%- endif %}
