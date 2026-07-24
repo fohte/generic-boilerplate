@@ -14,9 +14,11 @@ if (isObservabilityConfigured(process.env)) {
 }
 
 // `@fohte/service-kit/observability` also exports `captureWithFingerprint`,
-// for reporting an error at an interop boundary under a stable fingerprint
-// (for Sentry grouping) without changing control flow. Call it once, right
-// before re-throwing a wrapped BoundaryError (see src/errors.ts):
+// for reporting an error under a stable fingerprint (for Sentry grouping)
+// without changing control flow. Call it once, right before re-throwing a
+// wrapped BoundaryError (see src/errors.ts), in a file listed under
+// eslint.config.js's errorHandling.interopBoundaryFiles — this file isn't
+// one, since it never catches an error itself:
 //
 //   import { captureWithFingerprint } from '@fohte/service-kit/observability'
 //
