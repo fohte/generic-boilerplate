@@ -5,7 +5,10 @@ import storybook from 'eslint-plugin-storybook'
 {%- endif %}
 
 export default config(
-  { typescript: { typeChecked: true } },
+  {
+    typescript: { typeChecked: true },
+    errorHandling: {},
+  },
 {%- if has_storybook %}
   ...storybook.configs['flat/recommended'],
 {%- endif %}

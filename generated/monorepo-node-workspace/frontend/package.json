@@ -9,6 +9,9 @@
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"
   },
+  "dependencies": {
+    "neverthrow": "8.2.0"
+  },
   "devDependencies": {
     "@storybook/addon-docs": "10.4.6",
     "@storybook/addon-themes": "10.4.6",
