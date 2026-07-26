@@ -10,7 +10,7 @@
     subpackage gets the observability wiring. -#}
 {%- set is_bootstrap_wired = (pkg is defined and (pkg.web_app | default(false)) and (pkg.tests | default(true))) or (pkg is not defined and type == 'node' and is_web_app | default(false)) -%}
 {%- if is_bootstrap_wired -%}
-import '@/bootstrap'
+import '#bootstrap'
 
 {% endif -%}
 export const greet = (name: string): string => {
