@@ -30,7 +30,12 @@
 {%- else %}
     "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
-    "test:unit": "vitest run"{{ "," if has_storybook else "" }}
+    "test:unit": "vitest run"{{ "," if (root_is_web_app or has_storybook) else "" }}
+{%- endif %}
+{%- if root_is_web_app %}
+    "build": "tsup",
+    "start": "node --import ./otel-register.mjs dist/index.js",
+    "dev": "tsx watch --import ./otel-register.mjs src/index.ts"{{ "," if has_storybook else "" }}
 {%- endif %}
 {%- if has_storybook and not is_workspace %}
     "storybook": "storybook dev -p 6006",
@@ -76,6 +81,10 @@
     "prettier": "3.9.4",
 {%- if has_storybook and not is_workspace %}
     "storybook": "10.4.6",
+{%- endif %}
+{%- if root_is_web_app %}
+    "tsup": "8.5.1",
+    "tsx": "4.23.1",
 {%- endif %}
     "typescript": "6.0.3",
     "vitest": "4.1.10"

@@ -1,0 +1,18 @@
+{#- This file is also `{% include %}`d verbatim from the subpackage index.ts
+    template, where `pkg` is defined and `type`/`is_web_app` still refer to
+    the root project's answers. Check `pkg` first so a subpackage render
+    keys off its own `web_app` flag instead of the root's.
+
+    The `pkg.web_app | default(false) and pkg.tests | default(true)` half
+    of this condition must stay in sync with the same gate on the
+    subpackage bootstrap.ts filename and on `pkg_is_web_app` in the
+    subpackage package.json template — all three decide whether that
+    subpackage gets the observability wiring. -#}
+{%- set is_bootstrap_wired = (pkg is defined and (pkg.web_app | default(false)) and (pkg.tests | default(true))) or (pkg is not defined and type == 'node' and is_web_app | default(false)) -%}
+{%- if is_bootstrap_wired -%}
+import '#bootstrap'
+
+{% endif -%}
+export const greet = (name: string): string => {
+  return `Hello, ${name}!`
+}
