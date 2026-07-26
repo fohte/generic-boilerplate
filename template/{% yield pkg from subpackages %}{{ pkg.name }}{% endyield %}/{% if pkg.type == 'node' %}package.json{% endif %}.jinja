@@ -13,6 +13,11 @@
   "packageManager": "pnpm@11.9.0",
 {%- endif %}
   "type": "module"{{ "," if has_scripts else "" }}
+{%- if has_tests %}
+  "imports": {
+    "#*": "./src/*.ts"
+  },
+{%- endif %}
 {%- if has_scripts %}
   "scripts": {
 {%- if has_tests and not is_workspace %}
@@ -54,7 +59,7 @@
   "devDependencies": {
     "@commitlint/cli": "21.2.0",
     "@eslint/eslintrc": "3.3.5",
-    "@fohte/eslint-config": "0.3.9",
+    "@fohte/eslint-config": "0.4.0",
     "@ninoseki/eslint-plugin-neverthrow": "0.2.0",
 {%- if has_storybook %}
     "@storybook/addon-docs": "10.4.6",

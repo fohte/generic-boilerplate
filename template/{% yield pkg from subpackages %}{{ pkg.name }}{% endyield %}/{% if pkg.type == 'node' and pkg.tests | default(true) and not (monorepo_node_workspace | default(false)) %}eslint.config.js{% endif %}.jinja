@@ -12,29 +12,4 @@ export default config(
 {%- if has_storybook %}
   ...storybook.configs['flat/recommended'],
 {%- endif %}
-  {
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['./*', '../*'],
-              message:
-                'Please use absolute imports instead of relative imports.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-{%- if has_storybook %}
-  // .storybook/ and vitest.config.ts are outside src/ where @ alias is unavailable
-  {
-    files: ['.storybook/**/*.ts', 'vitest.config.ts'],
-    rules: {
-      'no-restricted-imports': 'off',
-    },
-  },
-{%- endif %}
 )
