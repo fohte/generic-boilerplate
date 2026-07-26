@@ -90,6 +90,13 @@ _exclude:
   # in the subpackage filename template.
   - "{% if type != 'node' or not is_web_app | default(false) %}/src/bootstrap.ts{% endif %}"
   - "{% if type != 'node' or not is_web_app | default(false) %}/otel-register.mjs{% endif %}"
+  # Exclude web app build/container scaffolding when the root project is not
+  # a node web app. Scoped to the root project only; monorepo web_app_pkgs
+  # subpackages do not get Dockerfile/build scaffolding.
+  - "{% if type != 'node' or not is_web_app | default(false) %}/Dockerfile{% endif %}"
+  - "{% if type != 'node' or not is_web_app | default(false) %}/.dockerignore{% endif %}"
+  - "{% if type != 'node' or not is_web_app | default(false) %}/tsup.config.ts{% endif %}"
+  - "{% if type != 'node' or not is_web_app | default(false) %}.github/workflows/docker-publish.yml{% endif %}"
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
   # Exclude Storybook files when storybook is disabled or no storybook packages exist
@@ -204,6 +211,12 @@ is_web_app:
   default: false
   help: Is this project a web app (a long-running process exposing an HTTP server)?
   when: "{{ type == 'node' }}"
+
+web_app_port:
+  type: int
+  default: 8080
+  help: Port the web app's HTTP server listens on
+  when: '{{ is_web_app | default(false) }}'
 
 # Computed variables (not asked, derived from other answers).
 # Centralized here so individual templates can reference them directly
