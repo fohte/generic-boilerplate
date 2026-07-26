@@ -1190,6 +1190,74 @@ jobs:
 EOF
 }
 
+@test "syncs Dockerfile FROM version and preserves stage aliases" {
+  cat > template/Dockerfile.jinja << 'EOF'
+FROM node:24.18.0-slim AS base
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json ./
+EOF
+
+  cat > generated/base/Dockerfile << 'EOF'
+FROM node:24.18.0-slim AS base
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json ./
+EOF
+
+  create_initial_commit
+
+  # Renovate bumps the base image version
+  cat > generated/base/Dockerfile << 'EOF'
+FROM node:24.19.0-slim AS base
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json ./
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update node docker tag"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Synced 1 version"* ]]
+
+  diff -u template/Dockerfile.jinja - << 'EOF'
+FROM node:24.19.0-slim AS base
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json ./
+EOF
+}
+
+@test "detects already synced Dockerfile FROM version" {
+  cat > template/Dockerfile.jinja << 'EOF'
+FROM node:24.19.0-slim AS base
+EOF
+
+  cat > generated/base/Dockerfile << 'EOF'
+FROM node:24.18.0-slim AS base
+EOF
+
+  create_initial_commit
+
+  # Renovate updates to the same version the template already has
+  cat > generated/base/Dockerfile << 'EOF'
+FROM node:24.19.0-slim AS base
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update node docker tag"
+
+  run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Already in sync"* ]]
+}
+
 @test "is idempotent when template is already pinned to the same SHA" {
   mkdir -p template/.github/workflows generated/base/.github/workflows
 

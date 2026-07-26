@@ -114,6 +114,7 @@ sync_versions_to_template() {
     # - JSON: "key": "version"
     # - YAML: key: version or key: vX.Y.Z (unquoted, with optional v prefix)
     # - GitHub Actions: uses: owner/repo@vX.Y.Z or uses: owner/repo@<sha> # vX.Y.Z
+    # - Dockerfile: FROM image:version (optionally followed by "AS stage")
     # Semver range specifiers: =, ^, ~, >, >=, <, <= (for Cargo.toml pin, npm ranges)
     if [[ "$line" =~ ^[[:space:]]*-?[[:space:]]*(uses:[[:space:]]*[^@]+)@(([0-9a-f]{40}|v?[0-9]+(\.[0-9]+)*[^[:space:]#]*)([[:space:]]+#[[:space:]]*v?[0-9]+(\.[0-9]+)*[^[:space:]]*)?) ]]; then
       # GitHub Actions uses: directive - version (or SHA pin with trailing version comment) after @
@@ -121,18 +122,30 @@ sync_versions_to_template() {
       local version="${BASH_REMATCH[2]}"
       local quoted=false
       local uses_syntax=true
+      local dockerfile_syntax=false
+    elif [[ "$line" =~ ^(FROM[[:space:]]+[A-Za-z0-9_./-]+:)([^[:space:]]+) ]]; then
+      # Dockerfile FROM directive - version after the image name's colon. A
+      # stage alias reference (e.g. "FROM base AS deps") has no colon and
+      # never matches this pattern, so only externally-sourced images sync.
+      local key="${BASH_REMATCH[1]}"
+      local version="${BASH_REMATCH[2]}"
+      local quoted=false
+      local uses_syntax=false
+      local dockerfile_syntax=true
     elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*[=:][[:space:]]*\"([^@\"]+@|[=^~\>\<]{0,2}v?)?([0-9]+\.[0-9]+[^\"]*)\" ]]; then
       # Quoted version (TOML/JSON) - includes semver range specifiers and package@version format
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}${BASH_REMATCH[3]}"
       local quoted=true
       local uses_syntax=false
+      local dockerfile_syntax=false
     elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*:[[:space:]]*([=^~\>\<]{0,2}v?[0-9]+\.[0-9]+[^[:space:]#]*) ]]; then
       # Unquoted version (YAML) - only match colon separator, includes semver range specifiers
       local key="${BASH_REMATCH[1]}"
       local version="${BASH_REMATCH[2]}"
       local quoted=false
       local uses_syntax=false
+      local dockerfile_syntax=false
     else
       continue
     fi
@@ -160,6 +173,20 @@ sync_versions_to_template() {
         local escaped_version_sed
         escaped_version_sed=$(printf '%s' "$version" | sed 's/[|\\&]/\\&/g')
         if sed -i.bak -E "s|(${escaped_key}@)[^[:space:]#]*([[:space:]]+#[[:space:]]*v?[0-9]+(\.[0-9]+)*[^[:space:]]*)?|\\1${escaped_version_sed}|" "$template_file"; then
+          rm -f "${template_file}.bak"
+          ((changes_applied++)) || true
+        fi
+      elif [[ "$dockerfile_syntax" == "true" ]]; then
+        # Dockerfile FROM directive - version right after the image's colon,
+        # stopping at the next space so a trailing "AS stage" is preserved.
+        if grep -F -- "${key}${version}" "$template_file" > /dev/null 2>&1; then
+          continue
+        fi
+        local escaped_key
+        escaped_key=$(printf '%s' "$key" | sed 's/[|.^$*[\\/]/\\&/g')
+        local escaped_version_sed
+        escaped_version_sed=$(printf '%s' "$version" | sed 's/[|\\&]/\\&/g')
+        if sed -i.bak -E "s|(${escaped_key})[^[:space:]]*|\\1${escaped_version_sed}|" "$template_file"; then
           rm -f "${template_file}.bak"
           ((changes_applied++)) || true
         fi
