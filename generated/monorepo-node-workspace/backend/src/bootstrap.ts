@@ -12,7 +12,3 @@ import {
 if (isObservabilityConfigured(process.env)) {
   initObservability(process.env)
 }
-
-// `@fohte/service-kit/observability` also exports `captureWithFingerprint`,
-// for reporting a wrapped BoundaryError under a stable fingerprint (for
-// Sentry grouping) — see src/errors.ts for the throw/catch usage.

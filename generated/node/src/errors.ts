@@ -1,9 +1,9 @@
 // Wrap a caught external error before re-throwing, so it carries a
 // domain-meaningful message while preserving the original via `cause`.
 // Subclass per interop boundary — `name` is derived automatically, so no
-// constructor override is needed. The throw/try-catch this requires needs
-// an eslint-disable-next-line comment, since @fohte/eslint-config's
-// errorHandling bans them elsewhere:
+// constructor override is needed. The try and the throw this requires each
+// need their own eslint-disable-next-line comment, since @fohte/eslint-config's
+// errorHandling bans ThrowStatement and TryStatement as separate selectors:
 //
 //   export class TaskStorePersistenceError extends BoundaryError {}
 //
@@ -12,6 +12,7 @@
 //     ...
 //   } catch (caughtErr) {
 //     const wrapped = new TaskStorePersistenceError('failed to save', caughtErr)
+//     // eslint-disable-next-line no-restricted-syntax -- interop boundary
 //     throw wrapped
 //   }
 //
