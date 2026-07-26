@@ -99,6 +99,16 @@ resolve_yield_template() {
   return 1
 }
 
+# Escape a sed `s|pattern|repl|` pattern's metacharacters and its `|` delimiter.
+escape_sed_pattern() {
+  printf '%s' "$1" | sed 's/[|.^$*[\\/]/\\&/g'
+}
+
+# Escape a sed replacement's special characters (& and \) and its `|` delimiter.
+escape_sed_replacement() {
+  printf '%s' "$1" | sed 's/[|\\&]/\\&/g'
+}
+
 # Sync versions from generated file to template.
 # For each line with a version in the generated file, update the corresponding
 # line in the template to use the same version.
@@ -166,12 +176,10 @@ sync_versions_to_template() {
         # leave a stale "# v3" suffix after the replacement. The literal "@" between
         # key and value is part of the pattern, so use "|" as the sed delimiter to
         # avoid clashing with it.
-        # Escape regex metacharacters and the sed delimiter (|) in key.
         local escaped_key
-        escaped_key=$(printf '%s' "$key" | sed 's/[|.^$*[\\/]/\\&/g')
-        # Escape sed replacement special characters (& and \) and delimiter (|) in version.
+        escaped_key=$(escape_sed_pattern "$key")
         local escaped_version_sed
-        escaped_version_sed=$(printf '%s' "$version" | sed 's/[|\\&]/\\&/g')
+        escaped_version_sed=$(escape_sed_replacement "$version")
         if sed -i.bak -E "s|(${escaped_key}@)[^[:space:]#]*([[:space:]]+#[[:space:]]*v?[0-9]+(\.[0-9]+)*[^[:space:]]*)?|\\1${escaped_version_sed}|" "$template_file"; then
           rm -f "${template_file}.bak"
           ((changes_applied++)) || true
@@ -183,9 +191,9 @@ sync_versions_to_template() {
           continue
         fi
         local escaped_key
-        escaped_key=$(printf '%s' "$key" | sed 's/[|.^$*[\\/]/\\&/g')
+        escaped_key=$(escape_sed_pattern "$key")
         local escaped_version_sed
-        escaped_version_sed=$(printf '%s' "$version" | sed 's/[|\\&]/\\&/g')
+        escaped_version_sed=$(escape_sed_replacement "$version")
         if sed -i.bak -E "s|(${escaped_key})[^[:space:]]*|\\1${escaped_version_sed}|" "$template_file"; then
           rm -f "${template_file}.bak"
           ((changes_applied++)) || true

@@ -215,7 +215,7 @@ is_web_app:
 web_app_port:
   type: int
   default: 8080
-  help: Port the web app's HTTP server listens on
+  help: Port declared in the generated Dockerfile's EXPOSE directive
   when: '{{ is_web_app | default(false) }}'
 
 # Computed variables (not asked, derived from other answers).

@@ -13,7 +13,10 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile
 
-# Local development stage (used by docker compose)
+# Local development stage. Bind-mount the repo over /app (e.g. from
+# docker compose, with an anonymous volume on /app/node_modules to keep
+# this image's install instead of the host's) for live-reload without
+# rebuilding the image.
 FROM base AS dev
 COPY --from=deps /app/node_modules ./node_modules
 CMD ["pnpm", "dev"]
