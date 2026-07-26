@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.9.0](https://github.com/fohte/generic-boilerplate/compare/v0.8.14...v0.9.0) (2026-07-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **template:** switch internal imports to # subpath imports ([#529](https://github.com/fohte/generic-boilerplate/issues/529))
+* **template:** add neverthrow-based error handling scaffolding ([#527](https://github.com/fohte/generic-boilerplate/issues/527))
+
+### Features
+
+* **template:** add neverthrow-based error handling scaffolding ([#527](https://github.com/fohte/generic-boilerplate/issues/527)) ([067705b](https://github.com/fohte/generic-boilerplate/commit/067705b9ea5ecd3c9fd0745e6fca065459ec195d))
+* **template:** scaffold web app build, container, and CI ([#528](https://github.com/fohte/generic-boilerplate/issues/528)) ([bf9d239](https://github.com/fohte/generic-boilerplate/commit/bf9d2398b814ce1a4dcdde6b5dea0a5e676178ad))
+* **template:** switch internal imports to # subpath imports ([#529](https://github.com/fohte/generic-boilerplate/issues/529)) ([9b0761c](https://github.com/fohte/generic-boilerplate/commit/9b0761c7a29138d18d262951d62026f9772f0b03))
+
+
+### Bug Fixes
+
+* **template:** register the ESM loader hook so HTTP spans get created ([#526](https://github.com/fohte/generic-boilerplate/issues/526)) ([fef21b2](https://github.com/fohte/generic-boilerplate/commit/fef21b256bf1dce508cbd97e2fca791c766a97d8))
+
+
+### Dependencies
+
+* **ci:** Update dependency jdx/mise to v2026.7.1 ([#524](https://github.com/fohte/generic-boilerplate/issues/524)) ([a513813](https://github.com/fohte/generic-boilerplate/commit/a513813d3d8ce9e8122de657a3573aabd1204de8))
+* **ci:** Update marocchino/sticky-pull-request-comment action to v3.0.5 ([#518](https://github.com/fohte/generic-boilerplate/issues/518)) ([0c99342](https://github.com/fohte/generic-boilerplate/commit/0c99342f91dad859d9566724fc0b30c762a7c01d))
+* **ci:** Update taiki-e/install-action action to v2.82.10 ([#523](https://github.com/fohte/generic-boilerplate/issues/523)) ([c3a8084](https://github.com/fohte/generic-boilerplate/commit/c3a80845ba89084c7a6c334c061d164f70a44199))
+* **ci:** Update taiki-e/install-action action to v2.82.9 ([#521](https://github.com/fohte/generic-boilerplate/issues/521)) ([51b62cf](https://github.com/fohte/generic-boilerplate/commit/51b62cff143592776bf9aff550e93af66c5b23f6))
+* Update @commitlint/cli to v21.2.1 ([#530](https://github.com/fohte/generic-boilerplate/issues/530)) ([912ab70](https://github.com/fohte/generic-boilerplate/commit/912ab70ca68188805d9fe96364d8181230d59368))
+* Update dependency lefthook to v2.1.10 ([#531](https://github.com/fohte/generic-boilerplate/issues/531)) ([74105b0](https://github.com/fohte/generic-boilerplate/commit/74105b03e0e7d4dc21d2885f7d026009426b8bda))
+* Update dependency vitest to v4.1.10 ([#522](https://github.com/fohte/generic-boilerplate/issues/522)) ([544921e](https://github.com/fohte/generic-boilerplate/commit/544921e015f6bdead94a84c27fd8adafa54a8b33))
+* Update pnpm to v11.15.0 ([#520](https://github.com/fohte/generic-boilerplate/issues/520)) ([7bbe678](https://github.com/fohte/generic-boilerplate/commit/7bbe678263235d0ba743c5f1ee24892e4dacef10))
+
 ## [0.8.14](https://github.com/fohte/generic-boilerplate/compare/v0.8.13...v0.8.14) (2026-07-11)
 
 
