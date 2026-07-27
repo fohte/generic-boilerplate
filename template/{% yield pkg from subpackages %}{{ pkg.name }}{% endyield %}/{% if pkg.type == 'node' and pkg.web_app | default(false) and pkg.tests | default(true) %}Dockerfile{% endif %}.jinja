@@ -1,4 +1,4 @@
-{%- if is_workspace %}
+{%- if is_workspace -%}
 # syntax=docker/dockerfile:1
 
 # Keep the Node.js version in sync with .mise.toml.
@@ -47,7 +47,7 @@ USER node
 WORKDIR /app/{{ pkg.name }}
 EXPOSE {{ pkg.web_app_port | default(8080) }}
 CMD ["node", "--import", "./otel-register.mjs", "dist/index.js"]
-{%- else %}
-{%- set web_app_port = pkg.web_app_port | default(8080) %}
+{% else %}
+{%- set web_app_port = pkg.web_app_port | default(8080) -%}
 {% include "template/Dockerfile.jinja" -%}
-{%- endif %}
+{%- endif -%}

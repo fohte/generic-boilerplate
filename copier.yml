@@ -101,7 +101,7 @@ _exclude:
   - "{% if not (type == 'node' and is_web_app | default(false)) and not (is_workspace and has_web_app_pkg) %}/.dockerignore{% endif %}"
   # docker-publish.yml is needed whenever there's anything to publish: the
   # root itself, or any monorepo web app subpackage (workspace or not).
-  - "{% if not (type == 'node' and is_web_app | default(false)) and not has_web_app_pkg %}.github/workflows/docker-publish.yml{% endif %}"
+  - '{% if not has_web_app %}.github/workflows/docker-publish.yml{% endif %}'
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
   # Exclude Storybook files when storybook is disabled or no storybook packages exist
@@ -247,7 +247,12 @@ storybook_pkgs:
 
 web_app_pkgs:
   type: yaml
-  default: "{{ subpackages | default([]) | selectattr('web_app', 'defined') | selectattr('web_app', 'equalto', true) | list }}"
+  # `tests: false` collapses the src/ segment and skips the bootstrap.ts/
+  # otel-register.mjs/Dockerfile emission for that subpackage (see the
+  # subpackage filename templates), so a `tests: false` pkg must not appear
+  # here even if `web_app: true` — otherwise docker-publish.yml's matrix
+  # would reference a Dockerfile that was never generated.
+  default: "{{ subpackages | default([]) | selectattr('web_app', 'defined') | selectattr('web_app', 'equalto', true) | rejectattr('tests', 'equalto', false) | list }}"
   when: false
 
 has_node_pkg:

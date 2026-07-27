@@ -10,6 +10,11 @@ monorepo_node_workspace: false
 subpackages:
   - name: docs
     type: node
-    # The docs subpackage will bring its own setup (Astro/Starlight etc.).
+    # The docs subpackage will bring its own setup (Astro/Starlight etc.),
+    # including its own Dockerfile if it needs one. `web_app: true` here
+    # exercises the tests:false + web_app:true combination: it must NOT
+    # produce a Dockerfile or a docker-publish.yml matrix entry, since
+    # `tests: false` already collapses all of this subpackage's scaffolding.
     tests: false
+    web_app: true
 repo_language: ja
