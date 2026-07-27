@@ -5,7 +5,7 @@
     same gate so we never ship deps without the file that uses them. -#}
 {%- set pkg_is_web_app = (pkg.web_app | default(false)) and (pkg.tests | default(true)) -%}
 {%- set has_scripts = has_tests or has_storybook -%}
-{%- set has_dev_deps = (has_tests and not is_workspace) or has_storybook -%}
+{%- set has_dev_deps = (has_tests and not is_workspace) or has_storybook or pkg_is_web_app -%}
 {
   "name": "{{ pkg.name }}",
   "private": true,
@@ -29,7 +29,12 @@
 {%- if has_tests %}
     "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
-    "test:unit": "vitest run"{{ "," if has_storybook else "" }}
+    "test:unit": "vitest run"{{ "," if (pkg_is_web_app or has_storybook) else "" }}
+{%- endif %}
+{%- if pkg_is_web_app %}
+    "build": "tsup",
+    "start": "node --import ./otel-register.mjs dist/index.js",
+    "dev": "tsx watch --import ./otel-register.mjs src/index.ts"{{ "," if has_storybook else "" }}
 {%- endif %}
 {%- if has_storybook %}
     "storybook": "storybook dev -p 6006",
@@ -78,15 +83,30 @@
 {%- if has_storybook %}
     "storybook": "10.4.6",
 {%- endif %}
+{%- if pkg_is_web_app %}
+    "tsup": "8.5.1",
+    "tsx": "4.23.1",
+{%- endif %}
     "typescript": "6.0.3",
     "vitest": "4.1.10"
   }
-{%- elif has_storybook %}
+{%- elif has_storybook or pkg_is_web_app %}
   "devDependencies": {
+{%- if has_storybook %}
     "@storybook/addon-docs": "10.4.6",
     "@storybook/addon-themes": "10.4.6",
     "@storybook/react-vite": "10.4.6",
+{%- endif %}
+{%- if has_storybook and pkg_is_web_app %}
+    "storybook": "10.4.6",
+    "tsup": "8.5.1",
+    "tsx": "4.23.1"
+{%- elif has_storybook %}
     "storybook": "10.4.6"
+{%- else %}
+    "tsup": "8.5.1",
+    "tsx": "4.23.1"
+{%- endif %}
   }
 {%- endif %}
 }

@@ -90,13 +90,18 @@ _exclude:
   # in the subpackage filename template.
   - "{% if type != 'node' or not is_web_app | default(false) %}/src/bootstrap.ts{% endif %}"
   - "{% if type != 'node' or not is_web_app | default(false) %}/otel-register.mjs{% endif %}"
-  # Exclude web app build/container scaffolding when the root project is not
-  # a node web app. Scoped to the root project only; monorepo web_app_pkgs
-  # subpackages do not get Dockerfile/build scaffolding.
+  # Exclude root-level web app build/container scaffolding when the root
+  # project is not a node web app. Monorepo web_app_pkgs subpackages get their
+  # own Dockerfile/tsup.config.ts (and, in non-workspace mode, .dockerignore)
+  # via the subpackage filename template instead.
   - "{% if type != 'node' or not is_web_app | default(false) %}/Dockerfile{% endif %}"
-  - "{% if type != 'node' or not is_web_app | default(false) %}/.dockerignore{% endif %}"
   - "{% if type != 'node' or not is_web_app | default(false) %}/tsup.config.ts{% endif %}"
-  - "{% if type != 'node' or not is_web_app | default(false) %}.github/workflows/docker-publish.yml{% endif %}"
+  # Root .dockerignore also covers workspace-mode web app subpackages, since
+  # their Docker build context is the repo root.
+  - "{% if not (type == 'node' and is_web_app | default(false)) and not (is_workspace and has_web_app_pkg) %}/.dockerignore{% endif %}"
+  # docker-publish.yml is needed whenever there's anything to publish: the
+  # root itself, or any monorepo web app subpackage (workspace or not).
+  - "{% if not (type == 'node' and is_web_app | default(false)) and not has_web_app_pkg %}.github/workflows/docker-publish.yml{% endif %}"
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
   # Exclude Storybook files when storybook is disabled or no storybook packages exist
@@ -169,8 +174,12 @@ subpackages:
     Per-entry flags (optional):
       storybook: true  -- enable Storybook for a node subpackage
       web_app: true    -- mark a node subpackage as a web app (long-running
-                          HTTP server). Gates the observability bootstrap
-                          emission for that subpackage.
+                          HTTP server). Gates the observability bootstrap and
+                          build/container scaffolding (Dockerfile, tsup.config.ts,
+                          docker-publish.yml matrix entry) for that subpackage.
+      web_app_port: 8080 -- port declared in the subpackage's Dockerfile EXPOSE
+                          directive. Only meaningful with web_app: true;
+                          defaults to 8080.
       tests: false     -- skip test scaffolding (vitest, tsconfig, src/, eslint),
                           the unit-test CI job, the per-package eslint
                           lefthook hook, and the pnpm install/cache step in
