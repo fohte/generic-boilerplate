@@ -174,9 +174,10 @@ subpackages:
     Per-entry flags (optional):
       storybook: true  -- enable Storybook for a node subpackage
       web_app: true    -- mark a node subpackage as a web app (long-running
-                          HTTP server). Gates the observability bootstrap and
+                          HTTP server). Gates the observability bootstrap,
                           build/container scaffolding (Dockerfile, tsup.config.ts,
-                          docker-publish.yml matrix entry) for that subpackage.
+                          docker-publish.yml matrix entry), and the pnpm
+                          allowBuilds entry for protobufjs for that subpackage.
       web_app_port: 8080 -- port declared in the subpackage's Dockerfile EXPOSE
                           directive. Only meaningful with web_app: true;
                           defaults to 8080.
