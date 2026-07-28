@@ -9,6 +9,7 @@ subpackages:
   - name: frontend
     type: node
     storybook: true
+    error_tracking: true
   - name: backend
     type: node
     web_app: true

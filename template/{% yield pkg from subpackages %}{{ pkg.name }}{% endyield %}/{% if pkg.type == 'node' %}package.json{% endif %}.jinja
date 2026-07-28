@@ -4,6 +4,12 @@
     collapses the src/ segment). Keep the OTel/Sentry dependency block on the
     same gate so we never ship deps without the file that uses them. -#}
 {%- set pkg_is_web_app = (pkg.web_app | default(false)) and (pkg.tests | default(true)) -%}
+{#- error_tracking widens the OTel/Sentry dependency gate beyond web_app:
+    bootstrap.ts also emits for error_tracking-only subpackages (see the
+    bootstrap.ts filename template), so the deps must follow suit. Scripts
+    and the tsup/tsx dev deps stay on pkg_is_web_app alone — those are
+    HTTP-server-specific. -#}
+{%- set pkg_has_error_tracking = ((pkg.web_app | default(false)) or (pkg.error_tracking | default(false))) and (pkg.tests | default(true)) -%}
 {%- set has_scripts = has_tests or has_storybook -%}
 {%- set has_dev_deps = (has_tests and not is_workspace) or has_storybook or pkg_is_web_app -%}
 {
@@ -44,7 +50,7 @@
 {%- endif %}
 {%- if has_tests %}
   "dependencies": {
-{%- if pkg_is_web_app %}
+{%- if pkg_has_error_tracking %}
     "@fohte/service-kit": "0.1.4",
     "@opentelemetry/api": "1.9.1",
     "@opentelemetry/auto-instrumentations-node": "0.77.0",
