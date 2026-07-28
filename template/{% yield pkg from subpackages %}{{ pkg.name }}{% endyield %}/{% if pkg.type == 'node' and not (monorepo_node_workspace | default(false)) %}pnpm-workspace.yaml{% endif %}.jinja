@@ -1,6 +1,10 @@
 allowBuilds:
   # required by vitest's transformer
   esbuild: true
+{%- if (pkg.web_app | default(false)) and (pkg.tests | default(true)) %}
+  # required by @opentelemetry/exporter-trace-otlp-proto
+  protobufjs: true
+{%- endif %}
   # required by @fohte/eslint-config -> eslint-plugin-import-x for module resolution
   unrs-resolver: true
 

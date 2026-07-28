@@ -1,0 +1,53 @@
+{%- if is_workspace -%}
+# syntax=docker/dockerfile:1
+
+# Keep the Node.js version in sync with .mise.toml.
+FROM node:24.18.0-slim AS base
+WORKDIR /app
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+# Node.js 25+ no longer bundles Corepack: https://github.com/nodejs/corepack
+RUN npm install -g corepack@0.35.0 && npm cache clean --force && corepack enable
+
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+{%- for p in node_pkgs %}
+COPY {{ p.name }}/package.json {{ p.name }}/
+{%- endfor %}
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --frozen-lockfile
+
+# Local development stage. Bind-mount the repo over /app (e.g. from
+# docker compose, with an anonymous volume on /app/node_modules to keep
+# this image's install instead of the host's) for live-reload without
+# rebuilding the image.
+FROM base AS dev
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/{{ pkg.name }}/node_modules ./{{ pkg.name }}/node_modules
+WORKDIR /app/{{ pkg.name }}
+CMD ["pnpm", "dev"]
+
+FROM deps AS builder
+COPY . .
+RUN pnpm --filter {{ pkg.name }} build
+
+# Built fresh from `base`, not `builder`, so the runtime image doesn't inherit
+# dev dependencies or source files left over from the build stage.
+FROM base AS runtime
+ENV NODE_ENV=production
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+{%- for p in node_pkgs %}
+COPY {{ p.name }}/package.json {{ p.name }}/
+{%- endfor %}
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --frozen-lockfile --prod
+COPY --from=builder /app/{{ pkg.name }}/dist ./{{ pkg.name }}/dist
+COPY {{ pkg.name }}/otel-register.mjs ./{{ pkg.name }}/
+USER node
+WORKDIR /app/{{ pkg.name }}
+EXPOSE {{ pkg.web_app_port | default(8080) }}
+CMD ["node", "--import", "./otel-register.mjs", "dist/index.js"]
+{% else %}
+{%- set web_app_port = pkg.web_app_port | default(8080) -%}
+{% include "template/Dockerfile.jinja" -%}
+{%- endif -%}

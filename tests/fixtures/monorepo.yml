@@ -11,6 +11,8 @@ subpackages:
   - name: frontend
     type: node
     storybook: true
+    web_app: true
+    web_app_port: 3001
   - name: backend
     type: rust
 repo_language: ja
