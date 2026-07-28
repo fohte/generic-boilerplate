@@ -46,6 +46,10 @@ jobs:
 
       - run: corepack enable
 
+      # corepack creates the pnpm executable inside mise's node install bin
+      # directory; reshim so the mise shims dir (which is on PATH) picks it up.
+      - run: mise reshim
+
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"

@@ -126,6 +126,12 @@ jobs:
         run: corepack enable
         if: hashFiles(format('generated/{0}/**/package.json', matrix.fixture)) != ''
 
+      # corepack creates the pnpm executable inside mise's node install bin
+      # directory; reshim so the mise shims dir (which is on PATH) picks it up.
+      - name: Reshim mise shims
+        run: mise reshim
+        if: hashFiles(format('generated/{0}/**/package.json', matrix.fixture)) != ''
+
       - name: Generate lockfiles
         working-directory: generated/${{ matrix.fixture }}
         run: |
@@ -201,6 +207,11 @@ jobs:
       - name: Enable corepack
         run: corepack enable
 
+      # corepack creates the pnpm executable inside mise's node install bin
+      # directory; reshim so the mise shims dir (which is on PATH) picks it up.
+      - name: Reshim mise shims
+        run: mise reshim
+
       - name: Get pnpm store directory
         id: pnpm-store
         run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
@@ -245,6 +256,11 @@ jobs:
 
       - name: Enable corepack
         run: corepack enable
+
+      # corepack creates the pnpm executable inside mise's node install bin
+      # directory; reshim so the mise shims dir (which is on PATH) picks it up.
+      - name: Reshim mise shims
+        run: mise reshim
 
       - name: Get pnpm store directory
         id: pnpm-store

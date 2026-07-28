@@ -56,6 +56,10 @@ jobs:
           version: 2026.7.7
 
       - run: corepack enable
+
+      # corepack creates the pnpm executable inside mise's node install bin
+      # directory; reshim so the mise shims dir (which is on PATH) picks it up.
+      - run: mise reshim
 {%- if is_workspace %}
 
       - name: Get pnpm store directory
@@ -151,6 +155,10 @@ jobs:
           version: 2026.7.7
 
       - run: corepack enable
+
+      # corepack creates the pnpm executable inside mise's node install bin
+      # directory; reshim so the mise shims dir (which is on PATH) picks it up.
+      - run: mise reshim
 
       - name: Get pnpm store directory
         id: pnpm-store
