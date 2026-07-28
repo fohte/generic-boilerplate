@@ -6,9 +6,10 @@
 
     The `(pkg.web_app | default(false) or pkg.error_tracking | default(false))
     and pkg.tests | default(true)` half of this condition must stay in sync
-    with the same gate on the subpackage bootstrap.ts filename and on
-    `pkg_has_error_tracking` in the subpackage package.json template — all
-    three decide whether that subpackage gets the observability wiring. -#}
+    with the same gate on the subpackage bootstrap.ts filename, on
+    `pkg_has_error_tracking` in the subpackage package.json template, and on
+    the subpackage pnpm-workspace.yaml's protobufjs allowBuilds gate — all
+    four decide whether that subpackage gets the observability wiring. -#}
 {%- set is_bootstrap_wired = (pkg is defined and (pkg.web_app | default(false) or pkg.error_tracking | default(false)) and (pkg.tests | default(true))) or (pkg is not defined and type == 'node' and (is_web_app | default(false) or error_tracking | default(false))) -%}
 {%- if is_bootstrap_wired -%}
 import '#bootstrap'
