@@ -32,6 +32,8 @@ The repository root itself is a consumer of this template, managed via `.copier-
 - `validate (<fixture>)`: for each fixture in `tests/fixtures/`, initializes a git repo inside `generated/<fixture>/`, runs `lefthook run pre-commit --all-files` (prettier, eslint, etc. as configured by that fixture's own lefthook), then fails if any file has a diff. **This means every file under `generated/` must already be in the exact form its own lefthook would produce.**
 - `validate-node` / `validate-monorepo-node-workspace` / `validate-rust`: run the generated project's test suite (plus `pnpm peers check` for node-based fixtures) when the corresponding `generated/<fixture>` tree changed
 
+Do not reproduce the `validate` job locally (e.g., copying `generated/<fixture>` into a scratch directory, running `git init`, and executing `lefthook run pre-commit --all-files` there). That job assumes CI's disposable runner; attempting the same steps against a real, persistent worktree risks operating on the wrong directory and corrupting in-progress work. Local verification stops at running `scripts/generate-snapshots` and reviewing the resulting diff — leave formatter/test correctness confirmation to CI after pushing.
+
 ### Implications for `template/` authors
 
 - Because generated files must be lefthook-clean, the bytes emitted by copier rendering must already match the downstream formatter's output. Prettier cannot format `.jinja` files directly (it errors on unknown parser), so you cannot rely on post-rendering formatting of the jinja source itself
