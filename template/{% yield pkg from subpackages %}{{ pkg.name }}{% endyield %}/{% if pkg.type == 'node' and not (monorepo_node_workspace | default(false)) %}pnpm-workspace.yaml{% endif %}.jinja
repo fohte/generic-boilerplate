@@ -1,7 +1,7 @@
 allowBuilds:
   # required by vitest's transformer
   esbuild: true
-{%- if (pkg.web_app | default(false)) and (pkg.tests | default(true)) %}
+{%- if ((pkg.web_app | default(false)) or (pkg.error_tracking | default(false))) and (pkg.tests | default(true)) %}
   # required by @opentelemetry/exporter-trace-otlp-proto
   protobufjs: true
 {%- endif %}

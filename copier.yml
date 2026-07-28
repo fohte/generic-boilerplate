@@ -84,11 +84,15 @@ _exclude:
   - "{% if type != 'node' %}/src/index.test.ts{% endif %}"
   - "{% if type != 'node' %}/src/errors.ts{% endif %}"
   - "{% if type != 'node' %}/src/errors.test.ts{% endif %}"
-  # Exclude observability bootstrap when the root project is not a node web app.
-  # Monorepo subpackages declare their own web app status via `web_app: true`
-  # on the subpackages entry; the per-pkg bootstrap path is gated separately
-  # in the subpackage filename template.
-  - "{% if type != 'node' or not is_web_app | default(false) %}/src/bootstrap.ts{% endif %}"
+  # Exclude observability bootstrap when the root project has neither web app
+  # nor error tracking enabled. Monorepo subpackages declare their own status
+  # via `web_app: true` / `error_tracking: true` on the subpackages entry;
+  # the per-pkg bootstrap path is gated separately in the subpackage filename
+  # template.
+  - "{% if type != 'node' or not (is_web_app | default(false) or error_tracking | default(false)) %}/src/bootstrap.ts{% endif %}"
+  # otel-register.mjs's `node --import` hook only matters for a long-running
+  # HTTP server (see otel-register.mjs), so it stays web-app-only even when
+  # error_tracking is enabled.
   - "{% if type != 'node' or not is_web_app | default(false) %}/otel-register.mjs{% endif %}"
   # Exclude root-level web app build/container scaffolding when the root
   # project is not a node web app. Monorepo web_app_pkgs subpackages get their
@@ -174,13 +178,17 @@ subpackages:
     Per-entry flags (optional):
       storybook: true  -- enable Storybook for a node subpackage
       web_app: true    -- mark a node subpackage as a web app (long-running
-                          HTTP server). Gates the observability bootstrap,
-                          build/container scaffolding (Dockerfile, tsup.config.ts,
-                          docker-publish.yml matrix entry), and the pnpm
+                          HTTP server). Implies error_tracking (see below)
+                          and additionally gates build/container scaffolding
+                          (Dockerfile, tsup.config.ts, otel-register.mjs,
+                          docker-publish.yml matrix entry) and the pnpm
                           allowBuilds entry for protobufjs for that subpackage.
       web_app_port: 8080 -- port declared in the subpackage's Dockerfile EXPOSE
                           directive. Only meaningful with web_app: true;
                           defaults to 8080.
+      error_tracking: true -- enable Sentry error tracking wiring
+                          (dependencies + bootstrap import) for a node
+                          subpackage independent of web_app.
       tests: false     -- skip test scaffolding (vitest, tsconfig, src/, eslint),
                           the unit-test CI job, the per-package eslint
                           lefthook hook, and the pnpm install/cache step in
@@ -213,9 +221,11 @@ use_storybook:
   help: Enable Storybook deployment to Cloudflare Pages?
   when: "{{ type == 'node' or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
 
-# Web app flag. Drives the observability bootstrap emission (and is intended
-# to gate any future long-running-service scaffolding). For monorepos, set
-# `web_app: true` on the relevant subpackages entry instead.
+# Web app flag. Implies error_tracking (see below) and additionally drives
+# build/container scaffolding (Dockerfile, tsup.config.ts, otel-register.mjs,
+# docker-publish.yml) and is intended to gate any future long-running-service
+# scaffolding. For monorepos, set `web_app: true` on the relevant
+# subpackages entry instead.
 is_web_app:
   type: bool
   default: false
@@ -227,6 +237,18 @@ web_app_port:
   default: 8080
   help: Port declared in the generated Dockerfile's EXPOSE directive
   when: '{{ is_web_app | default(false) }}'
+
+# Error tracking flag, independent of web app status. Installs the Sentry +
+# OpenTelemetry dependency set and wires up the observability bootstrap
+# (src/bootstrap.ts, imported first from src/index.ts) without the
+# HTTP-server-specific build/start/dev scripts or container scaffolding that
+# `is_web_app` adds. Implied by `is_web_app: true`. For monorepos, set
+# `error_tracking: true` on the relevant subpackages entry instead.
+error_tracking:
+  type: bool
+  default: false
+  help: Enable Sentry error tracking independent of web app status?
+  when: "{{ type == 'node' }}"
 
 # Computed variables (not asked, derived from other answers).
 # Centralized here so individual templates can reference them directly
@@ -256,6 +278,14 @@ web_app_pkgs:
   default: "{{ subpackages | default([]) | selectattr('web_app', 'defined') | selectattr('web_app', 'equalto', true) | rejectattr('tests', 'equalto', false) | list }}"
   when: false
 
+error_tracking_pkgs:
+  type: yaml
+  # Mirrors web_app_pkgs: `tests: false` collapses the src/ segment and
+  # skips the bootstrap.ts emission for that subpackage, so a `tests: false`
+  # pkg must not appear here even if `error_tracking: true`.
+  default: "{{ subpackages | default([]) | selectattr('error_tracking', 'defined') | selectattr('error_tracking', 'equalto', true) | rejectattr('tests', 'equalto', false) | list }}"
+  when: false
+
 has_node_pkg:
   type: bool
   default: '{{ node_pkgs | length > 0 }}'
@@ -276,6 +306,11 @@ has_web_app_pkg:
   default: '{{ web_app_pkgs | length > 0 }}'
   when: false
 
+has_error_tracking_pkg:
+  type: bool
+  default: '{{ error_tracking_pkgs | length > 0 }}'
+  when: false
+
 has_node:
   type: bool
   default: "{{ type == 'node' or has_node_pkg }}"
@@ -284,6 +319,16 @@ has_node:
 has_web_app:
   type: bool
   default: '{{ is_web_app | default(false) or has_web_app_pkg }}'
+  when: false
+
+# Superset of has_web_app: true whenever the Sentry + OpenTelemetry
+# dependency set is installed anywhere in the project (root or any
+# subpackage), whether via web_app or error_tracking. Used to gate
+# infrastructure shared by both, such as the pnpm protobufjs allowBuilds
+# entry.
+has_error_tracking:
+  type: bool
+  default: '{{ is_web_app | default(false) or error_tracking | default(false) or has_web_app_pkg or has_error_tracking_pkg }}'
   when: false
 
 has_rust:

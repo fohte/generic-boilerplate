@@ -9,5 +9,6 @@ use_release_please: false
 use_storybook: true
 is_web_app: true
 web_app_port: 8080
+error_tracking: false
 repo_language: ja
 subpackages: []
