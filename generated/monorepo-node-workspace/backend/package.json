@@ -14,7 +14,7 @@
     "dev": "tsx watch --import ./otel-register.mjs src/index.ts"
   },
   "dependencies": {
-    "@fohte/service-kit": "0.1.4",
+    "@fohte/service-kit": "0.1.6",
     "@opentelemetry/api": "1.9.1",
     "@opentelemetry/auto-instrumentations-node": "0.77.0",
     "@opentelemetry/exporter-trace-otlp-proto": "0.219.0",
