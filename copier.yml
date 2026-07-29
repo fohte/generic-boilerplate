@@ -90,10 +90,6 @@ _exclude:
   # the per-pkg bootstrap path is gated separately in the subpackage filename
   # template.
   - "{% if type != 'node' or not (is_web_app | default(false) or error_tracking | default(false)) %}/src/bootstrap.ts{% endif %}"
-  # otel-register.mjs's `node --import` hook only matters for a long-running
-  # HTTP server (see otel-register.mjs), so it stays web-app-only even when
-  # error_tracking is enabled.
-  - "{% if type != 'node' or not is_web_app | default(false) %}/otel-register.mjs{% endif %}"
   # Exclude root-level web app build/container scaffolding when the root
   # project is not a node web app. Monorepo web_app_pkgs subpackages get their
   # own Dockerfile/tsup.config.ts (and, in non-workspace mode, .dockerignore)
@@ -180,9 +176,9 @@ subpackages:
       web_app: true    -- mark a node subpackage as a web app (long-running
                           HTTP server). Implies error_tracking (see below)
                           and additionally gates build/container scaffolding
-                          (Dockerfile, tsup.config.ts, otel-register.mjs,
-                          docker-publish.yml matrix entry) and the pnpm
-                          allowBuilds entry for protobufjs for that subpackage.
+                          (Dockerfile, tsup.config.ts, docker-publish.yml
+                          matrix entry) and the pnpm allowBuilds entry for
+                          protobufjs for that subpackage.
       web_app_port: 8080 -- port declared in the subpackage's Dockerfile EXPOSE
                           directive. Only meaningful with web_app: true;
                           defaults to 8080.
@@ -222,10 +218,9 @@ use_storybook:
   when: "{{ type == 'node' or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
 
 # Web app flag. Implies error_tracking (see below) and additionally drives
-# build/container scaffolding (Dockerfile, tsup.config.ts, otel-register.mjs,
-# docker-publish.yml) and is intended to gate any future long-running-service
-# scaffolding. For monorepos, set `web_app: true` on the relevant
-# subpackages entry instead.
+# build/container scaffolding (Dockerfile, tsup.config.ts, docker-publish.yml)
+# and is intended to gate any future long-running-service scaffolding. For
+# monorepos, set `web_app: true` on the relevant subpackages entry instead.
 is_web_app:
   type: bool
   default: false
@@ -270,11 +265,11 @@ storybook_pkgs:
 
 web_app_pkgs:
   type: yaml
-  # `tests: false` collapses the src/ segment and skips the bootstrap.ts/
-  # otel-register.mjs/Dockerfile emission for that subpackage (see the
-  # subpackage filename templates), so a `tests: false` pkg must not appear
-  # here even if `web_app: true` — otherwise docker-publish.yml's matrix
-  # would reference a Dockerfile that was never generated.
+  # `tests: false` collapses the src/ segment and skips the
+  # bootstrap.ts/Dockerfile emission for that subpackage (see the subpackage
+  # filename templates), so a `tests: false` pkg must not appear here even if
+  # `web_app: true` — otherwise docker-publish.yml's matrix would reference a
+  # Dockerfile that was never generated.
   default: "{{ subpackages | default([]) | selectattr('web_app', 'defined') | selectattr('web_app', 'equalto', true) | rejectattr('tests', 'equalto', false) | list }}"
   when: false
 

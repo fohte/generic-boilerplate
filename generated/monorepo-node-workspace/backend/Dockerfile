@@ -39,8 +39,7 @@ COPY backend/package.json backend/
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile --prod
 COPY --from=builder /app/backend/dist ./backend/dist
-COPY backend/otel-register.mjs ./backend/
 USER node
 WORKDIR /app/backend
 EXPOSE 8080
-CMD ["node", "--import", "./otel-register.mjs", "dist/index.js"]
+CMD ["node", "--import", "@fohte/service-kit/otel-register", "dist/index.js"]
