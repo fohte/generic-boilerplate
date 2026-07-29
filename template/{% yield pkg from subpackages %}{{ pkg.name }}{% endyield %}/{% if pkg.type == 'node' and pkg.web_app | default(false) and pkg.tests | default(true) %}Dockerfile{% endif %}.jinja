@@ -42,11 +42,10 @@ COPY {{ p.name }}/package.json {{ p.name }}/
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile --prod
 COPY --from=builder /app/{{ pkg.name }}/dist ./{{ pkg.name }}/dist
-COPY {{ pkg.name }}/otel-register.mjs ./{{ pkg.name }}/
 USER node
 WORKDIR /app/{{ pkg.name }}
 EXPOSE {{ pkg.web_app_port | default(8080) }}
-CMD ["node", "--import", "./otel-register.mjs", "dist/index.js"]
+CMD ["node", "--import", "@fohte/service-kit/otel-register", "dist/index.js"]
 {% else %}
 {%- set web_app_port = pkg.web_app_port | default(8080) -%}
 {% include "template/Dockerfile.jinja" -%}
