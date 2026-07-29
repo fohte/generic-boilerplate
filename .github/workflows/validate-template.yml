@@ -122,8 +122,12 @@ jobs:
           version: 2026.7.7
           working_directory: generated/${{ matrix.fixture }}
 
+      # corepack creates the pnpm executable inside mise's node install bin
+      # directory; reshim so the mise shims dir (which is on PATH) picks it up.
       - name: Enable corepack
-        run: corepack enable
+        run: |
+          corepack enable
+          mise reshim
         if: hashFiles(format('generated/{0}/**/package.json', matrix.fixture)) != ''
 
       - name: Generate lockfiles
@@ -198,8 +202,12 @@ jobs:
           version: 2026.7.7
           working_directory: generated/node
 
+      # corepack creates the pnpm executable inside mise's node install bin
+      # directory; reshim so the mise shims dir (which is on PATH) picks it up.
       - name: Enable corepack
-        run: corepack enable
+        run: |
+          corepack enable
+          mise reshim
 
       - name: Get pnpm store directory
         id: pnpm-store
@@ -243,8 +251,12 @@ jobs:
           version: 2026.7.7
           working_directory: generated/monorepo-node-workspace
 
+      # corepack creates the pnpm executable inside mise's node install bin
+      # directory; reshim so the mise shims dir (which is on PATH) picks it up.
       - name: Enable corepack
-        run: corepack enable
+        run: |
+          corepack enable
+          mise reshim
 
       - name: Get pnpm store directory
         id: pnpm-store
