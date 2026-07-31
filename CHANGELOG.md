@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.9.1](https://github.com/fohte/generic-boilerplate/compare/v0.9.0...v0.9.1) (2026-07-30)
+
+
+### Features
+
+* **template:** consolidate otel/sentry deps into service-kit ([#545](https://github.com/fohte/generic-boilerplate/issues/545)) ([2b9c476](https://github.com/fohte/generic-boilerplate/commit/2b9c4766b41f15dcf0cd366cfb87ac48a8e93752))
+* **template:** separate error tracking from web app ([#542](https://github.com/fohte/generic-boilerplate/issues/542)) ([16012b7](https://github.com/fohte/generic-boilerplate/commit/16012b757385a0f43c28d0c22fe61f6221b3537d))
+* **template:** support build scaffold for web app subpackages ([#540](https://github.com/fohte/generic-boilerplate/issues/540)) ([fd01a72](https://github.com/fohte/generic-boilerplate/commit/fd01a7261c85bce008733c1b3b1285e8eb4a53dd))
+
+
+### Bug Fixes
+
+* **template:** pnpm missing after corepack enable ([#543](https://github.com/fohte/generic-boilerplate/issues/543)) ([cf520c6](https://github.com/fohte/generic-boilerplate/commit/cf520c6874e569e7e2e329873f6ec3903298b167))
+
+
+### Dependencies
+
+* **ci:** Update actions/checkout action to v7.0.1 ([#547](https://github.com/fohte/generic-boilerplate/issues/547)) ([edef250](https://github.com/fohte/generic-boilerplate/commit/edef250d27c8ef28681eda3b574c04760d0ab4d7))
+* **ci:** Update dependency jdx/mise to v2026.7.11 ([#548](https://github.com/fohte/generic-boilerplate/issues/548)) ([70dcd96](https://github.com/fohte/generic-boilerplate/commit/70dcd9628df2c511efc1727bada65d3ed82b6cb5))
+* **ci:** Update dependency jdx/mise to v2026.7.12 ([#555](https://github.com/fohte/generic-boilerplate/issues/555)) ([38cf98b](https://github.com/fohte/generic-boilerplate/commit/38cf98bbc731cd476d065837aec732305968c722))
+* **ci:** Update dependency jdx/mise to v2026.7.7 ([#538](https://github.com/fohte/generic-boilerplate/issues/538)) ([bf75539](https://github.com/fohte/generic-boilerplate/commit/bf755393e0d52ca6838cd20d5e3f882b835242ba))
+* **ci:** Update jdx/mise-action action to v4.2.1 ([#539](https://github.com/fohte/generic-boilerplate/issues/539)) ([9c2b95f](https://github.com/fohte/generic-boilerplate/commit/9c2b95fdecdd27be653f7110eee6fbd3eab97ebb))
+* update dependency @fohte/service-kit to v0.1.6 ([#544](https://github.com/fohte/generic-boilerplate/issues/544)) ([15a2702](https://github.com/fohte/generic-boilerplate/commit/15a270242217d22df8a9057c024c5fa76c96804d))
+* Update dependency github:ast-grep/ast-grep to v0.44.1 ([#517](https://github.com/fohte/generic-boilerplate/issues/517)) ([0cf4296](https://github.com/fohte/generic-boilerplate/commit/0cf429648e9987f45a642000f35da922f0af228a))
+* Update dependency github:ast-grep/ast-grep to v0.45.0 ([#554](https://github.com/fohte/generic-boilerplate/issues/554)) ([af33985](https://github.com/fohte/generic-boilerplate/commit/af33985a94626b21a0949aacc7b3285e8d05b1da))
+* Update devDependencies (non-major) ([#532](https://github.com/fohte/generic-boilerplate/issues/532)) ([2aad3a5](https://github.com/fohte/generic-boilerplate/commit/2aad3a523c3d9d04683db3085938b27a1caf59d7))
+* Update pnpm to v11.15.1 ([#536](https://github.com/fohte/generic-boilerplate/issues/536)) ([e2af7d6](https://github.com/fohte/generic-boilerplate/commit/e2af7d6787515c59fb0227c86bd8bafad897c8ca))
+* Update pnpm to v11.16.0 ([#551](https://github.com/fohte/generic-boilerplate/issues/551)) ([79cb259](https://github.com/fohte/generic-boilerplate/commit/79cb259a6c5f0e699f080cb21a29982b40f5b1a6))
+* Update prettier to v3.9.5 ([#534](https://github.com/fohte/generic-boilerplate/issues/534)) ([4f25cd6](https://github.com/fohte/generic-boilerplate/commit/4f25cd6dbd9087c20f61a9ae67a9e0de4b5d8019))
+* Update prettier to v3.9.6 ([#546](https://github.com/fohte/generic-boilerplate/issues/546)) ([2e3f858](https://github.com/fohte/generic-boilerplate/commit/2e3f8589882ce828717206f13cf9948a5a65a26f))
+* update rust crate thiserror to v2.0.19 ([#535](https://github.com/fohte/generic-boilerplate/issues/535)) ([5bab7e1](https://github.com/fohte/generic-boilerplate/commit/5bab7e11d9c884b16f738252d121c0ec2dc64aad))
+
 ## [0.9.0](https://github.com/fohte/generic-boilerplate/compare/v0.8.14...v0.9.0) (2026-07-26)
 
 
