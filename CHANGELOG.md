@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/fohte/generic-boilerplate/compare/v0.9.1...v0.9.2) (2026-08-01)
+
+
+### Dependencies
+
+* **ci:** Update fohte/copier-update-action action to v0.1.5 ([#557](https://github.com/fohte/generic-boilerplate/issues/557)) ([68da2e6](https://github.com/fohte/generic-boilerplate/commit/68da2e65a0e8d10ed1df2329ea10dc340f513d71))
+
 ## [0.9.1](https://github.com/fohte/generic-boilerplate/compare/v0.9.0...v0.9.1) (2026-07-30)
 
 
