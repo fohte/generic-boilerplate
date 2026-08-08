@@ -110,7 +110,10 @@ jobs:
           while IFS= read -r -d '' lockfile; do
             dir=$(dirname "$lockfile")
             echo "Updating ${lockfile}"
-            (cd "$dir" && pnpm install --no-frozen-lockfile)
+            # --ignore-scripts: this job holds an OIDC token (id-token: write)
+            # and a checked-out repo with credentials; don't let an installed
+            # package's lifecycle script run with access to either.
+            (cd "$dir" && pnpm install --no-frozen-lockfile --ignore-scripts)
           done < <(find . -name pnpm-lock.yaml -not -path '*/node_modules/*' -not -path '*/.git/*' -print0)
 
       - name: Sync Cargo lockfiles
