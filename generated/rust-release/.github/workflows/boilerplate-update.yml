@@ -89,6 +89,40 @@ jobs:
             chmod +x scripts/bootstrap
           fi
 
+      # copier only rewrites version strings in package.json/Cargo.toml; the
+      # lockfiles are never touched, so they must be regenerated here or the
+      # PR ships a stale lockfile. This also fails the workflow outright (before
+      # a PR is opened) if a bumped version doesn't actually exist upstream.
+      - name: Set up mise
+        if: steps.should-update.outputs.value == 'true' && hashFiles('**/pnpm-lock.yaml') != ''
+        uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea # v4.2.1
+        with:
+          version: 2026.7.12
+
+      - name: Sync pnpm lockfiles
+        if: steps.should-update.outputs.value == 'true' && hashFiles('**/pnpm-lock.yaml') != ''
+        run: |
+          set -euo pipefail
+          # corepack creates the pnpm executable inside mise's node install bin
+          # directory; reshim so the mise shims dir (which is on PATH) picks it up.
+          corepack enable
+          mise reshim
+          while IFS= read -r -d '' lockfile; do
+            dir=$(dirname "$lockfile")
+            echo "Updating ${lockfile}"
+            (cd "$dir" && pnpm install --no-frozen-lockfile)
+          done < <(find . -name pnpm-lock.yaml -not -path '*/node_modules/*' -not -path '*/.git/*' -print0)
+
+      - name: Sync Cargo lockfiles
+        if: steps.should-update.outputs.value == 'true' && hashFiles('**/Cargo.lock') != ''
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' lockfile; do
+            dir=$(dirname "$lockfile")
+            echo "Updating ${lockfile}"
+            (cd "$dir" && rustup show && cargo generate-lockfile)
+          done < <(find . -name Cargo.lock -not -path '*/target/*' -not -path '*/.git/*' -print0)
+
       - name: Create branch
         if: steps.should-update.outputs.value == 'true'
         id: branch
