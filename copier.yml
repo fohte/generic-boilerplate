@@ -104,8 +104,11 @@ _exclude:
   - '{% if not has_web_app %}.github/workflows/docker-publish.yml{% endif %}'
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
-  # Exclude Storybook files when no SPA subpackage exists
-  - '{% if not has_spa %}.github/workflows/storybook.yml{% endif %}'
+  # spa is a subpackage-only flag (see subpackages help below); there is no
+  # standalone root SPA.
+  - '{% if not has_spa_pkg %}.github/workflows/storybook.yml{% endif %}'
+  # Root .storybook/ is only an {% include %} source for the per-subpackage
+  # .storybook files (see the yield template); it is never rendered directly.
   - /.storybook
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
@@ -284,7 +287,7 @@ has_rust_pkg:
   default: '{{ rust_pkgs | length > 0 }}'
   when: false
 
-has_spa:
+has_spa_pkg:
   type: bool
   default: '{{ spa_pkgs | length > 0 }}'
   when: false

@@ -3,9 +3,6 @@
     "@tsconfig/node-lts/tsconfig.json",
     "@tsconfig/strictest/tsconfig.json"
   ],
-{%- if has_spa %}
-  "include": ["**/*", ".storybook/**/*"],
-{%- endif %}
   "exclude": ["**/*.cjs"],
   "compilerOptions": {
     "module": "preserve",

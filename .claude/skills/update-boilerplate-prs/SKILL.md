@@ -81,7 +81,7 @@ PRs where the only change is the `_commit` version bump in `.copier-answers.yml`
 
 `boilerplate-update.yml` already schedules `gh pr merge --auto --squash` itself whenever `copier-update-action` reports no unresolved conflicts, so most version-only PRs from Step 3 are already auto-merging by the time you reach this step. This step is a fallback for PRs where that scheduling did not happen (e.g. the workflow run failed before reaching the merge step, or the PR predates this migration).
 
-The script checks that the only diff lines are `_commit` version changes. When new template parameters are introduced (e.g., `use_storybook`), copier adds them to `.copier-answers.yml` with default values for repos that match the parameter's `when` condition. These PRs have additional diff lines beyond `_commit`, so the script automatically skips them -- they require manual validation in Step 5b.
+The script checks that the only diff lines are `_commit` version changes. When new template parameters are introduced (e.g., `is_web_app`), copier adds them to `.copier-answers.yml` with default values for repos that match the parameter's `when` condition. These PRs have additional diff lines beyond `_commit`, so the script automatically skips them -- they require manual validation in Step 5b.
 
 Parameters with a `when` condition that evaluates to false for a given repo are not written to `.copier-answers.yml` at all, so those repos remain version-only and are safe to auto-merge.
 
@@ -116,9 +116,9 @@ gh pr diff <number> -R fohte/<repo>
 
 ### 5b. Verify new template parameters match actual repo usage
 
-When a new template parameter is introduced (e.g., `use_storybook`), copier sets it to the default value. The default may not match the repo's actual usage. Check the actual repo contents to verify.
+When a new template parameter is introduced (e.g., `is_web_app`), copier sets it to the default value. The default may not match the repo's actual usage. Check the actual repo contents to verify.
 
-For example, if the template adds `use_storybook: false` by default but the repo actually uses Storybook (has `@storybook/*` in `package.json`), the parameter must be corrected to `true` so the corresponding template files are generated.
+For example, if the template adds `is_web_app: false` by default but the repo actually runs a long-running HTTP server (has a `Dockerfile`/`tsup.config.ts` from the web app scaffolding), the parameter must be corrected to `true` so the corresponding template files are generated.
 
 Do not trust the copier-answers values blindly -- always cross-check against what the repo actually uses.
 
@@ -210,7 +210,7 @@ Reporting completion with only step 3 done (auto-merge scheduled but CI never ob
 The latest generic-boilerplate template (v<latest>) is correctly applied to the repository and the PR is merged. Specifically:
 
 - All copier conflict markers are resolved
-- Template parameters in `.copier-answers.yml` match the repo's actual usage (e.g., `use_storybook: true` if the repo uses Storybook)
+- Template parameters in `.copier-answers.yml` match the repo's actual usage (e.g., `is_web_app: true` if the repo runs a long-running HTTP server)
 - All expected template-generated files are present and correct
 - Repository-specific customizations are preserved
 - Syntax checks pass (e.g., `jq .` for JSON, appropriate tools for TOML/YAML)
