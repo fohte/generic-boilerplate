@@ -6,11 +6,10 @@ is_public: false
 use_release_please: false
 use_coverage: true
 monorepo_node_workspace: false
-use_storybook: true
 subpackages:
   - name: frontend
     type: node
-    storybook: true
+    spa: true
     web_app: true
     web_app_port: 3001
   - name: backend

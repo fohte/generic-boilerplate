@@ -104,9 +104,9 @@ _exclude:
   - '{% if not has_web_app %}.github/workflows/docker-publish.yml{% endif %}'
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
-  # Exclude Storybook files when storybook is disabled or no storybook packages exist
-  - "{% if not use_storybook | default(false) or (type != 'node' and not has_storybook_pkg) %}.github/workflows/storybook.yml{% endif %}"
-  - "{% if type != 'node' or not use_storybook | default(false) %}/.storybook{% endif %}"
+  # Exclude Storybook files when no SPA subpackage exists
+  - '{% if not has_spa %}.github/workflows/storybook.yml{% endif %}'
+  - /.storybook
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
@@ -172,7 +172,7 @@ subpackages:
     Subpackage definitions for monorepo.
     Example: [{name: frontend, type: node}, {name: backend, type: rust}]
     Per-entry flags (optional):
-      storybook: true  -- enable Storybook for a node subpackage
+      spa: true        -- enable Storybook for a node subpackage
       web_app: true    -- mark a node subpackage as a web app (long-running
                           HTTP server). Implies error_tracking (see below)
                           and additionally gates build/container scaffolding
@@ -209,13 +209,6 @@ use_coverage:
   default: false
   help: Enable code coverage with cargo-llvm-cov and Codecov?
   when: "{{ type == 'rust' or (subpackages | selectattr('type', 'equalto', 'rust') | list | length > 0) }}"
-
-# Storybook settings
-use_storybook:
-  type: bool
-  default: false
-  help: Enable Storybook deployment to Cloudflare Pages?
-  when: "{{ type == 'node' or (subpackages | selectattr('type', 'equalto', 'node') | list | length > 0) }}"
 
 # Web app flag. Implies error_tracking (see below) and additionally drives
 # build/container scaffolding (Dockerfile, tsup.config.ts, docker-publish.yml)
@@ -258,9 +251,9 @@ rust_pkgs:
   default: "{{ subpackages | default([]) | selectattr('type', 'equalto', 'rust') | list }}"
   when: false
 
-storybook_pkgs:
+spa_pkgs:
   type: yaml
-  default: "{{ subpackages | default([]) | selectattr('storybook', 'defined') | selectattr('storybook', 'equalto', true) | list }}"
+  default: "{{ subpackages | default([]) | selectattr('spa', 'defined') | selectattr('spa', 'equalto', true) | list }}"
   when: false
 
 web_app_pkgs:
@@ -291,9 +284,9 @@ has_rust_pkg:
   default: '{{ rust_pkgs | length > 0 }}'
   when: false
 
-has_storybook_pkg:
+has_spa:
   type: bool
-  default: '{{ storybook_pkgs | length > 0 }}'
+  default: '{{ spa_pkgs | length > 0 }}'
   when: false
 
 has_web_app_pkg:

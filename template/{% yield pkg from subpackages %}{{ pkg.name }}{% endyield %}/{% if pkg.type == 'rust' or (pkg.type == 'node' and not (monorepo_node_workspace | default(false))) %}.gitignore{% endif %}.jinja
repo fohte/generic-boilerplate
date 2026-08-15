@@ -129,7 +129,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-{%- if pkg.storybook | default(false) %}
+{%- if pkg.spa | default(false) %}
 
 # Storybook build output
 storybook-static/

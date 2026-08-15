@@ -6,7 +6,6 @@ project_name: node
 description: Test Node.js project description
 is_public: false
 use_release_please: false
-use_storybook: true
 is_web_app: true
 web_app_port: 8080
 error_tracking: false
