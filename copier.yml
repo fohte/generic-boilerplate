@@ -33,6 +33,9 @@ description:
 # so conflicts are almost guaranteed on copier update. Skip to avoid this.
 _skip_if_exists:
   - README.md
+  # components.json's `style`/`aliases` are chosen per repo via `shadcn init`,
+  # so copier update must not overwrite a repo's existing choice.
+  - '*/components.json'
 
 # Exclude files that are specific to this template repository
 # and not needed in derived repositories
@@ -110,6 +113,16 @@ _exclude:
   # Root .storybook/ is only an {% include %} source for the per-subpackage
   # .storybook files (see the yield template); it is never rendered directly.
   - /.storybook
+  # Same as /.storybook above: these are only {% include %} sources for the
+  # per-subpackage spa scaffolding (see the yield template). spa is a
+  # subpackage-only flag, so they are never rendered directly.
+  - /src/App.tsx
+  - /src/main.tsx
+  - /src/index.css
+  - /src/lib/utils.ts
+  - /src/vite-env.d.ts
+  - /vite.config.ts
+  - /components.json
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
@@ -175,7 +188,8 @@ subpackages:
     Subpackage definitions for monorepo.
     Example: [{name: frontend, type: node}, {name: backend, type: rust}]
     Per-entry flags (optional):
-      spa: true        -- enable Storybook for a node subpackage
+      spa: true        -- mark a node subpackage as a SPA (Vite + React +
+                          Tailwind CSS + shadcn/ui + Storybook)
       web_app: true    -- mark a node subpackage as a web app (long-running
                           HTTP server). Implies error_tracking (see below)
                           and additionally gates build/container scaffolding
@@ -256,7 +270,10 @@ rust_pkgs:
 
 spa_pkgs:
   type: yaml
-  default: "{{ subpackages | default([]) | selectattr('spa', 'defined') | selectattr('spa', 'equalto', true) | list }}"
+  # Mirrors web_app_pkgs: `tests: false` collapses the src/ segment and
+  # skips the Vite/Storybook file emission for that subpackage, so a
+  # `tests: false` pkg must not appear here even if `spa: true`.
+  default: "{{ subpackages | default([]) | selectattr('spa', 'defined') | selectattr('spa', 'equalto', true) | rejectattr('tests', 'equalto', false) | list }}"
   when: false
 
 web_app_pkgs:

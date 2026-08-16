@@ -11,6 +11,10 @@
   "compilerOptions": {
     "module": "preserve",
     "moduleResolution": "bundler",
-    "noEmit": true
+    "noEmit": true{{ "," if pkg_has_spa else "" }}
+{%- if pkg_has_spa %}
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx"
+{%- endif %}
   }
 }
