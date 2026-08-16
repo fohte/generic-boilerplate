@@ -1,2 +1,7 @@
 # Auto-generated files
 CHANGELOG.md
+
+# Snapshot fixtures rendered by scripts/generate-snapshots. Formatting them
+# here would race with the regenerate-and-commit CI job's own commits to
+# generated/, causing the two workflows to endlessly overwrite each other.
+generated/
