@@ -28,7 +28,7 @@
   "devDependencies": {
     "@commitlint/cli": "21.2.1",
     "@eslint/eslintrc": "3.3.6",
-    "@fohte/eslint-config": "0.4.0",
+    "@fohte/eslint-config": "0.4.1",
     "@ninoseki/eslint-plugin-neverthrow": "0.2.0",
     "@storybook/addon-docs": "10.4.6",
     "@storybook/addon-themes": "10.4.6",
