@@ -1,7 +1,7 @@
-{#- The vite.config.ts/index.html/components.json/.storybook filename
-    templates only emit when spa and tests are both true (tests=false
-    collapses the src/ segment they reference). Keep this gate in sync with
-    those. -#}
+{#- The vite.config.ts/index.html/components.json/.storybook/App.tsx/main.tsx/
+    index.css/lib/utils.ts/vite-env.d.ts filename templates only emit when spa
+    and tests are both true (tests=false collapses the src/ segment they
+    reference). Keep this gate in sync with those. -#}
 {%- set pkg_has_spa = (pkg.spa | default(false)) and (pkg.tests | default(true)) -%}
 {%- set has_tests = pkg.tests | default(true) -%}
 {#- bootstrap.ts only emits when both web_app and tests are true (tests=false
@@ -85,7 +85,7 @@
 {%- if pkg_has_spa %}
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "shadcn": "4.18.0",
+    "shadcn": "4.16.2",
     "tailwind-merge": "3.6.0"
 {%- endif %}
   }{{ "," if has_dev_deps else "" }}

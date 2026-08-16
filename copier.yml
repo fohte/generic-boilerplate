@@ -33,9 +33,8 @@ description:
 # so conflicts are almost guaranteed on copier update. Skip to avoid this.
 _skip_if_exists:
   - README.md
-  # components.json's `style`/`aliases` are chosen per repo via `shadcn init`
-  # (e.g. t-rader stays on new-york instead of this template's base-nova), so
-  # copier update must not overwrite a repo's existing choice.
+  # components.json's `style`/`aliases` are chosen per repo via `shadcn init`,
+  # so copier update must not overwrite a repo's existing choice.
   - '*/components.json'
 
 # Exclude files that are specific to this template repository
@@ -114,6 +113,16 @@ _exclude:
   # Root .storybook/ is only an {% include %} source for the per-subpackage
   # .storybook files (see the yield template); it is never rendered directly.
   - /.storybook
+  # Same as /.storybook above: these are only {% include %} sources for the
+  # per-subpackage spa scaffolding (see the yield template). spa is a
+  # subpackage-only flag, so they are never rendered directly.
+  - /src/App.tsx
+  - /src/main.tsx
+  - /src/index.css
+  - /src/lib/utils.ts
+  - /src/vite-env.d.ts
+  - /vite.config.ts
+  - /components.json
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"

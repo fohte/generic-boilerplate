@@ -5,9 +5,7 @@ import storybook from 'eslint-plugin-storybook'
 
 {% if has_spa_pkg and is_workspace -%}
 {#- @fohte/eslint-config's `tailwind` option takes a single cssConfigPath, so
-    only the first spa subpackage is wired up here. No downstream consumer of
-    this template currently needs more than one spa subpackage per
-    workspace. -#}
+    only the first spa subpackage is wired up here. -#}
 export default config(
   {
     typescript: { typeChecked: true },
