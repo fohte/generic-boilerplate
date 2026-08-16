@@ -27,7 +27,11 @@
   "imports": {
 {%- if pkg_has_spa %}
     "#*": {
-      "types": ["./src/*.tsx", "./src/*.ts", "./src/*"],
+      "types": [
+        "./src/*.tsx",
+        "./src/*.ts",
+        "./src/*"
+      ],
       "default": "./src/*"
     }
 {%- else %}
