@@ -33,6 +33,7 @@ description:
 # so conflicts are almost guaranteed on copier update. Skip to avoid this.
 _skip_if_exists:
   - README.md
+  - '*/components.json'
 
 # Exclude files that are specific to this template repository
 # and not needed in derived repositories
@@ -175,7 +176,8 @@ subpackages:
     Subpackage definitions for monorepo.
     Example: [{name: frontend, type: node}, {name: backend, type: rust}]
     Per-entry flags (optional):
-      spa: true        -- enable Storybook for a node subpackage
+      spa: true        -- mark a node subpackage as a SPA (Vite + React +
+                          Tailwind CSS + shadcn/ui + Storybook)
       web_app: true    -- mark a node subpackage as a web app (long-running
                           HTTP server). Implies error_tracking (see below)
                           and additionally gates build/container scaffolding

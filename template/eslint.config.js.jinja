@@ -8,8 +8,17 @@ export default config(
   {
     typescript: { typeChecked: true },
     errorHandling: {},
+    tailwind: { cssConfigPath: '{{ spa_pkgs[0].name }}/src/index.css' },
   },
   ...storybook.configs['flat/recommended'],
+  {
+    files: [
+      '{{ spa_pkgs[0].name }}/.storybook/**/*.ts',
+      '{{ spa_pkgs[0].name }}/vite.config.ts',
+      '{{ spa_pkgs[0].name }}/vitest.config.ts',
+    ],
+    rules: { 'no-restricted-imports': 'off' },
+  },
 )
 {%- else -%}
 export default config({
