@@ -1,2 +1,6 @@
 # Auto-generated files
 CHANGELOG.md
+
+# Snapshot fixtures rendered by scripts/generate-snapshots; formatting them
+# here would race with that script's own commits (see CLAUDE.md)
+generated/
