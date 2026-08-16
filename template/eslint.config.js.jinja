@@ -3,12 +3,17 @@ import { config } from '@fohte/eslint-config'
 import storybook from 'eslint-plugin-storybook'
 {%- endif %}
 
+{% if has_spa_pkg and is_workspace -%}
 export default config(
   {
     typescript: { typeChecked: true },
     errorHandling: {},
   },
-{%- if has_spa_pkg and is_workspace %}
   ...storybook.configs['flat/recommended'],
-{%- endif %}
 )
+{%- else -%}
+export default config({
+  typescript: { typeChecked: true },
+  errorHandling: {},
+})
+{%- endif %}
