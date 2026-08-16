@@ -2,5 +2,5 @@
 CHANGELOG.md
 
 # Snapshot fixtures rendered by scripts/generate-snapshots; formatting them
-# here would race with that script's own commits (see CLAUDE.md)
+# here would race with the regenerate-and-commit CI job's own commits (see CLAUDE.md)
 generated/
