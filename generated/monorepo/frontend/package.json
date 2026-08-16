@@ -24,6 +24,9 @@
     "build": "tsup",
     "start": "node --import @fohte/service-kit/otel-register dist/index.js",
     "dev": "tsx watch --import @fohte/service-kit/otel-register src/index.ts",
+    "dev:client": "vite",
+    "build:client": "vite build",
+    "preview:client": "vite preview",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"
   },

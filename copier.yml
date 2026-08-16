@@ -33,6 +33,9 @@ description:
 # so conflicts are almost guaranteed on copier update. Skip to avoid this.
 _skip_if_exists:
   - README.md
+  # components.json's `style`/`aliases` are chosen per repo via `shadcn init`
+  # (e.g. t-rader stays on new-york instead of this template's base-nova), so
+  # copier update must not overwrite a repo's existing choice.
   - '*/components.json'
 
 # Exclude files that are specific to this template repository
@@ -258,7 +261,10 @@ rust_pkgs:
 
 spa_pkgs:
   type: yaml
-  default: "{{ subpackages | default([]) | selectattr('spa', 'defined') | selectattr('spa', 'equalto', true) | list }}"
+  # Mirrors web_app_pkgs: `tests: false` collapses the src/ segment and
+  # skips the Vite/Storybook file emission for that subpackage, so a
+  # `tests: false` pkg must not appear here even if `spa: true`.
+  default: "{{ subpackages | default([]) | selectattr('spa', 'defined') | selectattr('spa', 'equalto', true) | rejectattr('tests', 'equalto', false) | list }}"
   when: false
 
 web_app_pkgs:
