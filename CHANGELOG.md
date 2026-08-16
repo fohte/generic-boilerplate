@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.10.0](https://github.com/fohte/generic-boilerplate/compare/v0.9.3...v0.10.0) (2026-08-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **template:** rename storybook flag to spa ([#572](https://github.com/fohte/generic-boilerplate/issues/572))
+
+### Features
+
+* **template:** generate SPA scaffolding for spa subpackages ([#580](https://github.com/fohte/generic-boilerplate/issues/580)) ([7337159](https://github.com/fohte/generic-boilerplate/commit/73371599aee640bcf1be71960dbd4ad9e113aaaa))
+* **template:** rename storybook flag to spa ([#572](https://github.com/fohte/generic-boilerplate/issues/572)) ([c6f5d22](https://github.com/fohte/generic-boilerplate/commit/c6f5d22e7845e96b89092e8b060eea19b2f02c12))
+
+
+### Bug Fixes
+
+* **template:** bundle subpath imports into dist ([#565](https://github.com/fohte/generic-boilerplate/issues/565)) ([6fcc04b](https://github.com/fohte/generic-boilerplate/commit/6fcc04b224738913796e7eaa6e5f906e3687db61))
+* **template:** sync lockfiles after copier update ([#563](https://github.com/fohte/generic-boilerplate/issues/563)) ([351e938](https://github.com/fohte/generic-boilerplate/commit/351e938b11f356d20afc12c5a9119f353c4cfc2a))
+
+
+### Dependencies
+
+* **ci:** Update jdx/mise-action action to v4.2.4 ([#570](https://github.com/fohte/generic-boilerplate/issues/570)) ([b22bcab](https://github.com/fohte/generic-boilerplate/commit/b22bcababaf58e41575078bec951f3167446db35))
+* **ci:** Update mozilla-actions/sccache-action action to v0.0.11 ([#576](https://github.com/fohte/generic-boilerplate/issues/576)) ([ce0aefb](https://github.com/fohte/generic-boilerplate/commit/ce0aefb76defae8469ffeea7edc4cfa122b90d75))
+* Update dependency @fohte/eslint-config to v0.4.1 ([#577](https://github.com/fohte/generic-boilerplate/issues/577)) ([cd0b3e6](https://github.com/fohte/generic-boilerplate/commit/cd0b3e6929e4f7a90f3e6abd5258335e5b358c3c))
+* update dependency @fohte/service-kit to v0.1.11 ([#571](https://github.com/fohte/generic-boilerplate/issues/571)) ([49e144b](https://github.com/fohte/generic-boilerplate/commit/49e144b101565e67d56dcb5cc9014baa4499c680))
+* update dependency @fohte/service-kit to v0.1.9 ([#566](https://github.com/fohte/generic-boilerplate/issues/566)) ([61b2591](https://github.com/fohte/generic-boilerplate/commit/61b2591163b313e7b1069c2f0749717fb5d77042))
+* Update dependency github:ast-grep/ast-grep to v0.45.1 ([#573](https://github.com/fohte/generic-boilerplate/issues/573)) ([5d9e46e](https://github.com/fohte/generic-boilerplate/commit/5d9e46e3d8d9c74ac72f5f22a1ac1efef01c45e7))
+* Update dependency github:betterleaks/betterleaks to v1.7.3 ([#556](https://github.com/fohte/generic-boilerplate/issues/556)) ([6ff0378](https://github.com/fohte/generic-boilerplate/commit/6ff037888a6333e01a22bcdc760025119b9c6d73))
+* Update dependency pinact to v4.1.1 ([#567](https://github.com/fohte/generic-boilerplate/issues/567)) ([94f352e](https://github.com/fohte/generic-boilerplate/commit/94f352eb63c985946e5acd546c68726d59dc66dc))
+* Update dependency tsx to v4.23.11 ([#574](https://github.com/fohte/generic-boilerplate/issues/574)) ([768b26f](https://github.com/fohte/generic-boilerplate/commit/768b26fe6a729cf5de32299ad016aab1fa4ca4d7))
+* Update dependency tsx to v4.23.8 ([#569](https://github.com/fohte/generic-boilerplate/issues/569)) ([bb86b7f](https://github.com/fohte/generic-boilerplate/commit/bb86b7f1cbcef758268d7b50c101dc26be2cce1d))
+* Update devDependencies (non-major) ([#568](https://github.com/fohte/generic-boilerplate/issues/568)) ([142e235](https://github.com/fohte/generic-boilerplate/commit/142e23521525ed36516933301f4fd8aab84c9bed))
+* update rust crate thiserror to v2.0.20 ([#575](https://github.com/fohte/generic-boilerplate/issues/575)) ([127266c](https://github.com/fohte/generic-boilerplate/commit/127266c5a3af934dd03806f2cb403ad9044f666b))
+
 ## [0.9.3](https://github.com/fohte/generic-boilerplate/compare/v0.9.2...v0.9.3) (2026-08-07)
 
 
