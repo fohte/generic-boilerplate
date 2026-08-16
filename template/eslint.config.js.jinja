@@ -1,15 +1,19 @@
-{%- set has_storybook = use_storybook | default(false) -%}
 import { config } from '@fohte/eslint-config'
-{%- if has_storybook %}
+{%- if has_spa_pkg and is_workspace %}
 import storybook from 'eslint-plugin-storybook'
 {%- endif %}
 
+{% if has_spa_pkg and is_workspace -%}
 export default config(
   {
     typescript: { typeChecked: true },
     errorHandling: {},
   },
-{%- if has_storybook %}
   ...storybook.configs['flat/recommended'],
-{%- endif %}
 )
+{%- else -%}
+export default config({
+  typescript: { typeChecked: true },
+  errorHandling: {},
+})
+{%- endif %}
