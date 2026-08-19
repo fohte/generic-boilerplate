@@ -12,13 +12,8 @@ export default config(
     // vite.config.ts/vitest.config.ts are loaded through Vite's own
     // esbuild-based config loader, which doesn't resolve the package.json
     // "imports" field, unlike the Rollup pipeline that bundles the app
-    // itself. .storybook/**/*.ts is loaded the same way, through
-    // Storybook's own Node-based config loader.
-    files: [
-      'frontend/.storybook/**/*.ts',
-      'frontend/vite.config.ts',
-      'frontend/vitest.config.ts',
-    ],
+    // itself.
+    files: ['frontend/vite.config.ts', 'frontend/vitest.config.ts'],
     rules: { 'no-restricted-imports': 'off' },
   },
 )
