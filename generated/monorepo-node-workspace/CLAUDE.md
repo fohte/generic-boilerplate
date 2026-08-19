@@ -52,3 +52,9 @@ expect(run()).toEqual({
 ```
 
 For dynamic fields (timestamps, UUIDs, random IDs), normalize them in a helper before the comparison (e.g. replace with a fixed placeholder) so the full output can still be asserted in one equality check. Do not weaken the assertion to dodge the dynamic value.
+
+## Copier update rules
+
+### Delete `node_modules` before running `copier update` manually
+
+If `node_modules` exists, `git status --ignored` lists every file under it (not just the directory) as a `git apply --exclude` argument, and a real dependency tree overflows the OS command-line length limit. Copier then crashes with `OSError: [Errno 7] Argument list too long` — but only after it already overwrote tracked files with the new template content, so local customizations are silently lost with no conflict markers. CI's `boilerplate-update.yml` runs against a clean checkout and is unaffected.

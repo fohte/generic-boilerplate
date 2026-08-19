@@ -126,3 +126,9 @@ If the same assertion chain appears in 3+ tests, extract it into a helper.
 ### Do not write tests that only verify test helpers
 
 Tests must verify production code. Tests that only assert on test helpers, fixtures, or mocks are unnecessary. Remove them.
+
+## Copier update rules
+
+### Delete `node_modules` before running `copier update` manually
+
+If `node_modules` exists, `git status --ignored` lists every file under it (not just the directory) as a `git apply --exclude` argument, and a real dependency tree overflows the OS command-line length limit. Copier then crashes with `OSError: [Errno 7] Argument list too long` — but only after it already overwrote tracked files with the new template content, so local customizations are silently lost with no conflict markers. CI's `boilerplate-update.yml` runs against a clean checkout and is unaffected.
