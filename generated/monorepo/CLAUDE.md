@@ -129,6 +129,6 @@ Tests must verify production code. Tests that only assert on test helpers, fixtu
 
 ## Copier update rules
 
-### Delete `node_modules` before running `copier update` manually
+### Move `node_modules` out of the way before running `copier update` manually
 
-If `node_modules` exists, `git status --ignored` lists every file under it (not just the directory) as a `git apply --exclude` argument, and a real dependency tree overflows the OS command-line length limit. Copier then crashes with `OSError: [Errno 7] Argument list too long` — but only after it already overwrote tracked files with the new template content, so local customizations are silently lost with no conflict markers. CI's `boilerplate-update.yml` runs against a clean checkout and is unaffected.
+If your git config sets `status.showUntrackedFiles` to `all` (`git config status.showUntrackedFiles`), `git status --ignored` lists every file inside an ignored directory individually instead of collapsing it to one line. Copier passes each such entry as a `git apply --exclude` argument during its update, and a real `node_modules` tree overflows the OS command-line length limit. Copier then crashes with `OSError: [Errno 7] Argument list too long` — but only after it has already overwritten tracked files with the freshly rendered template, so local customizations are silently discarded with no conflict markers. Move `node_modules` aside (e.g. `mv node_modules /tmp/...`) before updating, then move it back afterward. CI's `boilerplate-update.yml` runs against a clean checkout and is unaffected.
