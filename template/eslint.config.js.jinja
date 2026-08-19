@@ -17,16 +17,17 @@ export default config(
     // vite.config.ts/vitest.config.ts are loaded through Vite's own
     // esbuild-based config loader, which doesn't resolve the package.json
     // "imports" field, unlike the Rollup pipeline that bundles the app
-    // itself. .storybook/**/*.ts doesn't need this exception: Storybook's
-    // Node config loader only transpiles TS to ESM and otherwise defers to
-    // Node's own module resolution, which resolves "imports" natively.
+    // itself. .storybook/vitest.setup.ts imports its sibling
+    // .storybook/preview.ts by relative path because that file lives outside
+    // src/, the only directory the "imports" field maps.
 {#- Mirror prettier's printWidth (80, the .prettierrc.yaml default) so this
     array renders single-line exactly when prettier would keep it single-line. -#}
-{%- set files_content = "files: ['" ~ spa_pkgs[0].name ~ "/vite.config.ts', '" ~ spa_pkgs[0].name ~ "/vitest.config.ts']," %}
+{%- set files_content = "files: ['" ~ spa_pkgs[0].name ~ "/.storybook/vitest.setup.ts', '" ~ spa_pkgs[0].name ~ "/vite.config.ts', '" ~ spa_pkgs[0].name ~ "/vitest.config.ts']," %}
 {%- if (4 + (files_content | length)) <= 80 %}
     {{ files_content }}
 {%- else %}
     files: [
+      '{{ spa_pkgs[0].name }}/.storybook/vitest.setup.ts',
       '{{ spa_pkgs[0].name }}/vite.config.ts',
       '{{ spa_pkgs[0].name }}/vitest.config.ts',
     ],
