@@ -98,6 +98,8 @@ jobs:
         with:
           apiToken: {% raw %}${{ secrets.CLOUDFLARE_API_TOKEN }}{% endraw %}
           accountId: {% raw %}${{ secrets.CLOUDFLARE_ACCOUNT_ID }}{% endraw %}
+          workingDirectory: {{ pkg.name }}
+          packageManager: pnpm
           command: pages project create {{ slug(project_name) }}-{{ slug(pkg.name) }}-storybook --production-branch=main
         continue-on-error: true
 
@@ -107,7 +109,9 @@ jobs:
         with:
           apiToken: {% raw %}${{ secrets.CLOUDFLARE_API_TOKEN }}{% endraw %}
           accountId: {% raw %}${{ secrets.CLOUDFLARE_ACCOUNT_ID }}{% endraw %}
-          command: pages deploy {{ pkg.name }}/storybook-static --project-name={{ slug(project_name) }}-{{ slug(pkg.name) }}-storybook --branch={% raw %}${{ github.head_ref || 'main' }}{% endraw %} --commit-dirty=true
+          workingDirectory: {{ pkg.name }}
+          packageManager: pnpm
+          command: pages deploy storybook-static --project-name={{ slug(project_name) }}-{{ slug(pkg.name) }}-storybook --branch={% raw %}${{ github.head_ref || 'main' }}{% endraw %} --commit-dirty=true
 
       - name: Comment preview URL on PR
         if: github.event_name == 'pull_request'
