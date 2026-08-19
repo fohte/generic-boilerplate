@@ -1,3 +1,5 @@
+{%- set vitest_config_is_spa = pkg is defined and (pkg.spa | default(false)) and (pkg.tests | default(true)) -%}
+{%- if vitest_config_is_spa -%}
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -40,3 +42,8 @@ export default mergeConfig(
     },
   }),
 )
+{%- else -%}
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({})
+{%- endif %}
