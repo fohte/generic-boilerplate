@@ -353,6 +353,12 @@ jobs:
           restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
+{%- if pkg.spa | default(false) %}
+
+      - name: Install Playwright chromium
+        working-directory: {{ pkg.name }}
+        run: pnpm exec playwright install --with-deps chromium
+{%- endif %}
 
       - name: Run tests
         working-directory: {{ pkg.name }}
@@ -456,6 +462,28 @@ jobs:
       # Install only the matrix package and its workspace dependencies, not the
       # whole workspace, so each parallel leg skips unrelated packages' installs.
       - run: pnpm install --filter ./${{ matrix.package }}... --frozen-lockfile
+{%- endraw -%}
+{%- if has_spa_pkg -%}
+{% raw %}
+
+      # Story tests run through @storybook/addon-vitest's browser project, which
+      # needs a devDependency on `playwright` — only spa packages declare one.
+      - name: Check if this package needs Playwright
+        id: needs-playwright
+        run: |
+          if jq -e '.devDependencies.playwright' "${{ matrix.package }}/package.json" >/dev/null 2>&1; then
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install Playwright chromium
+        if: steps.needs-playwright.outputs.needed == 'true'
+        working-directory: ${{ matrix.package }}
+        run: pnpm exec playwright install --with-deps chromium
+{%- endraw -%}
+{%- endif -%}
+{% raw %}
 
       - name: Run tests
         working-directory: ${{ matrix.package }}
@@ -600,6 +628,12 @@ jobs:
           restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
 
       - run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
+{%- if pkg.spa | default(false) %}
+
+      - name: Install Playwright chromium
+        working-directory: {{ pkg.name }}
+        run: pnpm exec playwright install --with-deps chromium
+{%- endif %}
 
       - name: Run tests
         working-directory: {{ pkg.name }}

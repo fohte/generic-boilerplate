@@ -273,6 +273,10 @@ jobs:
       - run: pnpm install
         working-directory: generated/monorepo-node-workspace
 
+      - name: Install Playwright chromium
+        working-directory: generated/monorepo-node-workspace/frontend
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: Check peer dependencies
         working-directory: generated/monorepo-node-workspace
         run: pnpm peers check

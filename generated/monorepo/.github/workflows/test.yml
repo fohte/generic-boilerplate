@@ -175,6 +175,10 @@ jobs:
 
       - run: cd "frontend" && pnpm install --frozen-lockfile
 
+      - name: Install Playwright chromium
+        working-directory: frontend
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: Run tests
         working-directory: frontend
         run: pnpm run test
