@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.10.1](https://github.com/fohte/generic-boilerplate/compare/v0.10.0...v0.10.1) (2026-08-20)
+
+
+### Features
+
+* **template:** add Storybook norms to generated CLAUDE.md ([#586](https://github.com/fohte/generic-boilerplate/issues/586)) ([da1e921](https://github.com/fohte/generic-boilerplate/commit/da1e921b31fe0e0535a1a4eb1160a179283ef065))
+* **template:** support running spa stories via vitest ([#587](https://github.com/fohte/generic-boilerplate/issues/587)) ([d375d14](https://github.com/fohte/generic-boilerplate/commit/d375d142381d21125ce629d4dcc79c2151d068b2))
+
+
+### Bug Fixes
+
+* **template:** allow workerd build script for spa ([#584](https://github.com/fohte/generic-boilerplate/issues/584)) ([a3279fc](https://github.com/fohte/generic-boilerplate/commit/a3279fc263ac34e0d6e4d6aa8f18bde75775c8ff))
+* **template:** drop stale .storybook exception ([#583](https://github.com/fohte/generic-boilerplate/issues/583)) ([e1f0a60](https://github.com/fohte/generic-boilerplate/commit/e1f0a60bd7898c67392f479acce7058d1b737ae5))
+* **template:** pin wrangler working directory for storybook deploy ([#582](https://github.com/fohte/generic-boilerplate/issues/582)) ([91a7e61](https://github.com/fohte/generic-boilerplate/commit/91a7e61b94657aa470362c18a6186c9eb5d10bed))
+
 ## [0.10.0](https://github.com/fohte/generic-boilerplate/compare/v0.9.3...v0.10.0) (2026-08-16)
 
 
