@@ -123,6 +123,7 @@ _exclude:
   - /src/vite-env.d.ts
   - /vite.config.ts
   - /components.json
+  - /public
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
