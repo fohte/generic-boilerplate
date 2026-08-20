@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.2](https://github.com/fohte/generic-boilerplate/compare/v0.10.1...v0.10.2) (2026-08-20)
+
+
+### Features
+
+* **template:** add @fohte/storybook-addon to spa subpackages ([#588](https://github.com/fohte/generic-boilerplate/issues/588)) ([8f35e29](https://github.com/fohte/generic-boilerplate/commit/8f35e29915e5cd7d1c782992cb529eb368d89683))
+* **template:** wire MSW into spa subpackages ([#591](https://github.com/fohte/generic-boilerplate/issues/591)) ([5dc5c6c](https://github.com/fohte/generic-boilerplate/commit/5dc5c6c7f9ccc537d6f586315da68516a0941cc6))
+
+
+### Bug Fixes
+
+* **template:** stop lockfile sync from failing when conflicts remain ([#590](https://github.com/fohte/generic-boilerplate/issues/590)) ([4edfef4](https://github.com/fohte/generic-boilerplate/commit/4edfef48b8f39c93fe93d2d0c587351a3cd4583e))
+
 ## [0.10.1](https://github.com/fohte/generic-boilerplate/compare/v0.10.0...v0.10.1) (2026-08-20)
 
 
