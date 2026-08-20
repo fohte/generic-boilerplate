@@ -17,6 +17,8 @@ allowBuilds:
 {%- if has_spa_pkg %}
   # required by cloudflare/wrangler-action's internal `pnpm add wrangler` step (Storybook deploy)
   workerd: true
+  # no-op unless package.json sets "msw.workerDirectory", which we don't use
+  msw: true
 {%- endif %}
 
 # Dodge short-lived supply-chain attacks (e.g. shai-hulud, tinycolor) by
