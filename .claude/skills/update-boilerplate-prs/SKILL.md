@@ -59,7 +59,7 @@ The output shows each repository's current version, latest version, and whether 
 
 ## Step 3: Trigger boilerplate-update workflow runs
 
-Every outdated repo already has `.github/workflows/boilerplate-update.yml` (calls `fohte/copier-update-action`), which normally runs on a weekly cron and creates or refreshes the update PR itself -- including auto-merging it when `copier-update-action` reports no unresolved conflicts. This step dispatches that workflow immediately instead of waiting for the next scheduled run.
+Every outdated repo already has `.github/workflows/boilerplate-update.yml` (calls `fohte/copier-update-action`), which normally runs on a weekly cron and creates or refreshes the update PR itself -- including auto-merging it when `copier-update-action` reports no unresolved conflicts and lockfile sync succeeds. This step dispatches that workflow immediately instead of waiting for the next scheduled run.
 
 ```bash
 # Dry-run first to verify targets
@@ -79,7 +79,7 @@ The script polls every 20 seconds (up to 5 minutes), printing `DISPATCHED <repo>
 
 PRs where the only change is the `_commit` version bump in `.copier-answers.yml` can be merged automatically without manual review.
 
-`boilerplate-update.yml` already schedules `gh pr merge --auto --squash` itself whenever `copier-update-action` reports no unresolved conflicts, so most version-only PRs from Step 3 are already auto-merging by the time you reach this step. This step is a fallback for PRs where that scheduling did not happen (e.g. the workflow run failed before reaching the merge step, or the PR predates this migration).
+`boilerplate-update.yml` already schedules `gh pr merge --auto --squash` itself whenever `copier-update-action` reports no unresolved conflicts and lockfile sync succeeds, so most version-only PRs from Step 3 are already auto-merging by the time you reach this step. This step is a fallback for PRs where that scheduling did not happen (e.g. the workflow run failed before reaching the merge step, lockfile sync failed and left the PR as a draft, or the PR predates this migration).
 
 The script checks that the only diff lines are `_commit` version changes. When new template parameters are introduced (e.g., `is_web_app`), copier adds them to `.copier-answers.yml` with default values for repos that match the parameter's `when` condition. These PRs have additional diff lines beyond `_commit`, so the script automatically skips them -- they require manual validation in Step 5b.
 
