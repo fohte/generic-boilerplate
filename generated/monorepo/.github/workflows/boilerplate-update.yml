@@ -111,8 +111,7 @@ jobs:
       # PR ships a stale lockfile. continue-on-error below lets a sync failure
       # (e.g. a bumped version that doesn't exist upstream, or mise/corepack
       # itself failing) fall through to the PR step instead of killing the
-      # job before a PR exists; the PR step reads step outcomes to turn it
-      # into a draft-PR warning.
+      # job before a PR exists.
       - name: Set up mise
         if: steps.can-sync-lockfiles.outputs.value == 'true' && hashFiles('**/pnpm-lock.yaml') != ''
         continue-on-error: true
