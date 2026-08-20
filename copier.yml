@@ -191,8 +191,8 @@ subpackages:
     Per-entry flags (optional):
       spa: true        -- mark a node subpackage as a SPA (Vite + React +
                           Tailwind CSS + shadcn/ui + Storybook), and (unless
-                          tests: false) add the pnpm allowBuilds entry for
-                          workerd for that subpackage.
+                          tests: false) add the pnpm allowBuilds entries for
+                          workerd and msw for that subpackage.
       web_app: true    -- mark a node subpackage as a web app (long-running
                           HTTP server). Implies error_tracking (see below)
                           and additionally gates build/container scaffolding
