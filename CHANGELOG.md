@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.3](https://github.com/fohte/generic-boilerplate/compare/v0.10.2...v0.10.3) (2026-08-20)
+
+
+### Bug Fixes
+
+* **template:** open a draft PR even when lockfile sync fails ([#592](https://github.com/fohte/generic-boilerplate/issues/592)) ([fa271b7](https://github.com/fohte/generic-boilerplate/commit/fa271b7fd411d8268c7d2adfaa9e0f8225e24f0a))
+
 ## [0.10.2](https://github.com/fohte/generic-boilerplate/compare/v0.10.1...v0.10.2) (2026-08-20)
 
 
