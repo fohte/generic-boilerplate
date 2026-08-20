@@ -93,14 +93,17 @@ jobs:
       # lockfiles are never touched, so they must be regenerated here or the
       # PR ships a stale lockfile. This also fails the workflow outright (before
       # a PR is opened) if a bumped version doesn't actually exist upstream.
+      # Skipped when conflicts remain: copier's 3-way merge can leave conflict
+      # markers in files pnpm/cargo parse (e.g. pnpm-workspace.yaml), which
+      # crashes the sync outright instead of producing a usable lockfile.
       - name: Set up mise
-        if: steps.should-update.outputs.value == 'true' && hashFiles('**/pnpm-lock.yaml') != ''
+        if: steps.should-update.outputs.value == 'true' && steps.copier-update.outputs.unresolved-files == '' && hashFiles('**/pnpm-lock.yaml') != ''
         uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
         with:
           version: 2026.7.12
 
       - name: Sync pnpm lockfiles
-        if: steps.should-update.outputs.value == 'true' && hashFiles('**/pnpm-lock.yaml') != ''
+        if: steps.should-update.outputs.value == 'true' && steps.copier-update.outputs.unresolved-files == '' && hashFiles('**/pnpm-lock.yaml') != ''
         run: |
           set -euo pipefail
           # corepack creates the pnpm executable inside mise's node install bin
@@ -117,7 +120,7 @@ jobs:
           done < <(find . -name pnpm-lock.yaml -not -path '*/node_modules/*' -not -path '*/.git/*' -print0)
 
       - name: Sync Cargo lockfiles
-        if: steps.should-update.outputs.value == 'true' && hashFiles('**/Cargo.lock') != ''
+        if: steps.should-update.outputs.value == 'true' && steps.copier-update.outputs.unresolved-files == '' && hashFiles('**/Cargo.lock') != ''
         run: |
           set -euo pipefail
           while IFS= read -r -d '' lockfile; do
@@ -194,7 +197,9 @@ jobs:
           > [!WARNING]
           > Manual review required. Unresolved conflicts remain in:
           >
-          ${unresolved_list}"
+          ${unresolved_list}
+          >
+          > Lockfiles were not synced because conflicts remain. Resolve the conflicts above, then sync lockfiles manually (e.g. \`pnpm install\`, \`cargo generate-lockfile\`)."
           fi
 
           body="${body}
