@@ -95,6 +95,9 @@
     "@commitlint/cli": "21.2.1",
     "@eslint/eslintrc": "3.3.6",
     "@fohte/eslint-config": "0.4.1",
+{%- if pkg_has_spa %}
+    "@fohte/storybook-addon": "0.1.2",
+{%- endif %}
     "@ninoseki/eslint-plugin-neverthrow": "0.2.0",
 {%- if pkg_has_spa %}
     "@storybook/addon-docs": "10.4.6",
@@ -141,6 +144,7 @@
 {%- elif pkg_has_spa or pkg_is_web_app %}
   "devDependencies": {
 {%- if pkg_has_spa %}
+    "@fohte/storybook-addon": "0.1.2",
     "@storybook/addon-docs": "10.4.6",
     "@storybook/addon-themes": "10.4.6",
     "@storybook/addon-vitest": "10.4.6",
