@@ -157,9 +157,9 @@ jobs:
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
 {%- endif %}
 
-      # fohte/infra provisions exactly one `<project_name>-vrt` R2 bucket per
-      # repo, and vrt-report's storage keys (baseline/, branch/<branch>/) carry
-      # no per-project segment -- if more than one vrt_pkgs entry exists, their
+      # Only one `<project_name>-vrt` R2 bucket is provisioned per repo, and
+      # vrt-report's storage keys (baseline/, branch/<branch>/) carry no
+      # per-project segment -- if more than one vrt_pkgs entry exists, their
       # reports overwrite each other in this bucket. Keep vrt: true on a
       # single subpackage until fohte/storybook-vrt-workflows adds a key
       # prefix input.
