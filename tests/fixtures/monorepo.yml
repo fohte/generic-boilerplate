@@ -12,6 +12,7 @@ subpackages:
     spa: true
     web_app: true
     web_app_port: 3001
+    vrt: true
   - name: backend
     type: rust
 repo_language: ja

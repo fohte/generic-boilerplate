@@ -1,5 +1,3 @@
-{#- Slugify: lowercase, replace _ and / with -, remove @ -#}
-{%- macro slug(name) %}{{ name | replace('_', '-') | replace('@', '') | replace('/', '-') | lower }}{% endmacro -%}
 name: VRT
 
 on:
@@ -12,11 +10,10 @@ permissions:
   contents: read
 
 jobs:
-{%- for pkg in vrt_pkgs %}
-  detect-changes-{{ slug(pkg.name) }}:
+  detect-changes-frontend:
     runs-on: ubuntu-slim
     outputs:
-      changed: {% raw %}${{ steps.changes.outputs.any_changed }}{% endraw %}
+      changed: ${{ steps.changes.outputs.any_changed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -27,17 +24,12 @@ jobs:
         id: changes
         with:
           files: |
-            {{ pkg.name }}/**
+            frontend/**
             .github/workflows/vrt.yml
-{%- if is_workspace %}
-            package.json
-            pnpm-lock.yaml
-            pnpm-workspace.yaml
-{%- endif %}
 
-  capture-{{ slug(pkg.name) }}:
-    needs: detect-changes-{{ slug(pkg.name) }}
-    if: needs.detect-changes-{{ slug(pkg.name) }}.outputs.changed == 'true'
+  capture-frontend:
+    needs: detect-changes-frontend
+    if: needs.detect-changes-frontend.outputs.changed == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -53,7 +45,6 @@ jobs:
       - run: |
           corepack enable
           mise reshim
-{%- if is_workspace %}
 
       - name: Get pnpm store directory
         id: pnpm-store
@@ -63,28 +54,12 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
-            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
-
-      - run: pnpm install --filter "{{ pkg.name }}..." --frozen-lockfile
-{%- else %}
-
-      - name: Get pnpm store directory
-        id: pnpm-store
-        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache pnpm store
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
+            ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
 
       - name: Install pnpm dependencies
-        run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
-{%- endif %}
+        run: cd "frontend" && pnpm install --frozen-lockfile
 
       # project must match the `name` passed to createStorybookProject() in
       # vitest.screenshot.config.ts, and stay unique across every vrt_pkgs
@@ -93,15 +68,15 @@ jobs:
       # two artifacts with the same name.
       - uses: fohte/storybook-vrt-workflows/vrt-capture@b00e0f55e330d098c0d7f57b8f8b5ccab19b37dd # v0.1.2
         with:
-          project: storybook-screenshot-{{ pkg.name }}
+          project: storybook-screenshot-frontend
           shard: 1
           shards: 1
           capture-script: storybook:screenshot
-          package-dir: {{ pkg.name }}
+          package-dir: frontend
           screenshots-dir: __screenshots__/desktop
 
-  report-{{ slug(pkg.name) }}:
-    needs: capture-{{ slug(pkg.name) }}
+  report-frontend:
+    needs: capture-frontend
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -112,7 +87,7 @@ jobs:
     # update the single `baseline/actual/` key, where each run's diff was
     # computed against a baseline the other run is concurrently mutating.
     concurrency:
-      group: vrt-report-{{ slug(pkg.name) }}-{% raw %}${{ (github.ref == 'refs/heads/main') && 'push' || 'pr' }}-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}{% endraw %}
+      group: vrt-report-frontend-${{ (github.ref == 'refs/heads/main') && 'push' || 'pr' }}-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -124,7 +99,6 @@ jobs:
       - run: |
           corepack enable
           mise reshim
-{%- if is_workspace %}
 
       - name: Get pnpm store directory
         id: pnpm-store
@@ -134,28 +108,12 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
-            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
-
-      - run: pnpm install --frozen-lockfile
-{%- else %}
-
-      - name: Get pnpm store directory
-        id: pnpm-store
-        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache pnpm store
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
-          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
-          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
+            ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
 
       - name: Install pnpm dependencies
-        run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
-{%- endif %}
+        run: cd "frontend" && pnpm install --frozen-lockfile
 
       # fohte/infra provisions exactly one `<project_name>-vrt` R2 bucket per
       # repo, and vrt-report's storage keys (baseline/, branch/<branch>/) carry
@@ -165,10 +123,9 @@ jobs:
       # prefix input.
       - uses: fohte/storybook-vrt-workflows/vrt-report@b00e0f55e330d098c0d7f57b8f8b5ccab19b37dd # v0.1.2
         with:
-          package-dir: {{ pkg.name }}
+          package-dir: frontend
           screenshots-dir: __screenshots__/desktop
-          r2-bucket: {{ slug(project_name) }}-vrt
-          github-token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
-          aws-access-key-id: {% raw %}${{ secrets.AWS_ACCESS_KEY_ID }}{% endraw %}
-          aws-secret-access-key: {% raw %}${{ secrets.AWS_SECRET_ACCESS_KEY }}{% endraw %}
-{%- endfor %}
+          r2-bucket: monorepo-vrt
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

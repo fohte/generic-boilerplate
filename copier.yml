@@ -219,7 +219,11 @@ subpackages:
                           manual setup in the consuming repo: an
                           `<project_name>-vrt` R2 bucket with
                           AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY repo
-                          secrets, and a `vrt-approved` label.
+                          secrets, and a `vrt-approved` label. Only one
+                          subpackage should set this: the R2 bucket and its
+                          storage keys are per-repo, not per-subpackage, so
+                          reports from a second vrt: true subpackage would
+                          overwrite the first's.
       tests: false     -- skip test scaffolding (vitest, tsconfig, src/, eslint),
                           the unit-test CI job, the per-package eslint
                           lefthook hook, and the pnpm install/cache step in

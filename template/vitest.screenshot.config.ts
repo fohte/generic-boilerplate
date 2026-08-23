@@ -17,7 +17,7 @@ export default mergeConfig(
   viteConfig,
   defineConfig(
     createStorybookProject({
-      name: 'storybook-screenshot',
+      name: 'storybook-screenshot-{{ pkg.name }}',
       rootDir: dirname,
       viewport: SCREENSHOT_VIEWPORT,
       screenshotsSubdir: 'desktop',

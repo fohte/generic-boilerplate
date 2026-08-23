@@ -28,7 +28,8 @@
     "build:client": "vite build",
     "preview:client": "vite preview",
     "storybook": "storybook dev -p 6006",
-    "storybook:build": "storybook build"
+    "storybook:build": "storybook build",
+    "storybook:screenshot": "vitest run --config vitest.screenshot.config.ts"
   },
   "dependencies": {
     "@fohte/service-kit": "0.1.11",
@@ -50,6 +51,7 @@
     "@storybook/addon-themes": "10.4.6",
     "@storybook/addon-vitest": "10.4.6",
     "@storybook/react-vite": "10.4.6",
+    "@storycap-testrun/browser": "2.1.1",
     "@tailwindcss/vite": "4.3.3",
     "@tsconfig/node-lts": "24.0.0",
     "@tsconfig/strictest": "2.0.8",
@@ -67,6 +69,9 @@
     "msw-storybook-addon": "3.0.0",
     "playwright": "1.62.1",
     "prettier": "3.9.6",
+    "reg-publish-s3-plugin": "0.14.4",
+    "reg-simple-keygen-plugin": "0.14.2",
+    "reg-suit": "0.14.5",
     "storybook": "10.4.6",
     "tailwindcss": "4.3.3",
     "tsup": "8.5.1",
