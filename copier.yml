@@ -219,11 +219,11 @@ subpackages:
                           manual setup in the consuming repo: an
                           `<project_name>-vrt` R2 bucket with
                           AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY repo
-                          secrets, and a `vrt-approved` label. Only one
-                          subpackage should set this: the R2 bucket and its
+                          secrets, and a `vrt-approved` label. At most one
+                          subpackage may set this: the R2 bucket and its
                           storage keys are per-repo, not per-subpackage, so
-                          reports from a second vrt: true subpackage would
-                          overwrite the first's.
+                          generation fails (see validator below) if a second
+                          subpackage sets vrt: true.
       tests: false     -- skip test scaffolding (vitest, tsconfig, src/, eslint),
                           the unit-test CI job, the per-package eslint
                           lefthook hook, and the pnpm install/cache step in
@@ -233,6 +233,21 @@ subpackages:
   # `when: true` is the default but explicit here: hidden questions (when: false)
   # discard the stored answer, which would erase subpackages on every update.
   when: true
+  # vrt-report's R2 storage keys (baseline/, branch/<branch>/...) are not
+  # scoped per-subpackage, and only one `<project_name>-vrt` bucket is
+  # provisioned per repo -- a second vrt: true subpackage would silently
+  # overwrite the first's baseline and reports. Fail generation instead of
+  # relying on the help text above. Lift this once
+  # fohte/storybook-vrt-workflows's vrt-capture/vrt-report actions accept a
+  # per-project storage-key prefix.
+  validator: |-
+    {%- set vrt_count = subpackages | selectattr('vrt', 'defined') | selectattr('vrt', 'equalto', true) | selectattr('spa', 'defined') | selectattr('spa', 'equalto', true) | rejectattr('tests', 'equalto', false) | list | length -%}
+    {%- if vrt_count > 1 -%}
+    Only one subpackage may set `vrt: true` (found {{ vrt_count }}). The VRT
+    R2 bucket and its storage keys are per-repo, not per-subpackage, so a
+    second `vrt: true` subpackage would overwrite the first's baseline and
+    reports. Remove `vrt: true` from all but one subpackage.
+    {%- endif -%}
 
 monorepo_node_workspace:
   type: bool
