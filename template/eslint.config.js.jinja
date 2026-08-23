@@ -30,10 +30,10 @@ export default config(
   spa_pkgs[0].name ~ '/vite.config.ts',
   spa_pkgs[0].name ~ '/vitest.config.ts',
 ] %}
-{%- if spa_pkgs[0].vrt | default(false) %}
+{%- if has_vrt_pkg %}
 {%- set exempt_files = exempt_files + [
-  spa_pkgs[0].name ~ '/.storybook/vitest.setup.screenshot.ts',
-  spa_pkgs[0].name ~ '/vitest.screenshot.config.ts',
+  vrt_pkgs[0].name ~ '/.storybook/vitest.setup.screenshot.ts',
+  vrt_pkgs[0].name ~ '/vitest.screenshot.config.ts',
 ] %}
 {%- endif %}
 {#- Mirror prettier's printWidth (80, the .prettierrc.yaml default) so this
