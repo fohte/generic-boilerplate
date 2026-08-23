@@ -20,7 +20,13 @@ export default config(
     // itself. .storybook/vitest.setup.ts imports its sibling
     // .storybook/preview.ts by relative path because that file lives outside
     // src/, the only directory the "imports" field maps.
-    files: ['.storybook/vitest.setup.ts', 'vite.config.ts', 'vitest.config.ts'],
+    files: [
+      '.storybook/vitest.setup.ts',
+      'vite.config.ts',
+      'vitest.config.ts',
+      '.storybook/vitest.setup.screenshot.ts',
+      'vitest.screenshot.config.ts',
+    ],
     rules: { 'no-restricted-imports': 'off' },
   },
 )

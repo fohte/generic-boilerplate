@@ -34,7 +34,7 @@
     "tailwind-merge": "3.6.0"
   },
   "devDependencies": {
-    "@fohte/storybook-addon": "0.1.2",
+    "@fohte/storybook-addon": "0.1.5",
     "@storybook/addon-docs": "10.4.6",
     "@storybook/addon-themes": "10.4.6",
     "@storybook/addon-vitest": "10.4.6",
