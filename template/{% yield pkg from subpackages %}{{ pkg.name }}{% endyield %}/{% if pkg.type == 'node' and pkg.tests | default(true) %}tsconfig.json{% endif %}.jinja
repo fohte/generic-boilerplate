@@ -1,4 +1,5 @@
 {%- set pkg_has_spa = pkg.spa | default(false) -%}
+{%- set pkg_has_vrt = pkg_has_spa and (pkg.vrt | default(false)) -%}
 {
   "extends": [
     "@tsconfig/node-lts/tsconfig.json",
@@ -12,6 +13,11 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "noEmit": true{{ "," if pkg_has_spa else "" }}
+{%- if pkg_has_vrt %}
+    // @vitest/runner's TestAnnotation type isn't exactOptionalPropertyTypes-safe,
+    // which fails @storycap-testrun/browser's screenshot(page, context) call.
+    "exactOptionalPropertyTypes": false,
+{%- endif %}
 {%- if pkg_has_spa %}
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx"
