@@ -24,7 +24,22 @@ export default config(
     // itself. .storybook/vitest.setup.ts imports its sibling
     // .storybook/preview.ts by relative path because that file lives outside
     // src/, the only directory the "imports" field maps.
-    files: ['.storybook/vitest.setup.ts', 'vite.config.ts', 'vitest.config.ts'],
+{%- set exempt_files = ['.storybook/vitest.setup.ts', 'vite.config.ts', 'vitest.config.ts'] %}
+{%- if pkg.vrt | default(false) %}
+{%- set exempt_files = exempt_files + ['.storybook/vitest.setup.screenshot.ts', 'vitest.screenshot.config.ts'] %}
+{%- endif %}
+{#- Mirror prettier's printWidth (80, the .prettierrc.yaml default) so this
+    array renders single-line exactly when prettier would keep it single-line. -#}
+{%- set files_content = "files: ['" ~ (exempt_files | join("', '")) ~ "']," %}
+{%- if (4 + (files_content | length)) <= 80 %}
+    {{ files_content }}
+{%- else %}
+    files: [
+{%- for f in exempt_files %}
+      '{{ f }}',
+{%- endfor %}
+    ],
+{%- endif %}
     rules: { 'no-restricted-imports': 'off' },
   },
 )

@@ -1,0 +1,19 @@
+{#- Slugify: lowercase, replace _ and / with -, remove @ -#}
+{%- macro slug(name) %}{{ name | replace('_', '-') | replace('@', '') | replace('/', '-') | lower }}{% endmacro -%}
+name: VRT approval
+
+on:
+  pull_request:
+    types: [synchronize, labeled]
+
+jobs:
+{%- for pkg in vrt_pkgs %}
+  vrt-approval-{{ slug(pkg.name) }}:
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+    uses: fohte/storybook-vrt-workflows/.github/workflows/vrt-approval.yml@b00e0f55e330d098c0d7f57b8f8b5ccab19b37dd # v0.1.2
+    with:
+      r2-bucket: {{ slug(project_name) }}-vrt
+{%- endfor %}

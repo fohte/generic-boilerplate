@@ -9,6 +9,7 @@ subpackages:
     type: node
     spa: true
     error_tracking: true
+    vrt: true
   - name: backend
     type: node
     web_app: true

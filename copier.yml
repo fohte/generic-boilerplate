@@ -110,12 +110,16 @@ _exclude:
   # spa is a subpackage-only flag (see subpackages help below); there is no
   # standalone root SPA.
   - '{% if not has_spa_pkg %}.github/workflows/storybook.yml{% endif %}'
+  # vrt is a subpackage-only flag (see subpackages help below); there is no
+  # standalone root VRT.
+  - '{% if not has_vrt_pkg %}.github/workflows/vrt.yml{% endif %}'
+  - '{% if not has_vrt_pkg %}.github/workflows/vrt-approval.yml{% endif %}'
   # Root .storybook/ is only an {% include %} source for the per-subpackage
   # .storybook files (see the yield template); it is never rendered directly.
   - /.storybook
   # Same as /.storybook above: these are only {% include %} sources for the
-  # per-subpackage spa scaffolding (see the yield template). spa is a
-  # subpackage-only flag, so they are never rendered directly.
+  # per-subpackage spa/vrt scaffolding (see the yield template). spa/vrt are
+  # subpackage-only flags, so they are never rendered directly.
   - /src/App.tsx
   - /src/main.tsx
   - /src/index.css
@@ -124,6 +128,7 @@ _exclude:
   - /vite.config.ts
   - /components.json
   - /public
+  - /vitest.screenshot.config.ts
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
@@ -205,6 +210,20 @@ subpackages:
       error_tracking: true -- enable Sentry error tracking wiring
                           (dependencies + bootstrap import) for a node
                           subpackage independent of web_app.
+      vrt: true        -- enable Visual Regression Testing for a spa
+                          subpackage (requires spa: true; ignored otherwise).
+                          Adds a screenshot-capture vitest project, the
+                          storycap/reg-suit devDependencies, and vrt.yml /
+                          vrt-approval.yml wired to
+                          fohte/storybook-vrt-workflows@v0.1.2. Still needs
+                          manual setup in the consuming repo: an
+                          `<project_name>-vrt` R2 bucket with
+                          AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY repo
+                          secrets, and a `vrt-approved` label. At most one
+                          subpackage may set this: the R2 bucket and its
+                          storage keys are per-repo, not per-subpackage, so
+                          generation fails (see validator below) if a second
+                          subpackage sets vrt: true.
       tests: false     -- skip test scaffolding (vitest, tsconfig, src/, eslint),
                           the unit-test CI job, the per-package eslint
                           lefthook hook, and the pnpm install/cache step in
@@ -214,6 +233,21 @@ subpackages:
   # `when: true` is the default but explicit here: hidden questions (when: false)
   # discard the stored answer, which would erase subpackages on every update.
   when: true
+  # vrt-report's R2 storage keys (baseline/, branch/<branch>/...) are not
+  # scoped per-subpackage, and only one `<project_name>-vrt` bucket is
+  # provisioned per repo -- a second vrt: true subpackage would silently
+  # overwrite the first's baseline and reports. Fail generation instead of
+  # relying on the help text above. Lift this once
+  # fohte/storybook-vrt-workflows's vrt-capture/vrt-report actions accept a
+  # per-project storage-key prefix.
+  validator: |-
+    {%- set vrt_count = subpackages | selectattr('vrt', 'defined') | selectattr('vrt', 'equalto', true) | selectattr('spa', 'defined') | selectattr('spa', 'equalto', true) | rejectattr('tests', 'equalto', false) | list | length -%}
+    {%- if vrt_count > 1 -%}
+    Only one subpackage may set `vrt: true` (found {{ vrt_count }}). The VRT
+    R2 bucket and its storage keys are per-repo, not per-subpackage, so a
+    second `vrt: true` subpackage would overwrite the first's baseline and
+    reports. Remove `vrt: true` from all but one subpackage.
+    {%- endif -%}
 
 monorepo_node_workspace:
   type: bool
@@ -297,6 +331,15 @@ error_tracking_pkgs:
   default: "{{ subpackages | default([]) | selectattr('error_tracking', 'defined') | selectattr('error_tracking', 'equalto', true) | rejectattr('tests', 'equalto', false) | list }}"
   when: false
 
+vrt_pkgs:
+  type: yaml
+  # VRT captures Storybook, so it's meaningless without spa: true; a pkg
+  # with vrt: true but spa unset/false is silently dropped here rather than
+  # emitting a screenshot config with no Storybook to capture. Also mirrors
+  # web_app_pkgs's `tests: false` handling.
+  default: "{{ subpackages | default([]) | selectattr('vrt', 'defined') | selectattr('vrt', 'equalto', true) | selectattr('spa', 'defined') | selectattr('spa', 'equalto', true) | rejectattr('tests', 'equalto', false) | list }}"
+  when: false
+
 has_node_pkg:
   type: bool
   default: '{{ node_pkgs | length > 0 }}'
@@ -310,6 +353,11 @@ has_rust_pkg:
 has_spa_pkg:
   type: bool
   default: '{{ spa_pkgs | length > 0 }}'
+  when: false
+
+has_vrt_pkg:
+  type: bool
+  default: '{{ vrt_pkgs | length > 0 }}'
   when: false
 
 has_web_app_pkg:
