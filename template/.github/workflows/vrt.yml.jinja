@@ -1,0 +1,163 @@
+{#- Slugify: lowercase, replace _ and / with -, remove @ -#}
+{%- macro slug(name) %}{{ name | replace('_', '-') | replace('@', '') | replace('/', '-') | lower }}{% endmacro -%}
+name: VRT
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+{%- for pkg in vrt_pkgs %}
+  detect-changes-{{ slug(pkg.name) }}:
+    runs-on: ubuntu-slim
+    outputs:
+      changed: {% raw %}${{ steps.changes.outputs.any_changed }}{% endraw %}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+
+      - name: Check for changes
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        id: changes
+        with:
+          files: |
+            {{ pkg.name }}/**
+            .github/workflows/vrt.yml
+{%- if is_workspace %}
+            package.json
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
+{%- endif %}
+
+  capture-{{ slug(pkg.name) }}:
+    needs: detect-changes-{{ slug(pkg.name) }}
+    if: needs.detect-changes-{{ slug(pkg.name) }}.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+        with:
+          version: 2026.7.12
+
+      # corepack creates the pnpm executable inside mise's node install
+      # directory; reshim so the mise shims dir (which is on PATH) picks it up.
+      - run: |
+          corepack enable
+          mise reshim
+{%- if is_workspace %}
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
+
+      - run: pnpm install --filter "{{ pkg.name }}..." --frozen-lockfile
+{%- else %}
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
+
+      - name: Install pnpm dependencies
+        run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
+{%- endif %}
+
+      - uses: fohte/storybook-vrt-workflows/vrt-capture@b00e0f55e330d098c0d7f57b8f8b5ccab19b37dd # v0.1.2
+        with:
+          project: storybook-screenshot
+          shard: 1
+          shards: 1
+          capture-script: storybook:screenshot
+          package-dir: {{ pkg.name }}
+          screenshots-dir: __screenshots__/desktop
+
+  report-{{ slug(pkg.name) }}:
+    needs: capture-{{ slug(pkg.name) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+    # Overlapping runs for the same ref would otherwise race to publish to
+    # the same R2 key at once -- most importantly two main pushes racing to
+    # update the single `baseline/actual/` key, where each run's diff was
+    # computed against a baseline the other run is concurrently mutating.
+    concurrency:
+      group: vrt-report-{{ slug(pkg.name) }}-{% raw %}${{ (github.ref == 'refs/heads/main') && 'push' || 'pr' }}-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}{% endraw %}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+        with:
+          version: 2026.7.12
+
+      - run: |
+          corepack enable
+          mise reshim
+{%- if is_workspace %}
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
+
+      - run: pnpm install --frozen-lockfile
+{%- else %}
+
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
+          restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
+
+      - name: Install pnpm dependencies
+        run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
+{%- endif %}
+
+      - uses: fohte/storybook-vrt-workflows/vrt-report@b00e0f55e330d098c0d7f57b8f8b5ccab19b37dd # v0.1.2
+        with:
+          package-dir: {{ pkg.name }}
+          screenshots-dir: __screenshots__/desktop
+          r2-bucket: {{ slug(project_name) }}-vrt
+          github-token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
+          aws-access-key-id: {% raw %}${{ secrets.AWS_ACCESS_KEY_ID }}{% endraw %}
+          aws-secret-access-key: {% raw %}${{ secrets.AWS_SECRET_ACCESS_KEY }}{% endraw %}
+{%- endfor %}

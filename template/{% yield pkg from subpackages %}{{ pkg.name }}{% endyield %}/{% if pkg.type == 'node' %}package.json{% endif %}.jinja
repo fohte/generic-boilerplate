@@ -14,6 +14,10 @@
     and the tsup/tsx dev deps stay on pkg_is_web_app alone — those are
     HTTP-server-specific. -#}
 {%- set pkg_has_error_tracking = ((pkg.web_app | default(false)) or (pkg.error_tracking | default(false))) and (pkg.tests | default(true)) -%}
+{#- vrt is meaningless without spa (it captures Storybook); keep this gate in
+    sync with the vitest.screenshot.config.ts/.storybook/vitest.setup.screenshot.ts
+    filename templates and vrt_pkgs in copier.yml. -#}
+{%- set pkg_has_vrt = (pkg.vrt | default(false)) and pkg_has_spa -%}
 {%- set has_scripts = has_tests or pkg_has_spa -%}
 {%- set has_dev_deps = (has_tests and not is_workspace) or pkg_has_spa or pkg_is_web_app -%}
 {
@@ -68,7 +72,10 @@
 {%- endif %}
 {%- if pkg_has_spa %}
     "storybook": "storybook dev -p 6006",
-    "storybook:build": "storybook build"
+    "storybook:build": "storybook build"{{ "," if pkg_has_vrt else "" }}
+{%- endif %}
+{%- if pkg_has_vrt %}
+    "storybook:screenshot": "vitest run --config vitest.screenshot.config.ts"
 {%- endif %}
   }{{ "," if has_dev_deps or has_tests else "" }}
 {%- endif %}
@@ -104,6 +111,11 @@
     "@storybook/addon-themes": "10.4.6",
     "@storybook/addon-vitest": "10.4.6",
     "@storybook/react-vite": "10.4.6",
+{%- endif %}
+{%- if pkg_has_vrt %}
+    "@storycap-testrun/browser": "2.1.1",
+{%- endif %}
+{%- if pkg_has_spa %}
     "@tailwindcss/vite": "4.3.3",
 {%- endif %}
     "@tsconfig/node-lts": "24.0.0",
@@ -126,6 +138,11 @@
     "playwright": "1.62.1",
 {%- endif %}
     "prettier": "3.9.6",
+{%- if pkg_has_vrt %}
+    "reg-publish-s3-plugin": "0.14.4",
+    "reg-simple-keygen-plugin": "0.14.2",
+    "reg-suit": "0.14.5",
+{%- endif %}
 {%- if pkg_has_spa %}
     "storybook": "10.4.6",
     "tailwindcss": "4.3.3",
@@ -151,6 +168,11 @@
     "@storybook/addon-themes": "10.4.6",
     "@storybook/addon-vitest": "10.4.6",
     "@storybook/react-vite": "10.4.6",
+{%- endif %}
+{%- if pkg_has_vrt %}
+    "@storycap-testrun/browser": "2.1.1",
+{%- endif %}
+{%- if pkg_has_spa %}
     "@tailwindcss/vite": "4.3.3",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
@@ -160,6 +182,13 @@
     "msw": "2.15.0",
     "msw-storybook-addon": "3.0.0",
     "playwright": "1.62.1",
+{%- endif %}
+{%- if pkg_has_vrt %}
+    "reg-publish-s3-plugin": "0.14.4",
+    "reg-simple-keygen-plugin": "0.14.2",
+    "reg-suit": "0.14.5",
+{%- endif %}
+{%- if pkg_has_spa %}
     "storybook": "10.4.6",
     "tailwindcss": "4.3.3",
 {%- endif %}
