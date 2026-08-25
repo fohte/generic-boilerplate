@@ -55,7 +55,15 @@ _exclude:
   - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
   - '{% if not use_release_please %}.github/workflows/test-release-please.yml{% endif %}'
   - '{% if not use_release_please %}.github/workflows/pr-title-check.yml{% endif %}'
-  - '{% if not use_release_please %}.github/chainguard/{{ project_name }}-release-please.sts.yaml{% endif %}'
+  # octo-sts trust policies embed repo_id in an immutable subject_pattern
+  # (see the repo_id parameter below); skip them entirely while it's empty
+  # instead of rendering a policy that can never match, so a fresh `copier
+  # copy`/`update` with no repo_id yet doesn't ship a dead file, and so a
+  # missing repo_id never hard-fails the rest of generation.
+  - "{% if repo_id == '' %}.github/chainguard/{{ project_name }}.sts.yaml{% endif %}"
+  - "{% if repo_id == '' %}.github/chainguard/{{ project_name }}-boilerplate-update.sts.yaml{% endif %}"
+  - "{% if repo_id == '' %}.github/chainguard/{{ project_name }}-bootstrap.sts.yaml{% endif %}"
+  - "{% if repo_id == '' or not use_release_please %}.github/chainguard/{{ project_name }}-release-please.sts.yaml{% endif %}"
   # Exclude Node.js specific files when type is not 'node'
   # Use leading / to match root only (not yield subpackage directories)
   # Non-workspace monorepos (even with node subpackages) keep prettier/commitlint
@@ -407,18 +415,22 @@ is_workspace:
 
 # octo-sts trust policy inputs. Immutable subject claim `subject_pattern`
 # values take the form `repo:<owner>@<owner_id>/<name>@<repo_id>:...`.
+#
+# The .github/chainguard/*.sts.yaml.jinja templates mirror
+# fohte/infra's octo-sts-trust-policy*.tftpl content exactly, including two
+# properties that look like oversights but aren't: project_name/repo_id are
+# interpolated unescaped into subject_pattern/job_workflow_ref (fohte org
+# repo names are operator-controlled, not attacker input), and the
+# bootstrap policy matches any branch (`.+`) rather than main/master even
+# though bootstrap.yml only ever triggers on those — harmless since
+# obtaining a token still requires actually triggering that workflow.
 repo_id:
   type: str
   default: ''
   help: |
     GitHub repository ID (`github.repository_id` in the Actions context).
-    Embedded in the octo-sts trust policies under .github/chainguard/.
-  validator: |-
-    {%- if repo_id == '' -%}
-    repo_id must not be empty: octo-sts trust policies under
-    .github/chainguard/ embed it in an immutable subject_pattern, and an
-    empty value renders a broken pattern.
-    {%- endif -%}
+    Embedded in the octo-sts trust policies under .github/chainguard/; those
+    files are skipped (see _exclude above) while this is empty.
 
 # fohte org's GitHub owner ID. Constant: it only changes if the org itself
 # is deleted and recreated.
