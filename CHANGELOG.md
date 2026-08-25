@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.6](https://github.com/fohte/generic-boilerplate/compare/v0.10.5...v0.10.6) (2026-08-25)
+
+
+### Bug Fixes
+
+* **template:** commit repo_id backfill in advance ([#606](https://github.com/fohte/generic-boilerplate/issues/606)) ([f3d7559](https://github.com/fohte/generic-boilerplate/commit/f3d755958ca726cc5467e801b8dff9f185692976))
+
 ## [0.10.5](https://github.com/fohte/generic-boilerplate/compare/v0.10.4...v0.10.5) (2026-08-25)
 
 
