@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.3](https://github.com/fohte/generic-boilerplate/compare/v0.10.2...v0.10.3) (2026-08-25)
+
+
+### Features
+
+* **template:** add repo_id parameter for octo-sts trust policies ([#597](https://github.com/fohte/generic-boilerplate/issues/597)) ([23668f2](https://github.com/fohte/generic-boilerplate/commit/23668f29b039a1015a418165de81d7bf6399ebf8))
+* **template:** add VRT configuration for SPA subpackages ([#594](https://github.com/fohte/generic-boilerplate/issues/594)) ([bdb292e](https://github.com/fohte/generic-boilerplate/commit/bdb292ee11cd5969adae8744d5bb5868731b5806))
+
+
+### Bug Fixes
+
+* **template:** open a draft PR even when lockfile sync fails ([#592](https://github.com/fohte/generic-boilerplate/issues/592)) ([fa271b7](https://github.com/fohte/generic-boilerplate/commit/fa271b7fd411d8268c7d2adfaa9e0f8225e24f0a))
+
 ## [0.10.2](https://github.com/fohte/generic-boilerplate/compare/v0.10.1...v0.10.2) (2026-08-20)
 
 
