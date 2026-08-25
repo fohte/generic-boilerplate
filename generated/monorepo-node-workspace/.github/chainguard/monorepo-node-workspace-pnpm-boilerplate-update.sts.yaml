@@ -1,0 +1,8 @@
+issuer: https://token.actions.githubusercontent.com
+subject_pattern: ^repo:fohte@11088009/monorepo-node-workspace-pnpm@123456789:ref:refs/heads/(main|master)$
+claim_pattern:
+  job_workflow_ref: ^fohte/monorepo-node-workspace-pnpm/\.github/workflows/boilerplate-update\.yml@[^@]+$
+permissions:
+  contents: write
+  pull_requests: write
+  workflows: write

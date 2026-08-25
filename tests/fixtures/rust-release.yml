@@ -11,4 +11,4 @@ release_binary: true
 binary_name: rust-release
 repo_language: ja
 subpackages: []
-repo_id: ''
+repo_id: '123456789'
