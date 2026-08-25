@@ -121,16 +121,23 @@ jobs:
           identity: ${{ github.event.repository.name }}-private-deps
           domain: octo-sts.fohte.net
 
-      # pnpm/cargo resolve git dependencies as SCP-like SSH URLs
-      # (git@github.com:...); rewrite them to authenticated HTTPS so they
-      # resolve without an SSH key.
+      # pnpm resolves git deps as SCP-like `git@github.com:owner/repo.git`;
+      # Cargo rejects that syntax and requires `ssh://git@github.com/...`
+      # instead. Rewrite both to HTTPS so they resolve without an SSH key.
+      # The token rides an HTTP auth header, not the URL itself, so it can't
+      # leak into git's own fetch-failure diagnostics — same as how
+      # actions/checkout authenticates the sibling token above.
       - name: Allow git to fetch private dependencies over HTTPS
         if: steps.octo-sts-private-deps.outputs.token != ''
         env:
           PRIVATE_DEPS_TOKEN: ${{ steps.octo-sts-private-deps.outputs.token }}
         run: |
           set -euo pipefail
-          git config --global url."https://x-access-token:${PRIVATE_DEPS_TOKEN}@github.com/".insteadOf "git@github.com:"
+          basic_credential=$(printf 'x-access-token:%s' "${PRIVATE_DEPS_TOKEN}" | base64 -w0)
+          echo "::add-mask::${basic_credential}"
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/"
+          git config --global "http.https://github.com/.extraheader" "AUTHORIZATION: basic ${basic_credential}"
 
       # copier only rewrites version strings in package.json/Cargo.toml; the
       # lockfiles are never touched, so they must be regenerated here or the
