@@ -8,4 +8,4 @@ release_type: simple
 auto_merge_release_pr: false
 subpackages: []
 repo_language: ja
-repo_id: ''
+repo_id: '123456789'
