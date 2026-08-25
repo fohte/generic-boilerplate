@@ -399,3 +399,19 @@ is_workspace:
   type: bool
   default: '{{ monorepo_node_workspace | default(false) }}'
   when: false
+
+# octo-sts trust policy inputs. Immutable subject claim `subject_pattern`
+# values take the form `repo:<owner>@<owner_id>/<name>@<repo_id>:...`.
+repo_id:
+  type: str
+  default: ''
+  help: |
+    GitHub repository ID (`github.repository_id` in the Actions context).
+    No template consumes this yet, so leave it empty.
+
+# fohte org's GitHub owner ID. Constant: it only changes if the org itself
+# is deleted and recreated.
+owner_id:
+  type: str
+  default: '11088009'
+  when: false
