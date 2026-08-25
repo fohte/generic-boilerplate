@@ -51,6 +51,19 @@ jobs:
           fi
           echo "version=${from_version}" >> "$GITHUB_OUTPUT"
 
+      - name: Backfill repo_id in copier answers
+        env:
+          REPO_ID: ${{ github.repository_id }}
+        run: |
+          set -euo pipefail
+          # `repo_id` is a normal copier.yml question (no `when: false`), so
+          # `copier update --defaults` reuses whatever value already sits in
+          # `.copier-answers.yml` instead of resetting it. Only the
+          # still-empty default is patched; an already-backfilled value is
+          # left as-is, and a missing key (pre-repo_id template versions) is
+          # a no-op here and picked up on a later run once copier adds it.
+          sed -i "s/^repo_id: ''$/repo_id: '${REPO_ID}'/" .copier-answers.yml
+
       - name: Run copier-update-action
         id: copier-update
         uses: fohte/copier-update-action@a1c6dfff1b9bb8d5c7ec7af88436611fe7d3f209 # v0.1.5
