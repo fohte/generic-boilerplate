@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.5](https://github.com/fohte/generic-boilerplate/compare/v0.10.4...v0.10.5) (2026-08-25)
+
+
+### Features
+
+* **template:** add repo-scoped octo-sts trust policy ([#602](https://github.com/fohte/generic-boilerplate/issues/602)) ([cd07409](https://github.com/fohte/generic-boilerplate/commit/cd0740981d1c8ad0b175a28e111d702cf99b1d28))
+
 ## [0.10.4](https://github.com/fohte/generic-boilerplate/compare/v0.10.3...v0.10.4) (2026-08-25)
 
 
