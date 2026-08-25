@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.4](https://github.com/fohte/generic-boilerplate/compare/v0.10.3...v0.10.4) (2026-08-25)
+
+
+### Features
+
+* **template:** auto-populate repo_id in boilerplate-update ([#599](https://github.com/fohte/generic-boilerplate/issues/599)) ([a8c672b](https://github.com/fohte/generic-boilerplate/commit/a8c672b4c1f79c58a6b1abe9b36754a13028be91))
+
 ## [0.10.3](https://github.com/fohte/generic-boilerplate/compare/v0.10.2...v0.10.3) (2026-08-25)
 
 
