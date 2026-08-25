@@ -62,7 +62,12 @@ jobs:
           # still-empty default is patched; an already-backfilled value is
           # left as-is, and a missing key (pre-repo_id template versions) is
           # a no-op here and picked up on a later run once copier adds it.
-          sed -i "s/^repo_id: ''$/repo_id: '${REPO_ID}'/" .copier-answers.yml
+          if grep -q "^repo_id: ''$" .copier-answers.yml; then
+            sed -i "s/^repo_id: ''$/repo_id: '${REPO_ID}'/" .copier-answers.yml
+            echo "Backfilled repo_id=${REPO_ID}"
+          else
+            echo "repo_id already set or key not present; skipping backfill" >&2
+          fi
 
       - name: Run copier-update-action
         id: copier-update
