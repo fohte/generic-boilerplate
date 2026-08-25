@@ -192,6 +192,15 @@ jobs:
           # copier-update-action leaves unmerged entries in the index when
           # conflicts remain; stage everything so `git checkout -B` succeeds.
           git add -A
+          # Whether copier update produced anything beyond the repo_id backfill
+          # commit (already committed in the `backfill` step, if any). Computed
+          # once here and reused below so the title/commit/PR-body steps agree
+          # on whether this run is backfill-only.
+          if git diff --cached --quiet; then
+            echo "has-extra-changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-extra-changes=true" >> "$GITHUB_OUTPUT"
+          fi
           git checkout -B "${branch}"
 
       - name: Compose commit and PR title
@@ -201,13 +210,13 @@ jobs:
           FROM_VERSION: ${{ steps.current-version.outputs.version }}
           TARGET_VERSION: ${{ steps.copier-update.outputs.target-version }}
           BACKFILLED: ${{ steps.backfill.outputs.backfilled }}
+          HAS_EXTRA_CHANGES: ${{ steps.branch.outputs.has-extra-changes }}
         run: |
           set -euo pipefail
-          if [ "${BACKFILLED}" = "true" ] && [ "${FROM_VERSION}" = "${TARGET_VERSION}" ]; then
-            # Template version didn't move, so the only reason should-update
-            # is true is the repo_id backfill; don't claim a version bump
-            # that didn't happen (a manual re-apply of the same version, with
-            # nothing backfilled, still falls through to the branch below).
+          if [ "${BACKFILLED}" = "true" ] && [ "${HAS_EXTRA_CHANGES}" != "true" ]; then
+            # copier update produced nothing beyond the repo_id backfill commit
+            # (not just a version-string match — e.g. this rules out an
+            # unrelated YAML quote-style drift landing under this title).
             echo "value=chore: backfill repo_id in copier answers" >> "$GITHUB_OUTPUT"
           else
             echo "value=chore: update ${TEMPLATE_REPO} from ${FROM_VERSION} to ${TARGET_VERSION}" >> "$GITHUB_OUTPUT"
@@ -218,12 +227,13 @@ jobs:
         env:
           BRANCH: ${{ steps.branch.outputs.name }}
           COMMIT_MESSAGE: ${{ steps.title.outputs.value }}
+          HAS_EXTRA_CHANGES: ${{ steps.branch.outputs.has-extra-changes }}
         run: |
           set -euo pipefail
           # Nothing to commit when the only change this run is the repo_id
           # backfill (already committed in its own step above) and copier
           # update itself produced no further diff.
-          if ! git diff --cached --quiet; then
+          if [ "${HAS_EXTRA_CHANGES}" = "true" ]; then
             git -c 'user.name=fohte-bot[bot]' \
                 -c 'user.email=139195068+fohte-bot[bot]@users.noreply.github.com' \
                 commit -m "${COMMIT_MESSAGE}"
@@ -250,11 +260,12 @@ jobs:
           BRANCH: ${{ steps.branch.outputs.name }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
           BACKFILLED: ${{ steps.backfill.outputs.backfilled }}
+          HAS_EXTRA_CHANGES: ${{ steps.branch.outputs.has-extra-changes }}
         run: |
           set -euo pipefail
 
           release_url="https://github.com/${TEMPLATE_REPO}/releases/tag/${TARGET_VERSION}"
-          if [ "${BACKFILLED}" = "true" ] && [ "${FROM_VERSION}" = "${TARGET_VERSION}" ]; then
+          if [ "${BACKFILLED}" = "true" ] && [ "${HAS_EXTRA_CHANGES}" != "true" ]; then
             summary="Backfill \`repo_id\` in \`.copier-answers.yml\` (template version unchanged at [\`${TARGET_VERSION}\`](${release_url}))."
           else
             summary="Update \`${TEMPLATE_REPO}\` from \`${FROM_VERSION}\` to [\`${TARGET_VERSION}\`](${release_url})."
