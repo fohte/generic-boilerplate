@@ -401,12 +401,13 @@ is_workspace:
   when: false
 
 # octo-sts trust policy inputs. Immutable subject claim `subject_pattern`
-# values take the form `repo:<owner>@<owner_id>/<name>@<repo_id>:...`. Not
-# consumed by any template file yet.
+# values take the form `repo:<owner>@<owner_id>/<name>@<repo_id>:...`.
 repo_id:
   type: str
   default: ''
-  help: GitHub repository ID (`github.repository_id` in the Actions context)
+  help: |
+    GitHub repository ID (`github.repository_id` in the Actions context).
+    No template consumes this yet, so leave it empty.
 
 # fohte org's GitHub owner ID. Constant: it only changes if the org itself
 # is deleted and recreated.
