@@ -106,6 +106,32 @@ jobs:
             echo "value=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # Repos with a private git dependency (e.g. a pnpm `github:` dep on
+      # another private repo) fail to clone it here: the runner has no SSH
+      # key, and the identity below only exists for consumers that declared
+      # such a dependency's trust policy. continue-on-error lets repos
+      # without one (the common case) skip straight past this untouched.
+      - name: Federate private git dependency token via octo-sts
+        if: steps.can-sync-lockfiles.outputs.value == 'true' && (hashFiles('**/pnpm-lock.yaml') != '' || hashFiles('**/Cargo.lock') != '')
+        id: octo-sts-private-deps
+        continue-on-error: true
+        uses: octo-sts/action@f603d3be9d8dd9871a265776e625a27b00effe05 # v1.1.1
+        with:
+          scope: fohte
+          identity: ${{ github.event.repository.name }}-private-deps
+          domain: octo-sts.fohte.net
+
+      # pnpm/cargo resolve git dependencies as SCP-like SSH URLs
+      # (git@github.com:...); rewrite them to authenticated HTTPS so they
+      # resolve without an SSH key.
+      - name: Allow git to fetch private dependencies over HTTPS
+        if: steps.octo-sts-private-deps.outputs.token != ''
+        env:
+          PRIVATE_DEPS_TOKEN: ${{ steps.octo-sts-private-deps.outputs.token }}
+        run: |
+          set -euo pipefail
+          git config --global url."https://x-access-token:${PRIVATE_DEPS_TOKEN}@github.com/".insteadOf "git@github.com:"
+
       # copier only rewrites version strings in package.json/Cargo.toml; the
       # lockfiles are never touched, so they must be regenerated here or the
       # PR ships a stale lockfile. continue-on-error below lets a sync failure
