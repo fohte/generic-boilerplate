@@ -59,12 +59,12 @@ while IFS= read -r pr_json; do
 done <<< "$update_prs"
 
 # Search for repos containing .copier-answers.yml (root only, exclude templates/fixtures).
-# The `filename:` search qualifier's leading dot is dropped by GitHub's (legacy) code search
-# tokenizer and matches nothing, so strip it and use --filename instead of embedding it in
-# the query. --limit is raised above the default of 30 since raw (pre-path-filter) hits already
-# exceed that across fohte org repos.
+# --limit is raised above the default of 30 since raw (pre-path-filter) hits already exceed
+# that across fohte org repos. GitHub's code search index can also miss repos independently
+# of --limit (a known indexing gap this script cannot correct for), so a raw count under the
+# limit is not a completeness guarantee -- only a saturated limit is something we can detect.
 search_limit=100
-raw_results=$(gh search code --owner "$OWNER" --filename "${FILE_PATH#.}" --limit "$search_limit" --json repository,path)
+raw_results=$(gh search code --owner "$OWNER" "filename:${FILE_PATH}" --limit "$search_limit" --json repository,path)
 
 # Warn if results were truncated instead of silently under-reporting repos to
 # trigger-boilerplate-update-prs / auto-merge-boilerplate-prs downstream.
