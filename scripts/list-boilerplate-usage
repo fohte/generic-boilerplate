@@ -58,9 +58,13 @@ while IFS= read -r pr_json; do
   update_pr_map["$repo_name"]="$pr_json"
 done <<< "$update_prs"
 
-# Search for repos containing .copier-answers.yml (root only, exclude templates/fixtures)
+# Search for repos containing .copier-answers.yml (root only, exclude templates/fixtures).
+# The `filename:` search qualifier's leading dot is dropped by GitHub's (legacy) code search
+# tokenizer and matches nothing, so strip it and use --filename instead of embedding it in
+# the query. --limit is raised above the default of 30 since raw (pre-path-filter) hits already
+# exceed that across fohte org repos.
 repos=$(
-  gh search code --owner "$OWNER" "filename:${FILE_PATH}" \
+  gh search code --owner "$OWNER" --filename "${FILE_PATH#.}" --limit 100 \
     --json repository,path \
     --jq ".[] | select(.path == \"${FILE_PATH}\") | .repository.nameWithOwner" |
     sort -u
