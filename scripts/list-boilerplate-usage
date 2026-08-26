@@ -63,10 +63,19 @@ done <<< "$update_prs"
 # tokenizer and matches nothing, so strip it and use --filename instead of embedding it in
 # the query. --limit is raised above the default of 30 since raw (pre-path-filter) hits already
 # exceed that across fohte org repos.
+search_limit=100
+raw_results=$(gh search code --owner "$OWNER" --filename "${FILE_PATH#.}" --limit "$search_limit" --json repository,path)
+
+# Warn if results were truncated instead of silently under-reporting repos to
+# trigger-boilerplate-update-prs / auto-merge-boilerplate-prs downstream.
+raw_count=$(echo "$raw_results" | jq 'length')
+if [[ "$raw_count" -ge "$search_limit" ]]; then
+  echo "warning: gh search code returned $raw_count results, hitting --limit $search_limit; results may be truncated" >&2
+fi
+
 repos=$(
-  gh search code --owner "$OWNER" --filename "${FILE_PATH#.}" --limit 100 \
-    --json repository,path \
-    --jq ".[] | select(.path == \"${FILE_PATH}\") | .repository.nameWithOwner" |
+  echo "$raw_results" |
+    jq -r ".[] | select(.path == \"${FILE_PATH}\") | .repository.nameWithOwner" |
     sort -u
 )
 
