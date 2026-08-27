@@ -76,9 +76,11 @@ jobs:
           if grep -q "^repo_id: ''$" .copier-answers.yml; then
             echo "needed=true" >> "$GITHUB_OUTPUT"
             echo "extra-data=repo_id=${REPO_ID}" >> "$GITHUB_OUTPUT"
+            echo "Backfilling repo_id=${REPO_ID} via copier update --data" >&2
           else
             echo "needed=false" >> "$GITHUB_OUTPUT"
             echo "extra-data=" >> "$GITHUB_OUTPUT"
+            echo "repo_id already set or key not present; skipping backfill" >&2
           fi
 
       - name: Run copier-update-action
@@ -187,6 +189,8 @@ jobs:
       - name: Create branch
         if: steps.should-update.outputs.value == 'true'
         id: branch
+        env:
+          BACKFILL_NEEDED: ${{ steps.repo-id-data.outputs.needed }}
         run: |
           set -euo pipefail
           # Fixed per template repo (not per version) so repeated runs reuse the
@@ -197,9 +201,24 @@ jobs:
           # conflicts remain; stage everything so `git checkout -B` succeeds.
           git add -A
           if git diff --cached --quiet; then
-            echo "has-changes=false" >> "$GITHUB_OUTPUT"
+            has_changes=false
           else
-            echo "has-changes=true" >> "$GITHUB_OUTPUT"
+            has_changes=true
+          fi
+          echo "has-changes=${has_changes}" >> "$GITHUB_OUTPUT"
+          # True only when a repo_id backfill was requested this run, something
+          # actually changed, and every changed/added path is one repo_id
+          # unlocks (`.copier-answers.yml` itself, or a newly-rendered trust
+          # policy under `.github/chainguard/`). Anything else in the same
+          # diff (a template version bump, unrelated formatting drift) means
+          # this run is a real update, not a pure backfill, and the title/PR
+          # body below should describe it as such instead.
+          if [ "${BACKFILL_NEEDED}" = "true" ] &&
+            [ "${has_changes}" = "true" ] &&
+            ! git diff --cached --name-only | grep -qvE '^(\.copier-answers\.yml|\.github/chainguard/.*\.sts\.yaml)$'; then
+            echo "is-backfill-only=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is-backfill-only=false" >> "$GITHUB_OUTPUT"
           fi
           git checkout -B "${branch}"
 
@@ -209,10 +228,10 @@ jobs:
         env:
           FROM_VERSION: ${{ steps.current-version.outputs.version }}
           TARGET_VERSION: ${{ steps.copier-update.outputs.target-version }}
-          BACKFILLED: ${{ steps.repo-id-data.outputs.needed }}
+          IS_BACKFILL_ONLY: ${{ steps.branch.outputs.is-backfill-only }}
         run: |
           set -euo pipefail
-          if [ "${BACKFILLED}" = "true" ] && [ "${FROM_VERSION}" = "${TARGET_VERSION}" ]; then
+          if [ "${IS_BACKFILL_ONLY}" = "true" ]; then
             echo "value=chore: backfill repo_id in copier answers" >> "$GITHUB_OUTPUT"
           else
             echo "value=chore: update ${TEMPLATE_REPO} from ${FROM_VERSION} to ${TARGET_VERSION}" >> "$GITHUB_OUTPUT"
@@ -252,12 +271,12 @@ jobs:
           HAS_LOCKFILES: ${{ hashFiles('**/pnpm-lock.yaml', '**/Cargo.lock') != '' }}
           BRANCH: ${{ steps.branch.outputs.name }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
-          BACKFILLED: ${{ steps.repo-id-data.outputs.needed }}
+          IS_BACKFILL_ONLY: ${{ steps.branch.outputs.is-backfill-only }}
         run: |
           set -euo pipefail
 
           release_url="https://github.com/${TEMPLATE_REPO}/releases/tag/${TARGET_VERSION}"
-          if [ "${BACKFILLED}" = "true" ] && [ "${FROM_VERSION}" = "${TARGET_VERSION}" ]; then
+          if [ "${IS_BACKFILL_ONLY}" = "true" ]; then
             summary="Backfill \`repo_id\` in \`.copier-answers.yml\` (template version unchanged at [\`${TARGET_VERSION}\`](${release_url}))."
           else
             summary="Update \`${TEMPLATE_REPO}\` from \`${FROM_VERSION}\` to [\`${TARGET_VERSION}\`](${release_url})."
