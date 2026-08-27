@@ -1,7 +1,14 @@
 # Auto-generated files
 CHANGELOG.md
 
+<<<<<<< before updating
 # Snapshot fixtures rendered by scripts/generate-snapshots. Formatting them
 # here would race with the regenerate-and-commit CI job's own commits to
 # generated/, causing the two workflows to endlessly overwrite each other.
 generated/
+||||||| last update
+=======
+# Copier rewraps this to a width prettier doesn't agree with, so the two
+# fight over its formatting on every `copier update`.
+.copier-answers.yml
+>>>>>>> after updating
