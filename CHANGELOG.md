@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.10.7](https://github.com/fohte/generic-boilerplate/compare/v0.10.6...v0.10.7) (2026-08-27)
+
+
+### Bug Fixes
+
+* **template:** exclude .copier-answers.yml from prettier ([#612](https://github.com/fohte/generic-boilerplate/issues/612)) ([45e423d](https://github.com/fohte/generic-boilerplate/commit/45e423db2108b7cc5835aae717fa68d738bbc2e6))
+* **template:** pass repo_id via copier update argument instead of pre-committing it ([#615](https://github.com/fohte/generic-boilerplate/issues/615)) ([624d3ba](https://github.com/fohte/generic-boilerplate/commit/624d3ba77b324c0d967490042dd0a3a7bfb043a1))
+* **template:** switch octo-sts reference to individual repositories ([#613](https://github.com/fohte/generic-boilerplate/issues/613)) ([58c565c](https://github.com/fohte/generic-boilerplate/commit/58c565cff3f9a39dd6c58e4875663c21a3ed8083))
+
 ## [0.10.6](https://github.com/fohte/generic-boilerplate/compare/v0.10.5...v0.10.6) (2026-08-25)
 
 
