@@ -120,6 +120,10 @@ _exclude:
   - '{% if not has_web_app %}.github/workflows/docker-publish.yml{% endif %}'
   # Exclude coverage files when coverage is disabled
   - '{% if not use_coverage %}/codecov.yml{% endif %}'
+  # scope/<name> PR labels are only meaningful when there's more than one
+  # subpackage to distinguish between.
+  - '{% if not subpackages %}.github/labeler.yml{% endif %}'
+  - '{% if not subpackages %}.github/workflows/labeler.yml{% endif %}'
   # spa is a subpackage-only flag (see subpackages help below); there is no
   # standalone root SPA.
   - '{% if not has_spa_pkg %}.github/workflows/storybook.yml{% endif %}'
