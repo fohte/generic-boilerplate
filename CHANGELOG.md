@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.8](https://github.com/fohte/generic-boilerplate/compare/v0.10.7...v0.10.8) (2026-08-29)
+
+
+### Features
+
+* **template:** automatically apply subpackage labels to PRs ([#617](https://github.com/fohte/generic-boilerplate/issues/617)) ([b07f928](https://github.com/fohte/generic-boilerplate/commit/b07f92867b73c764571b3987d62c1957c817d77d))
+
 ## [0.10.7](https://github.com/fohte/generic-boilerplate/compare/v0.10.6...v0.10.7) (2026-08-27)
 
 
