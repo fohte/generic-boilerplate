@@ -1,0 +1,5 @@
+{%- for pkg in subpackages -%}
+{{ "" if loop.first else "\n" }}scope/{{ pkg.name }}:
+  - changed-files:
+      - any-glob-to-any-file: {{ pkg.name }}/**
+{%- endfor %}
