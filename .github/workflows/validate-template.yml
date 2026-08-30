@@ -166,6 +166,19 @@ jobs:
                 (cd "$dir" && pnpm install --no-frozen-lockfile)
               done
 
+      - name: Run knip
+        if: hashFiles(format('generated/{0}/**/knip.json', matrix.fixture)) != ''
+        working-directory: generated/${{ matrix.fixture }}
+        run: |
+          # Each knip.json covers its own directory (workspace root, or one
+          # per subpackage in non-workspace monorepos), matching how the
+          # generated repo's own `knip` job in test.yml.jinja invokes it.
+          find . -name knip.json -not -path '*/node_modules/*' -print0 \
+            | while IFS= read -r -d '' cfg; do
+                dir="$(dirname "$cfg")"
+                (cd "$dir" && pnpm exec knip)
+              done
+
       - name: Run lefthook
         working-directory: generated/${{ matrix.fixture }}
         env:
