@@ -77,7 +77,10 @@ generate_fixture() {
   # fixture, copier raises "Interactive session required" here — that failure
   # is the desired signal. Silently falling back to defaults would hide the
   # oversight and let unintended values leak into snapshots.
-  $COPIER_CMD copy --trust --overwrite --data-file "tests/fixtures/$fixture.yml" . "$output_dir"
+  #
+  # Without --vcs-ref HEAD, copier defaults to the latest git tag instead of
+  # the working tree.
+  $COPIER_CMD copy --trust --overwrite --vcs-ref HEAD --data-file "tests/fixtures/$fixture.yml" . "$output_dir"
 
   # Remove answers file as it contains a commit hash that changes on every run
   rm -f "$output_dir/.copier-answers.yml"
