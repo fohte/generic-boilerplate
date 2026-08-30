@@ -19,7 +19,7 @@
     "dev": "tsx watch --import @fohte/service-kit/otel-register src/index.ts"
   },
   "dependencies": {
-    "@fohte/service-kit": "0.1.11",
+    "@fohte/service-kit": "0.1.12",
     "@opentelemetry/api": "1.9.1",
     "neverthrow": "8.2.0"
   },
