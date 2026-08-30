@@ -58,6 +58,8 @@
     "vite": "8.2.1"
   },
   "msw": {
-    "workerDirectory": ["public"]
+    "workerDirectory": [
+      "public"
+    ]
   }
 }
