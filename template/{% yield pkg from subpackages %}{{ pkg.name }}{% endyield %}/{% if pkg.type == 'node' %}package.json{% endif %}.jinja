@@ -161,7 +161,14 @@
     "vite": "8.2.1",
 {%- endif %}
     "vitest": "4.1.10"
+  }{{ "," if pkg_has_spa else "" }}
+{%- if pkg_has_spa %}
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
+{%- endif %}
 {%- elif pkg_has_spa or pkg_is_web_app %}
   "devDependencies": {
 {%- if pkg_has_spa %}
@@ -206,6 +213,13 @@
     "tsup": "8.5.1",
     "tsx": "4.23.11"
 {%- endif %}
+  }{{ "," if pkg_has_spa else "" }}
+{%- if pkg_has_spa %}
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
+{%- endif %}
 {%- endif %}
 }

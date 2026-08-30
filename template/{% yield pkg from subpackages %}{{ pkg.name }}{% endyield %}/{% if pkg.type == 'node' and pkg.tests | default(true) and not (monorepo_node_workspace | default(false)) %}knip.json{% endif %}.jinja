@@ -1,18 +1,17 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "treatConfigHintsAsErrors": true,
 {%- if pkg.spa | default(false) %}
   "entry": ["src/lib/**"],
-  "ignore": ["public/mockServiceWorker.js"],
 {%- endif %}
 {%- if pkg.vrt | default(false) %}
   "ignoreDependencies": [
     "@commitlint/cli",
-    "neverthrow",
     "reg-suit",
     "reg-publish-s3-plugin",
     "reg-simple-keygen-plugin"
   ]
 {%- else %}
-  "ignoreDependencies": ["@commitlint/cli", "neverthrow"]
+  "ignoreDependencies": ["@commitlint/cli"]
 {%- endif %}
 }

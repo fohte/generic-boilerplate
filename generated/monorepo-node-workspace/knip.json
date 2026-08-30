@@ -1,5 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "treatConfigHintsAsErrors": true,
   "workspaces": {
     ".": {
       "ignoreDependencies": ["@commitlint/cli"],
@@ -7,16 +8,11 @@
     },
     "frontend": {
       "entry": ["src/lib/**"],
-      "ignore": ["public/mockServiceWorker.js"],
       "ignoreDependencies": [
-        "neverthrow",
         "reg-suit",
         "reg-publish-s3-plugin",
         "reg-simple-keygen-plugin"
       ]
-    },
-    "backend": {
-      "ignoreDependencies": ["neverthrow"]
     }
   }
 }

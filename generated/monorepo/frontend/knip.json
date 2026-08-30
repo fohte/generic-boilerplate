@@ -1,10 +1,9 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "treatConfigHintsAsErrors": true,
   "entry": ["src/lib/**"],
-  "ignore": ["public/mockServiceWorker.js"],
   "ignoreDependencies": [
     "@commitlint/cli",
-    "neverthrow",
     "reg-suit",
     "reg-publish-s3-plugin",
     "reg-simple-keygen-plugin"
