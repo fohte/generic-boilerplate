@@ -38,10 +38,13 @@
     "dev": "tsx watch --import @fohte/service-kit/otel-register src/index.ts"
 {%- endif %}
   },
-{%- if type == 'node' and root_has_error_tracking %}
+{%- if type == 'node' %}
   "dependencies": {
+{%- if root_has_error_tracking %}
     "@fohte/service-kit": "0.1.11",
-    "@opentelemetry/api": "1.9.1"
+    "@opentelemetry/api": "1.9.1",
+{%- endif %}
+    "neverthrow": "8.2.0"
   },
 {%- endif %}
   "devDependencies": {

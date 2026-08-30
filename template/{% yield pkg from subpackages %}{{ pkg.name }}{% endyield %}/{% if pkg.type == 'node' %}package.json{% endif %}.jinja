@@ -19,7 +19,6 @@
     filename templates and vrt_pkgs in copier.yml. -#}
 {%- set pkg_has_vrt = (pkg.vrt | default(false)) and pkg_has_spa -%}
 {%- set has_scripts = has_tests or pkg_has_spa -%}
-{%- set has_dependencies = has_tests and (pkg_has_error_tracking or pkg_has_spa) -%}
 {%- set has_dev_deps = (has_tests and not is_workspace) or pkg_has_spa or pkg_is_web_app -%}
 {
   "name": "{{ pkg.name }}",
@@ -78,16 +77,19 @@
 {%- if pkg_has_vrt %}
     "storybook:screenshot": "vitest run --config vitest.screenshot.config.ts"
 {%- endif %}
-  }{{ "," if has_dev_deps or has_dependencies else "" }}
+  }{{ "," if has_dev_deps or has_tests else "" }}
 {%- endif %}
-{%- if has_dependencies %}
+{%- if has_tests %}
   "dependencies": {
 {%- if pkg_has_error_tracking %}
     "@fohte/service-kit": "0.1.11",
-    "@opentelemetry/api": "1.9.1"{{ "," if pkg_has_spa else "" }}
+    "@opentelemetry/api": "1.9.1",
 {%- endif %}
 {%- if pkg_has_spa %}
     "clsx": "2.1.1",
+{%- endif %}
+    "neverthrow": "8.2.0"{{ "," if pkg_has_spa else "" }}
+{%- if pkg_has_spa %}
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "shadcn": "4.16.2",
