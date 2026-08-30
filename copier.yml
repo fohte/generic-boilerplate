@@ -141,7 +141,7 @@ _exclude:
   - /src/App.tsx
   - /src/main.tsx
   - /src/index.css
-  - /src/lib/utils.ts
+  - /src/lib
   - /src/vite-env.d.ts
   - /vite.config.ts
   - /components.json
