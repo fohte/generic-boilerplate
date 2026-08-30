@@ -78,10 +78,8 @@ generate_fixture() {
   # is the desired signal. Silently falling back to defaults would hide the
   # oversight and let unintended values leak into snapshots.
   #
-  # --vcs-ref HEAD is required: without it, copier checks out the latest git
-  # tag instead of the working tree (see `copier copy --help`), so any commit
-  # or uncommitted template change newer than the last release tag would be
-  # silently dropped from the snapshot.
+  # Without --vcs-ref HEAD, copier defaults to the latest git tag instead of
+  # the working tree.
   $COPIER_CMD copy --trust --overwrite --vcs-ref HEAD --data-file "tests/fixtures/$fixture.yml" . "$output_dir"
 
   # Remove answers file as it contains a commit hash that changes on every run

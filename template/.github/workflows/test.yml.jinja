@@ -113,7 +113,7 @@ jobs:
     No fixture combines type: rust with a testable node subpackage (testable
     multi-package setups use monorepo mode instead), so this branch has no
     snapshot coverage. Render it manually via `copier copy --overwrite
-    --defaults --data-file <fixture>.yml . .` when editing. #}
+    --defaults --vcs-ref HEAD --data-file <fixture>.yml . .` when editing. #}
 
       # corepack creates the pnpm executable inside mise's node install bin
       # directory; reshim so the mise shims dir (which is on PATH) picks it up.
@@ -784,8 +784,8 @@ jobs:
     cache (same pattern as the lefthook job above). No fixture combines
     type: rust with a testable node subpackage (testable multi-package setups
     use monorepo mode instead), so this branch has no snapshot coverage.
-    Render it manually via `copier copy --overwrite --defaults --data-file
-    <fixture>.yml . .` when editing. #}
+    Render it manually via `copier copy --overwrite --defaults --vcs-ref HEAD
+    --data-file <fixture>.yml . .` when editing. #}
 
       - name: Get pnpm store directory
         id: pnpm-store
