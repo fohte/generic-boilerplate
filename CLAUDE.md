@@ -15,7 +15,7 @@ The repository root itself is a consumer of this template, managed via `.copier-
 - `_src_path` in `.copier-answers.yml` points at the remote URL (same as any downstream consumer), so Renovate's Copier manager opens `copier update` PRs against root when a new tag is released
 - Root-only additions (e.g., `bats` in `.mise.toml`, `ignorePaths`/`packageRules` in `renovate.json5`, the `Run bats tests` step in `.github/workflows/test.yml`, the `generated/` entry in `.prettierignore`) are kept via conflict resolution on `copier update` — resolve them the same way a downstream repo would
 - Template-only infrastructure (`template/`, `tests/`, `generated/`, `copier.yml`, `scripts/generate-snapshots`, `scripts/apply-renovate-patch`, `.github/workflows/validate-template.yml`, `.github/workflows/sync-generated-to-template.yml`, `CHANGELOG.md`, etc.) lives only at root and is never emitted by the template
-- To preview how an in-flight template change will land at root before release, run `copier copy --overwrite --defaults --data-file <fixture-like-data>.yml . .` against the local template
+- To preview how an in-flight template change will land at root before release, run `copier copy --overwrite --defaults --vcs-ref HEAD --data-file <fixture-like-data>.yml . .` against the local template. `--vcs-ref HEAD` is required — without it, copier checks out the latest git tag instead of the working tree, silently dropping any unreleased template change from the preview
 
 ## Snapshot generation
 
