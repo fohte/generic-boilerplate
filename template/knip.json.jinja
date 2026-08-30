@@ -1,7 +1,7 @@
 {%- if is_workspace -%}
-{%- set knip_ws_pkgs = node_pkgs | rejectattr('tests', 'equalto', false) | list -%}
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "treatConfigHintsAsErrors": true,
   "workspaces": {
     ".": {
       "ignoreDependencies": ["@commitlint/cli"]{{ "," if (is_public or has_spa_pkg) else "" }}
@@ -11,22 +11,12 @@
 {%- if has_spa_pkg %}
       "ignoreBinaries": ["playwright"]
 {%- endif %}
-    }{{ "," if knip_ws_pkgs else "" }}
-{%- for pkg in knip_ws_pkgs %}
+    }{{ "," if spa_pkgs else "" }}
+{%- for pkg in spa_pkgs %}
     "{{ pkg.name }}": {
-{%- if pkg.spa | default(false) %}
-      "entry": ["src/lib/**"],
-      "ignore": ["public/mockServiceWorker.js"],
-{%- endif %}
+      "entry": ["src/lib/**"]{{ "," if pkg.vrt | default(false) else "" }}
 {%- if pkg.vrt | default(false) %}
-      "ignoreDependencies": [
-        "neverthrow",
-        "reg-suit",
-        "reg-publish-s3-plugin",
-        "reg-simple-keygen-plugin"
-      ]
-{%- else %}
-      "ignoreDependencies": ["neverthrow"]
+      "ignoreDependencies": ["reg-suit", "reg-publish-s3-plugin", "reg-simple-keygen-plugin"]
 {%- endif %}
     }{{ "," if not loop.last else "" }}
 {%- endfor %}
@@ -35,7 +25,8 @@
 {%- else -%}
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreDependencies": ["@commitlint/cli", "neverthrow"]{{ "," if is_public else "" }}
+  "treatConfigHintsAsErrors": true,
+  "ignoreDependencies": ["@commitlint/cli"]{{ "," if is_public else "" }}
 {%- if is_public %}
   "ignore": ["commitlint-plugin-no-external-refs.cjs"]
 {%- endif %}

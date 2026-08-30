@@ -19,6 +19,7 @@
     filename templates and vrt_pkgs in copier.yml. -#}
 {%- set pkg_has_vrt = (pkg.vrt | default(false)) and pkg_has_spa -%}
 {%- set has_scripts = has_tests or pkg_has_spa -%}
+{%- set has_dependencies = has_tests and (pkg_has_error_tracking or pkg_has_spa) -%}
 {%- set has_dev_deps = (has_tests and not is_workspace) or pkg_has_spa or pkg_is_web_app -%}
 {
   "name": "{{ pkg.name }}",
@@ -77,19 +78,16 @@
 {%- if pkg_has_vrt %}
     "storybook:screenshot": "vitest run --config vitest.screenshot.config.ts"
 {%- endif %}
-  }{{ "," if has_dev_deps or has_tests else "" }}
+  }{{ "," if has_dev_deps or has_dependencies else "" }}
 {%- endif %}
-{%- if has_tests %}
+{%- if has_dependencies %}
   "dependencies": {
 {%- if pkg_has_error_tracking %}
     "@fohte/service-kit": "0.1.11",
-    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/api": "1.9.1"{{ "," if pkg_has_spa else "" }}
 {%- endif %}
 {%- if pkg_has_spa %}
     "clsx": "2.1.1",
-{%- endif %}
-    "neverthrow": "8.2.0"{{ "," if pkg_has_spa else "" }}
-{%- if pkg_has_spa %}
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "shadcn": "4.16.2",
@@ -161,7 +159,12 @@
     "vite": "8.2.1",
 {%- endif %}
     "vitest": "4.1.10"
+  }{{ "," if pkg_has_spa else "" }}
+{%- if pkg_has_spa %}
+  "msw": {
+    "workerDirectory": ["public"]
   }
+{%- endif %}
 {%- elif pkg_has_spa or pkg_is_web_app %}
   "devDependencies": {
 {%- if pkg_has_spa %}
@@ -206,6 +209,11 @@
     "tsup": "8.5.1",
     "tsx": "4.23.11"
 {%- endif %}
+  }{{ "," if pkg_has_spa else "" }}
+{%- if pkg_has_spa %}
+  "msw": {
+    "workerDirectory": ["public"]
   }
+{%- endif %}
 {%- endif %}
 }
