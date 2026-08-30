@@ -1,0 +1,42 @@
+{%- if is_workspace -%}
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "ignoreDependencies": ["@commitlint/cli"]{{ "," if (is_public or has_spa_pkg) else "" }}
+{%- if is_public %}
+      "ignore": ["commitlint-plugin-no-external-refs.cjs"]{{ "," if has_spa_pkg else "" }}
+{%- endif %}
+{%- if has_spa_pkg %}
+      "ignoreBinaries": ["playwright"]
+{%- endif %}
+    },
+{%- for pkg in node_pkgs if pkg.tests | default(true) %}
+    "{{ pkg.name }}": {
+{%- if pkg.spa | default(false) %}
+      "entry": ["src/lib/**"],
+      "ignore": ["public/mockServiceWorker.js"],
+{%- endif %}
+{%- if pkg.vrt | default(false) %}
+      "ignoreDependencies": [
+        "neverthrow",
+        "reg-suit",
+        "reg-publish-s3-plugin",
+        "reg-simple-keygen-plugin"
+      ]
+{%- else %}
+      "ignoreDependencies": ["neverthrow"]
+{%- endif %}
+    }{{ "," if not loop.last else "" }}
+{%- endfor %}
+  }
+}
+{%- else -%}
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreDependencies": ["@commitlint/cli", "neverthrow"]{{ "," if is_public else "" }}
+{%- if is_public %}
+  "ignore": ["commitlint-plugin-no-external-refs.cjs"]
+{%- endif %}
+}
+{%- endif %}

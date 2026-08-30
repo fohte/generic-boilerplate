@@ -71,6 +71,7 @@ _exclude:
   - "{% if type != 'node' and not is_workspace %}/package.json{% endif %}"
   - "{% if type != 'node' %}/tsconfig.json{% endif %}"
   - "{% if type != 'node' and not is_workspace %}/eslint.config.js{% endif %}"
+  - "{% if type != 'node' and not is_workspace %}/knip.json{% endif %}"
   - "{% if type != 'node' %}/vitest.config.ts{% endif %}"
   # pnpm-workspace.yaml holds workspace packages and pnpm settings (allowBuilds).
   # Required for any project with a node root package; non-workspace node subpackages
