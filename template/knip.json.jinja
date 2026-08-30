@@ -1,4 +1,5 @@
 {%- if is_workspace -%}
+{%- set knip_ws_pkgs = node_pkgs | rejectattr('tests', 'equalto', false) | list -%}
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
@@ -10,8 +11,8 @@
 {%- if has_spa_pkg %}
       "ignoreBinaries": ["playwright"]
 {%- endif %}
-    },
-{%- for pkg in node_pkgs if pkg.tests | default(true) %}
+    }{{ "," if knip_ws_pkgs else "" }}
+{%- for pkg in knip_ws_pkgs %}
     "{{ pkg.name }}": {
 {%- if pkg.spa | default(false) %}
       "entry": ["src/lib/**"],
