@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.9](https://github.com/fohte/generic-boilerplate/compare/v0.10.8...v0.10.9) (2026-08-30)
+
+
+### Features
+
+* **template:** add knip CI to detect unused code ([#621](https://github.com/fohte/generic-boilerplate/issues/621)) ([5b46c03](https://github.com/fohte/generic-boilerplate/commit/5b46c039f3ea67ab6c8c388c9fc43c462660fd1e))
+
 ## [0.10.8](https://github.com/fohte/generic-boilerplate/compare/v0.10.7...v0.10.8) (2026-08-29)
 
 
