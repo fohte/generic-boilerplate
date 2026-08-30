@@ -24,11 +24,11 @@ jobs:
     # we may use stale template/ (before sync completes), causing incorrect regeneration.
     # By skipping here, we let sync finish first, then validate runs on sync's commit.
     #
-    # Skip for release-please branches: their PRs only touch CHANGELOG.md and the
-    # version manifest, so template validation is redundant. Skipping here (rather
-    # than at the workflow's `on.push` trigger) keeps the workflow triggered, so
-    # validate-status below still reports the required status check.
-    if: github.actor != 'renovate[bot]' && !startsWith(github.ref_name, 'release-please--branches--')
+    # Skip release-please branches (only touch CHANGELOG.md/version manifest) at
+    # job level so validate-status still reports the required status check.
+    if: |
+      github.actor != 'renovate[bot]' &&
+      !(github.actor == 'fohte-bot[bot]' && startsWith(github.ref_name, 'release-please--branches--'))
     outputs:
       fixtures: ${{ steps.list.outputs.fixtures }}
     steps:
