@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.10.10](https://github.com/fohte/generic-boilerplate/compare/v0.10.9...v0.10.10) (2026-08-30)
+
+
+### Features
+
+* **knip:** enable treatConfigHintsAsErrors and clean up unused ignore configurations ([#626](https://github.com/fohte/generic-boilerplate/issues/626)) ([ca15f0f](https://github.com/fohte/generic-boilerplate/commit/ca15f0fc81ffb0729bdeeb226174be2fb61436f1))
+
+
+### Bug Fixes
+
+* **template:** prevent generating empty src/lib directory ([#623](https://github.com/fohte/generic-boilerplate/issues/623)) ([2974b1f](https://github.com/fohte/generic-boilerplate/commit/2974b1fc92af36ac8480ff1f3b8e9154ae27d809))
+
 ## [0.10.9](https://github.com/fohte/generic-boilerplate/compare/v0.10.8...v0.10.9) (2026-08-30)
 
 
