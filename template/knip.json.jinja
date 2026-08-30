@@ -16,7 +16,11 @@
     "{{ pkg.name }}": {
       "entry": ["src/lib/**"]{{ "," if pkg.vrt | default(false) else "" }}
 {%- if pkg.vrt | default(false) %}
-      "ignoreDependencies": ["reg-suit", "reg-publish-s3-plugin", "reg-simple-keygen-plugin"]
+      "ignoreDependencies": [
+        "reg-suit",
+        "reg-publish-s3-plugin",
+        "reg-simple-keygen-plugin"
+      ]
 {%- endif %}
     }{{ "," if not loop.last else "" }}
 {%- endfor %}
