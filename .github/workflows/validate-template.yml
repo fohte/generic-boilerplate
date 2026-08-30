@@ -23,7 +23,12 @@ jobs:
     # to sync changes to template/. If we run regenerate here on Renovate's commit,
     # we may use stale template/ (before sync completes), causing incorrect regeneration.
     # By skipping here, we let sync finish first, then validate runs on sync's commit.
-    if: github.actor != 'renovate[bot]'
+    #
+    # Skip release-please branches (only touch CHANGELOG.md/version manifest) at
+    # job level so validate-status still reports the required status check.
+    if: |
+      github.actor != 'renovate[bot]' &&
+      !(github.actor == 'fohte-bot[bot]' && startsWith(github.ref_name, 'release-please--branches--'))
     outputs:
       fixtures: ${{ steps.list.outputs.fixtures }}
     steps:
