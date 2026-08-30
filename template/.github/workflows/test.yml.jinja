@@ -780,21 +780,25 @@ jobs:
 {%- else %}
 {#- Non-workspace mode: each testable node subpackage is its own isolated
     pnpm project (own lockfile, own knip.json), so knip runs once per
-    subpackage from its own directory. #}
-{%- for pkg in testable_node_pkgs %}
+    subpackage from its own directory, sharing one combined-key pnpm store
+    cache (same pattern as the lefthook job above). No fixture combines
+    type: rust with a testable node subpackage (testable multi-package setups
+    use monorepo mode instead), so this branch has no snapshot coverage.
+    Render it manually via `copier copy --overwrite --defaults --data-file
+    <fixture>.yml . .` when editing. #}
 
-      - name: Get pnpm store directory ({{ pkg.name }})
-        id: pnpm-store-{{ pkg.name }}
-        working-directory: {{ pkg.name }}
+      - name: Get pnpm store directory
+        id: pnpm-store
         run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
-      - name: Cache pnpm store ({{ pkg.name }})
+      - name: Cache pnpm store
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
-            {% raw %}${{ steps.pnpm-store-{% endraw %}{{ pkg.name }}{% raw %}.outputs.path }}{% endraw %}
-          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}'{{ pkg.name }}/pnpm-lock.yaml'{% raw %}) }}{% endraw %}
+            {% raw %}${{ steps.pnpm-store.outputs.path }}{% endraw %}
+          key: {% raw %}${{ runner.os }}-pnpm-store-${{ hashFiles({% endraw %}{% for pkg in testable_node_pkgs %}{% if not loop.first %}, {% endif %}'{{ pkg.name }}/pnpm-lock.yaml'{% endfor %}{% raw %}) }}{% endraw %}
           restore-keys: {% raw %}${{ runner.os }}-pnpm-store-{% endraw %}
+{%- for pkg in testable_node_pkgs %}
 
       - name: Install pnpm dependencies ({{ pkg.name }})
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
