@@ -244,12 +244,8 @@ jobs:
           flags: backend
           fail_ci_if_error: false
 
-  # Aggregation gate for the per-package unit-test jobs, and also for the knip
-  # job (when generated): the dynamic per-package job names cannot be pinned as
-  # required status checks, and knip has no `needs` of its own, so this single
-  # fixed-name job is the branch protection gate instead. It fails only when a
-  # needed job failed; when every leg succeeds (or is skipped because nothing
-  # changed) it is skipped, and a skipped required check counts as success.
+  # Fixed name for branch protection: per-package job names are dynamic, and
+  # knip has no `needs`, so this gate (skip == success) stands in for both.
   unit-test:
     runs-on: ubuntu-slim
     needs:

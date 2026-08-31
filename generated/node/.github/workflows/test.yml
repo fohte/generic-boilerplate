@@ -129,11 +129,8 @@ jobs:
       - name: Run tests
         run: pnpm run test
 
-  # Aggregation gate that also folds in the knip job's result: knip has no
-  # `needs` of its own, so without this gate a knip failure would not block
-  # merge under the fixed-name required status checks. Fails only when a
-  # needed job failed; it is skipped when both succeed, and a skipped
-  # required check counts as success.
+  # Fixed name for branch protection: knip has no `needs` of its own, so
+  # this gate (skip == success) folds its result into unit-test.
   unit-test:
     runs-on: ubuntu-slim
     needs:

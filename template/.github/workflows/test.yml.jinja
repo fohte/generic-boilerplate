@@ -278,11 +278,8 @@ jobs:
       - name: Run tests
         run: pnpm run test
 
-  # Aggregation gate that also folds in the knip job's result: knip has no
-  # `needs` of its own, so without this gate a knip failure would not block
-  # merge under the fixed-name required status checks. Fails only when a
-  # needed job failed; it is skipped when both succeed, and a skipped
-  # required check counts as success.
+  # Fixed name for branch protection: knip has no `needs` of its own, so
+  # this gate (skip == success) folds its result into unit-test.
   unit-test:
     runs-on: ubuntu-slim
     needs:
@@ -397,11 +394,8 @@ jobs:
         run: pnpm run test
 {%- endfor %}
 
-  # Aggregation gate that also folds in the knip job's result: knip has no
-  # `needs` of its own, so without this gate a knip failure would not block
-  # merge under the fixed-name required status checks. Fails only when a
-  # needed job failed; it is skipped when every leg succeeds, and a skipped
-  # required check counts as success.
+  # Fixed name for branch protection: per-package job names are dynamic, and
+  # knip has no `needs`, so this gate (skip == success) stands in for both.
   unit-test:
     runs-on: ubuntu-slim
     needs:
@@ -557,12 +551,8 @@ jobs:
         working-directory: ${{ matrix.package }}
         run: pnpm run test
 
-  # Aggregation gate for the unit-test matrix, and also for the knip job: matrix
-  # leg names are dynamic and knip has no `needs` of its own, so neither can be
-  # pinned as a required status check on its own. This single fixed-name job is
-  # the branch protection gate instead. It fails only when a needed job failed;
-  # when every leg succeeds (or the matrix is skipped because nothing changed) it
-  # is skipped, and a skipped required check counts as success.
+  # Fixed name for branch protection: matrix leg names are dynamic, and knip
+  # has no `needs`, so this gate (skip == success) stands in for both.
   unit-test:
     runs-on: ubuntu-slim
     needs:
@@ -758,12 +748,8 @@ jobs:
 {%- endif %}
 {%- endfor %}
 
-  # Aggregation gate for the per-package unit-test jobs, and also for the knip
-  # job (when generated): the dynamic per-package job names cannot be pinned as
-  # required status checks, and knip has no `needs` of its own, so this single
-  # fixed-name job is the branch protection gate instead. It fails only when a
-  # needed job failed; when every leg succeeds (or is skipped because nothing
-  # changed) it is skipped, and a skipped required check counts as success.
+  # Fixed name for branch protection: per-package job names are dynamic, and
+  # knip has no `needs`, so this gate (skip == success) stands in for both.
   unit-test:
     runs-on: ubuntu-slim
     needs:
