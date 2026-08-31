@@ -245,7 +245,8 @@ jobs:
           fail_ci_if_error: false
 
   # Fixed name for branch protection: per-package job names are dynamic, and
-  # knip has no `needs`, so this gate (skip == success) stands in for both.
+  # knip (when generated) has no `needs`, so this gate (skip == success)
+  # stands in for both.
   unit-test:
     runs-on: ubuntu-slim
     needs:
