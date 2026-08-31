@@ -42,6 +42,10 @@ When you need to check how a component looks or behaves in a given state, write 
 
 ## Visual Regression Testing (VRT)
 
+### Never run the full VRT screenshot suite locally
+
+Running `storybook:screenshot` launches a headless Chromium instance per story to render every story in the project. The `vrt` CI check already renders and diffs every story on every PR, so a full local run only buys an earlier signal — at the cost of overloading the machine when multiple sessions or worktrees run it concurrently, since local runs share one machine's CPU and memory while CI runs scale out independently. To check a component's look or behavior, use `storybook dev` (see above) instead. If you need to confirm a screenshot itself, scope the run to what changed (e.g. `storybook:screenshot -- --changed`, or by passing specific story file paths as arguments) rather than the full suite.
+
 ### Understand why the `vrt` check fails
 
 The `vrt` CI check renders Storybook stories to screenshots and compares them against the `main` baseline with reg-suit. A failure ("Visual differences detected") means the pixel diff exceeded reg-suit's `matchingThreshold`, not that something is broken — open the reg-suit report link posted on the PR and compare the actual/expected/diff images to judge whether the change is intentional.
