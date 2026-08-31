@@ -230,8 +230,9 @@ jobs:
         working-directory: ${{ matrix.package }}
         run: pnpm run test
 
-  # Aggregation gate for the unit-test matrix. Matrix leg names are dynamic and
-  # cannot be pinned as a required status check, so this single fixed-name job is
+  # Aggregation gate for the unit-test matrix, and also for the knip job: matrix
+  # leg names are dynamic and knip has no `needs` of its own, so neither can be
+  # pinned as a required status check on its own. This single fixed-name job is
   # the branch protection gate instead. It fails only when a needed job failed;
   # when every leg succeeds (or the matrix is skipped because nothing changed) it
   # is skipped, and a skipped required check counts as success.
@@ -240,6 +241,7 @@ jobs:
     needs:
       - setup
       - unit-test-run
+      - knip
     if: failure()
     steps:
       - run: exit 1

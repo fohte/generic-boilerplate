@@ -96,7 +96,7 @@ jobs:
         if: steps.lefthook.outcome == 'failure'
         run: exit 1
 
-  unit-test:
+  unit-test-run:
     runs-on: ubuntu-latest
 
     steps:
@@ -128,6 +128,20 @@ jobs:
 
       - name: Run tests
         run: pnpm run test
+
+  # Aggregation gate that also folds in the knip job's result: knip has no
+  # `needs` of its own, so without this gate a knip failure would not block
+  # merge under the fixed-name required status checks. Fails only when a
+  # needed job failed; it is skipped when both succeed, and a skipped
+  # required check counts as success.
+  unit-test:
+    runs-on: ubuntu-slim
+    needs:
+      - unit-test-run
+      - knip
+    if: failure()
+    steps:
+      - run: exit 1
 
   knip:
     runs-on: ubuntu-latest

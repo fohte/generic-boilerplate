@@ -245,7 +245,7 @@ jobs:
         run: exit 1
 {%- if type == 'node' %}
 
-  unit-test:
+  unit-test-run:
     runs-on: ubuntu-latest
 
     steps:
@@ -277,9 +277,23 @@ jobs:
 
       - name: Run tests
         run: pnpm run test
+
+  # Aggregation gate that also folds in the knip job's result: knip has no
+  # `needs` of its own, so without this gate a knip failure would not block
+  # merge under the fixed-name required status checks. Fails only when a
+  # needed job failed; it is skipped when both succeed, and a skipped
+  # required check counts as success.
+  unit-test:
+    runs-on: ubuntu-slim
+    needs:
+      - unit-test-run
+      - knip
+    if: failure()
+    steps:
+      - run: exit 1
 {%- elif type == 'rust' %}
 
-  unit-test:
+  {{ 'unit-test-run' if testable_node_pkgs else 'unit-test' }}:
     runs-on: ubuntu-latest
     env:
       SCCACHE_GHA_ENABLED: 'true'
@@ -322,8 +336,8 @@ jobs:
       - name: Run tests
         run: cargo test
 {%- endif %}
-{%- if has_node_pkg %}
-{%- for pkg in node_pkgs if pkg.tests | default(true) %}
+{%- if testable_node_pkgs %}
+{%- for pkg in testable_node_pkgs %}
 
   unit-test-{{ pkg.name }}:
     runs-on: ubuntu-latest
@@ -382,6 +396,23 @@ jobs:
         working-directory: {{ pkg.name }}
         run: pnpm run test
 {%- endfor %}
+
+  # Aggregation gate that also folds in the knip job's result: knip has no
+  # `needs` of its own, so without this gate a knip failure would not block
+  # merge under the fixed-name required status checks. Fails only when a
+  # needed job failed; it is skipped when every leg succeeds, and a skipped
+  # required check counts as success.
+  unit-test:
+    runs-on: ubuntu-slim
+    needs:
+      - unit-test-run
+{%- for pkg in testable_node_pkgs %}
+      - unit-test-{{ pkg.name }}
+{%- endfor %}
+      - knip
+    if: failure()
+    steps:
+      - run: exit 1
 {%- endif %}
 {%- elif subpackages %}
 {%- if is_workspace %}
@@ -526,8 +557,9 @@ jobs:
         working-directory: ${{ matrix.package }}
         run: pnpm run test
 
-  # Aggregation gate for the unit-test matrix. Matrix leg names are dynamic and
-  # cannot be pinned as a required status check, so this single fixed-name job is
+  # Aggregation gate for the unit-test matrix, and also for the knip job: matrix
+  # leg names are dynamic and knip has no `needs` of its own, so neither can be
+  # pinned as a required status check on its own. This single fixed-name job is
   # the branch protection gate instead. It fails only when a needed job failed;
   # when every leg succeeds (or the matrix is skipped because nothing changed) it
   # is skipped, and a skipped required check counts as success.
@@ -536,6 +568,7 @@ jobs:
     needs:
       - setup
       - unit-test-run
+      - knip
     if: failure()
     steps:
       - run: exit 1
@@ -725,8 +758,9 @@ jobs:
 {%- endif %}
 {%- endfor %}
 
-  # Aggregation gate for the per-package unit-test jobs. The dynamic per-package
-  # job names cannot be pinned as required status checks, so this single
+  # Aggregation gate for the per-package unit-test jobs, and also for the knip
+  # job (when generated): the dynamic per-package job names cannot be pinned as
+  # required status checks, and knip has no `needs` of its own, so this single
   # fixed-name job is the branch protection gate instead. It fails only when a
   # needed job failed; when every leg succeeds (or is skipped because nothing
   # changed) it is skipped, and a skipped required check counts as success.
@@ -737,6 +771,9 @@ jobs:
 {%- for pkg in testable_subpackages %}
       - unit-test-{{ pkg.name }}
 {%- endfor %}
+{%- if testable_node_pkgs %}
+      - knip
+{%- endif %}
     if: failure()
     steps:
       - run: exit 1
