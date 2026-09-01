@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.10.11](https://github.com/fohte/generic-boilerplate/compare/v0.10.10...v0.10.11) (2026-09-01)
+
+
+### Features
+
+* **template:** restrict local VRT execution and add UI extraction rules ([#635](https://github.com/fohte/generic-boilerplate/issues/635)) ([a40933f](https://github.com/fohte/generic-boilerplate/commit/a40933f08550ff8815f40e67a13c0038cbedd213))
+
+
+### Bug Fixes
+
+* **template:** include knip in unit-test aggregation gate ([#634](https://github.com/fohte/generic-boilerplate/issues/634)) ([c3ab642](https://github.com/fohte/generic-boilerplate/commit/c3ab642791056671611b1b6aaf9b852c9ad7e0d7))
+
+
+### Dependencies
+
+* **ci:** Update fohte/storybook-vrt-workflows action to v0.1.3 ([#629](https://github.com/fohte/generic-boilerplate/issues/629)) ([eea0eb0](https://github.com/fohte/generic-boilerplate/commit/eea0eb0b839e0e9883295d875ec46d20de4d3919))
+* update dependency @fohte/service-kit to v0.1.12 ([#627](https://github.com/fohte/generic-boilerplate/issues/627)) ([9a235a4](https://github.com/fohte/generic-boilerplate/commit/9a235a4f04600719ff92c91d3ac40aef9d4c5118))
+* update dependency @fohte/service-kit to v0.1.13 ([#636](https://github.com/fohte/generic-boilerplate/issues/636)) ([5d1de30](https://github.com/fohte/generic-boilerplate/commit/5d1de3006be3b6384a9670878f9bd9870d347045))
+* Update dependency @fohte/storybook-addon to v0.1.8 ([#628](https://github.com/fohte/generic-boilerplate/issues/628)) ([aed8a78](https://github.com/fohte/generic-boilerplate/commit/aed8a786069e3c2b2f76050162778c948cf0f8c2))
+* Update Node.js to v24.19.0 ([#630](https://github.com/fohte/generic-boilerplate/issues/630)) ([be42e44](https://github.com/fohte/generic-boilerplate/commit/be42e448a17998858eee5d4b865e1e2c450e25db))
+
 ## [0.10.10](https://github.com/fohte/generic-boilerplate/compare/v0.10.9...v0.10.10) (2026-08-30)
 
 
