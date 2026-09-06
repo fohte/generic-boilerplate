@@ -91,7 +91,7 @@ jobs:
       # entry -- vrt-capture's upload-artifact step names the artifact
       # `vrt-screenshots-<project>-<shard>`, and a workflow run can't upload
       # two artifacts with the same name.
-      - uses: fohte/storybook-vrt-workflows/vrt-capture@d466efc41e02b5ab567585915565d27b042d871b # v0.1.3
+      - uses: fohte/storybook-vrt-workflows/vrt-capture@90d01ee2e4d8501cce03b6cb938bb08d5e011edc # v0.1.4
         with:
           project: storybook-screenshot-{{ pkg.name }}
           shard: 1
@@ -163,7 +163,7 @@ jobs:
       # reports overwrite each other in this bucket. Keep vrt: true on a
       # single subpackage until fohte/storybook-vrt-workflows adds a key
       # prefix input.
-      - uses: fohte/storybook-vrt-workflows/vrt-report@d466efc41e02b5ab567585915565d27b042d871b # v0.1.3
+      - uses: fohte/storybook-vrt-workflows/vrt-report@90d01ee2e4d8501cce03b6cb938bb08d5e011edc # v0.1.4
         with:
           package-dir: {{ pkg.name }}
           screenshots-dir: __screenshots__/desktop
