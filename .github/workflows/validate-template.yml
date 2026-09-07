@@ -63,7 +63,7 @@ jobs:
 
       - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
         with:
-          version: 2026.7.12
+          version: 2026.8.15
 
       - name: Save diff before regeneration
         id: save-diff
@@ -124,7 +124,7 @@ jobs:
 
       - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
         with:
-          version: 2026.7.12
+          version: 2026.8.15
           working_directory: generated/${{ matrix.fixture }}
 
       # corepack creates the pnpm executable inside mise's node install bin
@@ -217,7 +217,7 @@ jobs:
 
       - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
         with:
-          version: 2026.7.12
+          version: 2026.8.15
           working_directory: generated/node
 
       # corepack creates the pnpm executable inside mise's node install bin
@@ -266,7 +266,7 @@ jobs:
 
       - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
         with:
-          version: 2026.7.12
+          version: 2026.8.15
           working_directory: generated/monorepo-node-workspace
 
       # corepack creates the pnpm executable inside mise's node install bin
@@ -341,7 +341,7 @@ jobs:
 
       - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
         with:
-          version: 2026.7.12
+          version: 2026.8.15
           working_directory: generated/rust
 
       - name: Run tests
