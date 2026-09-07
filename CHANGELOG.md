@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.10.12](https://github.com/fohte/generic-boilerplate/compare/v0.10.11...v0.10.12) (2026-09-07)
+
+
+### Bug Fixes
+
+* **template:** block external network requests in Storybook Vitest ([#637](https://github.com/fohte/generic-boilerplate/issues/637)) ([e3af0f7](https://github.com/fohte/generic-boilerplate/commit/e3af0f7f985043c1439c1ac3569b96c907bb7f2b))
+
+
+### Dependencies
+
+* **ci:** Update dependency jdx/mise to v2026.8.15 ([#658](https://github.com/fohte/generic-boilerplate/issues/658)) ([3889203](https://github.com/fohte/generic-boilerplate/commit/38892030f1c3c70de3aa10380c0a3791212f50be))
+* **ci:** Update fohte/storybook-vrt-workflows action to v0.1.4 ([#639](https://github.com/fohte/generic-boilerplate/issues/639)) ([d8cb5af](https://github.com/fohte/generic-boilerplate/commit/d8cb5afe083bde1fa22f0cd60ba2e5e8b9e43f43))
+* Update @commitlint/cli to v21.2.2 ([#640](https://github.com/fohte/generic-boilerplate/issues/640)) ([b9a9653](https://github.com/fohte/generic-boilerplate/commit/b9a9653cacacf5380349cc1514e9a5cae64ec915))
+* Update dependency @fohte/eslint-config to v0.4.4 ([#651](https://github.com/fohte/generic-boilerplate/issues/651)) ([533c2ee](https://github.com/fohte/generic-boilerplate/commit/533c2eee386f7c2fd79c5a70154640a2f53c942e))
+* Update dependency @ninoseki/eslint-plugin-neverthrow to v0.3.1 ([#644](https://github.com/fohte/generic-boilerplate/issues/644)) ([2b3f885](https://github.com/fohte/generic-boilerplate/commit/2b3f8857002da617092930ddbf69565048c7ffd6))
+* Update dependency bats to v1.14.0 ([#549](https://github.com/fohte/generic-boilerplate/issues/549)) ([66ab1c6](https://github.com/fohte/generic-boilerplate/commit/66ab1c6498a1d780c5c562052caa1f2a0877f851))
+* Update dependency eslint to v10.9.1 ([#550](https://github.com/fohte/generic-boilerplate/issues/550)) ([a47b9c1](https://github.com/fohte/generic-boilerplate/commit/a47b9c118101fd2a05430d6c20f50b4916b2de20))
+* Update dependency github:ast-grep/ast-grep to v0.45.2 ([#641](https://github.com/fohte/generic-boilerplate/issues/641)) ([b55c6a4](https://github.com/fohte/generic-boilerplate/commit/b55c6a44f3fe91d910de4e22963d14659b9f81fd))
+* Update dependency github:ast-grep/ast-grep to v0.45.3 ([#647](https://github.com/fohte/generic-boilerplate/issues/647)) ([82b515c](https://github.com/fohte/generic-boilerplate/commit/82b515c9a78dcbe81c5d93fc95bbf4c9d41ec610))
+* Update dependency github:betterleaks/betterleaks to v1.8.1 ([#649](https://github.com/fohte/generic-boilerplate/issues/649)) ([f54718b](https://github.com/fohte/generic-boilerplate/commit/f54718b652ef89c5b995594d3af8c269166f8697))
+* Update dependency lefthook to v2.1.12 ([#642](https://github.com/fohte/generic-boilerplate/issues/642)) ([e7b5ba7](https://github.com/fohte/generic-boilerplate/commit/e7b5ba76941723acfca0805ae09816ed0a583a9d))
+* update dependency shadcn to v4.19.1 ([#652](https://github.com/fohte/generic-boilerplate/issues/652)) ([910a07a](https://github.com/fohte/generic-boilerplate/commit/910a07a23c76b64497cf3b43a7e67c8873e15bd7))
+* Update dependency shfmt to v3.14.0 ([#653](https://github.com/fohte/generic-boilerplate/issues/653)) ([bb6c1c1](https://github.com/fohte/generic-boilerplate/commit/bb6c1c15110ed08f1daa083d99d2769221fb8b84))
+* Update devDependencies (non-major) ([#643](https://github.com/fohte/generic-boilerplate/issues/643)) ([a543184](https://github.com/fohte/generic-boilerplate/commit/a5431845a4803d6f5cf836ed3bb186416b2d66fb))
+* Update devDependencies (non-major) ([#654](https://github.com/fohte/generic-boilerplate/issues/654)) ([115251c](https://github.com/fohte/generic-boilerplate/commit/115251c575e2dd50bc414a8da47b9bef9942766b))
+* Update node to v24.20.0 ([#655](https://github.com/fohte/generic-boilerplate/issues/655)) ([0c14a76](https://github.com/fohte/generic-boilerplate/commit/0c14a767c4895c98243f18d56c0b73e1af858514))
+* Update pnpm to v11.25.0 ([#656](https://github.com/fohte/generic-boilerplate/issues/656)) ([baa5038](https://github.com/fohte/generic-boilerplate/commit/baa50381245ddf0a0d8ad665ca41e8d221c00e63))
+* update rust to v1.98.0 ([#657](https://github.com/fohte/generic-boilerplate/issues/657)) ([22f94e2](https://github.com/fohte/generic-boilerplate/commit/22f94e23ac597b3560b3d99e7fef824499df250f))
+* Update storybook monorepo to v10.5.10 ([#553](https://github.com/fohte/generic-boilerplate/issues/553)) ([cdcb178](https://github.com/fohte/generic-boilerplate/commit/cdcb17811f31b8ac5f404db2a4c0c6296522d961))
+
 ## [0.10.11](https://github.com/fohte/generic-boilerplate/compare/v0.10.10...v0.10.11) (2026-09-01)
 
 
