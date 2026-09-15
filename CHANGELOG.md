@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.11.1](https://github.com/fohte/generic-boilerplate/compare/v0.11.0...v0.11.1) (2026-09-15)
+
+
+### Features
+
+* **template:** adopt policy to restrict stories to props-driven states ([#685](https://github.com/fohte/generic-boilerplate/issues/685)) ([3244f08](https://github.com/fohte/generic-boilerplate/commit/3244f082332759c7e848bd3b938ea360c9d0cc14))
+
+
+### Dependencies
+
+* **ci:** Update dependency jdx/mise to v2026.9.2 ([#683](https://github.com/fohte/generic-boilerplate/issues/683)) ([5cb2afa](https://github.com/fohte/generic-boilerplate/commit/5cb2afa6027170266d631f7f6ed6bf7c162937d5))
+* **ci:** Update taiki-e/install-action action to v2.87.7 ([#679](https://github.com/fohte/generic-boilerplate/issues/679)) ([21d897f](https://github.com/fohte/generic-boilerplate/commit/21d897f50a2a7038539de062e5f062293e76f3f6))
+* Update dependency shfmt to v3.14.1 ([#677](https://github.com/fohte/generic-boilerplate/issues/677)) ([aa613c6](https://github.com/fohte/generic-boilerplate/commit/aa613c606de9b363ef9120952525644d1fe95595))
+* Update Node.js to v24.21.0 ([#681](https://github.com/fohte/generic-boilerplate/issues/681)) ([a58ce0c](https://github.com/fohte/generic-boilerplate/commit/a58ce0cfee169f1283ab531b48fa5a12671fca60))
+
 ## [0.11.0](https://github.com/fohte/generic-boilerplate/compare/v0.10.11...v0.11.0) (2026-09-13)
 
 
