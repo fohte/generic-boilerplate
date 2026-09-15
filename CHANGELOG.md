@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.2](https://github.com/fohte/generic-boilerplate/compare/v0.11.1...v0.11.2) (2026-09-15)
+
+
+### Dependencies
+
+* **ci:** Update dependency jdx/mise to v2026.9.3 ([#686](https://github.com/fohte/generic-boilerplate/issues/686)) ([1c20230](https://github.com/fohte/generic-boilerplate/commit/1c202305b29cfb7625219a72b74290986ea4e561))
+
 ## [0.11.1](https://github.com/fohte/generic-boilerplate/compare/v0.11.0...v0.11.1) (2026-09-15)
 
 
