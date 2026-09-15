@@ -48,8 +48,13 @@ Keep in the route file: data fetching, URL parameter handling, and composing alr
 {%- endif %}
 
 ### A story is a prop-driven visual state, not a behavior test
+{%- if has_vrt_pkg %}
 
 A story's args fully determine what renders; the story never clicks, types, or otherwise interacts to reach that state. `fohte/no-play-in-stories` (`@fohte/eslint-config`) rejects a `play` function on a story or its `meta`, and rejects `parameters.screenshot.skip`, because the `vrt` check screenshots every story as rendered — an interaction-driven story produces whatever the `play` function happens to leave on screen at screenshot time, not a stable state.
+{%- else %}
+
+A story's args fully determine what renders; the story never clicks, types, or otherwise interacts to reach that state. `fohte/no-play-in-stories` (`@fohte/eslint-config`) rejects a `play` function on a story or its `meta`, and rejects `parameters.screenshot.skip` — a story exists to document one rendered state from its args, and an interaction-driven story produces whatever the `play` function happens to leave on screen instead of that state.
+{%- endif %}
 
 For a state that would otherwise take interaction to reach — an open menu/popover/dialog, a field mid-edit — expose it through props (e.g. `open`/`defaultOpen`) instead of driving it with a `play` function, adding the prop or extracting a presentational subcomponent if the component doesn't already support it. Test the interaction itself (click, type, assert) in a co-located `.test.tsx` file, not in a story.
 
