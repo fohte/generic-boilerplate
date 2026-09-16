@@ -19,7 +19,7 @@ _migrations:
   # the update, so copier's normal 3-way merge produces a real conflict.
   - version: '0.12.0'
     before:
-      - sh -c 'if [ -f CLAUDE.md ] && [ ! -L CLAUDE.md ]; then cp CLAUDE.md AGENTS.md; fi'
+      - sh -c 'if [ -f CLAUDE.md ] && [ ! -L CLAUDE.md ]; then cp CLAUDE.md AGENTS.md && git add AGENTS.md; fi'
 
 type:
   type: str
