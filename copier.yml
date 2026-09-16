@@ -1,12 +1,25 @@
 _min_copier_version: '9.5.0'
 _subdirectory: template
 _answers_file: .copier-answers.yml
+# CLAUDE.md is a symlink to AGENTS.md (Claude Code only reads CLAUDE.md,
+# Codex only reads AGENTS.md); without this, copier dereferences the
+# symlink and copies AGENTS.md's content as a separate real file.
+_preserve_symlinks: true
 
 # Remove obsolete workflows when a generated repo is updated past the listed version.
 _migrations:
   - version: '0.8.10'
     before:
       - rm -f .github/workflows/renovate-copier.yml
+  # CLAUDE.md is becoming a symlink to AGENTS.md (see _preserve_symlinks
+  # above). Without this, copier can't diff a regular-file -> symlink type
+  # change and silently overwrites any team customization in an existing
+  # CLAUDE.md instead of raising a merge conflict. Seeding AGENTS.md from
+  # the pre-existing content first keeps the AGENTS.md path stable across
+  # the update, so copier's normal 3-way merge produces a real conflict.
+  - version: '0.12.0'
+    before:
+      - sh -c 'if [ -f CLAUDE.md ] && [ ! -L CLAUDE.md ]; then cp CLAUDE.md AGENTS.md && git add AGENTS.md; fi'
 
 type:
   type: str
@@ -77,8 +90,11 @@ _exclude:
   # Required for any project with a node root package; non-workspace node subpackages
   # get their own pnpm-workspace.yaml under the subpackage directory instead.
   - "{% if not is_workspace and type != 'node' %}/pnpm-workspace.yaml{% endif %}"
-  # Exclude CLAUDE.md when there is no test code (no Rust and no Node)
+  # Exclude CLAUDE.md/AGENTS.md when there is no test code (no Rust and no
+  # Node). Both must be excluded together, or copier update would strip its
+  # target and leave a dangling CLAUDE.md symlink.
   - '{% if not has_rust and not has_node %}/CLAUDE.md{% endif %}'
+  - '{% if not has_rust and not has_node %}/AGENTS.md{% endif %}'
   # Exclude bootstrap workflow when no lockfile-producing language is involved
   - '{% if not has_node and not has_rust %}.github/workflows/bootstrap.yml{% endif %}'
   # Skip bootstrap workflow on `copier update`: existing repos already have
