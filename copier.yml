@@ -11,6 +11,15 @@ _migrations:
   - version: '0.8.10'
     before:
       - rm -f .github/workflows/renovate-copier.yml
+  # CLAUDE.md is becoming a symlink to AGENTS.md (see _preserve_symlinks
+  # above). Without this, copier can't diff a regular-file -> symlink type
+  # change and silently overwrites any team customization in an existing
+  # CLAUDE.md instead of raising a merge conflict. Seeding AGENTS.md from
+  # the pre-existing content first keeps the AGENTS.md path stable across
+  # the update, so copier's normal 3-way merge produces a real conflict.
+  - version: '0.12.0'
+    before:
+      - sh -c 'if [ -f CLAUDE.md ] && [ ! -L CLAUDE.md ]; then cp CLAUDE.md AGENTS.md; fi'
 
 type:
   type: str
