@@ -1,6 +1,10 @@
 _min_copier_version: '9.5.0'
 _subdirectory: template
 _answers_file: .copier-answers.yml
+# CLAUDE.md is a symlink to AGENTS.md (Claude Code only reads CLAUDE.md,
+# Codex only reads AGENTS.md); without this, copier dereferences the
+# symlink and copies AGENTS.md's content as a separate real file.
+_preserve_symlinks: true
 
 # Remove obsolete workflows when a generated repo is updated past the listed version.
 _migrations:
@@ -77,8 +81,11 @@ _exclude:
   # Required for any project with a node root package; non-workspace node subpackages
   # get their own pnpm-workspace.yaml under the subpackage directory instead.
   - "{% if not is_workspace and type != 'node' %}/pnpm-workspace.yaml{% endif %}"
-  # Exclude CLAUDE.md when there is no test code (no Rust and no Node)
+  # Exclude CLAUDE.md/AGENTS.md when there is no test code (no Rust and no
+  # Node). Both must be excluded together, or copier update would strip its
+  # target and leave a dangling CLAUDE.md symlink.
   - '{% if not has_rust and not has_node %}/CLAUDE.md{% endif %}'
+  - '{% if not has_rust and not has_node %}/AGENTS.md{% endif %}'
   # Exclude bootstrap workflow when no lockfile-producing language is involved
   - '{% if not has_node and not has_rust %}.github/workflows/bootstrap.yml{% endif %}'
   # Skip bootstrap workflow on `copier update`: existing repos already have
