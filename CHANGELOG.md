@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.2](https://github.com/fohte/generic-boilerplate/compare/v0.11.1...v0.11.2) (2026-09-16)
+
+
+### Features
+
+* **template:** symlink CLAUDE.md to AGENTS.md ([#688](https://github.com/fohte/generic-boilerplate/issues/688)) ([85aacdd](https://github.com/fohte/generic-boilerplate/commit/85aacdd02d8548b134fde2e127a3df5632871708))
+
+
+### Dependencies
+
+* **ci:** Update dependency jdx/mise to v2026.9.3 ([#686](https://github.com/fohte/generic-boilerplate/issues/686)) ([1c20230](https://github.com/fohte/generic-boilerplate/commit/1c202305b29cfb7625219a72b74290986ea4e561))
+
 ## [0.11.1](https://github.com/fohte/generic-boilerplate/compare/v0.11.0...v0.11.1) (2026-09-15)
 
 
