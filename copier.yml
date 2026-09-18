@@ -22,13 +22,18 @@ _migrations:
   - version: '0.12.0'
     before:
       - |
+        set -euo pipefail
         if [ -f CLAUDE.md ] && [ ! -L CLAUDE.md ]; then
           cp CLAUDE.md .agents-md-pre-migration
         fi
     after:
       - |
+        set -euo pipefail
         if [ -f .agents-md-pre-migration ]; then
-          if ! diff -q .agents-md-pre-migration AGENTS.md > /dev/null 2>&1; then
+          # AGENTS.md may not exist here: has_rust/has_node are both false
+          # (type: base with no subpackages) excludes it, and in that case
+          # CLAUDE.md was never touched, so there's nothing to reconcile.
+          if [ -f AGENTS.md ] && ! diff -q .agents-md-pre-migration AGENTS.md > /dev/null 2>&1; then
             {
               printf '%s\n' '<<<<<<< before updating'
               cat .agents-md-pre-migration
