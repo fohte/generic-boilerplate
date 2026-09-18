@@ -19,7 +19,12 @@ _migrations:
   # let `after` diff it against the merged AGENTS.md, writing a conflict
   # (using the same labels copier's own `git merge-file -L` produces) only
   # when customization would otherwise be lost silently.
-  - version: '0.12.0'
+  #
+  # The version below is '0.11.2', not '0.12.0': this migration shipped as a
+  # patch release (see CHANGELOG.md), so downstream repos updating to 0.11.2
+  # never reach a `self.version >= 0.12.0` comparison and the migration
+  # (before AND after) would otherwise never run.
+  - version: '0.11.2'
     before:
       - |
         set -euo pipefail
