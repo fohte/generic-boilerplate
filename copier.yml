@@ -26,14 +26,7 @@ _migrations:
   # Target the release that actually shipped this migration (a patch bump,
   # not the next minor), so `self.version >= version > from_template.version`
   # triggers it for downstream repos updating past that release.
-  #
-  # Registered again as 0.11.3 and 0.11.4 below: type: base repos only started
-  # receiving AGENTS.md after 0.11.2, so a repo already at 0.11.2 would have
-  # its CLAUDE.md replaced by the symlink without this reconcile. 0.11.4 covers
-  # 0.11.3 shipping without that change. Re-running is a no-op once CLAUDE.md
-  # is a symlink.
-  - &agents-md-migration
-    version: '0.11.2'
+  - version: '0.11.2'
     before:
       - |
         set -eu
@@ -61,10 +54,6 @@ _migrations:
           fi
           rm -f .agents-md-pre-migration
         fi
-  - <<: *agents-md-migration
-    version: '0.11.3'
-  - <<: *agents-md-migration
-    version: '0.11.4'
 
 type:
   type: str
