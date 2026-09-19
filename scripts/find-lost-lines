@@ -5,8 +5,8 @@
 #
 # A removed line is reported when all of the following hold:
 #   - its file exists in the rendering of the *old* template version
-#   - the line does not appear in that rendering, ignoring version numbers and
-#     commit SHAs (so the repo added or edited it)
+#   - the line does not appear in that rendering, ignoring version numbers,
+#     commit SHAs and a trailing comma (so the repo added or edited it)
 #   - the line is not added back anywhere in the same diff (moves and
 #     conflict markers that keep the old side are not losses)
 #
@@ -34,6 +34,9 @@ lost=$(
       # Three or more parts: decimals ("0.5rem") and plain numbers
       # ("timeout-minutes: 30") are customizations, not versions.
       gsub(/[0-9]+\.[0-9]+(\.[0-9]+)+/, "<version>", s)
+      # A JSON trailing comma depends on whether the repo has elements after
+      # the line, not on its content, so the same line can differ by it alone.
+      sub(/,$/, "", s)
       return s
     }
     # Listed positively (not "no alphanumerics") because awk classes such as
