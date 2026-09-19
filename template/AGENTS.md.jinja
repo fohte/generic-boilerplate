@@ -4,7 +4,7 @@
 
 ### Split files before they grow past ~500 lines of production code
 
-When a change would push a file's non-test code past ~500 lines, split it along responsibility seams before adding more. Splits must be move-only commits: no logic changes, renames, or reformatting mixed in. Keep external import paths unchanged by keeping the entrypoint file in place and re-exporting the pieces you split out into new files (e.g. {% if has_rust and has_node %}`foo.rs` gains a `foo/` directory for its submodules, `index.ts` re-exports from the new files{% elif has_rust %}`foo.rs` gains a `foo/` directory for its submodules{% else %}`index.ts` re-exports from the new files{% endif %}). Tests move together with the code they verify.
+When a change would push a file's non-test code past ~500 lines, split it along responsibility seams before adding more. Splits must be move-only commits: no logic changes, renames, or reformatting mixed in. Keep external import paths unchanged by keeping the entrypoint file in place and re-exporting the pieces you split out into new files{% if has_rust or has_node %} (e.g. {% if has_rust and has_node %}`foo.rs` gains a `foo/` directory for its submodules, `index.ts` re-exports from the new files{% elif has_rust %}`foo.rs` gains a `foo/` directory for its submodules{% else %}`index.ts` re-exports from the new files{% endif %}){% endif %}. Tests move together with the code they verify.
 
 Prefer creating a new focused file over appending to the largest existing one.
 {%- if has_node %}
@@ -79,6 +79,7 @@ The `vrt` CI check renders Storybook stories to screenshots and compares them ag
 
 The `vrt-approval` workflow treats the `vrt-approved` label as confirmation that a human reviewed the diff images and approved them. Only a human can make that visual judgment, so after inspecting the diff, ask the user to review it and add the label themselves — do not add it yourself even if the diff looks correct.
 {%- endif %}
+{%- if has_rust or has_node %}
 
 ## Test code rules
 
@@ -181,4 +182,5 @@ If the same assertion chain appears in 3+ tests, extract it into a helper.
 ### Do not write tests that only verify test helpers
 
 Tests must verify production code. Tests that only assert on test helpers, fixtures, or mocks are unnecessary. Remove them.
+{%- endif %}
 {%- endif %}
