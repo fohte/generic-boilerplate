@@ -88,7 +88,7 @@ scripts/detect-content-loss
 scripts/detect-content-loss <repo1> <repo2>
 ```
 
-For each open update PR, the script renders the template version the repo is currently on, and reports every removed line that the template did not own (repo-specific content) and that the PR does not add back anywhere. Template-owned lines, moves to another file, and conflict markers that keep the old side are not reported, so template-body churn does not trip it. Files the template does not render (lockfiles, etc.) and `.copier-answers.yml` are ignored. Logic: `scripts/find-lost-lines`.
+For each open update PR, the script renders the template version the repo is currently on, and reports every removed line that the template did not own (repo-specific content) and that the PR does not add back anywhere. Template-owned lines, moves to another file, and conflict markers that keep the old side are not reported, so template-body churn does not trip it. Files the template does not render (lockfiles, etc.) and `.copier-answers.yml` are ignored. Dotted versions (3+ parts) and full commit SHAs are masked when matching against the template, so a repo-specific version pin on a key the template also manages is overwritten without being reported. Logic: `scripts/find-lost-lines`.
 
 | Result       | Meaning                                                  | Action                                                                       |
 | ------------ | -------------------------------------------------------- | ---------------------------------------------------------------------------- |
