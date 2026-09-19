@@ -20,24 +20,31 @@ _migrations:
   # (using the same labels copier's own `git merge-file -L` produces) only
   # when customization would otherwise be lost silently.
   #
+  # copier runs these via `/bin/sh -c`, which is dash on ubuntu-latest and
+  # rejects `set -o pipefail`, so keep the scripts POSIX (`set -eu`).
+  #
   # Target the release that actually shipped this migration (a patch bump,
   # not the next minor), so `self.version >= version > from_template.version`
   # triggers it for downstream repos updating past that release.
   - version: '0.11.2'
     before:
       - |
-        set -euo pipefail
+        set -eu
         if [ -f CLAUDE.md ] && [ ! -L CLAUDE.md ]; then
           cp CLAUDE.md .agents-md-pre-migration
         fi
     after:
       - |
-        set -euo pipefail
+        set -eu
         if [ -f .agents-md-pre-migration ]; then
           # AGENTS.md may not exist here: has_rust/has_node are both false
           # (type: base with no subpackages) excludes it, and in that case
           # CLAUDE.md was never touched, so there's nothing to reconcile.
-          if [ -f AGENTS.md ] && ! diff -q .agents-md-pre-migration AGENTS.md > /dev/null 2>&1; then
+          # Ignore the template's own `# CLAUDE.md` title (it always differs
+          # from `# AGENTS.md`) and conflict only when some other line is
+          # missing from the new AGENTS.md, i.e. the repo had its own
+          # additions. A customized title line is not ignored.
+          if [ -f AGENTS.md ] && sed '1{/^# CLAUDE\.md$/d;}' .agents-md-pre-migration | grep -qvxFf AGENTS.md; then
             {
               printf '%s\n' '<<<<<<< before updating'
               cat .agents-md-pre-migration
