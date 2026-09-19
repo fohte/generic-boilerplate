@@ -230,3 +230,19 @@ DIFF
   [ "$status" -eq 1 ]
   [ "${lines[0]}" = $'test.yml\ttimeout-minutes: 30' ]
 }
+
+@test "reports a customized decimal value that is not a version" {
+  printf '  --radius: 0.625rem;\n' > "$OLD_RENDER/index.css"
+
+  run "$SCRIPT_DIR/find-lost-lines" "$OLD_RENDER" << 'DIFF'
+diff --git a/index.css b/index.css
+--- a/index.css
++++ b/index.css
+@@ -1 +1 @@
+-  --radius: 0.5rem;
++  --radius: 0.625rem;
+DIFF
+
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = $'index.css\t--radius: 0.5rem;' ]
+}

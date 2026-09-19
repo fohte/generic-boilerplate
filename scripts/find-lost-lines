@@ -25,15 +25,15 @@ fi
 lost=$(
   awk -v dir="$1" '
     function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
-    # Renovate bumps versions in repos ahead of the template, so a line the
-    # template owns rarely matches the old render verbatim. Comparing with
-    # versions masked keeps that bump-then-overwrite from looking like a
-    # repo-specific line being lost. Only dotted versions and full commit SHAs
-    # are masked: other numbers ("timeout-minutes: 30") are real customizations.
-    # The cost is that a repo pin on a template-managed key is overwritten silently.
+    # Repos bump versions ahead of the template, so a template-owned line often
+    # differs from the old render only by version. Masking versions keeps that
+    # from reading as dropped repo-specific content, at the cost that a repo pin
+    # on a template-managed key is overwritten without a report.
     function unversioned(s) {
       gsub(sha, "<sha>", s)
-      gsub(/[0-9]+(\.[0-9]+)+/, "<version>", s)
+      # Three or more parts: decimals ("0.5rem") and plain numbers
+      # ("timeout-minutes: 30") are customizations, not versions.
+      gsub(/[0-9]+\.[0-9]+(\.[0-9]+)+/, "<version>", s)
       return s
     }
     # Listed positively (not "no alphanumerics") because awk classes such as
