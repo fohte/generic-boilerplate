@@ -197,6 +197,36 @@ DIFF
   [ "$status" -eq 0 ]
 }
 
+@test "ignores a template-managed JSON line that differs from the old render only by its trailing comma" {
+  printf '    "vite": "8.2.2"\n    "knip": "6.34.0",\n' > "$OLD_RENDER/package.json"
+
+  run "$SCRIPT_DIR/find-lost-lines" "$OLD_RENDER" << 'DIFF'
+diff --git a/package.json b/package.json
+--- a/package.json
++++ b/package.json
+@@ -1,2 +1,2 @@
+-    "vite": "8.2.2",
+-    "knip": "6.34.0"
++    "vite": "8.3.0",
++    "knip": "6.35.0"
+DIFF
+
+  [ "$status" -eq 0 ]
+
+  run "$SCRIPT_DIR/find-lost-lines" "$OLD_RENDER" << 'DIFF'
+diff --git a/package.json b/package.json
+--- a/package.json
++++ b/package.json
+@@ -1,2 +1,2 @@
+-    "vite": "8.2.2",
+-    "knip": "6.34.0"
++    "vite": "8.2.2"
++    "knip": "6.34.0",
+DIFF
+
+  [ "$status" -eq 0 ]
+}
+
 @test "reports a repo-specific pin whose value was overwritten by another version" {
   printf 'shfmt = "3.14.1"\n' > "$OLD_RENDER/.mise.toml"
 
