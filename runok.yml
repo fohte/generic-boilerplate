@@ -10,6 +10,7 @@ definitions:
         - ./scripts/list-boilerplate-usage
         - ./scripts/auto-merge-boilerplate-prs
         - ./scripts/trigger-boilerplate-update-prs
+        - ./scripts/detect-content-loss
 
 rules:
   - allow: 'bash <var:project-scripts> *'

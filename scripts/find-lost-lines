@@ -24,6 +24,10 @@ fi
 lost=$(
   awk -v dir="$1" '
     function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
+    # Listed positively (not "no alphanumerics") because awk classes such as
+    # [[:alnum:]] do not match non-ASCII text on every awk, which would drop
+    # Japanese-only lines as if they were "}".
+    function generic(s) { return s ~ /^[][{}()<>,;:.\/|\\*_=~`#+"!?@$%^&-]*$/ }
 
     /^diff --git / {
       path = $0
@@ -43,9 +47,9 @@ lost=$(
       for (i = 1; i <= n; i++) {
         p = removed_path[i]
         l = removed_line[i]
-        # .copier-answers.yml is rewritten by copier itself. Lines without
-        # alphanumerics ("}", "---", blanks) are too generic to mean anything.
-        if (p == ".copier-answers.yml" || l !~ /[[:alnum:]]/ || (l in added)) continue
+        # .copier-answers.yml is rewritten by copier itself. Punctuation-only
+        # lines ("}", "---", blanks) are too generic to mean anything.
+        if (p == ".copier-answers.yml" || generic(l) || (l in added)) continue
 
         if (!(p in loaded)) {
           loaded[p] = 1

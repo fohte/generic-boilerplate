@@ -49,6 +49,25 @@ EOF
   [ "${#lines[@]}" -eq 2 ]
 }
 
+@test "reports removed lines written only in non-ASCII text" {
+  printf '# Rules\n' > "$OLD_RENDER/CLAUDE.md"
+
+  run "$SCRIPT_DIR/find-lost-lines" "$OLD_RENDER" << 'EOF'
+diff --git a/CLAUDE.md b/CLAUDE.md
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -1,3 +1 @@
+ # Rules
+-製品仕様
+-- 日本語で返信する
+EOF
+
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = $'CLAUDE.md\t製品仕様' ]
+  [ "${lines[1]}" = $'CLAUDE.md\t- 日本語で返信する' ]
+  [ "${#lines[@]}" -eq 2 ]
+}
+
 @test "ignores lines the template owned" {
   printf 'node = "24.0"\nbun = "1.3"\n' > "$OLD_RENDER/.mise.toml"
 

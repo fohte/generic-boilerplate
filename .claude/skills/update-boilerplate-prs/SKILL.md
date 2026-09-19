@@ -56,7 +56,7 @@ scripts/list-boilerplate-usage --outdated
 The output shows each repository's current version, latest version, and whether an open update PR exists.
 
 - `update PR: (none)` -> Step 3 will dispatch `boilerplate-update.yml` to create one
-- `update PR: #<number> <url>` -> Step 3 will re-dispatch `boilerplate-update.yml`, which force-pushes the branch with the latest template state (updates the existing PR in place); proceed to Step 4 once `COMPLETED` is printed
+- `update PR: #<number> <url>` -> Step 3 will re-dispatch `boilerplate-update.yml`, which force-pushes the branch with the latest template state (updates the existing PR in place); run the content-loss check at the end of Step 3 once `COMPLETED` is printed, then proceed to Step 4
 
 ## Step 3: Trigger boilerplate-update workflow runs
 
@@ -78,7 +78,7 @@ The script polls every 20 seconds (up to 5 minutes), printing `DISPATCHED <repo>
 
 ### Content-loss check (required, run immediately after dispatch)
 
-The workflow arms `gh pr merge --auto --squash` when it creates a PR without unresolved conflicts, and that fires as soon as CI passes. Run the check before doing anything else (including Step 1), even if the dispatch script reported failures for some repos:
+The workflow arms `gh pr merge --auto --squash` when it creates a PR without unresolved conflicts, and that fires as soon as CI passes. Run the check before any other work, even if the dispatch script reported failures for some repos:
 
 ```bash
 # Also run this again after every re-dispatch: the workflow force-pushes the branch,

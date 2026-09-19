@@ -62,17 +62,31 @@ if [[ ${#FILTER_REPOS[@]} -gt 0 ]]; then
 fi
 jq_filter+=' | "\(.repo)\t\(.update_pr.number)\t\(.update_pr.url)\t\(.commit)\t\(.params | tojson)"'
 
-mapfile -t entries < <(
-  "${SCRIPT_DIR}/list-boilerplate-usage" --outdated --json |
-    jq "${jq_args[@]}" "$jq_filter"
-)
+# Capture first: a failure inside `mapfile < <(...)` does not propagate, and a
+# gate that reports "nothing to check" when the listing failed lets PRs through.
+if ! usage_json=$("${SCRIPT_DIR}/list-boilerplate-usage" --outdated --json); then
+  echo "UNVERIFIED: list-boilerplate-usage failed; no PR was checked" >&2
+  exit 1
+fi
+mapfile -t entries < <(jq "${jq_args[@]}" "$jq_filter" <<< "$usage_json")
+
+exit_code=0
+
+# A named repo with no open update PR would otherwise pass silently.
+for repo in "${FILTER_REPOS[@]}"; do
+  if ! printf '%s\n' "${entries[@]}" | cut -f1 | grep -qxF "$repo"; then
+    echo "NOT FOUND $repo: no outdated repo with an open update PR"
+    exit_code=1
+  fi
+done
 
 if [[ ${#entries[@]} -eq 0 ]]; then
   echo "No outdated repos with open update PRs found."
-  exit 0
+  exit "$exit_code"
 fi
 
-# Print lost lines grouped by file: a count plus the first few lines.
+# Print lost lines grouped by file. Every line is listed because the delegate
+# has to restore all of them.
 summarize() {
   awk '
     {
@@ -80,11 +94,11 @@ summarize() {
       p = substr($0, 1, i - 1)
       if (!(p in count)) order[++k] = p
       count[p]++
-      if (count[p] <= 5) example[p] = example[p] "\n      " substr($0, i + 1)
+      lines[p] = lines[p] "\n      " substr($0, i + 1)
     }
     END {
       for (j = 1; j <= k; j++) {
-        printf "  %s: %d line(s) lost%s\n", order[j], count[order[j]], example[order[j]]
+        printf "  %s: %d line(s) lost%s\n", order[j], count[order[j]], lines[order[j]]
       }
     }
   '
@@ -113,12 +127,17 @@ hold_pr() {
     echo "  (dry-run: PR not held)"
     return
   fi
+  # --disable-auto fails when auto-merge was never armed, so judge the hold by
+  # the resulting PR state rather than by exit status.
   gh pr merge "$number" -R "fohte/$repo" --disable-auto || true
-  gh pr ready "$number" -R "fohte/$repo" --undo
-  echo "  HELD: auto-merge disabled, converted to draft"
+  gh pr ready "$number" -R "fohte/$repo" --undo || true
+  if [[ $(gh pr view "$number" -R "fohte/$repo" --json isDraft,autoMergeRequest \
+    --jq '.isDraft and (.autoMergeRequest == null)') == true ]]; then
+    echo "  HELD: auto-merge disabled, converted to draft"
+  else
+    echo "  HOLD FAILED: could not disable auto-merge / convert to draft; act manually" >&2
+  fi
 }
-
-exit_code=0
 
 for entry in "${entries[@]}"; do
   IFS=$'\t' read -r repo number url from params <<< "$entry"
