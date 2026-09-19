@@ -37,14 +37,11 @@ _migrations:
       - |
         set -eu
         if [ -f .agents-md-pre-migration ]; then
-          # AGENTS.md may not exist here: has_rust/has_node are both false
-          # (type: base with no subpackages) excludes it, and in that case
-          # CLAUDE.md was never touched, so there's nothing to reconcile.
           # Ignore the template's own `# CLAUDE.md` title (it always differs
           # from `# AGENTS.md`) and conflict only when some other line is
           # missing from the new AGENTS.md, i.e. the repo had its own
           # additions. A customized title line is not ignored.
-          if [ -f AGENTS.md ] && sed '1{/^# CLAUDE\.md$/d;}' .agents-md-pre-migration | grep -qvxFf AGENTS.md; then
+          if sed '1{/^# CLAUDE\.md$/d;}' .agents-md-pre-migration | grep -qvxFf AGENTS.md; then
             {
               printf '%s\n' '<<<<<<< before updating'
               cat .agents-md-pre-migration
@@ -127,11 +124,6 @@ _exclude:
   # Required for any project with a node root package; non-workspace node subpackages
   # get their own pnpm-workspace.yaml under the subpackage directory instead.
   - "{% if not is_workspace and type != 'node' %}/pnpm-workspace.yaml{% endif %}"
-  # Exclude CLAUDE.md/AGENTS.md when there is no test code (no Rust and no
-  # Node). Both must be excluded together, or copier update would strip its
-  # target and leave a dangling CLAUDE.md symlink.
-  - '{% if not has_rust and not has_node %}/CLAUDE.md{% endif %}'
-  - '{% if not has_rust and not has_node %}/AGENTS.md{% endif %}'
   # Exclude bootstrap workflow when no lockfile-producing language is involved
   - '{% if not has_node and not has_rust %}.github/workflows/bootstrap.yml{% endif %}'
   # Skip bootstrap workflow on `copier update`: existing repos already have
