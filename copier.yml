@@ -12,14 +12,44 @@ _migrations:
     before:
       - rm -f .github/workflows/renovate-copier.yml
   # CLAUDE.md is becoming a symlink to AGENTS.md (see _preserve_symlinks
-  # above). Without this, copier can't diff a regular-file -> symlink type
-  # change and silently overwrites any team customization in an existing
-  # CLAUDE.md instead of raising a merge conflict. Seeding AGENTS.md from
-  # the pre-existing content first keeps the AGENTS.md path stable across
-  # the update, so copier's normal 3-way merge produces a real conflict.
-  - version: '0.12.0'
+  # above). AGENTS.md doesn't exist in the pre-migration template, so it's
+  # invisible to copier's 3-way merge, and copier's internal raw-copy pass
+  # overwrites it unconditionally before that merge even runs. Stash the
+  # pre-migration content outside the template's render scope instead, and
+  # let `after` diff it against the merged AGENTS.md, writing a conflict
+  # (using the same labels copier's own `git merge-file -L` produces) only
+  # when customization would otherwise be lost silently.
+  #
+  # Target the release that actually shipped this migration (a patch bump,
+  # not the next minor), so `self.version >= version > from_template.version`
+  # triggers it for downstream repos updating past that release.
+  - version: '0.11.2'
     before:
-      - sh -c 'if [ -f CLAUDE.md ] && [ ! -L CLAUDE.md ]; then cp CLAUDE.md AGENTS.md && git add AGENTS.md; fi'
+      - |
+        set -euo pipefail
+        if [ -f CLAUDE.md ] && [ ! -L CLAUDE.md ]; then
+          cp CLAUDE.md .agents-md-pre-migration
+        fi
+    after:
+      - |
+        set -euo pipefail
+        if [ -f .agents-md-pre-migration ]; then
+          # AGENTS.md may not exist here: has_rust/has_node are both false
+          # (type: base with no subpackages) excludes it, and in that case
+          # CLAUDE.md was never touched, so there's nothing to reconcile.
+          if [ -f AGENTS.md ] && ! diff -q .agents-md-pre-migration AGENTS.md > /dev/null 2>&1; then
+            {
+              printf '%s\n' '<<<<<<< before updating'
+              cat .agents-md-pre-migration
+              printf '%s\n' '======='
+              cat AGENTS.md
+              printf '%s\n' '>>>>>>> after updating'
+            } > AGENTS.md.new
+            mv AGENTS.md.new AGENTS.md
+            git add AGENTS.md
+          fi
+          rm -f .agents-md-pre-migration
+        fi
 
 type:
   type: str
