@@ -40,10 +40,11 @@ _migrations:
           # AGENTS.md may not exist here: has_rust/has_node are both false
           # (type: base with no subpackages) excludes it, and in that case
           # CLAUDE.md was never touched, so there's nothing to reconcile.
-          # Skip the title line (`# CLAUDE.md` vs `# AGENTS.md` always
-          # differs) and conflict only when some other line is missing from
-          # the new AGENTS.md, i.e. the repo had its own additions.
-          if [ -f AGENTS.md ] && tail -n +2 .agents-md-pre-migration | grep -qvxFf AGENTS.md; then
+          # Ignore the template's own `# CLAUDE.md` title (it always differs
+          # from `# AGENTS.md`) and conflict only when some other line is
+          # missing from the new AGENTS.md, i.e. the repo had its own
+          # additions. A customized title line is not ignored.
+          if [ -f AGENTS.md ] && sed '1{/^# CLAUDE\.md$/d;}' .agents-md-pre-migration | grep -qvxFf AGENTS.md; then
             {
               printf '%s\n' '<<<<<<< before updating'
               cat .agents-md-pre-migration
