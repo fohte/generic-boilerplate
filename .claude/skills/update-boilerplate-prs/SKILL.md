@@ -9,7 +9,8 @@ Validate generic-boilerplate update PRs created by the `boilerplate-update.yml` 
 
 ## Merge policy (read before doing anything)
 
-- **MERGE-READY PRs are merged.** Once a PR is validated as MERGE-READY (no conflict markers + CI pass + changes correctly propagated), merge it with `gh pr merge --squash --auto`. No per-PR user confirmation is required.
+- **No PR merges before `scripts/detect-content-loss` reports `OK` for it.** copier leaves no conflict marker when a template update silently drops repo-specific content (e.g. v0.11.2 wiped repo-specific `CLAUDE.md` sections in 6 repos), so neither the marker check nor CI catches it. The script is mechanical: run it (Step 3), do not substitute reading the diff.
+- **MERGE-READY PRs are merged.** Once a PR is validated as MERGE-READY (no conflict markers + CI pass + `detect-content-loss` `OK` + changes correctly propagated), merge it with `gh pr merge --squash --auto`. No per-PR user confirmation is required.
 - `scripts/auto-merge-boilerplate-prs` in Step 4 is the fast path for the version-only case: it batch-merges PRs whose diff shape is pre-validated (only `_commit` bumps), skipping the per-PR validation that Steps 5-6 perform.
 - NEEDS-INTERVENTION PRs are merged only after their conflicts are resolved. When a `/delegate-claude` delegate finishes resolving conflicts, the delegate executes Step 7's "CI watch and merge protocol" (it cannot stop at scheduling `--auto` -- it must observe CI to completion and confirm `state == "MERGED"`).
 
@@ -17,7 +18,7 @@ Validate generic-boilerplate update PRs created by the `boilerplate-update.yml` 
 
 1. **Understand changes**: Review what changed in generic-boilerplate itself
 2. **Identify outdated repos**: Run `scripts/list-boilerplate-usage --outdated` to find targets
-3. **Trigger boilerplate-update workflow runs**: Dispatch `boilerplate-update.yml` immediately instead of waiting for the weekly cron
+3. **Trigger boilerplate-update workflow runs**: Dispatch `boilerplate-update.yml` immediately instead of waiting for the weekly cron, then run `scripts/detect-content-loss` right away to hold PRs that dropped repo-specific content
 4. **Auto-merge version-only PRs**: Run `scripts/auto-merge-boilerplate-prs` for trivial PRs left over after Step 3 (a fallback path; `boilerplate-update.yml` already auto-merges most of these itself)
 5. **Validate remaining PRs**: Review diff, CI status for PRs with actual template changes
 6. **Report and merge**: Merge MERGE-READY PRs; present the NEEDS-INTERVENTION list to the user
@@ -74,6 +75,30 @@ scripts/trigger-boilerplate-update-prs --target-version v0.8.12
 ```
 
 The script polls every 20 seconds (up to 5 minutes), printing `DISPATCHED <repo>: boilerplate-update.yml` immediately after dispatch and `COMPLETED <repo>: conclusion=<value> (<run url>)` once each run finishes (`conclusion` is GitHub's run conclusion, e.g. `success`, `failure`, `cancelled`; any value other than `success` is treated as a failure). Re-run `scripts/list-boilerplate-usage --outdated` afterward to see the resulting PRs.
+
+### Content-loss check (required, run immediately after dispatch)
+
+The workflow arms `gh pr merge --auto --squash` when it creates a PR without unresolved conflicts, and that fires as soon as CI passes. Run the check before doing anything else (including Step 1), even if the dispatch script reported failures for some repos:
+
+```bash
+# Also run this again after every re-dispatch: the workflow force-pushes the branch,
+# marks the PR ready, and re-arms auto-merge
+scripts/detect-content-loss
+# Or target specific repos; add --dry-run to report without holding
+scripts/detect-content-loss <repo1> <repo2>
+```
+
+For each open update PR, the script renders the template version the repo is currently on, and reports every removed line that the template did not own (repo-specific content) and that the PR does not add back anywhere. Template-owned lines, moves to another file, and conflict markers that keep the old side are not reported, so template-body churn does not trip it. Files the template does not render (lockfiles, etc.) and `.copier-answers.yml` are ignored. Logic: `scripts/find-lost-lines`.
+
+| Result       | Meaning                                                  | Action                                                                       |
+| ------------ | -------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `OK`         | No repo-specific line was dropped                        | Continue                                                                     |
+| `LOST`       | Repo-specific lines were dropped (file and lines listed) | Held by the script. NEEDS-INTERVENTION regardless of conflict markers and CI |
+| `UNVERIFIED` | The diff or old template render could not be obtained    | Held by the script (fail closed). Retry; if it persists, treat as `LOST`     |
+
+"Held" means auto-merge is disabled and the PR is converted to draft. A held PR is released only by the delegate in Step 7 after `scripts/detect-content-loss <repo>` prints `OK` for it. If the listed lines look like a false positive, do not release the PR on your own judgment: show the file and lines to the user and let them decide.
+
+Limitation: the weekly cron run of `boilerplate-update.yml` in each repo does not run this check and can auto-merge such a PR on its own. Resolve held PRs before the next Monday 03:00 UTC run.
 
 ## Step 4: Auto-merge version-only PRs
 
@@ -135,10 +160,10 @@ If CI is failing, review logs to identify the cause.
 
 Evaluate each PR against these criteria:
 
-- **MERGE-READY**: No conflict markers + CI pass + changes correctly propagated
-- **NEEDS-INTERVENTION**: Conflict markers present, or propagation issues detected
+- **MERGE-READY**: No conflict markers + CI pass + `detect-content-loss` `OK` + changes correctly propagated
+- **NEEDS-INTERVENTION**: Conflict markers present, `detect-content-loss` reported `LOST` / `UNVERIFIED`, or propagation issues detected
 
-Report results in a table. **Merge MERGE-READY PRs** with `gh pr merge --squash --auto`. Proceed to Step 7 only for NEEDS-INTERVENTION PRs, and only after the user confirms delegation.
+Report results in a table. Re-run `scripts/detect-content-loss` right before merging (the branch may have been force-pushed since Step 3), then **merge MERGE-READY PRs** with `gh pr merge --squash --auto`. Proceed to Step 7 only for NEEDS-INTERVENTION PRs, and only after the user confirms delegation.
 
 ## Step 7: Delegate template application
 
@@ -168,6 +193,7 @@ Include the following in the delegation prompt:
 - Issues found during validation (conflict markers, incorrect parameter values, missing files, etc.)
 - Repository-specific customizations to preserve (e.g., repo-specific dependencies, local settings)
 - Context for resolution decisions (e.g., lefthook-config referencing itself remotely is inappropriate)
+- The `detect-content-loss` output for the PR (`LOST` files and lines), if any. Tell the delegate to restore every listed line into the file that now owns that content (e.g. append to `AGENTS.md` when `CLAUDE.md` became a symlink), not to drop any
 
 ### Conflict resolution rule: do NOT blindly choose `after updating` (always include in prompt)
 
@@ -200,7 +226,7 @@ The delegate may need to run `copier update --trust`. Always include these notes
 
 1. **Watch every check to completion.** After pushing, run `gh pr checks <number> -R fohte/<repo> --watch --fail-fast=false` and wait until it exits. Then re-run `gh pr checks <number> -R fohte/<repo>` (without `--watch`) and read every row with your own eyes -- do not infer. Every row must be `pass` or `skipping` (path-filtered jobs and neutral conclusions are acceptable); any `pending` / `queued` / `in_progress` row means step 1 is not done yet; any `fail` row blocks merge
 2. **On any failure, debug and re-push.** If any row is `fail`, run `gh run view <run-id> -R fohte/<repo> --log-failed` (find the failing run id in the `gh pr checks` output) to read the failure, fix the cause, commit, push, and return to step 1. Repeat until step 1 shows only `pass` / `skipping`
-3. **Only then enable auto-merge.** Once step 1's non-watch output shows only `pass` / `skipping`, run `gh pr ready <number> -R fohte/<repo>` unconditionally -- PRs created by `copier-update-action` with unresolved conflicts start as draft, and `gh pr merge` fails on a draft PR with `GraphQL: Pull Request is still a draft (mergePullRequest)`. `gh pr ready` on a PR that is already ready exits `0` (it just prints a notice to stderr), so no upfront `isDraft` check is needed. Then run `gh pr merge <number> -R fohte/<repo> --squash --auto`
+3. **Only then enable auto-merge.** Once step 1's non-watch output shows only `pass` / `skipping`, run `~/ghq/github.com/fohte/generic-boilerplate/scripts/detect-content-loss <repo>` and confirm it prints `OK` for this PR. `LOST` / `UNVERIFIED` (the script holds the PR by disabling auto-merge and converting it to draft) means repo-specific lines are still missing: restore them, commit, push, and return to step 1. If the listed lines look like a false positive, do not release the PR yourself: stop and report the file and lines to the delegator. With `OK`, run `gh pr ready <number> -R fohte/<repo>` unconditionally -- PRs created by `copier-update-action` with unresolved conflicts start as draft, and `gh pr merge` fails on a draft PR with `GraphQL: Pull Request is still a draft (mergePullRequest)`. `gh pr ready` on a PR that is already ready exits `0` (it just prints a notice to stderr), so no upfront `isDraft` check is needed. Then run `gh pr merge <number> -R fohte/<repo> --squash --auto`
 4. **Confirm the PR is MERGED.** Run `gh pr view <number> -R fohte/<repo> --json state,mergedAt` and verify `state == "MERGED"`. If it is still `OPEN`, the merge has not happened -- wait and re-check, or investigate why auto-merge did not fire (branch protection, required reviews, mergeability). Do not report completion until `state == "MERGED"`
 
 Reporting completion with only step 3 done (auto-merge scheduled but CI never observed and `MERGED` never confirmed) is a violation of this protocol.
@@ -212,7 +238,7 @@ The latest generic-boilerplate template (v<latest>) is correctly applied to the 
 - All copier conflict markers are resolved
 - Template parameters in `.copier-answers.yml` match the repo's actual usage (e.g., `is_web_app: true` if the repo runs a long-running HTTP server)
 - All expected template-generated files are present and correct
-- Repository-specific customizations are preserved
+- Repository-specific customizations are preserved: `scripts/detect-content-loss <repo>` prints `OK`
 - Syntax checks pass (e.g., `jq .` for JSON, appropriate tools for TOML/YAML)
 - Commit and push (no new PR needed; push to the existing PR branch)
 - Execute the **CI watch and merge protocol** above end to end -- the PR must reach `state == "MERGED"` before reporting completion
