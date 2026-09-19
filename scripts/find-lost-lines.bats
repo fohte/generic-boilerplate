@@ -177,3 +177,56 @@ EOF
   [ "$status" -eq 1 ]
   [ "${lines[0]}" = $'README.md\t-- repo note' ]
 }
+
+@test "ignores a template-managed line whose version the repo bumped ahead of the template" {
+  printf '    "knip": "6.34.0",\n  version: 2026.9.3\n- uses: taiki-e/install-action@1111111111111111111111111111111111111111 # v2.87.8\n' > "$OLD_RENDER/package.json"
+
+  run "$SCRIPT_DIR/find-lost-lines" "$OLD_RENDER" << 'DIFF'
+diff --git a/package.json b/package.json
+--- a/package.json
++++ b/package.json
+@@ -1,3 +1,3 @@
+-    "knip": "6.35.0",
+-  version: 2026.9.4
+-- uses: taiki-e/install-action@9534c84618278caac52cb373bb164ed464dbd8af # v2.87.11
++    "knip": "6.35.1",
++  version: 2026.9.5
++- uses: taiki-e/install-action@2222222222222222222222222222222222222222 # v2.87.12
+DIFF
+
+  [ "$status" -eq 0 ]
+}
+
+@test "reports a repo-specific pin whose value was overwritten by another version" {
+  printf 'shfmt = "3.14.1"\n' > "$OLD_RENDER/.mise.toml"
+
+  run "$SCRIPT_DIR/find-lost-lines" "$OLD_RENDER" << 'DIFF'
+diff --git a/.mise.toml b/.mise.toml
+--- a/.mise.toml
++++ b/.mise.toml
+@@ -1,2 +1,2 @@
+-"aqua:jqlang/jq" = "1.8.1"
++"aqua:jqlang/jq" = "3.14.1"
+ shfmt = "3.14.1"
+DIFF
+
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = $'.mise.toml\t"aqua:jqlang/jq" = "1.8.1"' ]
+  [ "${#lines[@]}" -eq 1 ]
+}
+
+@test "reports a customized number that is not a version" {
+  printf 'timeout-minutes: 10\n' > "$OLD_RENDER/test.yml"
+
+  run "$SCRIPT_DIR/find-lost-lines" "$OLD_RENDER" << 'DIFF'
+diff --git a/test.yml b/test.yml
+--- a/test.yml
++++ b/test.yml
+@@ -1 +1 @@
+-timeout-minutes: 30
++timeout-minutes: 10
+DIFF
+
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = $'test.yml\ttimeout-minutes: 30' ]
+}
