@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+# Detect generic-boilerplate update PRs that silently drop repo-specific
+# content (lines the template never owned) and hold them before they merge.
+#
+# copier only marks conflicts it notices; a file the new template replaces or
+# removes (or a migration that never fires) loses repo-specific lines with no
+# conflict marker and no failing check. This script renders the *old* template
+# version with the repo's answers and reports every removed line that the
+# template did not own (see scripts/find-lost-lines).
+#
+# A PR with lost lines, or one that cannot be verified, is held: auto-merge is
+# disabled and the PR is converted to a draft, the same state
+# boilerplate-update.yml gives PRs with unresolved conflicts.
+#
+# Usage: scripts/detect-content-loss [--dry-run] [REPO...]
+#
+# Options:
+#   --dry-run    Report only; do not hold PRs
+#
+# Arguments:
+#   REPO...      Specific repo names to check (default: all outdated repos with PRs)
+#
+# Exit status: 0 when every PR is clean, 1 when any PR lost content or could not be checked.
+#
+# Requires: gh, jq, yq, copier, git (yq is used by list-boilerplate-usage)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+TEMPLATE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+DRY_RUN=false
+FILTER_REPOS=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+    *)
+      FILTER_REPOS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+WORK_DIR=$(mktemp -d /tmp/detect-content-loss.XXXXXX)
+trap 'rm -rf "$WORK_DIR"' EXIT
+
+jq_args=(--raw-output)
+jq_filter='.[] | select(.update_pr != null)'
+if [[ ${#FILTER_REPOS[@]} -gt 0 ]]; then
+  repo_json=$(printf '%s\n' "${FILTER_REPOS[@]}" | jq -R . | jq -s .)
+  jq_args+=(--argjson filter_repos "$repo_json")
+  # shellcheck disable=SC2016
+  jq_filter+=' | select(.repo as $r | $filter_repos | index($r))'
+fi
+jq_filter+=' | "\(.repo)\t\(.update_pr.number)\t\(.update_pr.url)\t\(.commit)\t\(.params | tojson)"'
+
+# Capture first: a failure inside `mapfile < <(...)` does not propagate, and a
+# gate that reports "nothing to check" when the listing failed lets PRs through.
+if ! usage_json=$("${SCRIPT_DIR}/list-boilerplate-usage" --outdated --json); then
+  echo "UNVERIFIED: list-boilerplate-usage failed; no PR was checked" >&2
+  exit 1
+fi
+mapfile -t entries < <(jq "${jq_args[@]}" "$jq_filter" <<< "$usage_json")
+
+exit_code=0
+
+# A named repo with no open update PR would otherwise pass silently.
+for repo in "${FILTER_REPOS[@]}"; do
+  if ! printf '%s\n' "${entries[@]}" | cut -f1 | grep -qxF "$repo"; then
+    echo "NOT FOUND $repo: no outdated repo with an open update PR"
+    exit_code=1
+  fi
+done
+
+if [[ ${#entries[@]} -eq 0 ]]; then
+  echo "No outdated repos with open update PRs found."
+  exit "$exit_code"
+fi
+
+# Print lost lines grouped by file. Every line is listed because the delegate
+# has to restore all of them.
+summarize() {
+  awk '
+    {
+      i = index($0, "\t")
+      p = substr($0, 1, i - 1)
+      if (!(p in count)) order[++k] = p
+      count[p]++
+      lines[p] = lines[p] "\n      " substr($0, i + 1)
+    }
+    END {
+      for (j = 1; j <= k; j++) {
+        printf "  %s: %d line(s) lost%s\n", order[j], count[order[j]], lines[order[j]]
+      }
+    }
+  '
+}
+
+# Renders template version $2 into $4 with the repo's answers ($3, JSON), so
+# the result matches what copier rendered for the old side of its 3-way merge.
+render_old_template() {
+  local repo="$1" from="$2" params="$3" dest="$4" answers="$WORK_DIR/answers-$1.yml"
+
+  printf '%s\n' "$params" > "$answers"
+
+  if ! git -C "$TEMPLATE_DIR" rev-parse -q --verify "${from}^{commit}" > /dev/null; then
+    git -C "$TEMPLATE_DIR" fetch --tags --quiet origin
+  fi
+
+  # Tasks are skipped: they run post-copy commands (e.g. installs) that do not
+  # affect which lines a file contains.
+  copier copy --vcs-ref "$from" --data-file "$answers" --defaults --overwrite \
+    --skip-tasks --quiet "$TEMPLATE_DIR" "$dest"
+}
+
+hold_pr() {
+  local repo="$1" number="$2"
+  if "$DRY_RUN"; then
+    echo "  (dry-run: PR not held)"
+    return
+  fi
+  # --disable-auto fails when auto-merge was never armed, so judge the hold by
+  # the resulting PR state rather than by exit status.
+  gh pr merge "$number" -R "fohte/$repo" --disable-auto || true
+  gh pr ready "$number" -R "fohte/$repo" --undo || true
+  if [[ $(gh pr view "$number" -R "fohte/$repo" --json isDraft,autoMergeRequest \
+    --jq '.isDraft and (.autoMergeRequest == null)') == true ]]; then
+    echo "  HELD: auto-merge disabled, converted to draft"
+  else
+    echo "  HOLD FAILED: could not disable auto-merge / convert to draft; act manually" >&2
+  fi
+}
+
+for entry in "${entries[@]}"; do
+  IFS=$'\t' read -r repo number url from params <<< "$entry"
+
+  old_render="$WORK_DIR/old-render-$repo"
+  mkdir -p "$old_render"
+
+  # Fail closed: a PR that cannot be checked is treated like one that lost content.
+  if ! diff=$(gh pr diff "$number" -R "fohte/$repo"); then
+    echo "UNVERIFIED $repo#$number ($url): could not fetch the PR diff"
+    hold_pr "$repo" "$number"
+    exit_code=1
+    continue
+  fi
+  if ! render_old_template "$repo" "$from" "$params" "$old_render"; then
+    echo "UNVERIFIED $repo#$number ($url): could not render the old template version"
+    hold_pr "$repo" "$number"
+    exit_code=1
+    continue
+  fi
+
+  if lost=$("${SCRIPT_DIR}/find-lost-lines" "$old_render" <<< "$diff"); then
+    echo "OK $repo#$number ($url)"
+  else
+    echo "LOST $repo#$number ($url)"
+    summarize <<< "$lost"
+    hold_pr "$repo" "$number"
+    exit_code=1
+  fi
+done
+
+exit "$exit_code"
