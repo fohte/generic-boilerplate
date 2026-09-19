@@ -13,16 +13,24 @@
 # boilerplate-update.yml gives PRs with unresolved conflicts.
 #
 # Usage: scripts/detect-content-loss [--dry-run] [REPO...]
+#        scripts/detect-content-loss --pr-url URL --from REF --data-file FILE
 #
 # Options:
 #   --dry-run    Report only; do not hold PRs
 #
 # Arguments:
 #   REPO...      Specific repo names to check (default: all outdated repos with PRs)
+#   --pr-url     Check one PR directly without listing the organization's repos
+#   --from       Template ref used by the PR's base repository
+#   --data-file  Copier answers captured before the update ran
+#
+# The direct-mode options are a compatibility interface used by the
+# template-distributed workflow. Keep them backward-compatible with older
+# copies of template/.github/workflows/boilerplate-update.yml.
 #
 # Exit status: 0 when every PR is clean, 1 when any PR lost content or could not be checked.
 #
-# Requires: gh, jq, yq, copier, git (yq is used by list-boilerplate-usage)
+# Requires: gh, jq, yq, copier, git (jq/yq are only needed for repository-list mode)
 
 set -euo pipefail
 
@@ -31,12 +39,27 @@ TEMPLATE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 DRY_RUN=false
 FILTER_REPOS=()
+SINGLE_PR_URL=""
+SINGLE_FROM=""
+SINGLE_DATA_FILE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run)
       DRY_RUN=true
       shift
+      ;;
+    --pr-url)
+      SINGLE_PR_URL="$2"
+      shift 2
+      ;;
+    --from)
+      SINGLE_FROM="$2"
+      shift 2
+      ;;
+    --data-file)
+      SINGLE_DATA_FILE="$2"
+      shift 2
       ;;
     -*)
       echo "Unknown option: $1" >&2
@@ -49,41 +72,22 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+SINGLE_MODE=false
+if [[ -n "$SINGLE_PR_URL$SINGLE_FROM$SINGLE_DATA_FILE" ]]; then
+  SINGLE_MODE=true
+  if [[ -z "$SINGLE_PR_URL" || -z "$SINGLE_FROM" || -z "$SINGLE_DATA_FILE" || ${#FILTER_REPOS[@]} -gt 0 ]]; then
+    echo "--pr-url, --from, and --data-file must be provided together without repository arguments" >&2
+    exit 1
+  fi
+  if [[ ! -f "$SINGLE_DATA_FILE" ]]; then
+    echo "Copier data file does not exist: $SINGLE_DATA_FILE" >&2
+    exit 1
+  fi
+fi
+
 WORK_DIR=$(mktemp -d /tmp/detect-content-loss.XXXXXX)
 trap 'rm -rf "$WORK_DIR"' EXIT
-
-jq_args=(--raw-output)
-jq_filter='.[] | select(.update_pr != null)'
-if [[ ${#FILTER_REPOS[@]} -gt 0 ]]; then
-  repo_json=$(printf '%s\n' "${FILTER_REPOS[@]}" | jq -R . | jq -s .)
-  jq_args+=(--argjson filter_repos "$repo_json")
-  # shellcheck disable=SC2016
-  jq_filter+=' | select(.repo as $r | $filter_repos | index($r))'
-fi
-jq_filter+=' | "\(.repo)\t\(.update_pr.number)\t\(.update_pr.url)\t\(.commit)\t\(.params | tojson)"'
-
-# Capture first: a failure inside `mapfile < <(...)` does not propagate, and a
-# gate that reports "nothing to check" when the listing failed lets PRs through.
-if ! usage_json=$("${SCRIPT_DIR}/list-boilerplate-usage" --outdated --json); then
-  echo "UNVERIFIED: list-boilerplate-usage failed; no PR was checked" >&2
-  exit 1
-fi
-mapfile -t entries < <(jq "${jq_args[@]}" "$jq_filter" <<< "$usage_json")
-
-exit_code=0
-
-# A named repo with no open update PR would otherwise pass silently.
-for repo in "${FILTER_REPOS[@]}"; do
-  if ! printf '%s\n' "${entries[@]}" | cut -f1 | grep -qxF "$repo"; then
-    echo "NOT FOUND $repo: no outdated repo with an open update PR"
-    exit_code=1
-  fi
-done
-
-if [[ ${#entries[@]} -eq 0 ]]; then
-  echo "No outdated repos with open update PRs found."
-  exit "$exit_code"
-fi
+LIST_USAGE_SCRIPT="${DETECT_CONTENT_LOSS_LIST_USAGE:-$SCRIPT_DIR/list-boilerplate-usage}"
 
 # Print lost lines grouped by file. Every line is listed because the delegate
 # has to restore all of them.
@@ -104,34 +108,42 @@ summarize() {
   '
 }
 
-# Renders template version $2 into $4 with the repo's answers ($3, JSON), so
-# the result matches what copier rendered for the old side of its 3-way merge.
+# Renders template version $1 into $3 using answers file $2, so the result
+# matches what copier rendered for the old side of its 3-way merge.
 render_old_template() {
-  local repo="$1" from="$2" params="$3" dest="$4" answers="$WORK_DIR/answers-$1.yml"
-
-  printf '%s\n' "$params" > "$answers"
+  local from="$1" answers="$2" dest="$3"
+  local normalized_answers="$dest.answers.yml"
 
   if ! git -C "$TEMPLATE_DIR" rev-parse -q --verify "${from}^{commit}" > /dev/null; then
     git -C "$TEMPLATE_DIR" fetch --tags --quiet origin
   fi
 
+  # List mode already strips Copier's bookkeeping keys; normalize direct mode
+  # too so both entry points render from the same user-answer data.
+  if ! awk '
+    /^[^[:space:]]/ { skip = ($0 ~ /^_[^:]+:/) }
+    !skip { print }
+  ' "$answers" > "$normalized_answers"; then
+    return 1
+  fi
+
   # Tasks are skipped: they run post-copy commands (e.g. installs) that do not
   # affect which lines a file contains.
-  copier copy --vcs-ref "$from" --data-file "$answers" --defaults --overwrite \
+  copier copy --vcs-ref "$from" --data-file "$normalized_answers" --defaults --overwrite \
     --skip-tasks --quiet "$TEMPLATE_DIR" "$dest"
 }
 
 hold_pr() {
-  local repo="$1" number="$2"
+  local repo_ref="$1" number="$2"
   if "$DRY_RUN"; then
     echo "  (dry-run: PR not held)"
     return
   fi
   # --disable-auto fails when auto-merge was never armed, so judge the hold by
   # the resulting PR state rather than by exit status.
-  gh pr merge "$number" -R "fohte/$repo" --disable-auto || true
-  gh pr ready "$number" -R "fohte/$repo" --undo || true
-  if [[ $(gh pr view "$number" -R "fohte/$repo" --json isDraft,autoMergeRequest \
+  gh pr merge "$number" -R "$repo_ref" --disable-auto || true
+  gh pr ready "$number" -R "$repo_ref" --undo || true
+  if [[ $(gh pr view "$number" -R "$repo_ref" --json isDraft,autoMergeRequest \
     --jq '.isDraft and (.autoMergeRequest == null)') == true ]]; then
     echo "  HELD: auto-merge disabled, converted to draft"
   else
@@ -139,24 +151,22 @@ hold_pr() {
   fi
 }
 
-for entry in "${entries[@]}"; do
-  IFS=$'\t' read -r repo number url from params <<< "$entry"
-
-  old_render="$WORK_DIR/old-render-$repo"
+check_pr() {
+  local repo_ref="$1" number="$2" url="$3" from="$4" answers="$5"
+  local repo="${repo_ref##*/}"
+  local old_render="$WORK_DIR/old-render-$repo"
   mkdir -p "$old_render"
 
   # Fail closed: a PR that cannot be checked is treated like one that lost content.
-  if ! diff=$(gh pr diff "$number" -R "fohte/$repo"); then
+  if ! diff=$(gh pr diff "$number" -R "$repo_ref"); then
     echo "UNVERIFIED $repo#$number ($url): could not fetch the PR diff"
-    hold_pr "$repo" "$number"
-    exit_code=1
-    continue
+    hold_pr "$repo_ref" "$number"
+    return 1
   fi
-  if ! render_old_template "$repo" "$from" "$params" "$old_render"; then
+  if ! render_old_template "$from" "$answers" "$old_render"; then
     echo "UNVERIFIED $repo#$number ($url): could not render the old template version"
-    hold_pr "$repo" "$number"
-    exit_code=1
-    continue
+    hold_pr "$repo_ref" "$number"
+    return 1
   fi
 
   if lost=$("${SCRIPT_DIR}/find-lost-lines" "$old_render" <<< "$diff"); then
@@ -164,9 +174,73 @@ for entry in "${entries[@]}"; do
   else
     echo "LOST $repo#$number ($url)"
     summarize <<< "$lost"
-    hold_pr "$repo" "$number"
-    exit_code=1
+    hold_pr "$repo_ref" "$number"
+    return 1
   fi
-done
+}
 
-exit "$exit_code"
+run_single_mode() {
+  local single_repo_ref single_number
+  if [[ "$SINGLE_PR_URL" =~ ^https://github\.com/([^/]+/[^/]+)/pull/([0-9]+)$ ]]; then
+    single_repo_ref="${BASH_REMATCH[1]}"
+    single_number="${BASH_REMATCH[2]}"
+  else
+    echo "UNVERIFIED: unsupported PR URL: $SINGLE_PR_URL" >&2
+    return 1
+  fi
+
+  check_pr "$single_repo_ref" "$single_number" "$SINGLE_PR_URL" "$SINGLE_FROM" "$SINGLE_DATA_FILE"
+}
+
+run_list_mode() {
+  local exit_code=0 repo_json usage_json entry repo number url from params answers
+  local jq_filter='.[] | select(.update_pr != null)'
+  local -a jq_args=(--raw-output)
+  local -a entries
+
+  if [[ ${#FILTER_REPOS[@]} -gt 0 ]]; then
+    repo_json=$(printf '%s\n' "${FILTER_REPOS[@]}" | jq -R . | jq -s .)
+    jq_args+=(--argjson filter_repos "$repo_json")
+    # shellcheck disable=SC2016
+    jq_filter+=' | select(.repo as $r | $filter_repos | index($r))'
+  fi
+  jq_filter+=' | "\(.repo)\t\(.update_pr.number)\t\(.update_pr.url)\t\(.commit)\t\(.params | tojson)"'
+
+  # Capture first: a failure inside `mapfile < <(...)` does not propagate, and a
+  # gate that reports "nothing to check" when the listing failed lets PRs through.
+  if ! usage_json=$("$LIST_USAGE_SCRIPT" --outdated --json); then
+    echo "UNVERIFIED: list-boilerplate-usage failed; no PR was checked" >&2
+    return 1
+  fi
+  mapfile -t entries < <(jq "${jq_args[@]}" "$jq_filter" <<< "$usage_json")
+
+  # A named repo with no open update PR would otherwise pass silently.
+  for repo in "${FILTER_REPOS[@]}"; do
+    if ! printf '%s\n' "${entries[@]}" | cut -f1 | grep -qxF "$repo"; then
+      echo "NOT FOUND $repo: no outdated repo with an open update PR"
+      exit_code=1
+    fi
+  done
+
+  if [[ ${#entries[@]} -eq 0 ]]; then
+    echo "No outdated repos with open update PRs found."
+    return "$exit_code"
+  fi
+
+  for entry in "${entries[@]}"; do
+    IFS=$'\t' read -r repo number url from params <<< "$entry"
+    answers="$WORK_DIR/answers-$repo.yml"
+    printf '%s\n' "$params" > "$answers"
+    if ! check_pr "fohte/$repo" "$number" "$url" "$from" "$answers"; then
+      exit_code=1
+    fi
+  done
+
+  return "$exit_code"
+}
+
+if "$SINGLE_MODE"; then
+  run_single_mode
+else
+  run_list_mode
+fi
