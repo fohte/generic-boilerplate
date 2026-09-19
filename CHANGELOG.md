@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.11.3](https://github.com/fohte/generic-boilerplate/compare/v0.11.2...v0.11.3) (2026-09-19)
+
+
+### Features
+
+* **template:** distribute AGENTS.md and CLAUDE.md to all repos ([#700](https://github.com/fohte/generic-boilerplate/issues/700)) ([8223575](https://github.com/fohte/generic-boilerplate/commit/822357565299c9a2c3824c0be2cb070dad133fc8))
+
+
+### Bug Fixes
+
+* prevent silent loss of project-specific CLAUDE.md on copier update ([#697](https://github.com/fohte/generic-boilerplate/issues/697)) ([c99c407](https://github.com/fohte/generic-boilerplate/commit/c99c407b910fb68e320f59158d76a89d656f54cb))
+* resolve shell incompatibilities and unnecessary conflicts during AGENTS.md migration ([#698](https://github.com/fohte/generic-boilerplate/issues/698)) ([bbb5b3f](https://github.com/fohte/generic-boilerplate/commit/bbb5b3f14678df9a0a711081f707a7a0045eec9d))
+
+
+### Dependencies
+
+* **ci:** Update dependency jdx/mise to v2026.9.5 ([#693](https://github.com/fohte/generic-boilerplate/issues/693)) ([2a18821](https://github.com/fohte/generic-boilerplate/commit/2a18821d8e6543e6831d3bc97919d7dc1c459bcf))
+* **ci:** Update taiki-e/install-action action to v2.87.10 ([#691](https://github.com/fohte/generic-boilerplate/issues/691)) ([e93d360](https://github.com/fohte/generic-boilerplate/commit/e93d36044e82a32db12e006e73d12e0f8907578b))
+* **ci:** Update taiki-e/install-action action to v2.87.11 ([#695](https://github.com/fohte/generic-boilerplate/issues/695)) ([529d459](https://github.com/fohte/generic-boilerplate/commit/529d45985561de160676cebce8ee34a96c10e609))
+* **ci:** Update taiki-e/install-action action to v2.87.9 ([#689](https://github.com/fohte/generic-boilerplate/issues/689)) ([913fe91](https://github.com/fohte/generic-boilerplate/commit/913fe9130ba783bf5af97673f8f4d4d95b7ba256))
+* Update devDependencies (non-major) ([#692](https://github.com/fohte/generic-boilerplate/issues/692)) ([f5c456a](https://github.com/fohte/generic-boilerplate/commit/f5c456a06a528a35b538d22d1269e137ade9c0ef))
+
 ## [0.11.2](https://github.com/fohte/generic-boilerplate/compare/v0.11.1...v0.11.2) (2026-09-16)
 
 
