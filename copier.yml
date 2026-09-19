@@ -20,10 +20,9 @@ _migrations:
   # (using the same labels copier's own `git merge-file -L` produces) only
   # when customization would otherwise be lost silently.
   #
-  # The version below is '0.11.2', not '0.12.0': this migration shipped as a
-  # patch release (see CHANGELOG.md), so downstream repos updating to 0.11.2
-  # never reach a `self.version >= 0.12.0` comparison and the migration
-  # (before AND after) would otherwise never run.
+  # Target the release that actually shipped this migration (a patch bump,
+  # not the next minor), so `self.version >= version > from_template.version`
+  # triggers it for downstream repos updating past that release.
   - version: '0.11.2'
     before:
       - |
