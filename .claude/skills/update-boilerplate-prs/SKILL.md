@@ -9,7 +9,7 @@ Validate generic-boilerplate update PRs created by the `boilerplate-update.yml` 
 
 ## Merge policy (read before doing anything)
 
-- **No PR merges before `scripts/detect-content-loss` reports `OK` for it.** copier leaves no conflict marker when a template update silently drops repo-specific content (e.g. v0.11.2 wiped repo-specific `CLAUDE.md` sections in 6 repos), so neither the marker check nor CI catches it. The script is mechanical: run it (Step 3), do not substitute reading the diff.
+- **No PR merges before `scripts/detect-content-loss` reports `OK` for it.** The migrated workflow runs the check before arming auto-merge; run it manually for PRs created by an older workflow version. copier leaves no conflict marker when a template update silently drops repo-specific content (e.g. v0.11.2 wiped repo-specific `CLAUDE.md` sections in 6 repos), so neither the marker check nor CI catches it. The script is mechanical: do not substitute reading the diff.
 - **MERGE-READY PRs are merged.** Once a PR is validated as MERGE-READY (no conflict markers + CI pass + `detect-content-loss` `OK` + changes correctly propagated), merge it with `gh pr merge --squash --auto`. No per-PR user confirmation is required.
 - `scripts/auto-merge-boilerplate-prs` in Step 4 is the fast path for the version-only case: it batch-merges PRs whose diff shape is pre-validated (only `_commit` bumps), skipping the per-PR validation that Steps 5-6 perform.
 - NEEDS-INTERVENTION PRs are merged only after their conflicts are resolved. When a `/delegate-claude` delegate finishes resolving conflicts, the delegate executes Step 7's "CI watch and merge protocol" (it cannot stop at scheduling `--auto` -- it must observe CI to completion and confirm `state == "MERGED"`).
@@ -18,7 +18,7 @@ Validate generic-boilerplate update PRs created by the `boilerplate-update.yml` 
 
 1. **Understand changes**: Review what changed in generic-boilerplate itself
 2. **Identify outdated repos**: Run `scripts/list-boilerplate-usage --outdated` to find targets
-3. **Trigger boilerplate-update workflow runs**: Dispatch `boilerplate-update.yml` immediately instead of waiting for the weekly cron, then run `scripts/detect-content-loss` right away to hold PRs that dropped repo-specific content
+3. **Trigger boilerplate-update workflow runs**: Dispatch `boilerplate-update.yml` immediately instead of waiting for the weekly cron; use the workflow gate when the target has received it, and run the manual check for older workflow copies
 4. **Auto-merge version-only PRs**: Run `scripts/auto-merge-boilerplate-prs` for trivial PRs left over after Step 3 (a fallback path; `boilerplate-update.yml` already auto-merges most of these itself)
 5. **Validate remaining PRs**: Review diff, CI status for PRs with actual template changes
 6. **Report and merge**: Merge MERGE-READY PRs; present the NEEDS-INTERVENTION list to the user
@@ -56,11 +56,11 @@ scripts/list-boilerplate-usage --outdated
 The output shows each repository's current version, latest version, and whether an open update PR exists.
 
 - `update PR: (none)` -> Step 3 will dispatch `boilerplate-update.yml` to create one
-- `update PR: #<number> <url>` -> Step 3 will re-dispatch `boilerplate-update.yml`, which force-pushes the branch with the latest template state (updates the existing PR in place); run the content-loss check at the end of Step 3 once `COMPLETED` is printed, then proceed to Step 4
+- `update PR: #<number> <url>` -> Step 3 will re-dispatch `boilerplate-update.yml`, which force-pushes the branch with the latest template state (updates the existing PR in place); run the manual content-loss check after `COMPLETED` is printed when the target has not yet received the gate
 
 ## Step 3: Trigger boilerplate-update workflow runs
 
-Every outdated repo already has `.github/workflows/boilerplate-update.yml` (calls `fohte/copier-update-action`), which normally runs on a weekly cron and creates or refreshes the update PR itself -- including auto-merging it when `copier-update-action` reports no unresolved conflicts and lockfile sync succeeds. This step dispatches that workflow immediately instead of waiting for the next scheduled run.
+Every outdated repo already has `.github/workflows/boilerplate-update.yml` (calls `fohte/copier-update-action`), which normally runs on a weekly cron and creates or refreshes the update PR itself -- including auto-merging it when `copier-update-action` reports no unresolved conflicts, lockfile sync succeeds, and the content-loss gate reports `OK`. This step dispatches that workflow immediately instead of waiting for the next scheduled run.
 
 ```bash
 # Dry-run first to verify targets
@@ -74,15 +74,14 @@ scripts/trigger-boilerplate-update-prs <repo1> <repo2>
 scripts/trigger-boilerplate-update-prs --target-version v0.8.12
 ```
 
-The script polls every 20 seconds (up to 5 minutes), printing `DISPATCHED <repo>: boilerplate-update.yml` immediately after dispatch and `COMPLETED <repo>: conclusion=<value> (<run url>)` once each run finishes (`conclusion` is GitHub's run conclusion, e.g. `success`, `failure`, `cancelled`; any value other than `success` is treated as a failure). Re-run `scripts/list-boilerplate-usage --outdated` afterward to see the resulting PRs.
+The script polls every 20 seconds (up to 5 minutes), printing `DISPATCHED <repo>: boilerplate-update.yml` immediately after dispatch and `COMPLETED <repo>: conclusion=<value> (<run url>)` once each run finishes (`conclusion` is GitHub's run conclusion, e.g. `success`, `failure`, `cancelled`; any value other than `success` is treated as a failure). A `failure` with a draft PR can indicate a content-loss hold; the workflow also adds the report to the PR body. Read the workflow log before retrying. Re-run `scripts/list-boilerplate-usage --outdated` afterward to see the resulting PRs.
 
-### Content-loss check (required, run immediately after dispatch)
+### Content-loss check for PRs created by older workflow versions
 
-The workflow arms `gh pr merge --auto --squash` when it creates a PR without unresolved conflicts, and that fires as soon as CI passes. Run the check before any other work, even if the dispatch script reported failures for some repos:
+The current `boilerplate-update.yml` runs this check after creating or updating a PR and before `gh pr merge --auto --squash`. A target has received the gate when its default-branch workflow contains the `Check out content-loss detector` step. Until then, its weekly cron and manual dispatch can auto-merge before the check, so run this manually immediately after dispatch and after every re-dispatch:
 
 ```bash
-# Also run this again after every re-dispatch: the workflow force-pushes the branch,
-# marks the PR ready, and re-arms auto-merge
+# Run this immediately after dispatch for a target that still uses the old workflow.
 scripts/detect-content-loss
 # Or target specific repos; add --dry-run to report without holding
 scripts/detect-content-loss <repo1> <repo2>
@@ -98,13 +97,13 @@ For each open update PR, the script renders the template version the repo is cur
 
 "Held" means auto-merge is disabled and the PR is converted to draft. A held PR is released only by the delegate in Step 7 after `scripts/detect-content-loss <repo>` prints `OK` for it. If the listed lines look like a false positive, do not release the PR on your own judgment: show the file and lines to the user and let them decide.
 
-Limitation: the weekly cron run of `boilerplate-update.yml` in each repo does not run this check and can auto-merge such a PR on its own. Resolve held PRs before the next Monday 03:00 UTC run.
+After the update PR that carries the new workflow merges, the content-loss gate runs on both the weekly cron and `workflow_dispatch` paths. A held PR remains a draft until its missing lines are restored and the check reports `OK`.
 
 ## Step 4: Auto-merge version-only PRs
 
 PRs where the only change is the `_commit` version bump in `.copier-answers.yml` can be merged automatically without manual review.
 
-`boilerplate-update.yml` already schedules `gh pr merge --auto --squash` itself whenever `copier-update-action` reports no unresolved conflicts and lockfile sync succeeds, so most version-only PRs from Step 3 are already auto-merging by the time you reach this step. This step is a fallback for PRs where that scheduling did not happen (e.g. the workflow run failed before reaching the merge step, lockfile sync failed and left the PR as a draft, or the PR predates this migration).
+`boilerplate-update.yml` already schedules `gh pr merge --auto --squash` itself whenever `copier-update-action` reports no unresolved conflicts, lockfile sync succeeds, and `detect-content-loss` reports `OK`, so most version-only PRs from Step 3 are already auto-merging by the time you reach this step. This step is a fallback for PRs where that scheduling did not happen (e.g. the workflow run failed before reaching the merge step, lockfile sync failed and left the PR as a draft, or the PR predates this migration).
 
 The script checks that the only diff lines are `_commit` version changes. When new template parameters are introduced (e.g., `is_web_app`), copier adds them to `.copier-answers.yml` with default values for repos that match the parameter's `when` condition. These PRs have additional diff lines beyond `_commit`, so the script automatically skips them -- they require manual validation in Step 5b.
 
