@@ -192,8 +192,10 @@ _exclude:
   - '{% if not root_storybook %}/.storybook{% endif %}'
   - '{% if not root_vrt %}/.storybook/screenshot-viewport.ts{% endif %}'
   - '{% if not root_vrt %}/.storybook/vitest.setup.screenshot.ts{% endif %}'
-  # Same as /.storybook above: these are only {% include %} sources for the
-  # per-subpackage spa/vrt scaffolding (see the yield template).
+  # /src/App.tsx and the other application files below are only {% include %}
+  # sources for the per-subpackage spa/vrt scaffolding (see the yield
+  # template). Root .storybook/ and vitest.screenshot.config.ts are rendered
+  # directly when root Storybook/VRT is enabled.
   - /src/App.tsx
   - /src/main.tsx
   - /src/index.css

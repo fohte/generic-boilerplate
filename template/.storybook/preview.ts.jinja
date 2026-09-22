@@ -1,4 +1,5 @@
-{% if not root_storybook %}import '#index.css'
+{%- set is_root_storybook = pkg is not defined and root_storybook -%}
+{% if not is_root_storybook %}import '#index.css'
 
 {% endif -%}
 import {
@@ -6,13 +7,13 @@ import {
   beforeEach,
   configureUnhandledApiRequestCheck,
   parameters,
-{%- if not root_storybook %}
+{%- if not is_root_storybook %}
   reportUnhandledApiRequest,
 {%- endif %}
 } from '@fohte/storybook-addon/preview'
 import { withThemeByClassName } from '@storybook/addon-themes'
 import type { Preview } from '@storybook/react-vite'
-{%- if not root_storybook %}
+{%- if not is_root_storybook %}
 import { setupWorker } from 'msw/browser'
 import { mswLoader } from 'msw-storybook-addon/csf3'
 {%- endif %}
@@ -36,7 +37,7 @@ const preview: Preview = {
       defaultTheme: 'light',
     }),
   ],
-{%- if not root_storybook %}
+{%- if not is_root_storybook %}
   loaders: [
     mswLoader(async () => {
       const worker = setupWorker()

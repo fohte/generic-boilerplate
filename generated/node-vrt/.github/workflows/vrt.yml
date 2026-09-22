@@ -24,7 +24,14 @@ jobs:
         id: changes
         with:
           files: |
-            **
+            .storybook/**
+            src/**
+            package.json
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
+            tsconfig.json
+            vitest.config.ts
+            vitest.screenshot.config.ts
             .github/workflows/vrt.yml
 
   capture-root:
