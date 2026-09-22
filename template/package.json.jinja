@@ -1,5 +1,7 @@
 {%- set root_is_web_app = (type == 'node' and is_web_app | default(false)) -%}
 {%- set root_has_error_tracking = root_is_web_app or (type == 'node' and error_tracking | default(false)) -%}
+{%- set root_has_storybook = root_storybook | default(false) -%}
+{%- set root_has_vrt = root_vrt | default(false) -%}
 {#- Root package.json is only emitted for `type == 'node'` or pnpm workspace
     setups. Non-workspace monorepos host prettier/commitlint via mise instead,
     so they never gain a root package.json (see copier.yml _exclude). -#}
@@ -16,9 +18,22 @@
   "packageManager": "pnpm@12.3.4",
   "type": "module",
 {%- if type == 'node' %}
+{%- if root_has_storybook %}
+  "imports": {
+    "#*": {
+      "types": [
+        "./src/*.tsx",
+        "./src/*.ts",
+        "./src/*"
+      ],
+      "default": "./src/*"
+    }
+  },
+{%- else %}
   "imports": {
     "#*": "./src/*.ts"
   },
+{%- endif %}
 {%- endif %}
   "scripts": {
     "lint": "eslint .",
@@ -30,12 +45,19 @@
 {%- else %}
     "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
-    "test:unit": "vitest run"{{ "," if root_is_web_app else "" }}
+    "test:unit": "vitest run"{{ "," if (root_is_web_app or root_has_storybook) else "" }}
 {%- endif %}
 {%- if root_is_web_app %}
     "build": "tsup",
     "start": "node --import @fohte/service-kit/otel-register dist/index.js",
-    "dev": "tsx watch --import @fohte/service-kit/otel-register src/index.ts"
+    "dev": "tsx watch --import @fohte/service-kit/otel-register src/index.ts"{{ "," if root_has_storybook else "" }}
+{%- endif %}
+{%- if root_has_storybook %}
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"{{ "," if root_has_vrt else "" }}
+{%- endif %}
+{%- if root_has_vrt %}
+    "storybook:screenshot": "vitest run --config vitest.screenshot.config.ts"
 {%- endif %}
   },
 {%- if type == 'node' %}
@@ -44,24 +66,59 @@
     "@fohte/service-kit": "0.1.14",
     "@opentelemetry/api": "1.9.1",
 {%- endif %}
-    "neverthrow": "8.2.0"
+    "neverthrow": "8.2.0"{{ "," if root_has_storybook else "" }}
+{%- if root_has_storybook %}
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+{%- endif %}
   },
 {%- endif %}
   "devDependencies": {
     "@commitlint/cli": "21.2.2",
     "@fohte/eslint-config": "0.5.0",
+{%- if root_has_storybook %}
+    "@fohte/storybook-addon": "0.1.9",
+    "@storybook/addon-docs": "10.6.0",
+    "@storybook/addon-themes": "10.6.0",
+    "@storybook/addon-vitest": "10.6.0",
+    "@storybook/react-vite": "10.6.0",
+{%- endif %}
+{%- if root_has_vrt %}
+    "@storycap-testrun/browser": "2.1.1",
+{%- endif %}
     "@ninoseki/eslint-plugin-neverthrow": "0.3.1",
     "@tsconfig/node-lts": "24.0.1",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "24.13.4",
+{%- if root_has_storybook %}
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+{%- if root_has_vrt %}
+    "@vitest/browser": "4.1.11",
+    "@vitest/browser-playwright": "4.1.11",
+{%- endif %}
+{%- endif %}
     "concurrently": "10.0.5",
     "eslint": "10.10.0",
-{%- if has_spa_pkg and is_workspace %}
+{%- if root_has_storybook or (has_spa_pkg and is_workspace) %}
     "eslint-plugin-storybook": "10.6.0",
+{%- endif %}
+{%- if has_spa_pkg and is_workspace %}
     "eslint-plugin-tailwindcss": "4.4.0",
 {%- endif %}
     "knip": "6.35.1",
+{%- if root_has_vrt %}
+    "playwright": "1.63.0",
+{%- endif %}
     "prettier": "3.9.6",
+{%- if root_has_vrt %}
+    "reg-publish-s3-plugin": "0.14.4",
+    "reg-simple-keygen-plugin": "0.14.2",
+    "reg-suit": "0.14.5",
+{%- endif %}
+{%- if root_has_storybook %}
+    "storybook": "10.6.0",
+{%- endif %}
 {%- if root_is_web_app %}
     "tsup": "8.5.1",
     "tsx": "4.23.13",

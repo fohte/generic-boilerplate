@@ -7,6 +7,16 @@ on:
     types: [synchronize, labeled]
 
 jobs:
+{%- if root_vrt %}
+  vrt-approval-root:
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+    uses: fohte/storybook-vrt-workflows/.github/workflows/vrt-approval.yml@b1745100ad0c07758b763db13f25e5a0f2d7beec # v0.1.5
+    with:
+      r2-bucket: {{ slug(project_name) }}-vrt
+{%- endif %}
 {%- for pkg in vrt_pkgs %}
   vrt-approval-{{ slug(pkg.name) }}:
     permissions:

@@ -1,16 +1,21 @@
-import '#index.css'
+{% if not root_storybook %}import '#index.css'
 
+{% endif -%}
 import {
   afterEach,
   beforeEach,
   configureUnhandledApiRequestCheck,
   parameters,
+{%- if not root_storybook %}
   reportUnhandledApiRequest,
+{%- endif %}
 } from '@fohte/storybook-addon/preview'
 import { withThemeByClassName } from '@storybook/addon-themes'
 import type { Preview } from '@storybook/react-vite'
+{%- if not root_storybook %}
 import { setupWorker } from 'msw/browser'
 import { mswLoader } from 'msw-storybook-addon/csf3'
+{%- endif %}
 
 configureUnhandledApiRequestCheck({ pathPrefixes: ['/api/'] })
 
@@ -31,6 +36,7 @@ const preview: Preview = {
       defaultTheme: 'light',
     }),
   ],
+{%- if not root_storybook %}
   loaders: [
     mswLoader(async () => {
       const worker = setupWorker()
@@ -44,6 +50,7 @@ const preview: Preview = {
       return worker
     }),
   ],
+{%- endif %}
 }
 
 export default preview
