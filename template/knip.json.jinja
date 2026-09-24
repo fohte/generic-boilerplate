@@ -30,7 +30,16 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "treatConfigHintsAsErrors": true,
+{%- if root_vrt | default(false) %}
+  "ignoreDependencies": [
+    "@commitlint/cli",
+    "reg-suit",
+    "reg-publish-s3-plugin",
+    "reg-simple-keygen-plugin"
+  ]{{ "," if is_public else "" }}
+{%- else %}
   "ignoreDependencies": ["@commitlint/cli"]{{ "," if is_public else "" }}
+{%- endif %}
 {%- if is_public %}
   "ignore": ["commitlint-plugin-no-external-refs.cjs"]
 {%- endif %}

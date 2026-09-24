@@ -76,6 +76,18 @@ description:
   help: Project description for README.md
   default: ''
 
+storybook:
+  type: bool
+  default: false
+  help: Enable Storybook for the root Node.js package?
+  when: "{{ type == 'node' }}"
+
+vrt:
+  type: bool
+  default: false
+  help: Enable Visual Regression Testing for the root Storybook? This also enables Storybook.
+  when: "{{ type == 'node' }}"
+
 # README.md is expected to be customized immediately after repository creation,
 # so conflicts are almost guaranteed on copier update. Skip to avoid this.
 _skip_if_exists:
@@ -170,19 +182,20 @@ _exclude:
   # with none has no path prefix worth distinguishing.
   - '{% if not subpackages %}.github/labeler.yml{% endif %}'
   - '{% if not subpackages %}.github/workflows/labeler.yml{% endif %}'
-  # spa is a subpackage-only flag (see subpackages help below); there is no
-  # standalone root SPA.
+  # Storybook is not deployed for a root package. Root Storybook users can
+  # run it locally, while SPA subpackages still get the Cloudflare Pages
+  # workflow below.
   - '{% if not has_spa_pkg %}.github/workflows/storybook.yml{% endif %}'
-  # vrt is a subpackage-only flag (see subpackages help below); there is no
-  # standalone root VRT.
-  - '{% if not has_vrt_pkg %}.github/workflows/vrt.yml{% endif %}'
-  - '{% if not has_vrt_pkg %}.github/workflows/vrt-approval.yml{% endif %}'
-  # Root .storybook/ is only an {% include %} source for the per-subpackage
-  # .storybook files (see the yield template); it is never rendered directly.
-  - /.storybook
-  # Same as /.storybook above: these are only {% include %} sources for the
-  # per-subpackage spa/vrt scaffolding (see the yield template). spa/vrt are
-  # subpackage-only flags, so they are never rendered directly.
+  - '{% if not has_vrt %}.github/workflows/vrt.yml{% endif %}'
+  - '{% if not has_vrt %}.github/workflows/vrt-approval.yml{% endif %}'
+  # Root .storybook/ files are also included by the per-subpackage templates.
+  - '{% if not root_storybook %}/.storybook{% endif %}'
+  - '{% if not root_vrt %}/.storybook/screenshot-viewport.ts{% endif %}'
+  - '{% if not root_vrt %}/.storybook/vitest.setup.screenshot.ts{% endif %}'
+  # /src/App.tsx and the other application files below are only {% include %}
+  # sources for the per-subpackage spa/vrt scaffolding (see the yield
+  # template). Root .storybook/ and vitest.screenshot.config.ts are rendered
+  # directly when root Storybook/VRT is enabled.
   - /src/App.tsx
   - /src/main.tsx
   - /src/index.css
@@ -191,7 +204,7 @@ _exclude:
   - /vite.config.ts
   - /components.json
   - /public
-  - /vitest.screenshot.config.ts
+  - '{% if not root_vrt %}/vitest.screenshot.config.ts{% endif %}'
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
@@ -283,10 +296,10 @@ subpackages:
                           `<project_name>-vrt` R2 bucket with
                           AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY repo
                           secrets, and a `vrt-approved` label. At most one
-                          subpackage may set this: the R2 bucket and its
+                          VRT target may set this: the R2 bucket and its
                           storage keys are per-repo, not per-subpackage, so
                           generation fails (see validator below) if a second
-                          subpackage sets vrt: true.
+                          target sets vrt: true.
       tests: false     -- skip test scaffolding (vitest, tsconfig, src/, eslint),
                           the unit-test CI job, the per-package eslint
                           lefthook hook, and the pnpm install/cache step in
@@ -297,19 +310,20 @@ subpackages:
   # discard the stored answer, which would erase subpackages on every update.
   when: true
   # vrt-report's R2 storage keys (baseline/, branch/<branch>/...) are not
-  # scoped per-subpackage, and only one `<project_name>-vrt` bucket is
-  # provisioned per repo -- a second vrt: true subpackage would silently
-  # overwrite the first's baseline and reports. Fail generation instead of
-  # relying on the help text above. Lift this once
-  # fohte/storybook-vrt-workflows's vrt-capture/vrt-report actions accept a
-  # per-project storage-key prefix.
+  # scoped per target, and only one `<project_name>-vrt` bucket is provisioned
+  # per repo. A second VRT target would silently overwrite the first's
+  # baseline and reports. Fail generation instead of relying on the help text
+  # above. Lift this once fohte/storybook-vrt-workflows's
+  # vrt-capture/vrt-report actions accept a per-project storage-key prefix.
   validator: |-
-    {%- set vrt_count = subpackages | selectattr('vrt', 'defined') | selectattr('vrt', 'equalto', true) | selectattr('spa', 'defined') | selectattr('spa', 'equalto', true) | rejectattr('tests', 'equalto', false) | list | length -%}
+    {%- set root_vrt_count = 1 if vrt | default(false) else 0 -%}
+    {%- set subpackage_vrt_count = subpackages | selectattr('vrt', 'defined') | selectattr('vrt', 'equalto', true) | selectattr('spa', 'defined') | selectattr('spa', 'equalto', true) | rejectattr('tests', 'equalto', false) | list | length -%}
+    {%- set vrt_count = root_vrt_count + subpackage_vrt_count -%}
     {%- if vrt_count > 1 -%}
-    Only one subpackage may set `vrt: true` (found {{ vrt_count }}). The VRT
-    R2 bucket and its storage keys are per-repo, not per-subpackage, so a
-    second `vrt: true` subpackage would overwrite the first's baseline and
-    reports. Remove `vrt: true` from all but one subpackage.
+    Only one VRT target may set `vrt: true` (found {{ vrt_count }}). The VRT
+    R2 bucket and its storage keys are per-repo, so multiple targets would
+    overwrite each other's baseline and reports. Remove `vrt: true` from all
+    but one target.
     {%- endif -%}
 
 monorepo_node_workspace:
@@ -358,6 +372,16 @@ error_tracking:
 # Computed variables (not asked, derived from other answers).
 # Centralized here so individual templates can reference them directly
 # instead of redefining the same {%- set ... -%} expressions.
+root_storybook:
+  type: bool
+  default: "{{ type == 'node' and (storybook | default(false) or vrt | default(false)) }}"
+  when: false
+
+root_vrt:
+  type: bool
+  default: "{{ type == 'node' and vrt | default(false) }}"
+  when: false
+
 node_pkgs:
   type: yaml
   default: "{{ subpackages | default([]) | selectattr('type', 'equalto', 'node') | list }}"
@@ -421,6 +445,16 @@ has_spa_pkg:
 has_vrt_pkg:
   type: bool
   default: '{{ vrt_pkgs | length > 0 }}'
+  when: false
+
+has_storybook:
+  type: bool
+  default: '{{ root_storybook or has_spa_pkg }}'
+  when: false
+
+has_vrt:
+  type: bool
+  default: '{{ root_vrt or has_vrt_pkg }}'
   when: false
 
 has_web_app_pkg:

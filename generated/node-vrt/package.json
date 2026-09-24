@@ -1,0 +1,63 @@
+{
+  "name": "node-vrt",
+  "private": true,
+  "packageManager": "pnpm@12.3.4",
+  "type": "module",
+  "imports": {
+    "#*": {
+      "types": [
+        "./src/*.tsx",
+        "./src/*.ts",
+        "./src/*"
+      ],
+      "default": "./src/*"
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "format:eslint": "eslint --fix .",
+    "format:prettier": "prettier --write .",
+    "format": "conc -m 1 pnpm:format:eslint pnpm:format:prettier",
+    "test": "conc pnpm:test:type pnpm:test:unit",
+    "test:type": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build",
+    "storybook:screenshot": "vitest run --config vitest.screenshot.config.ts"
+  },
+  "dependencies": {
+    "neverthrow": "8.2.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.2",
+    "@fohte/eslint-config": "0.5.0",
+    "@fohte/storybook-addon": "0.1.9",
+    "@storybook/addon-docs": "10.6.0",
+    "@storybook/addon-themes": "10.6.0",
+    "@storybook/addon-vitest": "10.6.0",
+    "@storybook/react-vite": "10.6.0",
+    "@storycap-testrun/browser": "2.1.1",
+    "@ninoseki/eslint-plugin-neverthrow": "0.3.1",
+    "@tsconfig/node-lts": "24.0.1",
+    "@tsconfig/strictest": "2.0.8",
+    "@types/node": "24.13.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitest/browser": "4.1.11",
+    "@vitest/browser-playwright": "4.1.11",
+    "concurrently": "10.0.5",
+    "eslint": "10.10.0",
+    "eslint-plugin-storybook": "10.6.0",
+    "knip": "6.35.1",
+    "playwright": "1.63.0",
+    "prettier": "3.9.6",
+    "reg-publish-s3-plugin": "0.14.4",
+    "reg-simple-keygen-plugin": "0.14.2",
+    "reg-suit": "0.14.5",
+    "storybook": "10.6.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}
