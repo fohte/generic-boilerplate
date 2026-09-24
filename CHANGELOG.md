@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.4](https://github.com/fohte/generic-boilerplate/compare/v0.11.3...v0.11.4) (2026-09-24)
+
+
+### Features
+
+* support Storybook and VRT generation in root Node.js packages ([#706](https://github.com/fohte/generic-boilerplate/issues/706)) ([2ed9f9d](https://github.com/fohte/generic-boilerplate/commit/2ed9f9d627154a20d69c1a69251b7164061643c7))
+* **template:** run content-loss detection before auto-merge ([#705](https://github.com/fohte/generic-boilerplate/issues/705)) ([f35d9bf](https://github.com/fohte/generic-boilerplate/commit/f35d9bf1d4029d160087d7d16e570e4e1a9f94b0))
+
+
+### Bug Fixes
+
+* **scripts:** prevent false positives for template-managed lines differing only by trailing commas ([#704](https://github.com/fohte/generic-boilerplate/issues/704)) ([9485ae5](https://github.com/fohte/generic-boilerplate/commit/9485ae5dc1fc12e758c9809adf4f3118b045041a))
+* **scripts:** prevent false positives from replacing pre-bumped versions ([#702](https://github.com/fohte/generic-boilerplate/issues/702)) ([c26ab43](https://github.com/fohte/generic-boilerplate/commit/c26ab43a93ea9f557c51bff8478c1ec205fc4eb0))
+
 ## [0.11.3](https://github.com/fohte/generic-boilerplate/compare/v0.11.2...v0.11.3) (2026-09-19)
 
 
