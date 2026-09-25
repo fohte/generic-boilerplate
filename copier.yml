@@ -123,6 +123,7 @@ _exclude:
   - "{% if repo_id == '' %}.github/chainguard/{{ project_name }}-boilerplate-update.sts.yaml{% endif %}"
   - "{% if repo_id == '' %}.github/chainguard/{{ project_name }}-bootstrap.sts.yaml{% endif %}"
   - "{% if repo_id == '' or not use_release_please %}.github/chainguard/{{ project_name }}-release-please.sts.yaml{% endif %}"
+  # Public answers need no token; private repositories receive this only after repo_id is set.
   - "{% if is_public or repo_id == '' %}.github/chainguard/infra-copier-answers.sts.yaml{% endif %}"
   # Exclude Node.js specific files when type is not 'node'
   # Use leading / to match root only (not yield subpackage directories)
@@ -501,7 +502,7 @@ is_workspace:
 # octo-sts trust policy inputs. Immutable subject claim `subject_pattern`
 # values take the form `repo:<owner>@<owner_id>/<name>@<repo_id>:...`.
 #
-# The .github/chainguard/*.sts.yaml.jinja templates mirror
+# Project-scoped .github/chainguard/*.sts.yaml.jinja templates mirror
 # fohte/infra's octo-sts-trust-policy*.tftpl content exactly, including two
 # properties that look like oversights but aren't: project_name/repo_id are
 # interpolated unescaped into subject_pattern/job_workflow_ref (fohte org
@@ -514,8 +515,9 @@ repo_id:
   default: ''
   help: |
     GitHub repository ID (`github.repository_id` in the Actions context).
-    Embedded in the octo-sts trust policies under .github/chainguard/; those
-    files are skipped (see _exclude above) while this is empty.
+    Embedded in project-scoped octo-sts trust policies under .github/chainguard/;
+    those files are skipped (see _exclude above) while this is empty. The
+    infra copier-answers policy is also omitted until this value is configured.
 
 # fohte org's GitHub owner ID. Constant: it only changes if the org itself
 # is deleted and recreated.
