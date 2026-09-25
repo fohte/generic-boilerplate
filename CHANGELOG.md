@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.11.5](https://github.com/fohte/generic-boilerplate/compare/v0.11.4...v0.11.5) (2026-09-25)
+
+
+### Features
+
+* **template:** add infra copier-answers trust policy for private repositories ([#707](https://github.com/fohte/generic-boilerplate/issues/707)) ([a37415e](https://github.com/fohte/generic-boilerplate/commit/a37415eccee20f5fbd10f72eeb78150e7b883a4d))
+* **template:** add naming conventions for story names ([#710](https://github.com/fohte/generic-boilerplate/issues/710)) ([d16678d](https://github.com/fohte/generic-boilerplate/commit/d16678dba9c9937eb0c89d783d807b2dbd2ea4f2))
+* **template:** enforce `name` property on Storybook stories ([#713](https://github.com/fohte/generic-boilerplate/issues/713)) ([a17bebf](https://github.com/fohte/generic-boilerplate/commit/a17bebf561de375edb14bd683a33a0f55b1a269e))
+
+
+### Dependencies
+
+* **ci:** Update fohte/storybook-vrt-workflows action to v0.1.6 ([#709](https://github.com/fohte/generic-boilerplate/issues/709)) ([34f6f52](https://github.com/fohte/generic-boilerplate/commit/34f6f52351191c25750fceacb9fd4361c073d323))
+* Update dependency @fohte/eslint-config to v0.5.1 ([#712](https://github.com/fohte/generic-boilerplate/issues/712)) ([f6be321](https://github.com/fohte/generic-boilerplate/commit/f6be3214bd2279355e8ba52d10101b8e8e237ffe))
+
 ## [0.11.4](https://github.com/fohte/generic-boilerplate/compare/v0.11.3...v0.11.4) (2026-09-24)
 
 
