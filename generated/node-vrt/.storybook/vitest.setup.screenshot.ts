@@ -13,7 +13,5 @@ beforeEach(async () => {
 })
 
 afterEach(async (context) => {
-  // @vitest/runner's TestAnnotation type isn't exactOptionalPropertyTypes-safe.
-  // @ts-expect-error see comment above
   await screenshot(page, context)
 })
