@@ -68,7 +68,7 @@
     "msw": "2.15.0",
     "msw-storybook-addon": "3.0.3",
     "playwright": "1.63.0",
-    "prettier": "3.9.6",
+    "prettier": "3.9.8",
     "reg-publish-s3-plugin": "0.14.4",
     "reg-simple-keygen-plugin": "0.14.2",
     "reg-suit": "0.14.5",
