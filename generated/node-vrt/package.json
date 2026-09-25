@@ -38,7 +38,7 @@
     "@storybook/addon-themes": "10.6.0",
     "@storybook/addon-vitest": "10.6.0",
     "@storybook/react-vite": "10.6.0",
-    "@storycap-testrun/browser": "2.1.1",
+    "@storycap-testrun/browser": "3.1.0",
     "@ninoseki/eslint-plugin-neverthrow": "0.3.1",
     "@tsconfig/node-lts": "24.0.1",
     "@tsconfig/strictest": "2.0.8",
