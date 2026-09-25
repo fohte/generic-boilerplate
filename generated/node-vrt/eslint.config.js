@@ -21,4 +21,8 @@ export default config(
     ],
     rules: { 'no-restricted-imports': 'off' },
   },
+  {
+    files: ['**/*.stories.tsx'],
+    rules: { 'fohte/require-story-name': 'error' },
+  },
 )

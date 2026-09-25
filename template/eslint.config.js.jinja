@@ -26,6 +26,10 @@ export default config(
     ],
     rules: { 'no-restricted-imports': 'off' },
   },
+  {
+    files: ['**/*.stories.tsx'],
+    rules: { 'fohte/require-story-name': 'error' },
+  },
 )
 {%- elif has_spa_pkg and is_workspace -%}
 {#- @fohte/eslint-config's `tailwind` option takes a single cssConfigPath, so
@@ -73,6 +77,10 @@ export default config(
     ],
 {%- endif %}
     rules: { 'no-restricted-imports': 'off' },
+  },
+  {
+    files: ['{{ spa_pkgs[0].name }}/**/*.stories.tsx'],
+    rules: { 'fohte/require-story-name': 'error' },
   },
 )
 {%- else -%}
