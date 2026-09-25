@@ -42,6 +42,10 @@ export default config(
 {%- endif %}
     rules: { 'no-restricted-imports': 'off' },
   },
+  {
+    files: ['**/*.stories.tsx'],
+    rules: { 'fohte/require-story-name': 'error' },
+  },
 )
 {%- else -%}
 export default config({
