@@ -73,7 +73,7 @@ jobs:
 
       # project must match the `name` passed to createStorybookProject() in
       # vitest.screenshot.config.ts.
-      - uses: fohte/storybook-vrt-workflows/vrt-capture@b1745100ad0c07758b763db13f25e5a0f2d7beec # v0.1.5
+      - uses: fohte/storybook-vrt-workflows/vrt-capture@691148d6e8e53b86c8f93b5b54cadbd8308b06d3 # v0.1.6
         with:
           project: storybook-screenshot-{{ project_name }}
           shard: 1
@@ -122,7 +122,7 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-      - uses: fohte/storybook-vrt-workflows/vrt-report@b1745100ad0c07758b763db13f25e5a0f2d7beec # v0.1.5
+      - uses: fohte/storybook-vrt-workflows/vrt-report@691148d6e8e53b86c8f93b5b54cadbd8308b06d3 # v0.1.6
         with:
           package-dir: .
           screenshots-dir: __screenshots__/desktop
@@ -210,7 +210,7 @@ jobs:
       # entry -- vrt-capture's upload-artifact step names the artifact
       # `vrt-screenshots-<project>-<shard>`, and a workflow run can't upload
       # two artifacts with the same name.
-      - uses: fohte/storybook-vrt-workflows/vrt-capture@b1745100ad0c07758b763db13f25e5a0f2d7beec # v0.1.5
+      - uses: fohte/storybook-vrt-workflows/vrt-capture@691148d6e8e53b86c8f93b5b54cadbd8308b06d3 # v0.1.6
         with:
           project: storybook-screenshot-{{ pkg.name }}
           shard: 1
@@ -282,7 +282,7 @@ jobs:
       # reports overwrite each other in this bucket. Keep vrt: true on a
       # single subpackage until fohte/storybook-vrt-workflows adds a key
       # prefix input.
-      - uses: fohte/storybook-vrt-workflows/vrt-report@b1745100ad0c07758b763db13f25e5a0f2d7beec # v0.1.5
+      - uses: fohte/storybook-vrt-workflows/vrt-report@691148d6e8e53b86c8f93b5b54cadbd8308b06d3 # v0.1.6
         with:
           package-dir: {{ pkg.name }}
           screenshots-dir: __screenshots__/desktop
