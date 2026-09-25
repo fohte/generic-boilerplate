@@ -41,7 +41,7 @@ Every presentational component under `src/components/` should have a co-located 
 
 ### Give each story a descriptive `name`
 
-Write a short, natural-language sentence describing the rendered state, including the detail that distinguishes it from sibling stories. Splitting the story's export name into words (e.g. `open editor shows next preview`) does not describe the state as a sentence; write something like `the editor shows the next preview` instead. The `name` is displayed in Storybook and VRT reports. VRT baselines are keyed by story ID, so changing the `name` does not create a new baseline.
+Write a short, natural-language sentence describing the rendered state, including the detail that distinguishes it from sibling stories. Splitting the story's export name into words (e.g. `open editor shows next preview`) does not describe the state as a sentence; write something like `the editor shows the next preview` instead. The `name` is displayed in Storybook.
 {%- if has_vrt %}
 
 ### Extract route-inline UI that has its own appearance or state
