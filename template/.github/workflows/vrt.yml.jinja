@@ -1,20 +1,17 @@
 {#- Slugify: lowercase, replace _ and / with -, remove @ -#}
 {%- macro slug(name) %}{{ name | replace('_', '-') | replace('@', '') | replace('/', '-') | lower }}{% endmacro -%}
-{%- macro root_vrt_slug(name) -%}
-{{- slug(name | replace('.', '-')) if not root_storybook else slug(name) -}}
-{%- endmacro -%}
+{%- set root_vrt_screenshots_dir = '__screenshots__/desktop' if root_storybook else '__screenshots__/' ~ root_vrt_slug -%}
 {%- set root_vrt_change_files = [
-  '.storybook/**' if root_storybook else '**',
+  '.storybook/**',
   'src/**',
   'package.json',
   'pnpm-lock.yaml',
   'pnpm-workspace.yaml',
   'tsconfig.json',
   'vitest.config.ts',
-  'vitest.screenshot.config.ts' if root_storybook else '',
+  'vitest.screenshot.config.ts',
   '.github/workflows/vrt.yml',
-] | reject('equalto', '') | list -%}
-{%- set root_vrt_project_comment = '      # project must match the `name` passed to createStorybookProject() in\n      # vitest.screenshot.config.ts.\n' if root_storybook else '' -%}
+] if root_storybook else ['**'] -%}
 name: VRT
 
 on:
@@ -78,14 +75,16 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-{{ root_vrt_project_comment }}      - uses: fohte/storybook-vrt-workflows/vrt-capture@691148d6e8e53b86c8f93b5b54cadbd8308b06d3 # v0.1.6
+      {{ "# project must match the `name` passed to createStorybookProject() in" if root_storybook else "# The repository's `vrt:capture` script must write screenshots to" }}
+      {{ "# vitest.screenshot.config.ts." if root_storybook else "# `" ~ root_vrt_screenshots_dir ~ "`." }}
+      - uses: fohte/storybook-vrt-workflows/vrt-capture@691148d6e8e53b86c8f93b5b54cadbd8308b06d3 # v0.1.6
         with:
-          project: {% if root_storybook %}storybook-screenshot-{{ project_name }}{% else %}{{ root_vrt_slug(project_name) }}{% endif %}
+          project: {% if root_storybook %}storybook-screenshot-{{ project_name }}{% else %}{{ root_vrt_slug }}{% endif %}
           shard: 1
           shards: 1
           capture-script: {% if root_storybook %}storybook:screenshot{% else %}vrt:capture{% endif %}
           package-dir: .
-          screenshots-dir: {% if root_storybook %}__screenshots__/desktop{% else %}__screenshots__/{{ root_vrt_slug(project_name) }}{% endif %}
+          screenshots-dir: {{ root_vrt_screenshots_dir }}
 
   report-root:
     needs: capture-root
@@ -99,7 +98,7 @@ jobs:
     # update the single `baseline/actual/` key, where each run's diff was
     # computed against a baseline the other run is concurrently mutating.
     concurrency:
-      group: vrt-report-{{ root_vrt_slug(project_name) }}-{% raw %}${{ (github.ref == 'refs/heads/main') && 'push' || 'pr' }}-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}{% endraw %}
+      group: vrt-report-{{ root_vrt_slug }}-{% raw %}${{ (github.ref == 'refs/heads/main') && 'push' || 'pr' }}-${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}{% endraw %}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -130,8 +129,8 @@ jobs:
       - uses: fohte/storybook-vrt-workflows/vrt-report@691148d6e8e53b86c8f93b5b54cadbd8308b06d3 # v0.1.6
         with:
           package-dir: .
-          screenshots-dir: {% if root_storybook %}__screenshots__/desktop{% else %}__screenshots__/{{ root_vrt_slug(project_name) }}{% endif %}
-          r2-bucket: {{ root_vrt_slug(project_name) }}-vrt
+          screenshots-dir: {{ root_vrt_screenshots_dir }}
+          r2-bucket: {{ root_vrt_slug }}-vrt
           github-token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
           aws-access-key-id: {% raw %}${{ secrets.AWS_ACCESS_KEY_ID }}{% endraw %}
           aws-secret-access-key: {% raw %}${{ secrets.AWS_SECRET_ACCESS_KEY }}{% endraw %}

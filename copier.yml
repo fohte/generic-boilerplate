@@ -54,6 +54,16 @@ _migrations:
           fi
           rm -f .agents-md-pre-migration
         fi
+  # Preserve root Storybook VRT for projects created before Storybook and VRT
+  # became independent settings.
+  - version: '0.12.0'
+    before:
+      - |
+        set -eu
+        if grep -q '^vrt: true$' .copier-answers.yml && grep -q '^storybook: false$' .copier-answers.yml; then
+          sed 's/^storybook: false$/storybook: true/' .copier-answers.yml > .copier-answers.yml.tmp
+          mv .copier-answers.yml.tmp .copier-answers.yml
+        fi
 
 type:
   type: str
@@ -85,7 +95,7 @@ storybook:
 vrt:
   type: bool
   default: false
-  help: Enable Visual Regression Testing for the root Node.js package? If Storybook is disabled, provide a vrt:capture script.
+  help: Enable Visual Regression Testing for the root Node.js package? If Storybook is disabled, provide a vrt:capture script that writes to __screenshots__/<slugified project_name>.
   when: "{{ type == 'node' }}"
 
 # README.md is expected to be customized immediately after repository creation,
@@ -384,6 +394,11 @@ root_vrt:
   default: "{{ type == 'node' and vrt | default(false) }}"
   when: false
 
+root_vrt_slug:
+  type: str
+  default: "{{ ((project_name | replace('.', '-')) if not root_storybook else project_name) | replace('_', '-') | replace('@', '') | replace('/', '-') | lower }}"
+  when: false
+
 node_pkgs:
   type: yaml
   default: "{{ subpackages | default([]) | selectattr('type', 'equalto', 'node') | list }}"
@@ -457,6 +472,11 @@ has_storybook:
 has_vrt:
   type: bool
   default: '{{ root_vrt or has_vrt_pkg }}'
+  when: false
+
+has_storybook_vrt:
+  type: bool
+  default: '{{ (root_storybook and root_vrt) or has_vrt_pkg }}'
   when: false
 
 has_web_app_pkg:
