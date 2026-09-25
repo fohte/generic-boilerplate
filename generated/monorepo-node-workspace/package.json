@@ -26,7 +26,7 @@
     "eslint-plugin-storybook": "10.6.0",
     "eslint-plugin-tailwindcss": "4.4.0",
     "knip": "6.37.0",
-    "prettier": "3.9.6",
+    "prettier": "3.9.8",
     "typescript": "6.0.3",
     "vitest": "4.1.11"
   }
