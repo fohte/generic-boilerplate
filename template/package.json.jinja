@@ -2,6 +2,7 @@
 {%- set root_has_error_tracking = root_is_web_app or (type == 'node' and error_tracking | default(false)) -%}
 {%- set root_has_storybook = root_storybook | default(false) -%}
 {%- set root_has_vrt = root_vrt | default(false) -%}
+{%- set root_has_storybook_vrt = root_has_storybook and root_has_vrt -%}
 {#- Root package.json is only emitted for `type == 'node'` or pnpm workspace
     setups. Non-workspace monorepos host prettier/commitlint via mise instead,
     so they never gain a root package.json (see copier.yml _exclude). -#}
@@ -56,7 +57,7 @@
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"{{ "," if root_has_vrt else "" }}
 {%- endif %}
-{%- if root_has_vrt %}
+{%- if root_has_storybook_vrt %}
     "storybook:screenshot": "vitest run --config vitest.screenshot.config.ts"
 {%- endif %}
   },
@@ -83,7 +84,7 @@
     "@storybook/addon-vitest": "10.6.0",
     "@storybook/react-vite": "10.6.0",
 {%- endif %}
-{%- if root_has_vrt %}
+{%- if root_has_storybook_vrt %}
     "@storycap-testrun/browser": "3.1.0",
 {%- endif %}
     "@ninoseki/eslint-plugin-neverthrow": "0.3.1",
