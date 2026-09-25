@@ -123,6 +123,7 @@ _exclude:
   - "{% if repo_id == '' %}.github/chainguard/{{ project_name }}-boilerplate-update.sts.yaml{% endif %}"
   - "{% if repo_id == '' %}.github/chainguard/{{ project_name }}-bootstrap.sts.yaml{% endif %}"
   - "{% if repo_id == '' or not use_release_please %}.github/chainguard/{{ project_name }}-release-please.sts.yaml{% endif %}"
+  - "{% if is_public or repo_id == '' %}.github/chainguard/infra-copier-answers.sts.yaml{% endif %}"
   # Exclude Node.js specific files when type is not 'node'
   # Use leading / to match root only (not yield subpackage directories)
   # Non-workspace monorepos (even with node subpackages) keep prettier/commitlint
