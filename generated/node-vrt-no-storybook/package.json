@@ -33,6 +33,6 @@
     "reg-simple-keygen-plugin": "0.14.2",
     "reg-suit": "0.14.5",
     "typescript": "6.0.3",
-    "vitest": "4.1.11"
+    "vitest": "5.0.1"
   }
 }
