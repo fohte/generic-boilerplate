@@ -54,17 +54,6 @@ _migrations:
           fi
           rm -f .agents-md-pre-migration
         fi
-  # Preserve root Storybook VRT for projects created before Storybook and VRT
-  # became independent settings.
-  - version: '0.12.0'
-    before:
-      - |
-        set -eu
-        if grep -q '^vrt: true$' .copier-answers.yml && grep -q '^storybook: false$' .copier-answers.yml; then
-          sed 's/^storybook: false$/storybook: true/' .copier-answers.yml > .copier-answers.yml.tmp
-          mv .copier-answers.yml.tmp .copier-answers.yml
-        fi
-
 type:
   type: str
   choices:
