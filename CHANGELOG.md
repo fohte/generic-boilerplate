@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.11.6](https://github.com/fohte/generic-boilerplate/compare/v0.11.5...v0.11.6) (2026-09-26)
+
+
+### Features
+
+* **vrt:** allow enabling root package VRT without Storybook ([#721](https://github.com/fohte/generic-boilerplate/issues/721)) ([c4e80e0](https://github.com/fohte/generic-boilerplate/commit/c4e80e0bb2e4992b407ceb516e63f83d44ce9b46))
+
+
+### Dependencies
+
+* **ci:** Update dependency jdx/mise to v2026.9.11 ([#719](https://github.com/fohte/generic-boilerplate/issues/719)) ([5645d2f](https://github.com/fohte/generic-boilerplate/commit/5645d2f3c8045e9cf72b90b0861bd76d281635a6))
+* **ci:** Update taiki-e/install-action action to v2.87.16 ([#720](https://github.com/fohte/generic-boilerplate/issues/720)) ([c3f6240](https://github.com/fohte/generic-boilerplate/commit/c3f6240e551a0a191bf171980b45e8dd0883b3ed))
+* Update dependency lefthook to v2.1.14 ([#714](https://github.com/fohte/generic-boilerplate/issues/714)) ([6627196](https://github.com/fohte/generic-boilerplate/commit/662719695c1d12c02f9d31569472cbb33260efcd))
+* Update devDependencies (non-major) ([#716](https://github.com/fohte/generic-boilerplate/issues/716)) ([66aa234](https://github.com/fohte/generic-boilerplate/commit/66aa23445eb5620b5b3e6d0738fa4cb17b84f850))
+* Update devDependencies (non-major) ([#718](https://github.com/fohte/generic-boilerplate/issues/718)) ([c13a0d0](https://github.com/fohte/generic-boilerplate/commit/c13a0d0f5edeef1bcdbabffdcea3eb40e8f42f72))
+* Update prettier to v3.9.8 ([#717](https://github.com/fohte/generic-boilerplate/issues/717)) ([1aa58ea](https://github.com/fohte/generic-boilerplate/commit/1aa58ea638d300047eeca865027cbfd023c38287))
+
 ## [0.11.5](https://github.com/fohte/generic-boilerplate/compare/v0.11.4...v0.11.5) (2026-09-25)
 
 
