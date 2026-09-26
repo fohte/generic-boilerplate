@@ -1,0 +1,14 @@
+# Test fixture for a root Node.js package with repository-owned VRT capture
+type: node
+project_name: my-site.test
+description: Test Node.js package with custom VRT capture
+is_public: false
+use_release_please: false
+is_web_app: false
+web_app_port: 8080
+error_tracking: false
+storybook: false
+vrt: true
+repo_language: ja
+subpackages: []
+repo_id: '123456789'

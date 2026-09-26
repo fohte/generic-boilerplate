@@ -54,7 +54,6 @@ _migrations:
           fi
           rm -f .agents-md-pre-migration
         fi
-
 type:
   type: str
   choices:
@@ -85,7 +84,7 @@ storybook:
 vrt:
   type: bool
   default: false
-  help: Enable Visual Regression Testing for the root Storybook? This also enables Storybook.
+  help: Enable Visual Regression Testing for the root Node.js package? If Storybook is disabled, provide a vrt:capture script that writes to __screenshots__/<slugified project_name>.
   when: "{{ type == 'node' }}"
 
 # README.md is expected to be customized immediately after repository creation,
@@ -196,8 +195,8 @@ _exclude:
   - '{% if not root_vrt %}/.storybook/vitest.setup.screenshot.ts{% endif %}'
   # /src/App.tsx and the other application files below are only {% include %}
   # sources for the per-subpackage spa/vrt scaffolding (see the yield
-  # template). Root .storybook/ and vitest.screenshot.config.ts are rendered
-  # directly when root Storybook/VRT is enabled.
+  # template). Root .storybook/ files are emitted when root Storybook is
+  # enabled; the root screenshot config is emitted only for Storybook VRT.
   - /src/App.tsx
   - /src/main.tsx
   - /src/index.css
@@ -206,7 +205,7 @@ _exclude:
   - /vite.config.ts
   - /components.json
   - /public
-  - '{% if not root_vrt %}/vitest.screenshot.config.ts{% endif %}'
+  - '{% if not (root_storybook and root_vrt) %}/vitest.screenshot.config.ts{% endif %}'
   # Exclude type-specific files
   - "{% if type not in ['node', 'rust'] and not is_workspace and not has_node_pkg and not has_rust_pkg %}/.gitignore{% endif %}"
   - "{% if type not in ['node', 'rust'] %}/src{% endif %}"
@@ -376,12 +375,17 @@ error_tracking:
 # instead of redefining the same {%- set ... -%} expressions.
 root_storybook:
   type: bool
-  default: "{{ type == 'node' and (storybook | default(false) or vrt | default(false)) }}"
+  default: "{{ type == 'node' and (storybook | default(false)) }}"
   when: false
 
 root_vrt:
   type: bool
   default: "{{ type == 'node' and vrt | default(false) }}"
+  when: false
+
+root_vrt_slug:
+  type: str
+  default: "{{ ((project_name | replace('.', '-')) if not root_storybook else project_name) | replace('_', '-') | replace('@', '') | replace('/', '-') | lower }}"
   when: false
 
 node_pkgs:
@@ -457,6 +461,11 @@ has_storybook:
 has_vrt:
   type: bool
   default: '{{ root_vrt or has_vrt_pkg }}'
+  when: false
+
+has_storybook_vrt:
+  type: bool
+  default: '{{ (root_storybook and root_vrt) or has_vrt_pkg }}'
   when: false
 
 has_web_app_pkg:
