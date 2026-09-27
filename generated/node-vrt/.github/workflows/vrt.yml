@@ -70,7 +70,7 @@ jobs:
 
       # project must match the `name` passed to createStorybookProject() in
       # vitest.screenshot.config.ts.
-      - uses: fohte/storybook-vrt-workflows/vrt-capture@691148d6e8e53b86c8f93b5b54cadbd8308b06d3 # v0.1.6
+      - uses: fohte/storybook-vrt-workflows/vrt-capture@9a6313f4cbaba30b44a6a910e0656d5876743bf3 # v0.2.0
         with:
           project: storybook-screenshot-node-vrt
           shard: 1
@@ -119,7 +119,7 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-      - uses: fohte/storybook-vrt-workflows/vrt-report@691148d6e8e53b86c8f93b5b54cadbd8308b06d3 # v0.1.6
+      - uses: fohte/storybook-vrt-workflows/vrt-report@9a6313f4cbaba30b44a6a910e0656d5876743bf3 # v0.2.0
         with:
           package-dir: .
           screenshots-dir: __screenshots__/desktop
