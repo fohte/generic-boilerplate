@@ -290,7 +290,7 @@ subpackages:
                           Adds a screenshot-capture vitest project, the
                           storycap/reg-suit devDependencies, and vrt.yml /
                           vrt-approval.yml wired to
-                          fohte/storybook-vrt-workflows@v0.1.2. Still needs
+                          fohte/storybook-vrt-workflows. Still needs
                           manual setup in the consuming repo: an
                           `<project_name>-vrt` R2 bucket with
                           AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY repo
