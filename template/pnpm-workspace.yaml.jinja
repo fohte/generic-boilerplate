@@ -14,7 +14,7 @@ allowBuilds:
 {%- endif %}
   # required by @fohte/eslint-config -> eslint-plugin-import-x for module resolution
   unrs-resolver: true
-{%- if has_spa_pkg %}
+{%- if has_storybook %}
   # required by cloudflare/wrangler-action's internal `pnpm add wrangler` step (Storybook deploy)
   workerd: true
   # no-op unless package.json sets "msw.workerDirectory", which we don't use
