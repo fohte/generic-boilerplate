@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.7](https://github.com/fohte/generic-boilerplate/compare/v0.11.6...v0.11.7) (2026-09-27)
+
+
+### Bug Fixes
+
+* **storybook:** deploy root Storybook preview ([#723](https://github.com/fohte/generic-boilerplate/issues/723)) ([3f56fb6](https://github.com/fohte/generic-boilerplate/commit/3f56fb617a3d6f632b0ccaa365cf467ffff116c2))
+
 ## [0.11.6](https://github.com/fohte/generic-boilerplate/compare/v0.11.5...v0.11.6) (2026-09-26)
 
 
