@@ -183,10 +183,8 @@ _exclude:
   # with none has no path prefix worth distinguishing.
   - '{% if not subpackages %}.github/labeler.yml{% endif %}'
   - '{% if not subpackages %}.github/workflows/labeler.yml{% endif %}'
-  # Storybook is not deployed for a root package. Root Storybook users can
-  # run it locally, while SPA subpackages still get the Cloudflare Pages
-  # workflow below.
-  - '{% if not has_spa_pkg %}.github/workflows/storybook.yml{% endif %}'
+  # Deploy Storybook previews for root packages and SPA subpackages.
+  - '{% if not has_storybook %}.github/workflows/storybook.yml{% endif %}'
   - '{% if not has_vrt %}.github/workflows/vrt.yml{% endif %}'
   - '{% if not has_vrt %}.github/workflows/vrt-approval.yml{% endif %}'
   # Root .storybook/ files are also included by the per-subpackage templates.
