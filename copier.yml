@@ -1,4 +1,4 @@
-_min_copier_version: '9.5.0'
+_min_copier_version: '9.6.0'
 _subdirectory: template
 _answers_file: .copier-answers.yml
 # CLAUDE.md is a symlink to AGENTS.md (Claude Code only reads CLAUDE.md,
