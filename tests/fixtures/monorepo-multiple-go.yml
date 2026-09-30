@@ -1,0 +1,15 @@
+type: base
+project_name: dual-go
+description: Test hook names for multiple Go subpackages
+is_public: false
+use_release_please: false
+pr_title_check: false
+use_coverage: false
+monorepo_node_workspace: false
+subpackages:
+  - name: core
+    type: go
+  - name: tools
+    type: go
+repo_language: en
+repo_id: '765432109'

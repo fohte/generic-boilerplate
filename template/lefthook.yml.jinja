@@ -110,12 +110,12 @@ pre-commit:
 {%- endif %}
 {%- for pkg in go_pkgs %}
 
-    {{ 'go-fmt' if go_pkgs | length == 1 else 'go-fmt-' ~ pkg.name }}:
+    {{ 'go-fmt-' ~ pkg.name if has_multiple_go_pkgs else 'go-fmt' }}:
       glob: '*.go'
       root: '{{ pkg.name }}/'
       run: test -z "$(gofmt -l .)"
 
-    {{ 'go-vet' if go_pkgs | length == 1 else 'go-vet-' ~ pkg.name }}:
+    {{ 'go-vet-' ~ pkg.name if has_multiple_go_pkgs else 'go-vet' }}:
       glob: '*.go'
       root: '{{ pkg.name }}/'
       run: go vet ./...

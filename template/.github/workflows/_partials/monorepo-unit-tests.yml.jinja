@@ -346,8 +346,8 @@
       - name: Run Go format and vet checks through lefthook
         run: |
           lefthook run pre-commit --all-files \
-            --command {{ 'go-fmt' if go_pkgs | length == 1 else 'go-fmt-' ~ pkg.name }} \
-            --command {{ 'go-vet' if go_pkgs | length == 1 else 'go-vet-' ~ pkg.name }}
+            --command {{ 'go-fmt-' ~ pkg.name if has_multiple_go_pkgs else 'go-fmt' }} \
+            --command {{ 'go-vet-' ~ pkg.name if has_multiple_go_pkgs else 'go-vet' }}
 
       - name: Run Go tests
         working-directory: {{ pkg.name }}

@@ -16,7 +16,7 @@
 {%- endfor -%}
 {%- set go_hook_names = [] -%}
 {%- for pkg in go_pkgs -%}
-{%- set suffix = '' if go_pkgs | length == 1 else '-' ~ pkg.name -%}
+{%- set suffix = '-' ~ pkg.name if has_multiple_go_pkgs else '' -%}
 {%- set _ = go_hook_names.append('go-fmt' ~ suffix) -%}
 {%- set _ = go_hook_names.append('go-vet' ~ suffix) -%}
 {%- endfor -%}

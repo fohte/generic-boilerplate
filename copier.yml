@@ -276,6 +276,8 @@ subpackages:
   help: |
     Subpackage definitions for monorepo.
     Example: [{name: web, type: node}, {name: engine, type: rust}, {name: api, type: go}]
+    Go subpackages use existing modules. Provide each package's `go.mod` and source;
+    the template adds CI and release wiring but does not scaffold Go code.
     Per-entry flags (optional):
       spa: true        -- mark a node subpackage as a SPA (Vite + React +
                           Tailwind CSS + shadcn/ui + Storybook), and (unless
@@ -409,6 +411,11 @@ rust_pkgs:
 go_pkgs:
   type: yaml
   default: "{{ subpackages | default([]) | selectattr('type', 'equalto', 'go') | list }}"
+  when: false
+
+has_multiple_go_pkgs:
+  type: bool
+  default: '{{ go_pkgs | length > 1 }}'
   when: false
 
 spa_pkgs:
