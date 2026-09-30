@@ -1,0 +1,6 @@
+scope/web-client:
+  - changed-files:
+      - any-glob-to-any-file: web-client/**
+scope/provider-go:
+  - changed-files:
+      - any-glob-to-any-file: provider-go/**

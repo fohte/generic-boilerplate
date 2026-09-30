@@ -1,0 +1,6 @@
+scope/web-client:
+  - changed-files:
+      - any-glob-to-any-file: web-client/**
+scope/compute-core:
+  - changed-files:
+      - any-glob-to-any-file: compute-core/**

@@ -1,0 +1,19 @@
+type: base
+project_name: mixed-go-release
+description: Test selective release for a Go subpackage
+is_public: false
+use_release_please: true
+release_type: simple
+auto_merge_release_pr: false
+pr_title_check: false
+use_coverage: false
+monorepo_node_workspace: false
+subpackages:
+  - name: web-client
+    type: node
+    release: false
+  - name: provider-go
+    type: go
+    release_type: go
+repo_language: en
+repo_id: '987654321'

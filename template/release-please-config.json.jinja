@@ -16,7 +16,7 @@
   ],
   "packages": {
 {%- if subpackages %}
-{% for pkg in subpackages %}
+{% for pkg in subpackages if pkg.release | default(true) %}
     {{ pkg.name | tojson }}: {
       "release-type": {{ (pkg.release_type | default('simple')) | tojson }},
       "bump-minor-pre-major": true,

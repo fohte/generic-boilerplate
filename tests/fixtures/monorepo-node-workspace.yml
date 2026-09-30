@@ -3,6 +3,7 @@ project_name: monorepo-node-workspace-pnpm
 description: Test monorepo project with Node.js workspace (pnpm)
 is_public: false
 use_release_please: false
+pr_title_check: false
 monorepo_node_workspace: true
 subpackages:
   - name: frontend
