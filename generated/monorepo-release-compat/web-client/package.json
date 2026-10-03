@@ -1,7 +1,7 @@
 {
   "name": "web-client",
   "private": true,
-  "packageManager": "pnpm@12.3.4",
+  "packageManager": "pnpm@12.7.0",
   "type": "module",
   "imports": {
     "#*": "./src/*.ts"
