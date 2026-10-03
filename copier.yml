@@ -94,6 +94,10 @@ _skip_if_exists:
   # components.json's `style`/`aliases` are chosen per repo via `shadcn init`,
   # so copier update must not overwrite a repo's existing choice.
   - '*/components.json'
+  # tbls comments contain repository-specific descriptions and must survive
+  # copier updates.
+  - .tbls.yml
+  - '*/.tbls.yml'
 
 # Exclude files that are specific to this template repository
 # and not needed in derived repositories
@@ -117,6 +121,9 @@ _exclude:
   - '{% if not has_db %}compose.yaml{% endif %}'
   - '{% if not has_db %}scripts/db-up{% endif %}'
   - '{% if not has_db %}scripts/db-url{% endif %}'
+  - '{% if not has_db %}scripts/db-doc{% endif %}'
+  - '{% if not (db | default(false)) %}/.tbls.yml{% endif %}'
+  - '{% if not has_db %}*/.tbls.yml{% endif %}'
   # octo-sts trust policies embed repo_id in an immutable subject_pattern
   # (see the repo_id parameter below); skip them entirely while it's empty
   # instead of rendering a policy that can never match, so a fresh `copier
@@ -291,6 +298,10 @@ subpackages:
                           subpackage independent of web_app.
       db: true           -- provide an isolated local PostgreSQL database for
                           this subpackage, with separate dev and test DBs.
+      db_migrate: ...    -- override the migration command used to build the
+                          schema documentation. Defaults by package type.
+      db_schema_paths: [...] -- override repository-root-relative paths that
+                          trigger schema documentation generation in CI.
       vrt: true        -- enable Visual Regression Testing for a spa
                           subpackage (requires spa: true; ignored otherwise).
                           Adds a screenshot-capture vitest project, the
@@ -338,6 +349,18 @@ db:
   default: false
   help: Provide a local PostgreSQL database for this project?
   when: '{{ not subpackages }}'
+
+db_migrate:
+  type: str
+  default: "{{ 'pnpm run db:migrate' if type == 'node' else ('cargo run -q -p migration -- up' if type == 'rust' else '') }}"
+  help: Command to migrate the disposable database for documentation generation
+  when: '{{ db | default(false) }}'
+
+db_schema_paths:
+  type: yaml
+  default: "{{ ['drizzle/**'] if type == 'node' else (['migration/**'] if type == 'rust' else []) }}"
+  help: Repository-root-relative paths that trigger database documentation generation in CI
+  when: '{{ db | default(false) }}'
 
 monorepo_node_workspace:
   type: bool

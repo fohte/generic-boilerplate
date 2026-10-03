@@ -1,0 +1,14 @@
+name: "{{ project_name }} {{ pkg.name }}"
+docPath: docs/db
+# Fixed names keep the disposable database name out of generated headings.
+# schema.json includes architecture-specific database_version values.
+disableOutputSchema: true
+er:
+  format: mermaid
+exclude: {{ ['drizzle.*'] if pkg.type == 'node' else (['public.seaql_migrations'] if pkg.type == 'rust' else []) }}
+lint:
+  requireTableComment:
+    enabled: true
+  requireColumnComment:
+    enabled: true
+    exclude: [id, created_at, updated_at]

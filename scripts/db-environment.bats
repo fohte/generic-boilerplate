@@ -137,4 +137,9 @@ teardown() {
   [ ! -e "$REPO_ROOT/generated/base/compose.yaml" ]
   [ ! -e "$REPO_ROOT/generated/base/scripts/db-up" ]
   [ ! -e "$REPO_ROOT/generated/base/scripts/db-url" ]
+  [ ! -e "$REPO_ROOT/generated/base/scripts/db-doc" ]
+  [ ! -e "$REPO_ROOT/generated/base/.tbls.yml" ]
+  [ ! -e "$REPO_ROOT/generated/monorepo/.tbls.yml" ]
+  [ ! -e "$REPO_ROOT/generated/monorepo-node-workspace/frontend/.tbls.yml" ]
+  ! rg -q 'k1LoW/tbls|db:doc' "$REPO_ROOT/generated/base/.mise.toml"
 }

@@ -14,6 +14,26 @@
 {%- for pkg in node_pkgs if pkg.tests | default(true) -%}
 {%- set _ = testable_node_pkgs.append(pkg) -%}
 {%- endfor -%}
+{%- if has_db %}
+{%- set db_doc_paths = [] -%}
+{%- for pkg in db_pkgs -%}
+{%- if pkg.name == '.' -%}
+{%- set schema_paths = db_schema_paths -%}
+{%- elif pkg.db_schema_paths is defined -%}
+{%- set schema_paths = pkg.db_schema_paths -%}
+{%- elif pkg.type == 'node' -%}
+{%- set schema_paths = [pkg.name ~ '/drizzle/**'] -%}
+{%- elif pkg.type == 'rust' -%}
+{%- set schema_paths = [pkg.name ~ '/migration/**'] -%}
+{%- else -%}
+{%- set schema_paths = [] -%}
+{%- endif -%}
+{%- for path in schema_paths -%}
+{%- set _ = db_doc_paths.append(path) -%}
+{%- endfor -%}
+{%- endfor -%}
+{%- set _ = db_doc_paths.extend(['**/.tbls.yml', 'scripts/db-*', 'compose*.yaml', '.mise.toml', '.github/workflows/test.yml']) -%}
+{%- endif -%}
 name: Test
 
 on:
@@ -213,6 +233,24 @@ jobs:
         run: cd "{{ pkg.name }}" && cargo fetch
 {%- endfor %}
 {%- endif %}
+{%- endif %}
+
+{%- if has_db %}
+
+      - name: Check for database documentation changes
+        id: db-doc-changes
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: |
+            {{ db_doc_paths | join('\n            ') }}
+
+      - name: Generate database documentation
+        if: steps.db-doc-changes.outputs.any_changed == 'true'
+        run: mise run db:doc
+
+      - name: Stage generated database documentation
+        if: steps.db-doc-changes.outputs.any_changed == 'true'
+        run: git add -- {% for pkg in db_pkgs %}{% if pkg.name == '.' %}docs/db{% else %}{{ pkg.name }}/docs/db{% endif %}{% if not loop.last %} {% endif %}{% endfor %}
 {%- endif %}
 
       - name: Run lefthook

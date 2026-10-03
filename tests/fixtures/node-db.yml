@@ -13,4 +13,7 @@ vrt: false
 repo_language: ja
 subpackages: []
 db: true
+db_migrate: pnpm run db:migrate
+db_schema_paths:
+  - drizzle/**
 repo_id: '123456789'
