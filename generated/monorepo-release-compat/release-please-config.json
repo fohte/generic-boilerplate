@@ -15,20 +15,17 @@
     { "type": "ci", "hidden": true }
   ],
   "packages": {
-
     "web-client": {
       "release-type": "simple",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
       "component": "web-client"
     },
-
     "compute-core": {
       "release-type": "simple",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
       "component": "compute-core"
     }
-
   }
 }
