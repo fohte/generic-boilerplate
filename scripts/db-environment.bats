@@ -143,3 +143,7 @@ teardown() {
   [ ! -e "$REPO_ROOT/generated/monorepo-node-workspace/frontend/.tbls.yml" ]
   ! rg -q 'k1LoW/tbls|db:doc' "$REPO_ROOT/generated/base/.mise.toml"
 }
+
+@test "db-doc workflow includes a package-specific schema path" {
+  grep -Fxq '            backend/db-schema/**' "$REPO_ROOT/generated/monorepo/.github/workflows/test.yml"
+}
