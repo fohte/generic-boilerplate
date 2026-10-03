@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.11.8](https://github.com/fohte/generic-boilerplate/compare/v0.11.7...v0.11.8) (2026-10-03)
+
+
+### Features
+
+* **db:** add local database environment ([#733](https://github.com/fohte/generic-boilerplate/issues/733)) ([eb1e0bd](https://github.com/fohte/generic-boilerplate/commit/eb1e0bdc817091c638d49fe3965a260375ae6e93))
+* **db:** distribute automated schema documentation generation ([#740](https://github.com/fohte/generic-boilerplate/issues/740)) ([ae72ad4](https://github.com/fohte/generic-boilerplate/commit/ae72ad44619791288c7f0beb7867ba47ce9bf2e9))
+* support CI and selective release for Go subpackages ([#738](https://github.com/fohte/generic-boilerplate/issues/738)) ([4038b9d](https://github.com/fohte/generic-boilerplate/commit/4038b9d6d8844bc7c7e9289e31523f71f73cc221))
+
+
+### Bug Fixes
+
+* **copier:** bump minimum version required for template rendering ([#727](https://github.com/fohte/generic-boilerplate/issues/727)) ([bda9420](https://github.com/fohte/generic-boilerplate/commit/bda9420cb3991b2bc2360c7deeb080896b294bd7))
+
+
+### Dependencies
+
+* **ci:** Update dependency jdx/mise to v2026.9.14 ([#735](https://github.com/fohte/generic-boilerplate/issues/735)) ([253c25b](https://github.com/fohte/generic-boilerplate/commit/253c25b998329bb119f1a0e7295ab49245ecf0d2))
+* **ci:** Update taiki-e/install-action action to v2.87.20 ([#736](https://github.com/fohte/generic-boilerplate/issues/736)) ([d8b1d9f](https://github.com/fohte/generic-boilerplate/commit/d8b1d9fa8bc1eec42a1426980a8bf80e436f4d5c))
+* Update @commitlint/cli to v21.2.3 ([#729](https://github.com/fohte/generic-boilerplate/issues/729)) ([27c863b](https://github.com/fohte/generic-boilerplate/commit/27c863b1dcd37ac49f4d22a8c2f9bb98b0b01e10))
+* Update dependency prettier to v3.9.9 ([#734](https://github.com/fohte/generic-boilerplate/issues/734)) ([fa8af08](https://github.com/fohte/generic-boilerplate/commit/fa8af0895203482a693295121af97db051bd267d))
+* Update devDependencies (non-major) ([#730](https://github.com/fohte/generic-boilerplate/issues/730)) ([669d8d7](https://github.com/fohte/generic-boilerplate/commit/669d8d7af051ded53532734e63f55b67758ce126))
+* Update node ([#696](https://github.com/fohte/generic-boilerplate/issues/696)) ([c11643a](https://github.com/fohte/generic-boilerplate/commit/c11643a610b502391a309bd2ef70b7cb710eb8ac))
+* Update pnpm to v12.7.0 ([#737](https://github.com/fohte/generic-boilerplate/issues/737)) ([c6fcc13](https://github.com/fohte/generic-boilerplate/commit/c6fcc137cc0ffae1c055938ad9f4848e77b3eb33))
+* Update prettier to v3.9.9 ([#731](https://github.com/fohte/generic-boilerplate/issues/731)) ([d24af5a](https://github.com/fohte/generic-boilerplate/commit/d24af5ad588f69d9047b749067b762f6068de0d5))
+* update rust crate thiserror to v2.0.21 ([#732](https://github.com/fohte/generic-boilerplate/issues/732)) ([a003bae](https://github.com/fohte/generic-boilerplate/commit/a003baebb2232cc2a7a4fc54f0615e6754d7bc0e))
+
 ## [0.11.7](https://github.com/fohte/generic-boilerplate/compare/v0.11.6...v0.11.7) (2026-09-27)
 
 
