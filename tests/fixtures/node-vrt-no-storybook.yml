@@ -12,4 +12,5 @@ storybook: false
 vrt: true
 repo_language: ja
 subpackages: []
+db: false
 repo_id: '123456789'

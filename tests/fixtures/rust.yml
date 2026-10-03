@@ -10,4 +10,5 @@ pr_title_check: false
 use_coverage: false
 repo_language: ja
 subpackages: []
+db: false
 repo_id: '123456789'

@@ -8,5 +8,6 @@ pr_title_check: true
 release_type: simple
 auto_merge_release_pr: false
 subpackages: []
+db: false
 repo_language: ja
 repo_id: '123456789'
