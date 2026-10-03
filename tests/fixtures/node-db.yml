@@ -1,0 +1,16 @@
+# Test fixture for a single-package Node project with a local PostgreSQL DB
+
+type: node
+project_name: node-db
+description: Test Node.js project with a database
+is_public: false
+use_release_please: false
+is_web_app: false
+web_app_port: 8080
+error_tracking: false
+storybook: false
+vrt: false
+repo_language: ja
+subpackages: []
+db: true
+repo_id: '123456789'

@@ -18,9 +18,24 @@ pinact = "4.1.1"
 shellcheck = "0.11.0"
 shfmt = "3.14.1"
 
-{%- if has_rust %}
+{%- if has_rust or has_db %}
 
 [env]
+{%- if has_db %}
+{%- if db_pkgs | length == 1 %}
+DATABASE_URL = "{% raw %}{{ exec(command=config_root ~ '/scripts/db-url {% endraw %}{{ db_pkgs[0].name }}{% raw %} dev') }}{% endraw %}"
+TEST_DATABASE_URL = "{% raw %}{{ exec(command=config_root ~ '/scripts/db-url {% endraw %}{{ db_pkgs[0].name }}{% raw %} test') }}{% endraw %}"
+{%- endif %}
+_.file = ['.env', '.env.local']
+{%- endif %}
+{%- if has_rust %}
 # Share target dir across worktrees to avoid full recompilation
 CARGO_TARGET_DIR = "{% raw %}{{config_root}}{% endraw %}/target"
+{%- endif %}
+{%- endif %}
+{%- if has_db %}
+
+[tasks."db:up"]
+description = "Start the local PostgreSQL databases"
+file = "scripts/db-up"
 {%- endif %}

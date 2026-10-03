@@ -169,3 +169,9 @@ lcov.info
 {%- endif %}
 {% endif -%}
 {% endif -%}
+{% if has_db and not (type == 'node' or is_workspace) %}
+
+# Local database credentials
+.env
+.env.local
+{% endif -%}
