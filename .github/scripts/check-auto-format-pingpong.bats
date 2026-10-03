@@ -2,7 +2,6 @@
 
 setup() {
   SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" && pwd)"
-  REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
   TEST_DIR=$(mktemp -d)
   TEST_REPO="$TEST_DIR/repo"
@@ -25,7 +24,7 @@ create_commit() {
 
 run_check() {
   cd "$TEST_REPO"
-  run "$REPO_ROOT/scripts/check-auto-format-pingpong"
+  run "$SCRIPT_DIR/check-auto-format-pingpong"
 }
 
 @test "does not detect a ping-pong for a root commit" {

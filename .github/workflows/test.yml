@@ -29,7 +29,7 @@ jobs:
 
       - name: Check if current commit is auto-format by bot
         id: check-auto-format
-        run: scripts/check-auto-format-pingpong
+        run: .github/scripts/check-auto-format-pingpong
 
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
@@ -74,4 +74,4 @@ jobs:
         run: exit 1
 
       - name: Run bats tests
-        run: bats scripts/*.bats
+        run: bats scripts/*.bats .github/scripts/*.bats
