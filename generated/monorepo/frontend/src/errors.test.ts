@@ -8,12 +8,11 @@ describe('BoundaryError', () => {
   it('derives the name from the subclass and preserves the message', () => {
     const original = new Error('connection refused')
     const wrapped = new TaskStorePersistenceError('failed to save', original)
+    const expected = new TaskStorePersistenceError('failed to save', original)
 
-    expect(wrapped).toEqual({
-      name: 'TaskStorePersistenceError',
-      message: 'failed to save',
-      cause: original,
-    })
+    expected.name = 'TaskStorePersistenceError'
+    expected.message = 'failed to save'
+    expect(wrapped).toEqual(expected)
   })
 
   it('preserves the original error as cause', () => {
