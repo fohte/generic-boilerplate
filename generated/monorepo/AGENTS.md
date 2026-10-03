@@ -8,6 +8,10 @@ When a change would push a file's non-test code past ~500 lines, split it along 
 
 Prefer creating a new focused file over appending to the largest existing one.
 
+## Local database
+
+Run `mise run db:up` to start PostgreSQL and create the development and test databases for each package with `db: true`. The `DATABASE_URL` and `TEST_DATABASE_URL` values are resolved with mise `exec()` on each invocation. Run commands from a database package directory to use its databases; when there is one database package, the root config exposes its URLs too. Set either variable in `.env.local` to override the resolved URL.
+
 ## Error handling rules
 
 ### Return a `Result` instead of throwing

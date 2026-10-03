@@ -15,5 +15,6 @@ subpackages:
     vrt: true
   - name: backend
     type: rust
+    db: true
 repo_language: ja
 repo_id: '123456789'
