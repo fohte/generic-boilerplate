@@ -1,0 +1,16 @@
+name: 'monorepo frontend'
+docPath: docs/db
+# Fixed names keep the disposable database name out of generated headings.
+# schema.json includes architecture-specific database_version values.
+disableOutputSchema: true
+er:
+  format: mermaid
+exclude:
+  - drizzle.*
+
+lint:
+  requireTableComment:
+    enabled: true
+  requireColumnComment:
+    enabled: true
+    exclude: [id, created_at, updated_at]
