@@ -98,7 +98,7 @@ _skip_if_exists:
 # Exclude files that are specific to this template repository
 # and not needed in derived repositories
 _exclude:
-  # Jinja partials are included by workflow templates and must not be emitted.
+  # Copier would otherwise emit these source-only Jinja includes as workflows.
   - .github/workflows/_partials
   - .github/workflows/_partials/**
   # Exclude external refs plugin for private repos
