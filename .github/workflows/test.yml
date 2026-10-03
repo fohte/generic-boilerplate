@@ -29,19 +29,7 @@ jobs:
 
       - name: Check if current commit is auto-format by bot
         id: check-auto-format
-        run: |
-          commit_message=$(git log -1 --format=%s)
-          commit_author=$(git log -1 --format=%an)
-          echo "Current commit message: $commit_message"
-          echo "Current commit author: $commit_author"
-
-          # Skip if the current commit is an auto-format commit by a bot
-          # to prevent infinite loop: auto-format push -> CI -> auto-format push -> ...
-          if [ "$commit_message" = "style: auto-format" ] && [[ "$commit_author" == *"[bot]"* ]]; then
-            echo "skip_commit=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip_commit=false" >> "$GITHUB_OUTPUT"
-          fi
+        run: .github/scripts/check-auto-format-pingpong
 
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
@@ -64,6 +52,15 @@ jobs:
       - name: Unstage changes for commit-action
         run: git restore --staged .
 
+      - name: Fail if auto-format ping-pong was detected
+        if: steps.check-auto-format.outputs.format_pingpong == 'true'
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          echo "::error::A bot regenerated files after an auto-format commit"
+          exit 1
+
       - name: Commit formatted files
         if: ${{ !cancelled() && steps.check-auto-format.outputs.skip_commit != 'true' }}
         uses: suzuki-shunsuke/commit-action@06e3b49d4706498d325d29bd85adc82ecf2f5d8f # v1.0.0
@@ -77,4 +74,4 @@ jobs:
         run: exit 1
 
       - name: Run bats tests
-        run: bats scripts/*.bats
+        run: bats scripts/*.bats .github/scripts/*.bats
