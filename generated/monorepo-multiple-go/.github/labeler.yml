@@ -1,0 +1,6 @@
+scope/core:
+  - changed-files:
+      - any-glob-to-any-file: core/**
+scope/tools:
+  - changed-files:
+      - any-glob-to-any-file: tools/**

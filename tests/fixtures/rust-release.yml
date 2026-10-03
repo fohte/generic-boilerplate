@@ -4,6 +4,7 @@ project_name: rust-release
 description: Test Rust project with release features
 is_public: false
 use_release_please: true
+pr_title_check: true
 release_type: rust
 auto_merge_release_pr: true
 use_coverage: true

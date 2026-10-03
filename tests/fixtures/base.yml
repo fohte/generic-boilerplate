@@ -6,6 +6,7 @@ project_name: base
 description: Test project description
 is_public: false
 use_release_please: false
+pr_title_check: false
 subpackages: []
 db: false
 repo_language: ja

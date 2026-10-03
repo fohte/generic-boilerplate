@@ -4,6 +4,7 @@ project_name: node-vrt
 description: Test Node.js package with root Storybook and VRT
 is_public: false
 use_release_please: false
+pr_title_check: false
 is_web_app: false
 web_app_port: 8080
 error_tracking: false

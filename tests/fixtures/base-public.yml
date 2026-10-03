@@ -4,6 +4,7 @@ project_name: base-public
 description: Test project description
 is_public: true
 use_release_please: false
+pr_title_check: false
 subpackages: []
 db: false
 repo_language: en

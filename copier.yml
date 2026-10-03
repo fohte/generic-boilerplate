@@ -102,6 +102,9 @@ _skip_if_exists:
 # Exclude files that are specific to this template repository
 # and not needed in derived repositories
 _exclude:
+  # Copier would otherwise emit these source-only Jinja includes as workflows.
+  - .github/workflows/_partials
+  - .github/workflows/_partials/**
   # Exclude external refs plugin for private repos
   - '{% if not is_public %}commitlint-plugin-no-external-refs.cjs{% endif %}'
   # Conditional exclusion when release-please is disabled.
@@ -116,7 +119,7 @@ _exclude:
   - '{% if not use_release_please %}.release-please-manifest.json{% endif %}'
   - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
   - '{% if not use_release_please %}.github/workflows/test-release-please.yml{% endif %}'
-  - '{% if not use_release_please %}.github/workflows/pr-title-check.yml{% endif %}'
+  - '{% if not pr_title_check %}.github/workflows/pr-title-check.yml{% endif %}'
   # Exclude local database setup when no root or subpackage opts in.
   - '{% if not has_db %}compose.yaml{% endif %}'
   - '{% if not has_db %}scripts/db-up{% endif %}'
@@ -257,6 +260,11 @@ auto_merge_release_pr:
   help: Automatically merge release-please PRs?
   when: '{{ use_release_please }}'
 
+pr_title_check:
+  type: bool
+  default: '{{ use_release_please }}'
+  help: Validate pull request titles using Conventional Commits?
+
 release_binary:
   type: bool
   default: false
@@ -278,7 +286,9 @@ subpackages:
   default: []
   help: |
     Subpackage definitions for monorepo.
-    Example: [{name: frontend, type: node}, {name: backend, type: rust}]
+    Example: [{name: web, type: node}, {name: engine, type: rust}, {name: api, type: go}]
+    Go subpackages use existing modules. Provide each package's `go.mod` and source;
+    the template adds CI and release wiring but does not scaffold Go code.
     Per-entry flags (optional):
       spa: true        -- mark a node subpackage as a SPA (Vite + React +
                           Tailwind CSS + shadcn/ui + Storybook), and (unless
@@ -322,6 +332,8 @@ subpackages:
                           the lefthook CI job. Use for node subpackages that
                           bring their own setup, such as docs sites (Astro,
                           Starlight) or framework apps (Next.js).
+      release: false   -- exclude this subpackage from release-please. Defaults
+                          to true when omitted.
   # `when: true` is the default but explicit here: hidden questions (when: false)
   # discard the stored answer, which would erase subpackages on every update.
   when: true
@@ -436,6 +448,16 @@ node_pkgs:
 rust_pkgs:
   type: yaml
   default: "{{ subpackages | default([]) | selectattr('type', 'equalto', 'rust') | list }}"
+  when: false
+
+go_pkgs:
+  type: yaml
+  default: "{{ subpackages | default([]) | selectattr('type', 'equalto', 'go') | list }}"
+  when: false
+
+has_multiple_go_pkgs:
+  type: bool
+  default: '{{ go_pkgs | length > 1 }}'
   when: false
 
 spa_pkgs:

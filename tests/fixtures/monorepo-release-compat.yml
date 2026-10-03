@@ -1,0 +1,17 @@
+type: base
+project_name: release-compatibility
+description: Test default release settings for existing subpackages
+is_public: false
+use_release_please: true
+pr_title_check: true
+release_type: simple
+auto_merge_release_pr: false
+use_coverage: false
+monorepo_node_workspace: false
+subpackages:
+  - name: web-client
+    type: node
+  - name: compute-core
+    type: rust
+repo_language: en
+repo_id: '876543219'

@@ -4,6 +4,7 @@ project_name: rust-with-node-subpackage
 description: Test Rust root with a node docs subpackage
 is_public: false
 use_release_please: false
+pr_title_check: false
 use_coverage: false
 monorepo_node_workspace: false
 subpackages:

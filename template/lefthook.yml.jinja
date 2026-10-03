@@ -108,6 +108,18 @@ pre-commit:
       {%- endif %}
       run: cargo clippy --all-targets -- -D warnings
 {%- endif %}
+{%- for pkg in go_pkgs %}
+
+    {{ 'go-fmt-' ~ pkg.name if has_multiple_go_pkgs else 'go-fmt' }}:
+      glob: '*.go'
+      root: '{{ pkg.name }}/'
+      run: test -z "$(gofmt -l .)"
+
+    {{ 'go-vet-' ~ pkg.name if has_multiple_go_pkgs else 'go-vet' }}:
+      glob: '*.go'
+      root: '{{ pkg.name }}/'
+      run: go vet ./...
+{%- endfor %}
 
 commit-msg:
   commands:
