@@ -28,6 +28,15 @@ run_check() {
   run "$REPO_ROOT/scripts/check-auto-format-pingpong"
 }
 
+@test "does not detect a ping-pong for a root commit" {
+  create_commit "chore: initialize repository" "Example User"
+
+  run_check
+
+  [ "$status" -eq 0 ]
+  [ "$(cat "$GITHUB_OUTPUT")" = $'skip_commit=false\nformat_pingpong=false' ]
+}
+
 @test "skips formatting and detects a bot regeneration after bot auto-format" {
   create_commit "style: auto-format" "formatter[bot]"
   create_commit "chore(generated): regenerate from template" "template[bot]"

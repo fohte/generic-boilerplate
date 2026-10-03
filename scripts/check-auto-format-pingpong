@@ -3,8 +3,14 @@ set -euo pipefail
 
 commit_message=$(git log -1 --format=%s)
 commit_author=$(git log -1 --format=%an)
-parent_commit_message=$(git log -1 --format=%s HEAD^)
-parent_commit_author=$(git log -1 --format=%an HEAD^)
+parent_commit=$(git rev-parse --verify -q HEAD^ || true)
+parent_commit_message=''
+parent_commit_author=''
+
+if [[ -n "$parent_commit" ]]; then
+  parent_commit_message=$(git log -1 --format=%s "$parent_commit")
+  parent_commit_author=$(git log -1 --format=%an "$parent_commit")
+fi
 
 echo "Current commit message: $commit_message"
 echo "Current commit author: $commit_author"
@@ -12,7 +18,7 @@ echo "Current commit author: $commit_author"
 skip_commit=false
 format_pingpong=false
 
-# Keep bot auto-format commits from creating another formatting commit.
+# Only this repository runs template validation against generated/.
 if [[ "$commit_message" == "style: auto-format" && "$commit_author" == *"[bot]"* ]]; then
   skip_commit=true
 elif [[ "$commit_author" == *"[bot]"* && "$parent_commit_message" == "style: auto-format" && "$parent_commit_author" == *"[bot]"* ]]; then

@@ -55,6 +55,9 @@ jobs:
       - name: Fail if auto-format ping-pong was detected
         if: steps.check-auto-format.outputs.format_pingpong == 'true'
         run: |
+          if git diff --quiet; then
+            exit 0
+          fi
           echo "::error::A bot regenerated files after an auto-format commit"
           exit 1
 
