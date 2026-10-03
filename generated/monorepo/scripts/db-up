@@ -21,5 +21,11 @@ WHERE NOT EXISTS (
 \gexec
 SQL
 }
-ensure_database "monorepo_backend_dev"
-ensure_database "monorepo_backend_test"
+database_url="$(scripts/db-url 'frontend' 'dev')"
+ensure_database "${database_url##*/}"
+database_url="$(scripts/db-url 'frontend' 'test')"
+ensure_database "${database_url##*/}"
+database_url="$(scripts/db-url 'backend' 'dev')"
+ensure_database "${database_url##*/}"
+database_url="$(scripts/db-url 'backend' 'test')"
+ensure_database "${database_url##*/}"

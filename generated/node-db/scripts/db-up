@@ -21,5 +21,7 @@ WHERE NOT EXISTS (
 \gexec
 SQL
 }
-ensure_database "node-db_dev"
-ensure_database "node-db_test"
+database_url="$(scripts/db-url '.' 'dev')"
+ensure_database "${database_url##*/}"
+database_url="$(scripts/db-url '.' 'test')"
+ensure_database "${database_url##*/}"

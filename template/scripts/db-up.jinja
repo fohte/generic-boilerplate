@@ -22,11 +22,8 @@ WHERE NOT EXISTS (
 SQL
 }
 {% for pkg in db_pkgs -%}
-{% if pkg.name == '.' -%}
-ensure_database "{{ project_slug }}_dev"
-ensure_database "{{ project_slug }}_test"
-{% else -%}
-ensure_database "{{ project_slug }}_{{ pkg.name }}_dev"
-ensure_database "{{ project_slug }}_{{ pkg.name }}_test"
-{% endif -%}
+{% for environment in ['dev', 'test'] -%}
+database_url="$(scripts/db-url '{{ pkg.name }}' '{{ environment }}')"
+ensure_database "${database_url##*/}"
+{% endfor -%}
 {% endfor -%}

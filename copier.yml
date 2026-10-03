@@ -457,7 +457,7 @@ db_subpackages:
 
 db_pkgs:
   type: yaml
-  default: "{{ ([{'name': '.', 'is_root': true}] if db | default(false) else []) + db_subpackages }}"
+  default: "{{ ([{'name': '.'}] if db | default(false) else []) + db_subpackages }}"
   when: false
 
 has_node_pkg:
