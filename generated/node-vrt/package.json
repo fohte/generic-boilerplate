@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "neverthrow": "8.2.0",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.3",
