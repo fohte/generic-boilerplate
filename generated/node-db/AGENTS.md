@@ -34,7 +34,20 @@ function parseConfig(raw: string): Result<Config, ConfigError> {
 }
 ```
 
-Use `ResultAsync.fromPromise()` or `Result.fromThrowable()` to interop with a throwing API without a local try/catch. If the throw-based contract genuinely can't be wrapped that way, catch the exception, wrap it in a `BoundaryError` subclass (see `src/errors.ts`), and rethrow it — `no-restricted-syntax` bans `try`/`throw` as separate selectors, so both the `try` and the `throw` need their own `eslint-disable-next-line no-restricted-syntax` comment explaining why.
+Use `ResultAsync.fromPromise()` or `Result.fromThrowable()` to interop with a throwing API without a local try/catch. If the throw-based contract genuinely can't be wrapped that way, define a package-local base error and subclass it for the boundary:
+
+```ts
+abstract class BoundaryError extends Error {
+  constructor(message: string, cause: unknown) {
+    super(message, { cause })
+    this.name = new.target.name
+  }
+}
+
+class DataSourceBoundaryError extends BoundaryError {}
+```
+
+Catch the exception, wrap it in the boundary-specific subclass, and rethrow it — `no-restricted-syntax` bans `try`/`throw` as separate selectors, so both the `try` and the `throw` need their own `eslint-disable-next-line no-restricted-syntax` comment explaining why.
 
 ## Test code rules
 
