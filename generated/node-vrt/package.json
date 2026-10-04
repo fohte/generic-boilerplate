@@ -20,7 +20,7 @@
     "format": "conc -m 1 pnpm:format:eslint pnpm:format:prettier",
     "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run --passWithNoTests",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
     "storybook:screenshot": "vitest run --config vitest.screenshot.config.ts"

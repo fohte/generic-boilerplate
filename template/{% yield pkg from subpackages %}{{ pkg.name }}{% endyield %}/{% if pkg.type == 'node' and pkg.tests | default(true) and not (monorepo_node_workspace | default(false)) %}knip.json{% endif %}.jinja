@@ -1,9 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "treatConfigHintsAsErrors": true,
-{%- if pkg.spa | default(false) %}
-  "entry": ["src/main.tsx!"],
-{%- endif %}
 {%- if pkg.vrt | default(false) %}
   "ignoreDependencies": [
     "@commitlint/cli",

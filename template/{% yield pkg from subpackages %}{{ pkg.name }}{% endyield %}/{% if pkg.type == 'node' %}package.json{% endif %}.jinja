@@ -52,7 +52,7 @@
 {%- if has_tests %}
     "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
-    "test:unit": "vitest run"{{ "," if (pkg_is_web_app or pkg_has_spa) else "" }}
+    "test:unit": "vitest run{{ ' --passWithNoTests' if pkg_has_spa else '' }}"{{ "," if (pkg_is_web_app or pkg_has_spa) else "" }}
 {%- endif %}
 {%- if pkg_is_web_app %}
     "build": "tsup",

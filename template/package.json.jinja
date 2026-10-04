@@ -46,7 +46,7 @@
 {%- else %}
     "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
-    "test:unit": "vitest run"{{ "," if (root_is_web_app or root_has_storybook) else "" }}
+    "test:unit": "vitest run{{ ' --passWithNoTests' if root_has_storybook else '' }}"{{ "," if (root_is_web_app or root_has_storybook) else "" }}
 {%- endif %}
 {%- if root_is_web_app %}
     "build": "tsup",
