@@ -251,11 +251,11 @@ jobs:
             {{ db_doc_paths | join('\n            ') }}
 
       - name: Generate database documentation
-        if: steps.db-doc-changes.outputs.any_changed == 'true'
+        if: steps.db-doc-changes.outputs.any_modified == 'true'
         run: mise run db:doc
 
       - name: Stage generated database documentation
-        if: steps.db-doc-changes.outputs.any_changed == 'true'
+        if: steps.db-doc-changes.outputs.any_modified == 'true'
         run: git add -- {% for pkg in db_pkgs %}{% if pkg.name == '.' %}docs/db{% else %}{{ pkg.name }}/docs/db{% endif %}{% if not loop.last %} {% endif %}{% endfor %}
 {%- endif %}
 

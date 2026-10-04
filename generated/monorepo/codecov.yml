@@ -22,6 +22,6 @@ flag_management:
       - type: patch
         informational: true
   individual_flags:
-    - name: backend
+    - name: api-service
       paths:
-        - backend/
+        - api-service/

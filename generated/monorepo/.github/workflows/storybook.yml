@@ -19,7 +19,7 @@ jobs:
   detect-changes-frontend:
     runs-on: ubuntu-slim
     outputs:
-      changed: ${{ steps.changes.outputs.any_changed }}
+      changed: ${{ steps.changes.outputs.any_modified }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -75,7 +75,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: frontend
           packageManager: pnpm
-          command: pages project create monorepo-frontend-storybook --production-branch=main
+          command: pages project create sample-project-frontend-storybook --production-branch=main
         continue-on-error: true
 
       - name: Deploy to Cloudflare Pages
@@ -86,7 +86,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: frontend
           packageManager: pnpm
-          command: pages deploy storybook-static --project-name=monorepo-frontend-storybook --branch=${{ github.head_ref || 'main' }} --commit-dirty=true
+          command: pages deploy storybook-static --project-name=sample-project-frontend-storybook --branch=${{ github.head_ref || 'main' }} --commit-dirty=true
 
       - name: Comment preview URL on PR
         if: github.event_name == 'pull_request'

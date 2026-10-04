@@ -81,8 +81,8 @@ jobs:
       - name: Check peer dependencies (frontend)
         run: cd "frontend" && pnpm peers check
 
-      - name: Fetch cargo dependencies (backend)
-        run: cd "backend" && cargo fetch
+      - name: Fetch cargo dependencies (api-service)
+        run: cd "api-service" && cargo fetch
 
       - name: Check for database documentation changes
         id: db-doc-changes
@@ -90,7 +90,7 @@ jobs:
         with:
           files: |
             frontend/drizzle/**
-            backend/db-schema/**
+            api-service/db-schema/**
             **/.tbls.yml
             scripts/db-*
             compose*.yaml
@@ -98,12 +98,12 @@ jobs:
             .github/workflows/test.yml
 
       - name: Generate database documentation
-        if: steps.db-doc-changes.outputs.any_changed == 'true'
+        if: steps.db-doc-changes.outputs.any_modified == 'true'
         run: mise run db:doc
 
       - name: Stage generated database documentation
-        if: steps.db-doc-changes.outputs.any_changed == 'true'
-        run: git add -- frontend/docs/db backend/docs/db
+        if: steps.db-doc-changes.outputs.any_modified == 'true'
+        run: git add -- frontend/docs/db api-service/docs/db
 
       - name: Run lefthook
         id: lefthook
@@ -137,9 +137,9 @@ jobs:
   detect-changes:
     runs-on: ubuntu-slim
     outputs:
-      frontend: ${{ steps.changes-frontend.outputs.any_changed }}
-      backend: ${{ steps.changes-backend.outputs.any_changed }}
-      workflow: ${{ steps.changes-workflow.outputs.any_changed }}
+      frontend: ${{ steps.changes-frontend.outputs.any_modified }}
+      api-service: ${{ steps.changes-api-service.outputs.any_modified }}
+      workflow: ${{ steps.changes-workflow.outputs.any_modified }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -151,11 +151,11 @@ jobs:
         with:
           files: frontend/**
 
-      - name: Check for backend changes
+      - name: Check for api-service changes
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-        id: changes-backend
+        id: changes-api-service
         with:
-          files: backend/**
+          files: api-service/**
 
       - name: Check for workflow changes
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
@@ -222,10 +222,10 @@ jobs:
         working-directory: frontend
         run: pnpm run test
 
-  unit-test-backend:
+  unit-test-api-service:
     needs: detect-changes
     if: >-
-      needs.detect-changes.outputs.backend == 'true' ||
+      needs.detect-changes.outputs.api-service == 'true' ||
       needs.detect-changes.outputs.workflow == 'true'
     runs-on: ubuntu-latest
     env:
@@ -254,15 +254,15 @@ jobs:
         run: rustup component add llvm-tools-preview
 
       - name: Run tests with coverage
-        working-directory: backend
+        working-directory: api-service
         run: cargo llvm-cov --lcov --output-path lcov.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: backend/lcov.info
-          flags: backend
+          files: api-service/lcov.info
+          flags: api-service
           fail_ci_if_error: false
 
   # Fixed name for branch protection: per-package job names are dynamic, and
@@ -273,7 +273,7 @@ jobs:
     needs:
       - detect-changes
       - unit-test-frontend
-      - unit-test-backend
+      - unit-test-api-service
       - knip
     if: failure()
     steps:

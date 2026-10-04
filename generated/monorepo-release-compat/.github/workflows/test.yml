@@ -119,9 +119,9 @@ jobs:
   detect-changes:
     runs-on: ubuntu-slim
     outputs:
-      web-client: ${{ steps.changes-web-client.outputs.any_changed }}
-      compute-core: ${{ steps.changes-compute-core.outputs.any_changed }}
-      workflow: ${{ steps.changes-workflow.outputs.any_changed }}
+      web-client: ${{ steps.changes-web-client.outputs.any_modified }}
+      compute-core: ${{ steps.changes-compute-core.outputs.any_modified }}
+      workflow: ${{ steps.changes-workflow.outputs.any_modified }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
