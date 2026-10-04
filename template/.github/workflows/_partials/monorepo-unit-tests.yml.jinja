@@ -24,7 +24,7 @@
         env:
           # Changes to these files affect every package, so they trigger the full matrix.
           GLOBAL_PATHS_REGEX: '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.github/workflows/test\.yml)$'
-          CHANGED_FILES: ${{ steps.changed.outputs.all_changed_files }}
+          CHANGED_FILES: ${{ steps.changed.outputs.all_modified_files }}
         run: |
           # Workspace packages are the directories holding a non-root package.json
           # that declares a `test` script. Packages without one (e.g. node
@@ -158,11 +158,11 @@
     runs-on: ubuntu-slim
     outputs:
 {%- for pkg in testable_subpackages %}
-      {{ pkg.name }}: {% raw %}${{ steps.changes-{% endraw %}{{ pkg.name }}{% raw %}.outputs.any_changed }}{% endraw %}
+      {{ pkg.name }}: {% raw %}${{ steps.changes-{% endraw %}{{ pkg.name }}{% raw %}.outputs.any_modified }}{% endraw %}
 {%- endfor %}
-      workflow: {% raw %}${{ steps.changes-workflow.outputs.any_changed }}{% endraw %}
+      workflow: {% raw %}${{ steps.changes-workflow.outputs.any_modified }}{% endraw %}
 {%- if is_workspace %}
-      root-lockfile: {% raw %}${{ steps.changes-root-lockfile.outputs.any_changed }}{% endraw %}
+      root-lockfile: {% raw %}${{ steps.changes-root-lockfile.outputs.any_modified }}{% endraw %}
 {%- endif %}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

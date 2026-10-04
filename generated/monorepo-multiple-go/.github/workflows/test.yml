@@ -77,9 +77,9 @@ jobs:
   detect-changes:
     runs-on: ubuntu-slim
     outputs:
-      core: ${{ steps.changes-core.outputs.any_changed }}
-      tools: ${{ steps.changes-tools.outputs.any_changed }}
-      workflow: ${{ steps.changes-workflow.outputs.any_changed }}
+      core: ${{ steps.changes-core.outputs.any_modified }}
+      tools: ${{ steps.changes-tools.outputs.any_modified }}
+      workflow: ${{ steps.changes-workflow.outputs.any_modified }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
