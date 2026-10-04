@@ -40,7 +40,7 @@ jobs:
         run: |
           missing=false
           if [ ! -f frontend/pnpm-lock.yaml ]; then missing=true; fi
-          if [ ! -f backend/Cargo.lock ]; then missing=true; fi
+          if [ ! -f api-service/Cargo.lock ]; then missing=true; fi
           echo "missing=$missing" >> "$GITHUB_OUTPUT"
 
       # Run rustup before mise-action to prevent race condition.
@@ -66,7 +66,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm .github/workflows/bootstrap.yml
           if [ -f frontend/pnpm-lock.yaml ]; then git add frontend/pnpm-lock.yaml; fi
-          if [ -f backend/Cargo.lock ]; then git add backend/Cargo.lock; fi
+          if [ -f api-service/Cargo.lock ]; then git add api-service/Cargo.lock; fi
           if git diff --cached --quiet; then
             echo "Nothing to commit"
             exit 0

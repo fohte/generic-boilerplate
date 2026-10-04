@@ -10,7 +10,7 @@ ensure_database() {
   local database_name="$1"
 
   docker compose exec -T db psql \
-    --username "monorepo" \
+    --username "sample_project" \
     --dbname postgres \
     --set ON_ERROR_STOP=1 \
     --set "db_name=$database_name" << 'SQL'
@@ -25,7 +25,7 @@ database_url="$(scripts/db-url 'frontend' 'dev')"
 ensure_database "${database_url##*/}"
 database_url="$(scripts/db-url 'frontend' 'test')"
 ensure_database "${database_url##*/}"
-database_url="$(scripts/db-url 'backend' 'dev')"
+database_url="$(scripts/db-url 'api-service' 'dev')"
 ensure_database "${database_url##*/}"
-database_url="$(scripts/db-url 'backend' 'test')"
+database_url="$(scripts/db-url 'api-service' 'test')"
 ensure_database "${database_url##*/}"

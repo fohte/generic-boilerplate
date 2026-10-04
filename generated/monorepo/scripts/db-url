@@ -18,9 +18,9 @@ case "$environment" in
 esac
 
 if [ "$package" = "." ]; then
-  database_name="monorepo_$environment"
+  database_name="sample_project_$environment"
 else
-  database_name="monorepo_${package}_$environment"
+  database_name="sample_project_${package//-/_}_$environment"
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -36,4 +36,4 @@ case "$port" in
   '' | *[!0-9]*) port=0 ;;
 esac
 
-printf 'postgresql://monorepo:monorepo@127.0.0.1:%s/%s\n' "$port" "$database_name"
+printf 'postgresql://sample_project:sample_project@127.0.0.1:%s/%s\n' "$port" "$database_name"
