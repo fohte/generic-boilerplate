@@ -1,0 +1,26 @@
+id: no-knip-ignore-tags-javascript
+valid:
+  - |
+    // @internal
+    export const value = 'allowed line comment';
+  - |
+    /* @public */
+    export const value = 'allowed block comment';
+  - |
+    /** @internalized is not the knip tag. */
+    export const value = 'allowed longer tag';
+invalid:
+  - |
+    /** @internal */
+    export const value = 'internal';
+  - |
+    /**
+     * @public
+     */
+    export const value = 'public';
+  - |
+    /** @beta */
+    export const value = 'beta';
+  - |
+    /** @alias previousName */
+    export const value = 'alias';

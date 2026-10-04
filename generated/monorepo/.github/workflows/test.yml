@@ -312,3 +312,6 @@ jobs:
 
       - name: Run knip (frontend)
         run: cd "frontend" && pnpm exec knip
+
+      - name: Run knip in production mode (frontend)
+        run: cd "frontend" && pnpm exec knip --production

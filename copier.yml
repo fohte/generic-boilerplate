@@ -165,14 +165,27 @@ _exclude:
   - "{% if type != 'rust' %}/Cargo.toml{% endif %}"
   - "{% if type != 'rust' %}/rust-toolchain.toml{% endif %}"
   - "{% if type != 'rust' %}/clippy.toml{% endif %}"
-  - '{% if not has_rust %}/sgconfig.yml{% endif %}'
-  - '{% if not has_rust %}/.sg{% endif %}'
+  - '{% if not has_rust and not has_node %}/sgconfig.yml{% endif %}'
+  - '{% if not has_rust and not has_node %}/.sg{% endif %}'
+  - '{% if not has_rust %}/.sg/rules/no-assert-contains.yml{% endif %}'
+  - '{% if not has_rust %}/.sg/rules/prefer-indoc.yml{% endif %}'
+  - '{% if not has_rust %}/.sg/tests/no-assert-contains-test.yml{% endif %}'
+  - '{% if not has_rust %}/.sg/tests/prefer-indoc-test.yml{% endif %}'
+  - '{% if not has_rust %}/.sg/tests/__snapshots__/no-assert-contains-snapshot.yml{% endif %}'
+  - '{% if not has_rust %}/.sg/tests/__snapshots__/prefer-indoc-snapshot.yml{% endif %}'
+  - '{% if not has_node %}/.sg/rules/no-knip-ignore-tags-javascript.yml{% endif %}'
+  - '{% if not has_node %}/.sg/rules/no-knip-ignore-tags-typescript.yml{% endif %}'
+  - '{% if not has_node %}/.sg/rules/no-knip-ignore-tags-tsx.yml{% endif %}'
+  - '{% if not has_node %}/.sg/tests/no-knip-ignore-tags-javascript-test.yml{% endif %}'
+  - '{% if not has_node %}/.sg/tests/no-knip-ignore-tags-typescript-test.yml{% endif %}'
+  - '{% if not has_node %}/.sg/tests/no-knip-ignore-tags-tsx-test.yml{% endif %}'
+  - '{% if not has_node %}/.sg/tests/__snapshots__/no-knip-ignore-tags-javascript-snapshot.yml{% endif %}'
+  - '{% if not has_node %}/.sg/tests/__snapshots__/no-knip-ignore-tags-typescript-snapshot.yml{% endif %}'
+  - '{% if not has_node %}/.sg/tests/__snapshots__/no-knip-ignore-tags-tsx-snapshot.yml{% endif %}'
   - "{% if type != 'rust' %}/src/main.rs{% endif %}"
   # Exclude Node.js specific src files when type is not 'node'
   - "{% if type != 'node' %}/src/index.ts{% endif %}"
   - "{% if type != 'node' %}/src/index.test.ts{% endif %}"
-  - "{% if type != 'node' %}/src/errors.ts{% endif %}"
-  - "{% if type != 'node' %}/src/errors.test.ts{% endif %}"
   # Exclude observability bootstrap when the root project has neither web app
   # nor error tracking enabled. Monorepo subpackages declare their own status
   # via `web_app: true` / `error_tracking: true` on the subpackages entry;

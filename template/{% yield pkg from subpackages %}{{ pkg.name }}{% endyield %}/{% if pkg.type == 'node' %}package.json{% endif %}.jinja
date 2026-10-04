@@ -88,7 +88,9 @@
 {%- if pkg_has_spa %}
     "clsx": "2.1.1",
 {%- endif %}
+{%- if not pkg_has_spa or pkg_is_web_app %}
     "neverthrow": "8.2.0"{{ "," if pkg_has_spa else "" }}
+{%- endif %}
 {%- if pkg_has_spa %}
     "react": "19.2.8",
     "react-dom": "19.2.8",

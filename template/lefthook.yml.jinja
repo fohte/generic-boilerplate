@@ -84,12 +84,14 @@ pre-commit:
       run: pnpm exec eslint {staged_files}
 {%- endfor %}
 {%- endif %}
-{%- if has_rust %}
+{%- if has_rust or has_node %}
 
     ast-grep:
-      glob: '*.rs'
+      glob: '*.{js,ts,jsx,tsx,mjs,cjs,mts,cts,rs}'
       run: ast-grep scan {staged_files}
+{%- endif %}
 
+{%- if has_rust %}
     # Using glob instead of file_types because text/x-rust is not supported
     # by the mimetype library used by lefthook.
     # See: https://github.com/gabriel-vasile/mimetype/blob/master/supported_mimes.md

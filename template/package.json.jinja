@@ -67,11 +67,7 @@
     "@fohte/service-kit": "0.1.14",
     "@opentelemetry/api": "1.9.1",
 {%- endif %}
-    "neverthrow": "8.2.0"{{ "," if root_has_storybook else "" }}
-{%- if root_has_storybook %}
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
-{%- endif %}
+    "neverthrow": "8.2.0"
   },
 {%- endif %}
   "devDependencies": {
@@ -83,6 +79,8 @@
     "@storybook/addon-themes": "10.6.0",
     "@storybook/addon-vitest": "10.6.0",
     "@storybook/react-vite": "10.6.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
 {%- endif %}
 {%- if root_has_storybook_vrt %}
     "@storycap-testrun/browser": "3.1.1",
