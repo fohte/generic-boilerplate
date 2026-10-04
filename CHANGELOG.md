@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.11.9](https://github.com/fohte/generic-boilerplate/compare/v0.11.8...v0.11.9) (2026-10-04)
+
+
+### Features
+
+* **knip:** add production mode checks ([#748](https://github.com/fohte/generic-boilerplate/issues/748)) ([d80b5c2](https://github.com/fohte/generic-boilerplate/commit/d80b5c2971808302cb48c72396c982c1bc8d4cfe))
+* **template:** stop generating unused BoundaryError ([#745](https://github.com/fohte/generic-boilerplate/issues/745)) ([ba0ffa1](https://github.com/fohte/generic-boilerplate/commit/ba0ffa17853c7d3705630cbdc05952bca38d6875))
+
+
+### Bug Fixes
+
+* **ci:** trigger CI jobs on delete-only changes ([#747](https://github.com/fohte/generic-boilerplate/issues/747)) ([8e5e79b](https://github.com/fohte/generic-boilerplate/commit/8e5e79bda5e1a3432730d3d35fb957b33db3db0a))
+* **db:** normalize hyphens to underscores in PostgreSQL identifiers ([#742](https://github.com/fohte/generic-boilerplate/issues/742)) ([ba0ed2e](https://github.com/fohte/generic-boilerplate/commit/ba0ed2edcfd9b32669bbb41534249e42def92958))
+* **release-please:** prevent race conditions from concurrent release runs ([#746](https://github.com/fohte/generic-boilerplate/issues/746)) ([cc7f85b](https://github.com/fohte/generic-boilerplate/commit/cc7f85b12820535ed6454f1281d78127bfbe8455))
+* **template:** detect unused exports and dependencies in SPA with knip ([#743](https://github.com/fohte/generic-boilerplate/issues/743)) ([807285b](https://github.com/fohte/generic-boilerplate/commit/807285baea4c9a543d650ea944388972941db534))
+
 ## [0.11.8](https://github.com/fohte/generic-boilerplate/compare/v0.11.7...v0.11.8) (2026-10-03)
 
 
