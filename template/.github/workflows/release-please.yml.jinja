@@ -16,6 +16,10 @@ name: release-please
 
 jobs:
   release-please:
+    concurrency:
+      group: release-please-{% raw %}${{ github.repository }}{% endraw %}
+      cancel-in-progress: false
+      queue: max
 {%- if release_binary %}
     if: github.event_name != 'workflow_dispatch'
 {%- endif %}
