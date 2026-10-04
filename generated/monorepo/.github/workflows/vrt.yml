@@ -125,7 +125,7 @@ jobs:
         with:
           package-dir: frontend
           screenshots-dir: __screenshots__/desktop
-          r2-bucket: monorepo-vrt
+          r2-bucket: sample-project-vrt
           github-token: ${{ secrets.GITHUB_TOKEN }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

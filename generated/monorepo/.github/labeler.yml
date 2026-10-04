@@ -1,6 +1,6 @@
 scope/frontend:
   - changed-files:
       - any-glob-to-any-file: frontend/**
-scope/backend:
+scope/api-service:
   - changed-files:
-      - any-glob-to-any-file: backend/**
+      - any-glob-to-any-file: api-service/**

@@ -73,13 +73,13 @@ pre-commit:
     # See: https://github.com/gabriel-vasile/mimetype/blob/master/supported_mimes.md
     cargo-fmt:
       glob: '*.rs'
-      root: 'backend/'
+      root: 'api-service/'
       run: cargo fmt
       stage_fixed: true
 
     cargo-clippy:
       glob: '*.rs'
-      root: 'backend/'
+      root: 'api-service/'
       run: cargo clippy --all-targets -- -D warnings
 
 commit-msg:

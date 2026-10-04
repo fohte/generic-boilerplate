@@ -18,9 +18,9 @@ case "$environment" in
 esac
 
 if [ "$package" = "." ]; then
-  database_name="{{ project_slug }}_$environment"
+  database_name="{{ db_identifier }}_$environment"
 else
-  database_name="{{ project_slug }}_${package}_$environment"
+  database_name="{{ db_identifier }}_${package//-/_}_$environment"
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -36,4 +36,4 @@ case "$port" in
   '' | *[!0-9]*) port=0 ;;
 esac
 
-printf 'postgresql://{{ project_slug }}:{{ project_slug }}@127.0.0.1:%s/%s\n' "$port" "$database_name"
+printf 'postgresql://{{ db_identifier }}:{{ db_identifier }}@127.0.0.1:%s/%s\n' "$port" "$database_name"

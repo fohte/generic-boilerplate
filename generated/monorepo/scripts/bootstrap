@@ -46,4 +46,4 @@ fi
 (cd frontend && pnpm_install)
 
 # Fetch Rust dependencies
-cargo fetch --manifest-path backend/Cargo.toml
+cargo fetch --manifest-path api-service/Cargo.toml
