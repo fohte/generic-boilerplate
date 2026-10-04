@@ -79,13 +79,13 @@ teardown() {
 
   [ "$status" -eq 0 ]
   frontend_db="$(sed -nE 's/^compose exec -T db createdb --username sample_project (sample_project_doc_frontend_[0-9]+)$/\1/p' "$DOCKER_LOG")"
-  backend_db="$(sed -nE 's/^compose exec -T db createdb --username sample_project (sample_project_doc_api_service_[0-9]+)$/\1/p' "$DOCKER_LOG")"
+  api_service_db="$(sed -nE 's/^compose exec -T db createdb --username sample_project (sample_project_doc_api_service_[0-9]+)$/\1/p' "$DOCKER_LOG")"
   [ -n "$frontend_db" ]
-  [ -n "$backend_db" ]
+  [ -n "$api_service_db" ]
   grep -Fxq "pnpm|$MONOREPO_DIR/frontend|run db:migrate|postgresql://sample_project:sample_project@127.0.0.1:54321/$frontend_db" "$COMMAND_LOG"
-  grep -Fxq "cargo|$MONOREPO_DIR/api-service|run -q -p migration -- up|postgresql://sample_project:sample_project@127.0.0.1:54321/$backend_db" "$COMMAND_LOG"
+  grep -Fxq "cargo|$MONOREPO_DIR/api-service|run -q -p migration -- up|postgresql://sample_project:sample_project@127.0.0.1:54321/$api_service_db" "$COMMAND_LOG"
   grep -Fxq "compose exec -T db dropdb --username sample_project --if-exists --force $frontend_db" "$DOCKER_LOG"
-  grep -Fxq "compose exec -T db dropdb --username sample_project --if-exists --force $backend_db" "$DOCKER_LOG"
+  grep -Fxq "compose exec -T db dropdb --username sample_project --if-exists --force $api_service_db" "$DOCKER_LOG"
 }
 
 @test "db-doc preserves migration failure status and removes the database" {

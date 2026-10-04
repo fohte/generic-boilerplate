@@ -68,6 +68,7 @@ teardown() {
   compose_file="$REPO_ROOT/generated/node-db/compose.yaml"
 
   grep -Fxq 'name: node-db-infra' "$compose_file"
+  grep -Fxq '      # Existing data directories keep initialized roles and databases when these values change.' "$compose_file"
   grep -Fxq "      POSTGRES_USER: 'node_db'" "$compose_file"
   grep -Fxq "      POSTGRES_PASSWORD: 'node_db'" "$compose_file"
   grep -Fxq "      test: ['CMD-SHELL', 'pg_isready -U node_db -d postgres']" "$compose_file"

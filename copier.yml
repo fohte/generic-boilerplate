@@ -440,6 +440,11 @@ project_slug:
   default: "{{ project_name | replace('.', '-') | replace('_', '-') | replace('@', '') | replace('/', '-') | lower }}"
   when: false
 
+db_identifier:
+  type: str
+  default: "{{ project_slug | replace('-', '_') }}"
+  when: false
+
 node_pkgs:
   type: yaml
   default: "{{ subpackages | default([]) | selectattr('type', 'equalto', 'node') | list }}"
