@@ -4,13 +4,12 @@
     subpackage render keys off its own `web_app`/`error_tracking` flags
     instead of the root's.
 
-    The `(pkg.web_app | default(false) or pkg.error_tracking | default(false))
-    and pkg.tests | default(true)` half of this condition must stay in sync
-    with the same gate on the subpackage bootstrap.ts filename, on
-    `pkg_has_error_tracking` in the subpackage package.json template, and on
-    the subpackage pnpm-workspace.yaml's protobufjs allowBuilds gate — all
-    four decide whether that subpackage gets the observability wiring. -#}
-{%- set is_bootstrap_wired = (pkg is defined and (pkg.web_app | default(false) or pkg.error_tracking | default(false)) and (pkg.tests | default(true))) or (pkg is not defined and type == 'node' and (is_web_app | default(false) or error_tracking | default(false))) -%}
+    The Node observability gate must stay in sync with the subpackage
+    bootstrap.ts filename, `pkg_has_error_tracking` in package.json,
+    error_tracking_pkgs in copier.yml, and the protobufjs allowBuilds gate.
+    Browser-only SPAs do not use the Node bootstrap. -#}
+{%- set pkg_has_node_observability = (pkg is defined and (pkg.web_app | default(false) or pkg.error_tracking | default(false)) and (pkg.tests | default(true)) and (not (pkg.spa | default(false)) or pkg.web_app | default(false))) -%}
+{%- set is_bootstrap_wired = (pkg is defined and pkg_has_node_observability) or (pkg is not defined and type == 'node' and (is_web_app | default(false) or error_tracking | default(false))) -%}
 {%- if is_bootstrap_wired -%}
 import '#bootstrap'
 

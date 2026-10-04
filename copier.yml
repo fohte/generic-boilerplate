@@ -318,7 +318,9 @@ subpackages:
                           defaults to 8080.
       error_tracking: true -- enable Sentry error tracking wiring
                           (dependencies + bootstrap import) for a node
-                          subpackage independent of web_app.
+                          subpackage independent of web_app. For an SPA, this
+                          requires web_app: true because browser-only packages
+                          do not use the Node.js bootstrap.
       db: true           -- provide an isolated local PostgreSQL database for
                           this subpackage, with separate dev and test DBs.
       db_migrate: ...    -- override the migration command used to build the
@@ -495,8 +497,10 @@ error_tracking_pkgs:
   type: yaml
   # Mirrors web_app_pkgs: `tests: false` collapses the src/ segment and
   # skips the bootstrap.ts emission for that subpackage, so a `tests: false`
-  # pkg must not appear here even if `error_tracking: true`.
-  default: "{{ subpackages | default([]) | selectattr('error_tracking', 'defined') | selectattr('error_tracking', 'equalto', true) | rejectattr('tests', 'equalto', false) | list }}"
+  # pkg must not appear here even if `error_tracking: true`. Browser-only SPAs
+  # also omit Node.js observability wiring unless they expose a Node web app.
+  default: >-
+    {{ (subpackages | default([]) | selectattr('error_tracking', 'defined') | selectattr('error_tracking', 'equalto', true) | rejectattr('tests', 'equalto', false) | rejectattr('spa', 'equalto', true) | list) + (subpackages | default([]) | selectattr('error_tracking', 'defined') | selectattr('error_tracking', 'equalto', true) | rejectattr('tests', 'equalto', false) | selectattr('spa', 'equalto', true) | selectattr('web_app', 'equalto', true) | list) }}
   when: false
 
 vrt_pkgs:

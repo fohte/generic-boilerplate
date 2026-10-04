@@ -9,4 +9,4 @@ note: |
 rule:
   all:
     - kind: comment
-    - regex: '(?s)^/\*\*.*@(internal|public|beta|alias)\b'
+    - regex: '(?s)^/\*\*(?:[^\n]*\n)*[ \t]*\*?[ \t]*@(internal|public|beta|alias)\b'

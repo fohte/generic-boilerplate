@@ -9,6 +9,12 @@ valid:
   - |
     /** @internalized is not the knip tag. */
     export const Value = () => <div>allowed longer tag</div>;
+  - |
+    /** Contact ops@internal.example.com for access. */
+    export const EmailValue = () => <div>allowed email address</div>;
+  - |
+    /** Use @public as an example tag name. */
+    export const MentionValue = () => <div>allowed inline mention</div>;
 invalid:
   - |
     /** @internal */

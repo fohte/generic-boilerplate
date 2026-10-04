@@ -9,7 +9,7 @@ subpackages:
   - name: frontend
     type: node
     spa: true
-    error_tracking: false
+    error_tracking: true
     vrt: true
   - name: backend
     type: node

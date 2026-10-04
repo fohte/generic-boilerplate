@@ -6,34 +6,34 @@ snapshots:
      */
     export const value = 'public';
   : labels:
-    - source: |-
-        /**
-         * @public
-         */
-      style: primary
-      start: 0
-      end: 18
+      - source: |-
+          /**
+           * @public
+           */
+        style: primary
+        start: 0
+        end: 18
   ? |
     /** @alias previousName */
     export const value = 'alias';
   : labels:
-    - source: /** @alias previousName */
-      style: primary
-      start: 0
-      end: 26
+      - source: /** @alias previousName */
+        style: primary
+        start: 0
+        end: 26
   ? |
     /** @beta */
     export const value = 'beta';
   : labels:
-    - source: /** @beta */
-      style: primary
-      start: 0
-      end: 12
+      - source: /** @beta */
+        style: primary
+        start: 0
+        end: 12
   ? |
     /** @internal */
     export const value = 'internal';
   : labels:
-    - source: /** @internal */
-      style: primary
-      start: 0
-      end: 16
+      - source: /** @internal */
+        style: primary
+        start: 0
+        end: 16
