@@ -41,6 +41,8 @@ abstract class BoundaryError extends Error {
 class DataSourceBoundaryError extends BoundaryError {}
 ```
 
+When `error_tracking` or `is_web_app` is enabled, call `captureWithFingerprint` from `@fohte/service-kit/observability` immediately before rethrowing to give the error a stable Sentry fingerprint.
+
 Catch the exception, wrap it in the boundary-specific subclass, and rethrow it — `no-restricted-syntax` bans `try`/`throw` as separate selectors, so both the `try` and the `throw` need their own `eslint-disable-next-line no-restricted-syntax` comment explaining why.
 
 ## Storybook
