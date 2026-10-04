@@ -12,4 +12,4 @@ jobs:
       statuses: write
     uses: fohte/storybook-vrt-workflows/.github/workflows/vrt-approval.yml@9a6313f4cbaba30b44a6a910e0656d5876743bf3 # v0.2.0
     with:
-      r2-bucket: monorepo-vrt
+      r2-bucket: sample-project-vrt

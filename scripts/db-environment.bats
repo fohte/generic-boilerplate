@@ -59,9 +59,18 @@ teardown() {
 
   [ "$status" -eq 0 ]
   [ "$(grep -Fxc 'compose port db 5432' "$DOCKER_LOG")" -eq 2 ]
-  [ "$(grep -Fxc 'compose exec -T db psql --username node-db --dbname postgres --set ON_ERROR_STOP=1 --set db_name=node-db_dev' "$DOCKER_LOG")" -eq 1 ]
-  [ "$(grep -Fxc 'compose exec -T db psql --username node-db --dbname postgres --set ON_ERROR_STOP=1 --set db_name=node-db_test' "$DOCKER_LOG")" -eq 1 ]
+  [ "$(grep -Fxc 'compose exec -T db psql --username node_db --dbname postgres --set ON_ERROR_STOP=1 --set db_name=node_db_dev' "$DOCKER_LOG")" -eq 1 ]
+  [ "$(grep -Fxc 'compose exec -T db psql --username node_db --dbname postgres --set ON_ERROR_STOP=1 --set db_name=node_db_test' "$DOCKER_LOG")" -eq 1 ]
   assert_database_sql_calls 2
+}
+
+@test "compose uses underscore database credentials and keeps the infra project name" {
+  compose_file="$REPO_ROOT/generated/node-db/compose.yaml"
+
+  grep -Fxq 'name: node-db-infra' "$compose_file"
+  grep -Fxq "      POSTGRES_USER: 'node_db'" "$compose_file"
+  grep -Fxq "      POSTGRES_PASSWORD: 'node_db'" "$compose_file"
+  grep -Fxq "      test: ['CMD-SHELL', 'pg_isready -U node_db -d postgres']" "$compose_file"
 }
 
 @test "db-up creates development and test databases for a DB subpackage" {
@@ -69,8 +78,8 @@ teardown() {
 
   [ "$status" -eq 0 ]
   [ "$(grep -Fxc 'compose port db 5432' "$DOCKER_LOG")" -eq 4 ]
-  for database_name in monorepo_backend_dev monorepo_backend_test monorepo_frontend_dev monorepo_frontend_test; do
-    [ "$(grep -Fxc "compose exec -T db psql --username monorepo --dbname postgres --set ON_ERROR_STOP=1 --set db_name=$database_name" "$DOCKER_LOG")" -eq 1 ]
+  for database_name in sample_project_api_service_dev sample_project_api_service_test sample_project_frontend_dev sample_project_frontend_test; do
+    [ "$(grep -Fxc "compose exec -T db psql --username sample_project --dbname postgres --set ON_ERROR_STOP=1 --set db_name=$database_name" "$DOCKER_LOG")" -eq 1 ]
   done
   assert_database_sql_calls 4
 }
@@ -81,7 +90,7 @@ teardown() {
   run "$REPO_ROOT/generated/node-db/scripts/db-url" . dev
 
   [ "$status" -eq 0 ]
-  [ "$output" = "postgresql://node-db:node-db@127.0.0.1:54321/node-db_dev" ]
+  [ "$output" = "postgresql://node_db:node_db@127.0.0.1:54321/node_db_dev" ]
 }
 
 @test "db-url returns port zero when PostgreSQL is stopped" {
@@ -90,21 +99,21 @@ teardown() {
   run "$REPO_ROOT/generated/node-db/scripts/db-url" . test
 
   [ "$status" -eq 0 ]
-  [ "$output" = "postgresql://node-db:node-db@127.0.0.1:0/node-db_test" ]
+  [ "$output" = "postgresql://node_db:node_db@127.0.0.1:0/node_db_test" ]
 }
 
 @test "multiple DB subpackage mise configs resolve their own URLs" {
   export MOCK_PORT=down
 
-  run bash -c 'mise -C "$1" env --json | jq -r "[.DATABASE_URL, .TEST_DATABASE_URL] | @tsv"' _ "$REPO_ROOT/generated/monorepo/backend"
+  run bash -c 'mise -C "$1" env --json | jq -r "[.DATABASE_URL, .TEST_DATABASE_URL] | @tsv"' _ "$REPO_ROOT/generated/monorepo/api-service"
 
   [ "$status" -eq 0 ]
-  [ "$output" = $'postgresql://monorepo:monorepo@127.0.0.1:0/monorepo_backend_dev\tpostgresql://monorepo:monorepo@127.0.0.1:0/monorepo_backend_test' ]
+  [ "$output" = $'postgresql://sample_project:sample_project@127.0.0.1:0/sample_project_api_service_dev\tpostgresql://sample_project:sample_project@127.0.0.1:0/sample_project_api_service_test' ]
 
   run bash -c 'mise -C "$1" env --json | jq -r "[.DATABASE_URL, .TEST_DATABASE_URL] | @tsv"' _ "$REPO_ROOT/generated/monorepo/frontend"
 
   [ "$status" -eq 0 ]
-  [ "$output" = $'postgresql://monorepo:monorepo@127.0.0.1:0/monorepo_frontend_dev\tpostgresql://monorepo:monorepo@127.0.0.1:0/monorepo_frontend_test' ]
+  [ "$output" = $'postgresql://sample_project:sample_project@127.0.0.1:0/sample_project_frontend_dev\tpostgresql://sample_project:sample_project@127.0.0.1:0/sample_project_frontend_test' ]
 }
 
 @test "root mise omits ambiguous URLs when multiple packages enable DB" {
@@ -120,13 +129,13 @@ teardown() {
   run bash -c 'mise -C "$1" env --json | jq -r "[.DATABASE_URL, .TEST_DATABASE_URL] | @tsv"' _ "$REPO_ROOT/generated/node-db"
 
   [ "$status" -eq 0 ]
-  [ "$output" = $'postgresql://node-db:node-db@127.0.0.1:0/node-db_dev\tpostgresql://node-db:node-db@127.0.0.1:0/node-db_test' ]
+  [ "$output" = $'postgresql://node_db:node_db@127.0.0.1:0/node_db_dev\tpostgresql://node_db:node_db@127.0.0.1:0/node_db_test' ]
 }
 
 @test "database URL override files are gitignored where mise loads them" {
   for gitignore in \
     "$REPO_ROOT/generated/monorepo/.gitignore" \
-    "$REPO_ROOT/generated/monorepo/backend/.gitignore" \
+    "$REPO_ROOT/generated/monorepo/api-service/.gitignore" \
     "$REPO_ROOT/generated/monorepo/frontend/.gitignore"; do
     grep -Fxq '.env' "$gitignore"
     grep -Fxq '.env.local' "$gitignore"
@@ -145,5 +154,5 @@ teardown() {
 }
 
 @test "db-doc workflow includes a package-specific schema path" {
-  grep -Fxq '            backend/db-schema/**' "$REPO_ROOT/generated/monorepo/.github/workflows/test.yml"
+  grep -Fxq '            api-service/db-schema/**' "$REPO_ROOT/generated/monorepo/.github/workflows/test.yml"
 }

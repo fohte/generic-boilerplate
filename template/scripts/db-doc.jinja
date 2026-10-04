@@ -14,7 +14,7 @@ drop_database() {
   fi
 
   docker compose exec -T db dropdb \
-    --username "{{ project_slug }}" \
+    --username "{{ project_slug | replace('-', '_') }}" \
     --if-exists \
     --force \
     "$current_database_name"
@@ -59,13 +59,13 @@ run_db_doc() {
   fi
 
   if [[ "$package" == "." ]]; then
-    current_database_name="{{ project_slug }}_doc_$$"
+    current_database_name="{{ project_slug | replace('-', '_') }}_doc_$$"
   else
-    current_database_name="{{ project_slug }}_doc_${package}_$$"
+    current_database_name="{{ project_slug | replace('-', '_') }}_doc_${package//-/_}_$$"
   fi
 
   docker compose exec -T db createdb \
-    --username "{{ project_slug }}" \
+    --username "{{ project_slug | replace('-', '_') }}" \
     "$current_database_name"
 
   local database_url

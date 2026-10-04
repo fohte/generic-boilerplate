@@ -14,7 +14,7 @@ drop_database() {
   fi
 
   docker compose exec -T db dropdb \
-    --username "monorepo" \
+    --username "sample_project" \
     --if-exists \
     --force \
     "$current_database_name"
@@ -59,13 +59,13 @@ run_db_doc() {
   fi
 
   if [[ "$package" == "." ]]; then
-    current_database_name="monorepo_doc_$$"
+    current_database_name="sample_project_doc_$$"
   else
-    current_database_name="monorepo_doc_${package}_$$"
+    current_database_name="sample_project_doc_${package//-/_}_$$"
   fi
 
   docker compose exec -T db createdb \
-    --username "monorepo" \
+    --username "sample_project" \
     "$current_database_name"
 
   local database_url
@@ -86,6 +86,6 @@ run_db_doc 'frontend' 'node' << 'DB_MIGRATE'
 pnpm run db:migrate
 DB_MIGRATE
 
-run_db_doc 'backend' 'rust' << 'DB_MIGRATE'
+run_db_doc 'api-service' 'rust' << 'DB_MIGRATE'
 cargo run -q -p migration -- up
 DB_MIGRATE

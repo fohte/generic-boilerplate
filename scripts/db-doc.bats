@@ -16,8 +16,8 @@ setup() {
   mv "$TEST_DIR/node-db-package.json" "$NODE_DB_DIR/package.json"
   jq '.scripts["db:migrate"] = "true"' "$MONOREPO_DIR/frontend/package.json" > "$TEST_DIR/frontend-package.json"
   mv "$TEST_DIR/frontend-package.json" "$MONOREPO_DIR/frontend/package.json"
-  mkdir -p "$MONOREPO_DIR/backend/migration"
-  touch "$MONOREPO_DIR/backend/migration/Cargo.toml"
+  mkdir -p "$MONOREPO_DIR/api-service/migration"
+  touch "$MONOREPO_DIR/api-service/migration/Cargo.toml"
 
   export DOCKER_LOG="$TEST_DIR/docker.log"
   export COMMAND_LOG="$TEST_DIR/command.log"
@@ -59,17 +59,17 @@ teardown() {
 
   [ "$status" -eq 0 ]
   grep -Fxq 'compose up -d --wait db' "$DOCKER_LOG"
-  database_name="$(sed -nE 's/^compose exec -T db createdb --username node-db (node-db_doc_[0-9]+)$/\1/p' "$DOCKER_LOG")"
+  database_name="$(sed -nE 's/^compose exec -T db createdb --username node_db (node_db_doc_[0-9]+)$/\1/p' "$DOCKER_LOG")"
   [ -n "$database_name" ]
-  grep -Fxq "compose exec -T db dropdb --username node-db --if-exists --force $database_name" "$DOCKER_LOG"
+  grep -Fxq "compose exec -T db dropdb --username node_db --if-exists --force $database_name" "$DOCKER_LOG"
 }
 
 @test "db-doc passes the disposable DSN to tbls doc and lint" {
   run "$NODE_DB_DIR/scripts/db-doc"
 
   [ "$status" -eq 0 ]
-  database_name="$(sed -nE 's/^compose exec -T db createdb --username node-db (node-db_doc_[0-9]+)$/\1/p' "$DOCKER_LOG")"
-  dsn="postgresql://node-db:node-db@127.0.0.1:54321/$database_name?sslmode=disable"
+  database_name="$(sed -nE 's/^compose exec -T db createdb --username node_db (node_db_doc_[0-9]+)$/\1/p' "$DOCKER_LOG")"
+  dsn="postgresql://node_db:node_db@127.0.0.1:54321/$database_name?sslmode=disable"
   grep -Fxq "tbls|$NODE_DB_DIR|doc --rm-dist -c .tbls.yml|$dsn" "$COMMAND_LOG"
   grep -Fxq "tbls|$NODE_DB_DIR|lint -c .tbls.yml|$dsn" "$COMMAND_LOG"
 }
@@ -78,14 +78,14 @@ teardown() {
   run "$MONOREPO_DIR/scripts/db-doc"
 
   [ "$status" -eq 0 ]
-  frontend_db="$(sed -nE 's/^compose exec -T db createdb --username monorepo (monorepo_doc_frontend_[0-9]+)$/\1/p' "$DOCKER_LOG")"
-  backend_db="$(sed -nE 's/^compose exec -T db createdb --username monorepo (monorepo_doc_backend_[0-9]+)$/\1/p' "$DOCKER_LOG")"
+  frontend_db="$(sed -nE 's/^compose exec -T db createdb --username sample_project (sample_project_doc_frontend_[0-9]+)$/\1/p' "$DOCKER_LOG")"
+  backend_db="$(sed -nE 's/^compose exec -T db createdb --username sample_project (sample_project_doc_api_service_[0-9]+)$/\1/p' "$DOCKER_LOG")"
   [ -n "$frontend_db" ]
   [ -n "$backend_db" ]
-  grep -Fxq "pnpm|$MONOREPO_DIR/frontend|run db:migrate|postgresql://monorepo:monorepo@127.0.0.1:54321/$frontend_db" "$COMMAND_LOG"
-  grep -Fxq "cargo|$MONOREPO_DIR/backend|run -q -p migration -- up|postgresql://monorepo:monorepo@127.0.0.1:54321/$backend_db" "$COMMAND_LOG"
-  grep -Fxq "compose exec -T db dropdb --username monorepo --if-exists --force $frontend_db" "$DOCKER_LOG"
-  grep -Fxq "compose exec -T db dropdb --username monorepo --if-exists --force $backend_db" "$DOCKER_LOG"
+  grep -Fxq "pnpm|$MONOREPO_DIR/frontend|run db:migrate|postgresql://sample_project:sample_project@127.0.0.1:54321/$frontend_db" "$COMMAND_LOG"
+  grep -Fxq "cargo|$MONOREPO_DIR/api-service|run -q -p migration -- up|postgresql://sample_project:sample_project@127.0.0.1:54321/$backend_db" "$COMMAND_LOG"
+  grep -Fxq "compose exec -T db dropdb --username sample_project --if-exists --force $frontend_db" "$DOCKER_LOG"
+  grep -Fxq "compose exec -T db dropdb --username sample_project --if-exists --force $backend_db" "$DOCKER_LOG"
 }
 
 @test "db-doc preserves migration failure status and removes the database" {
@@ -94,8 +94,8 @@ teardown() {
   run "$NODE_DB_DIR/scripts/db-doc"
 
   [ "$status" -eq 17 ]
-  database_name="$(sed -nE 's/^compose exec -T db createdb --username node-db (node-db_doc_[0-9]+)$/\1/p' "$DOCKER_LOG")"
-  grep -Fxq "compose exec -T db dropdb --username node-db --if-exists --force $database_name" "$DOCKER_LOG"
+  database_name="$(sed -nE 's/^compose exec -T db createdb --username node_db (node_db_doc_[0-9]+)$/\1/p' "$DOCKER_LOG")"
+  grep -Fxq "compose exec -T db dropdb --username node_db --if-exists --force $database_name" "$DOCKER_LOG"
 }
 
 @test "db-doc skips packages without default migration setup" {
@@ -110,11 +110,11 @@ teardown() {
 }
 
 @test "db-doc skips Rust packages without a default migration crate" {
-  rm "$MONOREPO_DIR/backend/migration/Cargo.toml"
+  rm "$MONOREPO_DIR/api-service/migration/Cargo.toml"
 
   run "$MONOREPO_DIR/scripts/db-doc"
 
   [ "$status" -eq 0 ]
-  ! grep -Fq 'createdb --username monorepo monorepo_doc_backend_' "$DOCKER_LOG"
-  ! grep -Fq "cargo|$MONOREPO_DIR/backend|" "$COMMAND_LOG"
+  ! grep -Fq 'createdb --username sample_project sample_project_doc_api_service_' "$DOCKER_LOG"
+  ! grep -Fq "cargo|$MONOREPO_DIR/api-service|" "$COMMAND_LOG"
 }
