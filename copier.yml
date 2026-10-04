@@ -119,6 +119,7 @@ _exclude:
   - '{% if not use_release_please %}.release-please-manifest.json{% endif %}'
   - '{% if not use_release_please %}.github/workflows/release-please.yml{% endif %}'
   - '{% if not use_release_please %}.github/workflows/test-release-please.yml{% endif %}'
+  - '{% if not use_release_please %}.github/actionlint.yaml{% endif %}'
   - '{% if not pr_title_check %}.github/workflows/pr-title-check.yml{% endif %}'
   # Exclude local database setup when no root or subpackage opts in.
   - '{% if not has_db %}compose.yaml{% endif %}'
