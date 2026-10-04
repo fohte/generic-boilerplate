@@ -12,12 +12,12 @@ setup() {
     "$REPO_ROOT/generated"
   )
 
-  run rg -l 'tj-actions/changed-files' "${workflow_dirs[@]}"
+  run git -C "$REPO_ROOT" grep -l 'tj-actions/changed-files' -- "${workflow_dirs[@]}"
   [ "$status" -eq 0 ]
 
-  run rg -n 'outputs\.(any_changed|all_changed_files)\b' "${workflow_dirs[@]}"
+  run git -C "$REPO_ROOT" grep -nE 'outputs\.(any_changed|all_changed_files)([^[:alnum:]_]|$)' -- "${workflow_dirs[@]}"
   [ "$status" -eq 1 ]
 
-  run rg -n 'outputs\.(any_modified|all_modified_files)\b' "${workflow_dirs[@]}"
+  run git -C "$REPO_ROOT" grep -nE 'outputs\.(any_modified|all_modified_files)([^[:alnum:]_]|$)' -- "${workflow_dirs[@]}"
   [ "$status" -eq 0 ]
 }
