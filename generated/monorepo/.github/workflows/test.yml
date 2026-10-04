@@ -98,11 +98,11 @@ jobs:
             .github/workflows/test.yml
 
       - name: Generate database documentation
-        if: steps.db-doc-changes.outputs.any_changed == 'true'
+        if: steps.db-doc-changes.outputs.any_modified == 'true'
         run: mise run db:doc
 
       - name: Stage generated database documentation
-        if: steps.db-doc-changes.outputs.any_changed == 'true'
+        if: steps.db-doc-changes.outputs.any_modified == 'true'
         run: git add -- frontend/docs/db backend/docs/db
 
       - name: Run lefthook
@@ -137,9 +137,9 @@ jobs:
   detect-changes:
     runs-on: ubuntu-slim
     outputs:
-      frontend: ${{ steps.changes-frontend.outputs.any_changed }}
-      backend: ${{ steps.changes-backend.outputs.any_changed }}
-      workflow: ${{ steps.changes-workflow.outputs.any_changed }}
+      frontend: ${{ steps.changes-frontend.outputs.any_modified }}
+      backend: ${{ steps.changes-backend.outputs.any_modified }}
+      workflow: ${{ steps.changes-workflow.outputs.any_modified }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
