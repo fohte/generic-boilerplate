@@ -14,7 +14,6 @@
     }{{ "," if spa_pkgs else "" }}
 {%- for pkg in spa_pkgs %}
     "{{ pkg.name }}": {
-      "entry": ["src/lib/**"]{{ "," if pkg.vrt | default(false) else "" }}
 {%- if pkg.vrt | default(false) %}
       "ignoreDependencies": [
         "reg-suit",
