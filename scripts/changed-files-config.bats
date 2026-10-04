@@ -5,29 +5,19 @@ setup() {
   REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 }
 
-@test "workflow gates use outputs that include deleted files" {
-  local workflow
-  for workflow in \
-    .github/workflows/validate-template.yml \
-    template/.github/workflows/vrt.yml.jinja \
-    template/.github/workflows/storybook.yml.jinja \
-    template/.github/workflows/_partials/monorepo-unit-tests.yml.jinja \
-    template/.github/workflows/test.yml.jinja; do
-    run rg -q 'outputs\.any_modified' "$REPO_ROOT/$workflow"
-    [ "$status" -eq 0 ]
-    run rg -q 'outputs\.any_changed' "$REPO_ROOT/$workflow"
-    [ "$status" -eq 1 ]
-  done
-}
+@test "changed-files workflow gates use outputs that include deleted files" {
+  local workflow_dirs=(
+    "$REPO_ROOT/.github/workflows"
+    "$REPO_ROOT/template/.github/workflows"
+    "$REPO_ROOT/generated"
+  )
 
-@test "workspace test matrix includes deleted files" {
-  run rg -q 'outputs\.all_modified_files' \
-    "$REPO_ROOT/template/.github/workflows/_partials/monorepo-unit-tests.yml.jinja"
-
+  run rg -l 'tj-actions/changed-files' "${workflow_dirs[@]}"
   [ "$status" -eq 0 ]
 
-  run rg -q 'outputs\.all_changed_files' \
-    "$REPO_ROOT/template/.github/workflows/_partials/monorepo-unit-tests.yml.jinja"
-
+  run rg -n 'outputs\.(any_changed|all_changed_files)\b' "${workflow_dirs[@]}"
   [ "$status" -eq 1 ]
+
+  run rg -n 'outputs\.(any_modified|all_modified_files)\b' "${workflow_dirs[@]}"
+  [ "$status" -eq 0 ]
 }
