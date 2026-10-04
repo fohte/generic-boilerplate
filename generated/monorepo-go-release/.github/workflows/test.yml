@@ -243,3 +243,6 @@ jobs:
 
       - name: Run knip (web-client)
         run: cd "web-client" && pnpm exec knip
+
+      - name: Run knip in production mode (web-client)
+        run: cd "web-client" && pnpm exec knip --production

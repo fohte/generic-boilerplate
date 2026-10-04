@@ -334,6 +334,9 @@ jobs:
 
       - name: Run knip
         run: pnpm exec knip
+
+      - name: Run knip in production mode
+        run: pnpm exec knip --production
 {%- else %}
 {#- Non-workspace mode: each testable node subpackage is its own isolated
     pnpm project (own lockfile, own knip.json), so knip runs once per
@@ -362,6 +365,9 @@ jobs:
 
       - name: Run knip ({{ pkg.name }})
         run: cd "{{ pkg.name }}" && pnpm exec knip
+
+      - name: Run knip in production mode ({{ pkg.name }})
+        run: cd "{{ pkg.name }}" && pnpm exec knip --production
 {%- endfor %}
 {%- endif %}
 {%- endif %}

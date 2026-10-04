@@ -172,3 +172,6 @@ jobs:
 
       - name: Run knip
         run: pnpm exec knip
+
+      - name: Run knip in production mode
+        run: pnpm exec knip --production

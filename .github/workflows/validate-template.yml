@@ -187,6 +187,21 @@ jobs:
                 (cd "$dir" && pnpm exec knip)
               done
 
+      - name: Run knip in production mode
+        if: hashFiles(format('generated/{0}/**/knip.json', matrix.fixture)) != ''
+        working-directory: generated/${{ matrix.fixture }}
+        run: |
+          find . -name knip.json -not -path '*/node_modules/*' -print0 \
+            | while IFS= read -r -d '' cfg; do
+                dir="$(dirname "$cfg")"
+                (cd "$dir" && pnpm exec knip --production)
+              done
+
+      - name: Test ast-grep rules
+        if: hashFiles(format('generated/{0}/sgconfig.yml', matrix.fixture)) != ''
+        working-directory: generated/${{ matrix.fixture }}
+        run: ast-grep test
+
       - name: Run lefthook
         working-directory: generated/${{ matrix.fixture }}
         env:

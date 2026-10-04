@@ -8,12 +8,10 @@
     collapses the src/ segment). Keep the OTel/Sentry dependency block on the
     same gate so we never ship deps without the file that uses them. -#}
 {%- set pkg_is_web_app = (pkg.web_app | default(false)) and (pkg.tests | default(true)) -%}
-{#- error_tracking widens the OTel/Sentry dependency gate beyond web_app:
-    bootstrap.ts also emits for error_tracking-only subpackages (see the
-    bootstrap.ts filename template), so the deps must follow suit. Scripts
-    and the tsup/tsx dev deps stay on pkg_is_web_app alone — those are
-    HTTP-server-specific. -#}
-{%- set pkg_has_error_tracking = ((pkg.web_app | default(false)) or (pkg.error_tracking | default(false))) and (pkg.tests | default(true)) -%}
+{#- error_tracking widens the OTel/Sentry dependency gate beyond web_app.
+    Browser-only SPAs do not use the Node bootstrap, so they receive this
+    wiring only when they also define a Node web_app. -#}
+{%- set pkg_has_error_tracking = ((pkg.web_app | default(false)) or (pkg.error_tracking | default(false))) and (pkg.tests | default(true)) and (not (pkg.spa | default(false)) or (pkg.web_app | default(false))) -%}
 {#- vrt is meaningless without spa (it captures Storybook); keep this gate in
     sync with the vitest.screenshot.config.ts/.storybook/vitest.setup.screenshot.ts
     filename templates and vrt_pkgs in copier.yml. -#}
@@ -54,7 +52,7 @@
 {%- if has_tests %}
     "test": "conc pnpm:test:type pnpm:test:unit",
     "test:type": "tsc --noEmit",
-    "test:unit": "vitest run"{{ "," if (pkg_is_web_app or pkg_has_spa) else "" }}
+    "test:unit": "vitest run{{ ' --passWithNoTests' if pkg_has_spa else '' }}"{{ "," if (pkg_is_web_app or pkg_has_spa) else "" }}
 {%- endif %}
 {%- if pkg_is_web_app %}
     "build": "tsup",
@@ -88,7 +86,9 @@
 {%- if pkg_has_spa %}
     "clsx": "2.1.1",
 {%- endif %}
+{%- if not pkg_has_spa or pkg_is_web_app %}
     "neverthrow": "8.2.0"{{ "," if pkg_has_spa else "" }}
+{%- endif %}
 {%- if pkg_has_spa %}
     "react": "19.2.8",
     "react-dom": "19.2.8",
