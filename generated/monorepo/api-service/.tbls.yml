@@ -1,4 +1,4 @@
-name: "sample-project api-service"
+name: 'sample-project api-service'
 docPath: docs/db
 # Fixed names keep the disposable database name out of generated headings.
 # schema.json includes architecture-specific database_version values.
