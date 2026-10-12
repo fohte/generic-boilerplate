@@ -78,13 +78,15 @@ Group by decision axis. Use one H4 per axis, even if there is only one axis. Eac
 {%- endif %}
 
 </details>
+{%- if use_release_please %}
 
 ### Breaking changes
 
 <!--
 {% if repo_language == 'ja' -%}
-互換性を壊す変更を含むときのみ。非互換の内容と、利用者が取るべき対応を書く。breaking change がなければこのセクション (見出しごと) を削除。
+semver で major bump が必要な変更を含むときのみ。リリースして配布する成果物の公開インターフェースが変わり、利用者がコード・設定・使い方を変えないと動かなくなる変更を指す。別リポジトリの追従、データ移行、同じリポジトリ内のコンポーネント同士の API、UI の変更は含めない。非互換の内容と、利用者が取るべき対応を書く。該当しなければこのセクション (見出しごと) を削除。
 {%- else -%}
-Include only when this PR breaks compatibility. State what breaks and what consumers need to do to adapt. Delete this entire subsection if there are no breaking changes.
+Include only when this PR requires a semver major bump: the public interface of a released artifact changes so that consumers must change their code, configuration, or usage for it to keep working. Do not include follow-up changes in other repositories, data migrations, APIs between components within this repository, or UI changes. State what breaks and what consumers need to do to adapt. Delete this entire subsection otherwise.
 {%- endif %}
 -->
+{%- endif %}
