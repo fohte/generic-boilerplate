@@ -91,7 +91,7 @@ The `vrt` CI check renders Storybook stories to screenshots and compares them ag
 
 ### Apply the appropriate VRT approval label
 
-The `vrt-approved` label is for a human's approval; only the user may add it. The `vrt-agent-reviewed` label is for an agent's approval. After opening the custom VRT report linked from the PR, inspect the actual, expected, and diff images and add `vrt-agent-reviewed` only when every difference is intentional. If the report cannot be inspected or a difference is unclear, ask the user to review it. A new push clears both labels.
+The `vrt-approval` workflow treats the `vrt-approved` label as confirmation that a human reviewed the diff images and approved them. Only a human can make that visual judgment, so after inspecting the diff, ask the user to review it and add the label themselves — do not add it yourself even if the diff looks correct.
 
 ## Test code rules
 
