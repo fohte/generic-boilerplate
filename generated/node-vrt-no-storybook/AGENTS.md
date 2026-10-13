@@ -55,7 +55,7 @@ Catch the exception, wrap it in the boundary-specific subclass, and rethrow it �
 
 ### Understand why the `vrt` check fails
 
-The `vrt` CI check runs the repository's `vrt:capture` script, which must write screenshots to `__screenshots__/my-site-test`, and compares them against the `main` baseline with reg-suit. A failure ("Visual differences detected") means the pixel diff exceeded reg-suit's `matchingThreshold`, not that something is broken — open the reg-suit report link posted on the PR and compare the actual/expected/diff images to judge whether the change is intentional.
+The `vrt` CI check runs the repository's `vrt:capture` script, which must write screenshots to `__screenshots__/my-site-test`, and compares them against the `main` baseline with reg-suit. A failure ("Visual differences detected") means the pixel diff exceeded reg-suit's `matchingThreshold`, not that something is broken — open the custom VRT report linked from the PR and compare the actual/expected/diff images to judge whether the change is intentional.
 
 ### Never add the `vrt-approved` label yourself
 
