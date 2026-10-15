@@ -12,6 +12,7 @@ permissions:
 jobs:
   detect-changes-root:
     runs-on: ubuntu-slim
+    timeout-minutes: 30
     outputs:
       changed: ${{ steps.changes.outputs.any_modified }}
     steps:
@@ -30,6 +31,7 @@ jobs:
     needs: detect-changes-root
     if: needs.detect-changes-root.outputs.changed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -74,6 +76,7 @@ jobs:
   report-root:
     needs: capture-root
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: write

@@ -27,6 +27,7 @@ jobs:
 {%- if root_vrt %}
   detect-changes-root:
     runs-on: ubuntu-slim
+    timeout-minutes: 30
     outputs:
       changed: {% raw %}${{ steps.changes.outputs.any_modified }}{% endraw %}
     steps:
@@ -45,6 +46,7 @@ jobs:
     needs: detect-changes-root
     if: needs.detect-changes-root.outputs.changed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -89,6 +91,7 @@ jobs:
   report-root:
     needs: capture-root
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: write
@@ -138,6 +141,7 @@ jobs:
 {%- for pkg in vrt_pkgs %}
   detect-changes-{{ slug(pkg.name) }}:
     runs-on: ubuntu-slim
+    timeout-minutes: 30
     outputs:
       changed: {% raw %}${{ steps.changes.outputs.any_modified }}{% endraw %}
     steps:
@@ -162,6 +166,7 @@ jobs:
     needs: detect-changes-{{ slug(pkg.name) }}
     if: needs.detect-changes-{{ slug(pkg.name) }}.outputs.changed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -226,6 +231,7 @@ jobs:
   report-{{ slug(pkg.name) }}:
     needs: capture-{{ slug(pkg.name) }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: write
