@@ -18,6 +18,7 @@ permissions:
 jobs:
   list-fixtures:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # Skip for Renovate bot commits.
     # Renovate updates generated/ files, which triggers sync-generated-to-template.yml
     # to sync changes to template/. If we run regenerate here on Renovate's commit,
@@ -42,6 +43,7 @@ jobs:
 
   regenerate-and-commit:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: list-fixtures
     outputs:
       node_changed: ${{ steps.check-node-changes.outputs.any_modified }}
@@ -119,6 +121,7 @@ jobs:
 
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [list-fixtures, regenerate-and-commit]
 
     strategy:
@@ -230,6 +233,7 @@ jobs:
 
   validate-node:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: regenerate-and-commit
     if: needs.regenerate-and-commit.outputs.node_changed == 'true'
 
@@ -279,6 +283,7 @@ jobs:
 
   validate-monorepo-node-workspace:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: regenerate-and-commit
     if: needs.regenerate-and-commit.outputs.monorepo_node_workspace_changed == 'true'
 
@@ -346,6 +351,7 @@ jobs:
 
   validate-node-vrt:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: regenerate-and-commit
     if: needs.regenerate-and-commit.outputs.node_vrt_changed == 'true'
 
@@ -395,6 +401,7 @@ jobs:
 
   validate-rust:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: regenerate-and-commit
     if: needs.regenerate-and-commit.outputs.rust_changed == 'true'
     env:
@@ -423,6 +430,7 @@ jobs:
   # this job is used for branch protection rule
   validate-status:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs:
       - list-fixtures
       - regenerate-and-commit

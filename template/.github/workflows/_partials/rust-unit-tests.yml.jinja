@@ -1,5 +1,6 @@
   {{ 'unit-test-run' if testable_node_pkgs else 'unit-test' }}:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       SCCACHE_GHA_ENABLED: 'true'
       RUSTC_WRAPPER: 'sccache'
@@ -46,6 +47,7 @@
 
   unit-test-{{ pkg.name }}:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -106,6 +108,7 @@
   # knip has no `needs`, so this gate (skip == success) stands in for both.
   unit-test:
     runs-on: ubuntu-slim
+    timeout-minutes: 30
     needs:
       - unit-test-run
 {%- for pkg in testable_node_pkgs %}

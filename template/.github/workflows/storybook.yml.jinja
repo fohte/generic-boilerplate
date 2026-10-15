@@ -21,6 +21,7 @@ jobs:
 {%- if root_storybook %}
   detect-changes-root:
     runs-on: ubuntu-slim
+    timeout-minutes: 30
     outputs:
       changed: {% raw %}${{ steps.changes.outputs.any_modified }}{% endraw %}
     steps:
@@ -45,6 +46,7 @@ jobs:
     needs: detect-changes-root
     if: needs.detect-changes-root.outputs.changed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -107,6 +109,7 @@ jobs:
 {%- for pkg in spa_pkgs %}
   detect-changes-{{ slug(pkg.name) }}:
     runs-on: ubuntu-slim
+    timeout-minutes: 30
     outputs:
       changed: {% raw %}${{ steps.changes.outputs.any_modified }}{% endraw %}
     steps:
@@ -131,6 +134,7 @@ jobs:
     needs: detect-changes-{{ slug(pkg.name) }}
     if: needs.detect-changes-{{ slug(pkg.name) }}.outputs.changed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 

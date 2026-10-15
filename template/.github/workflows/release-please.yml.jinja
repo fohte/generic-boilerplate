@@ -24,6 +24,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch'
 {%- endif %}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       id-token: write
 {%- if auto_merge_release_pr or release_binary %}
@@ -94,6 +95,7 @@ jobs:
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-24.04-arm
     runs-on: {% raw %}${{ matrix.os }}{% endraw %}
+    timeout-minutes: 30
     permissions:
       contents: write
     env:

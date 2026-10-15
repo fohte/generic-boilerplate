@@ -13,6 +13,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       SCCACHE_GHA_ENABLED: 'true'
       RUSTC_WRAPPER: 'sccache'
@@ -118,6 +119,7 @@ jobs:
 
   detect-changes:
     runs-on: ubuntu-slim
+    timeout-minutes: 30
     outputs:
       web-client: ${{ steps.changes-web-client.outputs.any_modified }}
       compute-core: ${{ steps.changes-compute-core.outputs.any_modified }}
@@ -151,6 +153,7 @@ jobs:
       needs.detect-changes.outputs.web-client == 'true' ||
       needs.detect-changes.outputs.workflow == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -188,6 +191,7 @@ jobs:
       needs.detect-changes.outputs.compute-core == 'true' ||
       needs.detect-changes.outputs.workflow == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       SCCACHE_GHA_ENABLED: 'true'
       RUSTC_WRAPPER: 'sccache'
@@ -214,6 +218,7 @@ jobs:
   # stands in for both.
   unit-test:
     runs-on: ubuntu-slim
+    timeout-minutes: 30
     needs:
       - detect-changes
       - unit-test-web-client
@@ -225,6 +230,7 @@ jobs:
 
   knip:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
