@@ -27,7 +27,12 @@ setup() {
     config="${workflow%/workflows/docker-publish.yml}/actionlint.yaml"
 
     [ -f "$config" ]
-    run grep -Fq 'unexpected key "queue" for "concurrency" section' "$config"
+    run awk '
+      /^  \.github\/workflows\/docker-publish\.yml:$/ { in_docker_publish = 1; next }
+      /^  [^ ]/ { in_docker_publish = 0 }
+      in_docker_publish && /unexpected key "queue" for "concurrency" section/ { found = 1 }
+      END { exit !found }
+    ' "$config"
     [ "$status" -eq 0 ]
   done
 }
