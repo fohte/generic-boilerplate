@@ -1,5 +1,9 @@
 # GitHub Actions supports `queue`, but actionlint's concurrency schema does not.
 paths:
-  .github/workflows/release-please.yml:
+{% if use_release_please %}  .github/workflows/release-please.yml:
     ignore:
       - 'unexpected key "queue" for "concurrency" section'
+{% endif %}{% if has_web_app %}  .github/workflows/docker-publish.yml:
+    ignore:
+      - 'unexpected key "queue" for "concurrency" section'
+{% endif -%}
