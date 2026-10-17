@@ -12,6 +12,7 @@ permissions:
 
 concurrency:
   group: {% raw %}docker-publish-${{ github.ref }}{% endraw %}
+  queue: max
   cancel-in-progress: false
 
 jobs:
