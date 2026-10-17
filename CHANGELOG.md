@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.10](https://github.com/fohte/generic-boilerplate/compare/v0.11.9...v0.11.10) (2026-10-17)
+
+
+### Features
+
+* **pr-template:** limit breaking changes to semver major bumps ([#750](https://github.com/fohte/generic-boilerplate/issues/750)) ([80d6963](https://github.com/fohte/generic-boilerplate/commit/80d6963769361a4ee0b0c970877289f6b2e021ae))
+
+
+### Dependencies
+
+* **ci:** update VRT workflow pins ([#752](https://github.com/fohte/generic-boilerplate/issues/752)) ([f25b4af](https://github.com/fohte/generic-boilerplate/commit/f25b4afd3d76a73ff22c27a698b9c4f8a2af2d5c))
+
 ## [0.11.9](https://github.com/fohte/generic-boilerplate/compare/v0.11.8...v0.11.9) (2026-10-04)
 
 
