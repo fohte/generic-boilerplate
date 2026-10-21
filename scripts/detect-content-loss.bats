@@ -134,9 +134,7 @@ EXPECTED_HOLD_LOG=$'pr diff 3 -R fohte/example\npr merge 3 -R fohte/example --di
   run_direct
 
   [ "$status" -eq 1 ]
-  [[ "$output" == *"UNVERIFIED example#3 (https://github.com/fohte/example/pull/3): could not analyze the PR diff"* ]]
-  [[ "$output" != *"LOST example#3"* ]]
-  [[ "$output" == *"HELD: auto-merge disabled, converted to draft"* ]]
+  [ "$output" = $'synthetic analysis error\nUNVERIFIED example#3 (https://github.com/fohte/example/pull/3): could not analyze the PR diff\n  HELD: auto-merge disabled, converted to draft' ]
   gh_log=$(<"$GH_LOG")
   [ "$gh_log" = "$EXPECTED_HOLD_LOG" ]
 }
@@ -151,8 +149,7 @@ EXPECTED_HOLD_LOG=$'pr diff 3 -R fohte/example\npr merge 3 -R fohte/example --di
     --data-file "$DATA_FILE"
 
   [ "$status" -eq 1 ]
-  [[ "$output" == *"LOST example#3 (https://github.com/fohte/example/pull/3)"* ]]
-  [[ "$output" == *"(dry-run: PR not held)"* ]]
+  [ "$output" = $'LOST example#3 (https://github.com/fohte/example/pull/3)\n  README.md: 1 line(s) lost\n      repo line\n  (dry-run: PR not held)' ]
   gh_log=$(<"$GH_LOG")
   [ "$gh_log" = "pr diff 3 -R fohte/example" ]
 }
