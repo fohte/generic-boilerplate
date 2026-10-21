@@ -19,6 +19,7 @@ setup() {
   export GH_LOG
   export GH_MODE=clean
   export COPIER_MODE=clean
+  export GH_HELD_STATE=true
   export GH_LOST_PR=11
 
   cat > "$MOCK_BIN/gh" << 'EOF'
@@ -39,7 +40,7 @@ if [[ "$1 $2" == "pr diff" ]]; then
   exit 0
 fi
 if [[ "$1 $2" == "pr view" ]]; then
-  echo true
+  echo "$GH_HELD_STATE"
 fi
 EOF
   chmod +x "$MOCK_BIN/gh"
@@ -117,10 +118,20 @@ EXPECTED_HOLD_LOG=$'pr diff 3 -R fohte/example\npr merge 3 -R fohte/example --di
 
   run_direct
 
-  [ "$status" -eq 1 ]
+  [ "$status" -eq 2 ]
   [ "$output" = $'LOST example#3 (https://github.com/fohte/example/pull/3)\n  README.md: 1 line(s) lost\n      repo line\n  HELD: auto-merge disabled, converted to draft' ]
   gh_log=$(<"$GH_LOG")
   [ "$gh_log" = "$EXPECTED_HOLD_LOG" ]
+}
+
+@test "direct mode fails when a lost-content PR could not be held" {
+  export GH_MODE=lost
+  export GH_HELD_STATE=false
+
+  run_direct
+
+  [ "$status" -eq 1 ]
+  [ "$output" = $'LOST example#3 (https://github.com/fohte/example/pull/3)\n  README.md: 1 line(s) lost\n      repo line\n  HOLD FAILED: could not disable auto-merge / convert to draft; act manually' ]
 }
 
 @test "direct mode holds a PR when its diff cannot be fetched" {

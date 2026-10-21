@@ -28,7 +28,9 @@
 # template-distributed workflow. Keep them backward-compatible with older
 # copies of template/.github/workflows/boilerplate-update.yml.
 #
-# Exit status: 0 when every PR is clean, 1 when any PR lost content or could not be checked.
+# Exit status: 0 when every PR is clean, 1 when a PR could not be checked or held,
+# 2 when direct mode finds lost content and confirms the PR is held. List mode
+# continues to return 1 for any failed check so older callers still fail closed.
 #
 # Requires: gh, jq, yq, copier, git (jq/yq are only needed for repository-list mode)
 
@@ -137,7 +139,7 @@ hold_pr() {
   local repo_ref="$1" number="$2"
   if "$DRY_RUN"; then
     echo "  (dry-run: PR not held)"
-    return
+    return 1
   fi
   # --disable-auto fails when auto-merge was never armed, so judge the hold by
   # the resulting PR state rather than by exit status.
@@ -148,6 +150,7 @@ hold_pr() {
     echo "  HELD: auto-merge disabled, converted to draft"
   else
     echo "  HOLD FAILED: could not disable auto-merge / convert to draft; act manually" >&2
+    return 1
   fi
 }
 
@@ -160,12 +163,12 @@ check_pr() {
   # Fail closed: a PR that cannot be checked is treated like one that lost content.
   if ! diff=$(gh pr diff "$number" -R "$repo_ref"); then
     echo "UNVERIFIED $repo#$number ($url): could not fetch the PR diff"
-    hold_pr "$repo_ref" "$number"
+    hold_pr "$repo_ref" "$number" || true
     return 1
   fi
   if ! render_old_template "$from" "$answers" "$old_render"; then
     echo "UNVERIFIED $repo#$number ($url): could not render the old template version"
-    hold_pr "$repo_ref" "$number"
+    hold_pr "$repo_ref" "$number" || true
     return 1
   fi
 
@@ -174,7 +177,9 @@ check_pr() {
   else
     echo "LOST $repo#$number ($url)"
     summarize <<< "$lost"
-    hold_pr "$repo_ref" "$number"
+    if hold_pr "$repo_ref" "$number"; then
+      return 2
+    fi
     return 1
   fi
 }
