@@ -74,7 +74,7 @@ scripts/trigger-boilerplate-update-prs <repo1> <repo2>
 scripts/trigger-boilerplate-update-prs --target-version v0.8.12
 ```
 
-The script polls every 20 seconds (up to 5 minutes), printing `DISPATCHED <repo>: boilerplate-update.yml` immediately after dispatch and `COMPLETED <repo>: conclusion=<value> (<run url>)` once each run finishes (`conclusion` is GitHub's run conclusion, e.g. `success`, `failure`, `cancelled`; any value other than `success` is treated as a failure). A `failure` with a draft PR can indicate a content-loss hold; the workflow also adds the report to the PR body. Read the workflow log before retrying. Re-run `scripts/list-boilerplate-usage --outdated` afterward to see the resulting PRs.
+The script polls every 20 seconds (up to 5 minutes), printing `DISPATCHED <repo>: boilerplate-update.yml` immediately after dispatch and `COMPLETED <repo>: conclusion=<value> (<run url>)` once each run finishes (`conclusion` is GitHub's run conclusion, e.g. `success`, `failure`, `cancelled`; any value other than `success` is treated as a failure). For repos using older workflows, a `failure` with a draft PR can indicate a content-loss hold. The updated workflow reports a confirmed `LOST` hold as `success`; `UNVERIFIED` checks and failed holds still report `failure`. The workflow adds the report to the PR body. Read the workflow log before retrying. Re-run `scripts/list-boilerplate-usage --outdated` afterward to see the resulting PRs.
 
 ### Content-loss check for PRs created by older workflow versions
 

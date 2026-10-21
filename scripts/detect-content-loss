@@ -90,6 +90,7 @@ fi
 WORK_DIR=$(mktemp -d /tmp/detect-content-loss.XXXXXX)
 trap 'rm -rf "$WORK_DIR"' EXIT
 LIST_USAGE_SCRIPT="${DETECT_CONTENT_LOSS_LIST_USAGE:-$SCRIPT_DIR/list-boilerplate-usage}"
+FIND_LOST_LINES_SCRIPT="${DETECT_CONTENT_LOSS_FIND_LOST_LINES:-$SCRIPT_DIR/find-lost-lines}"
 
 # Print lost lines grouped by file. Every line is listed because the delegate
 # has to restore all of them.
@@ -156,6 +157,7 @@ hold_pr() {
 
 check_pr() {
   local repo_ref="$1" number="$2" url="$3" from="$4" answers="$5"
+  local find_lost_status
   local repo="${repo_ref##*/}"
   local old_render="$WORK_DIR/old-render-$repo"
   mkdir -p "$old_render"
@@ -172,9 +174,16 @@ check_pr() {
     return 1
   fi
 
-  if lost=$("${SCRIPT_DIR}/find-lost-lines" "$old_render" <<< "$diff"); then
+  if lost=$("$FIND_LOST_LINES_SCRIPT" "$old_render" <<< "$diff"); then
     echo "OK $repo#$number ($url)"
   else
+    find_lost_status=$?
+    if [[ "$find_lost_status" -ne 1 ]]; then
+      echo "UNVERIFIED $repo#$number ($url): could not analyze the PR diff"
+      hold_pr "$repo_ref" "$number" || true
+      return 1
+    fi
+
     echo "LOST $repo#$number ($url)"
     summarize <<< "$lost"
     if hold_pr "$repo_ref" "$number"; then
