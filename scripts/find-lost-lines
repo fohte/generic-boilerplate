@@ -13,7 +13,7 @@
 # Usage: gh pr diff <number> | scripts/find-lost-lines <old-render-dir>
 #
 # Output: one "<path><TAB><line>" per lost line (line is whitespace-trimmed).
-# Exit status: 0 when nothing was lost, 1 otherwise.
+# Exit status: 0 when nothing was lost, 1 when lines were lost, 2 on usage error.
 
 set -euo pipefail
 

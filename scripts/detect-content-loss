@@ -28,7 +28,9 @@
 # template-distributed workflow. Keep them backward-compatible with older
 # copies of template/.github/workflows/boilerplate-update.yml.
 #
-# Exit status: 0 when every PR is clean, 1 when any PR lost content or could not be checked.
+# Exit status: 0 when every PR is clean, 1 when a PR could not be checked or held,
+# 2 when direct mode finds lost content and confirms the PR is held. List mode
+# continues to return 1 for any failed check so older callers still fail closed.
 #
 # Requires: gh, jq, yq, copier, git (jq/yq are only needed for repository-list mode)
 
@@ -88,6 +90,7 @@ fi
 WORK_DIR=$(mktemp -d /tmp/detect-content-loss.XXXXXX)
 trap 'rm -rf "$WORK_DIR"' EXIT
 LIST_USAGE_SCRIPT="${DETECT_CONTENT_LOSS_LIST_USAGE:-$SCRIPT_DIR/list-boilerplate-usage}"
+FIND_LOST_LINES_SCRIPT="${DETECT_CONTENT_LOSS_FIND_LOST_LINES:-$SCRIPT_DIR/find-lost-lines}"
 
 # Print lost lines grouped by file. Every line is listed because the delegate
 # has to restore all of them.
@@ -137,7 +140,7 @@ hold_pr() {
   local repo_ref="$1" number="$2"
   if "$DRY_RUN"; then
     echo "  (dry-run: PR not held)"
-    return
+    return 1
   fi
   # --disable-auto fails when auto-merge was never armed, so judge the hold by
   # the resulting PR state rather than by exit status.
@@ -148,33 +151,49 @@ hold_pr() {
     echo "  HELD: auto-merge disabled, converted to draft"
   else
     echo "  HOLD FAILED: could not disable auto-merge / convert to draft; act manually" >&2
+    return 1
   fi
+}
+
+report_unverified_pr() {
+  local repo_ref="$1" number="$2" url="$3" reason="$4"
+  local repo="${repo_ref##*/}"
+
+  echo "UNVERIFIED $repo#$number ($url): $reason"
+  hold_pr "$repo_ref" "$number" || true
 }
 
 check_pr() {
   local repo_ref="$1" number="$2" url="$3" from="$4" answers="$5"
+  local find_lost_status
   local repo="${repo_ref##*/}"
   local old_render="$WORK_DIR/old-render-$repo"
   mkdir -p "$old_render"
 
   # Fail closed: a PR that cannot be checked is treated like one that lost content.
   if ! diff=$(gh pr diff "$number" -R "$repo_ref"); then
-    echo "UNVERIFIED $repo#$number ($url): could not fetch the PR diff"
-    hold_pr "$repo_ref" "$number"
+    report_unverified_pr "$repo_ref" "$number" "$url" "could not fetch the PR diff"
     return 1
   fi
   if ! render_old_template "$from" "$answers" "$old_render"; then
-    echo "UNVERIFIED $repo#$number ($url): could not render the old template version"
-    hold_pr "$repo_ref" "$number"
+    report_unverified_pr "$repo_ref" "$number" "$url" "could not render the old template version"
     return 1
   fi
 
-  if lost=$("${SCRIPT_DIR}/find-lost-lines" "$old_render" <<< "$diff"); then
+  if lost=$("$FIND_LOST_LINES_SCRIPT" "$old_render" <<< "$diff"); then
     echo "OK $repo#$number ($url)"
   else
+    find_lost_status=$?
+    if [[ "$find_lost_status" -ne 1 ]]; then
+      report_unverified_pr "$repo_ref" "$number" "$url" "could not analyze the PR diff"
+      return 1
+    fi
+
     echo "LOST $repo#$number ($url)"
     summarize <<< "$lost"
-    hold_pr "$repo_ref" "$number"
+    if hold_pr "$repo_ref" "$number"; then
+      return 2
+    fi
     return 1
   fi
 }
