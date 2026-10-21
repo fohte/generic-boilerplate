@@ -1,0 +1,222 @@
+#!/usr/bin/env bats
+
+write_template_config() {
+  local destination=$1
+  local exclude_condition=$2
+  local remove_question=${3:-false}
+
+  awk -v exclude_condition="$exclude_condition" -v remove_question="$remove_question" '
+    /# Legacy answers omit this question/ { next }
+    /\.github\/workflows\/pr-title-check\.yml/ {
+      printf "  - \047%s\047\n", exclude_condition
+      next
+    }
+    /^pr_title_check:$/ && remove_question == "true" { skip_question = 1; next }
+    skip_question && /^[^[:space:]#]/ { skip_question = 0 }
+    skip_question { next }
+    { print }
+  ' "$REPO_ROOT/copier.yml" > "$destination"
+}
+
+commit_template_ref() {
+  local copier_config=$1
+  local workflow=$2
+  local message=$3
+
+  cp "$copier_config" "$TEMPLATE_REPO/copier.yml"
+  cp "$workflow" "$TEMPLATE_REPO/template/.github/workflows/pr-title-check.yml"
+  git -C "$TEMPLATE_REPO" add copier.yml template/.github/workflows/pr-title-check.yml
+  git -C "$TEMPLATE_REPO" commit --quiet -m "$message"
+  git -C "$TEMPLATE_REPO" rev-parse HEAD
+}
+
+setup_file() {
+  SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" && pwd)"
+  REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+  TEST_ROOT=$(mktemp -d)
+  TEST_ROOT="$(cd "$TEST_ROOT" && pwd -P)"
+  TEMPLATE_REPO="$TEST_ROOT/template"
+
+  git clone --quiet --shared "$REPO_ROOT" "$TEMPLATE_REPO"
+  git -C "$TEMPLATE_REPO" config user.name "Bats"
+  git -C "$TEMPLATE_REPO" config user.email "bats@example.invalid"
+
+  legacy_exclude='{% if not use_release_please %}.github/workflows/pr-title-check.yml{% endif %}'
+  write_template_config "$TEST_ROOT/legacy-copier.yml" "$legacy_exclude" true
+  if grep -Eq '^pr_title_check:' "$TEST_ROOT/legacy-copier.yml"; then
+    printf 'legacy template still defines pr_title_check\n' >&2
+    return 1
+  fi
+
+  workflow="$REPO_ROOT/template/.github/workflows/pr-title-check.yml"
+  {
+    printf '# legacy template marker\n'
+    cat "$workflow"
+  } > "$TEST_ROOT/legacy-workflow.yml"
+  LEGACY_REF=$(commit_template_ref "$TEST_ROOT/legacy-copier.yml" "$TEST_ROOT/legacy-workflow.yml" "test: model legacy template")
+
+  question_exclude='{% if not pr_title_check %}.github/workflows/pr-title-check.yml{% endif %}'
+  write_template_config "$TEST_ROOT/question-copier.yml" "$question_exclude"
+  QUESTION_REF=$(commit_template_ref "$TEST_ROOT/question-copier.yml" "$workflow" "test: model question-enabled template")
+  CURRENT_REF=$(commit_template_ref "$REPO_ROOT/copier.yml" "$workflow" "test: use current template config")
+
+  export REPO_ROOT TEST_ROOT TEMPLATE_REPO LEGACY_REF QUESTION_REF CURRENT_REF
+}
+
+teardown_file() {
+  rm -rf "$TEST_ROOT"
+}
+
+setup() {
+  TEST_DIR=$(mktemp -d "$TEST_ROOT/case.XXXXXX")
+}
+
+teardown() {
+  rm -rf "$TEST_DIR"
+}
+
+run_copier() {
+  if command -v copier > /dev/null 2>&1; then
+    copier "$@"
+  else
+    pipx run copier "$@"
+  fi
+}
+
+copy_legacy_project() {
+  local answers_file="$TEST_DIR/legacy-answers.yml"
+  cp "$1" "$answers_file"
+  remove_pr_title_check_answer "$answers_file"
+  run_copier copy --trust --defaults --vcs-ref "$LEGACY_REF" \
+    --data-file "$answers_file" "$TEMPLATE_REPO" "$2"
+}
+
+copy_question_project() {
+  run_copier copy --trust --defaults --vcs-ref "$QUESTION_REF" \
+    --data-file "$1" "$TEMPLATE_REPO" "$2"
+}
+
+copy_current_project() {
+  run_copier copy --trust --defaults --vcs-ref "$CURRENT_REF" \
+    --data-file "$1" "$TEMPLATE_REPO" "$2"
+}
+
+update_project() {
+  run_copier update --trust --defaults --vcs-ref "$CURRENT_REF" "$1"
+}
+
+assert_copier_succeeded() {
+  if [ "$status" -ne 0 ]; then
+    printf '%s\n' "$output" >&2
+    return 1
+  fi
+}
+
+initialize_project_repo() {
+  local project=$1
+  git -C "$project" init --quiet
+  git -C "$project" config user.name "Bats"
+  git -C "$project" config user.email "bats@example.invalid"
+  git -C "$project" add --all
+  git -C "$project" commit --quiet -m "test: initialize generated project"
+}
+
+remove_pr_title_check_answer() {
+  local answers_file=$1
+  awk '!/^pr_title_check:/' "$answers_file" > "$answers_file.tmp"
+  mv "$answers_file.tmp" "$answers_file"
+}
+
+set_pr_title_check_answer() {
+  local answers_file=$1
+  local value=$2
+  awk -v value="$value" '$1 == "pr_title_check:" { $2 = value } { print }' \
+    "$answers_file" > "$answers_file.tmp"
+  mv "$answers_file.tmp" "$answers_file"
+}
+
+@test "updates a legacy release workflow without conflicts and keeps local customization" {
+  project="$TEST_DIR/project"
+  run copy_legacy_project "$REPO_ROOT/tests/fixtures/base-release.yml" "$project"
+  assert_copier_succeeded
+  run grep -Eq '^pr_title_check:' "$project/.copier-answers.yml"
+  [ "$status" -eq 1 ]
+  initialize_project_repo "$project"
+
+  workflow="$project/.github/workflows/pr-title-check.yml"
+  [ -f "$workflow" ]
+  printf '\n# local customization\n' >> "$workflow"
+  git -C "$project" add .github/workflows/pr-title-check.yml
+  git -C "$project" commit --quiet -m "test: preserve local workflow customization"
+
+  run update_project "$project"
+  assert_copier_succeeded
+  [ -f "$workflow" ]
+  run grep -Eq '^(<<<<<<<|=======|>>>>>>>)' "$workflow"
+  [ "$status" -eq 1 ]
+  run grep -Fxq '# legacy template marker' "$workflow"
+  [ "$status" -eq 1 ]
+  grep -Fxq '# local customization' "$workflow"
+}
+
+@test "keeps the workflow excluded for legacy answers with releases disabled" {
+  project="$TEST_DIR/project"
+  run copy_legacy_project "$REPO_ROOT/tests/fixtures/base.yml" "$project"
+  assert_copier_succeeded
+  run grep -Eq '^pr_title_check:' "$project/.copier-answers.yml"
+  [ "$status" -eq 1 ]
+  initialize_project_repo "$project"
+
+  workflow="$project/.github/workflows/pr-title-check.yml"
+  [ ! -f "$workflow" ]
+
+  run update_project "$project"
+  assert_copier_succeeded
+  [ ! -f "$workflow" ]
+}
+
+@test "honors an explicit false answer when releases are enabled" {
+  project="$TEST_DIR/project"
+  data_file="$TEST_DIR/answers.yml"
+  cp "$REPO_ROOT/tests/fixtures/base-release.yml" "$data_file"
+  set_pr_title_check_answer "$data_file" false
+
+  run copy_question_project "$data_file" "$project"
+  assert_copier_succeeded
+  initialize_project_repo "$project"
+  workflow="$project/.github/workflows/pr-title-check.yml"
+  [ ! -f "$workflow" ]
+
+  run update_project "$project"
+  assert_copier_succeeded
+  [ ! -f "$workflow" ]
+}
+
+@test "honors an explicit true answer when releases are disabled" {
+  project="$TEST_DIR/project"
+  data_file="$TEST_DIR/answers.yml"
+  cp "$REPO_ROOT/tests/fixtures/base.yml" "$data_file"
+  set_pr_title_check_answer "$data_file" true
+
+  run copy_question_project "$data_file" "$project"
+  assert_copier_succeeded
+  initialize_project_repo "$project"
+  workflow="$project/.github/workflows/pr-title-check.yml"
+  [ -f "$workflow" ]
+
+  run update_project "$project"
+  assert_copier_succeeded
+  [ -f "$workflow" ]
+}
+
+@test "defaults new projects to the release setting when the answer is omitted" {
+  project="$TEST_DIR/project"
+  data_file="$TEST_DIR/answers.yml"
+  cp "$REPO_ROOT/tests/fixtures/base-release.yml" "$data_file"
+  remove_pr_title_check_answer "$data_file"
+
+  run copy_current_project "$data_file" "$project"
+  assert_copier_succeeded
+  [ -f "$project/.github/workflows/pr-title-check.yml" ]
+  grep -Eq '^pr_title_check: true$' "$project/.copier-answers.yml"
+}
