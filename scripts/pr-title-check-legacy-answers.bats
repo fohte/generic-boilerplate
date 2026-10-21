@@ -11,7 +11,14 @@ setup_file() {
   git -C "$TEMPLATE_REPO" config user.name "Bats"
   git -C "$TEMPLATE_REPO" config user.email "bats@example.invalid"
 
-  awk '/\.github\/workflows\/pr-title-check\.yml/ { print "  - \047{% if not pr_title_check %}.github/workflows/pr-title-check.yml{% endif %}\047"; next } { print }' \
+  awk '
+    /\.github\/workflows\/pr-title-check\.yml/ { print "  - \047{% if not use_release_please %}.github/workflows/pr-title-check.yml{% endif %}\047"; next }
+    /# Legacy answers omit this question/ { next }
+    /^pr_title_check:$/ { skip_question = 1; next }
+    skip_question && /^[^[:space:]#]/ { skip_question = 0 }
+    skip_question { next }
+    { print }
+  ' \
     "$TEMPLATE_REPO/copier.yml" > "$TEST_ROOT/copier.yml"
   mv "$TEST_ROOT/copier.yml" "$TEMPLATE_REPO/copier.yml"
 
@@ -26,6 +33,25 @@ setup_file() {
   git -C "$TEMPLATE_REPO" commit --quiet -m "test: model legacy template"
   LEGACY_REF=$(git -C "$TEMPLATE_REPO" rev-parse HEAD)
 
+  git -C "$TEMPLATE_REPO" show "$LEGACY_REF:copier.yml" > "$TEST_ROOT/legacy-copier.yml"
+  if rg -q '^pr_title_check:' "$TEST_ROOT/legacy-copier.yml"; then
+    printf 'legacy template still defines pr_title_check\n' >&2
+    return 1
+  fi
+
+  cp "$REPO_ROOT/copier.yml" "$TEMPLATE_REPO/copier.yml"
+  awk '
+    /# Legacy answers omit this question/ { next }
+    /\.github\/workflows\/pr-title-check\.yml/ { print "  - \047{% if not pr_title_check %}.github/workflows/pr-title-check.yml{% endif %}\047"; next }
+    { print }
+  ' "$TEMPLATE_REPO/copier.yml" > "$TEST_ROOT/copier.yml"
+  mv "$TEST_ROOT/copier.yml" "$TEMPLATE_REPO/copier.yml"
+  cp "$REPO_ROOT/template/.github/workflows/pr-title-check.yml" \
+    "$TEMPLATE_REPO/template/.github/workflows/pr-title-check.yml"
+  git -C "$TEMPLATE_REPO" add copier.yml template/.github/workflows/pr-title-check.yml
+  git -C "$TEMPLATE_REPO" commit --quiet -m "test: model question-enabled template"
+  QUESTION_REF=$(git -C "$TEMPLATE_REPO" rev-parse HEAD)
+
   cp "$REPO_ROOT/copier.yml" "$TEMPLATE_REPO/copier.yml"
   cp "$REPO_ROOT/template/.github/workflows/pr-title-check.yml" \
     "$TEMPLATE_REPO/template/.github/workflows/pr-title-check.yml"
@@ -33,7 +59,7 @@ setup_file() {
   git -C "$TEMPLATE_REPO" commit --quiet -m "test: use current template config"
   CURRENT_REF=$(git -C "$TEMPLATE_REPO" rev-parse HEAD)
 
-  export REPO_ROOT TEST_ROOT TEMPLATE_REPO LEGACY_REF CURRENT_REF
+  export REPO_ROOT TEST_ROOT TEMPLATE_REPO LEGACY_REF QUESTION_REF CURRENT_REF
 }
 
 teardown_file() {
@@ -57,7 +83,15 @@ run_copier() {
 }
 
 copy_legacy_project() {
+  local answers_file="$TEST_DIR/legacy-answers.yml"
+  cp "$1" "$answers_file"
+  remove_pr_title_check_answer "$answers_file"
   run_copier copy --trust --defaults --vcs-ref "$LEGACY_REF" \
+    --data-file "$answers_file" "$TEMPLATE_REPO" "$2"
+}
+
+copy_question_project() {
+  run_copier copy --trust --defaults --vcs-ref "$QUESTION_REF" \
     --data-file "$1" "$TEMPLATE_REPO" "$2"
 }
 
@@ -104,7 +138,8 @@ set_pr_title_check_answer() {
   project="$TEST_DIR/project"
   run copy_legacy_project "$REPO_ROOT/tests/fixtures/base-release.yml" "$project"
   assert_copier_succeeded
-  remove_pr_title_check_answer "$project/.copier-answers.yml"
+  run rg -q '^pr_title_check:' "$project/.copier-answers.yml"
+  [ "$status" -eq 1 ]
   initialize_project_repo "$project"
 
   workflow="$project/.github/workflows/pr-title-check.yml"
@@ -127,7 +162,8 @@ set_pr_title_check_answer() {
   project="$TEST_DIR/project"
   run copy_legacy_project "$REPO_ROOT/tests/fixtures/base.yml" "$project"
   assert_copier_succeeded
-  remove_pr_title_check_answer "$project/.copier-answers.yml"
+  run rg -q '^pr_title_check:' "$project/.copier-answers.yml"
+  [ "$status" -eq 1 ]
   initialize_project_repo "$project"
 
   workflow="$project/.github/workflows/pr-title-check.yml"
@@ -144,7 +180,7 @@ set_pr_title_check_answer() {
   cp "$REPO_ROOT/tests/fixtures/base-release.yml" "$data_file"
   set_pr_title_check_answer "$data_file" false
 
-  run copy_legacy_project "$data_file" "$project"
+  run copy_question_project "$data_file" "$project"
   assert_copier_succeeded
   initialize_project_repo "$project"
   workflow="$project/.github/workflows/pr-title-check.yml"
@@ -161,7 +197,7 @@ set_pr_title_check_answer() {
   cp "$REPO_ROOT/tests/fixtures/base.yml" "$data_file"
   set_pr_title_check_answer "$data_file" true
 
-  run copy_legacy_project "$data_file" "$project"
+  run copy_question_project "$data_file" "$project"
   assert_copier_succeeded
   initialize_project_repo "$project"
   workflow="$project/.github/workflows/pr-title-check.yml"
