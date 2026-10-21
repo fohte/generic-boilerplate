@@ -1,5 +1,35 @@
 #!/usr/bin/env bats
 
+write_template_config() {
+  local destination=$1
+  local exclude_condition=$2
+  local remove_question=${3:-false}
+
+  awk -v exclude_condition="$exclude_condition" -v remove_question="$remove_question" '
+    /# Legacy answers omit this question/ { next }
+    /\.github\/workflows\/pr-title-check\.yml/ {
+      printf "  - \047%s\047\n", exclude_condition
+      next
+    }
+    /^pr_title_check:$/ && remove_question == "true" { skip_question = 1; next }
+    skip_question && /^[^[:space:]#]/ { skip_question = 0 }
+    skip_question { next }
+    { print }
+  ' "$REPO_ROOT/copier.yml" > "$destination"
+}
+
+commit_template_ref() {
+  local copier_config=$1
+  local workflow=$2
+  local message=$3
+
+  cp "$copier_config" "$TEMPLATE_REPO/copier.yml"
+  cp "$workflow" "$TEMPLATE_REPO/template/.github/workflows/pr-title-check.yml"
+  git -C "$TEMPLATE_REPO" add copier.yml template/.github/workflows/pr-title-check.yml
+  git -C "$TEMPLATE_REPO" commit --quiet -m "$message"
+  git -C "$TEMPLATE_REPO" rev-parse HEAD
+}
+
 setup_file() {
   SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")" && pwd)"
   REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -11,53 +41,24 @@ setup_file() {
   git -C "$TEMPLATE_REPO" config user.name "Bats"
   git -C "$TEMPLATE_REPO" config user.email "bats@example.invalid"
 
-  awk '
-    /\.github\/workflows\/pr-title-check\.yml/ { print "  - \047{% if not use_release_please %}.github/workflows/pr-title-check.yml{% endif %}\047"; next }
-    /# Legacy answers omit this question/ { next }
-    /^pr_title_check:$/ { skip_question = 1; next }
-    skip_question && /^[^[:space:]#]/ { skip_question = 0 }
-    skip_question { next }
-    { print }
-  ' \
-    "$TEMPLATE_REPO/copier.yml" > "$TEST_ROOT/copier.yml"
-  mv "$TEST_ROOT/copier.yml" "$TEMPLATE_REPO/copier.yml"
-
-  workflow="$TEMPLATE_REPO/template/.github/workflows/pr-title-check.yml"
-  {
-    printf '# legacy template marker\n'
-    cat "$workflow"
-  } > "$TEST_ROOT/workflow.yml"
-  mv "$TEST_ROOT/workflow.yml" "$workflow"
-
-  git -C "$TEMPLATE_REPO" add copier.yml template/.github/workflows/pr-title-check.yml
-  git -C "$TEMPLATE_REPO" commit --quiet -m "test: model legacy template"
-  LEGACY_REF=$(git -C "$TEMPLATE_REPO" rev-parse HEAD)
-
-  git -C "$TEMPLATE_REPO" show "$LEGACY_REF:copier.yml" > "$TEST_ROOT/legacy-copier.yml"
-  if rg -q '^pr_title_check:' "$TEST_ROOT/legacy-copier.yml"; then
+  legacy_exclude='{% if not use_release_please %}.github/workflows/pr-title-check.yml{% endif %}'
+  write_template_config "$TEST_ROOT/legacy-copier.yml" "$legacy_exclude" true
+  if grep -Eq '^pr_title_check:' "$TEST_ROOT/legacy-copier.yml"; then
     printf 'legacy template still defines pr_title_check\n' >&2
     return 1
   fi
 
-  cp "$REPO_ROOT/copier.yml" "$TEMPLATE_REPO/copier.yml"
-  awk '
-    /# Legacy answers omit this question/ { next }
-    /\.github\/workflows\/pr-title-check\.yml/ { print "  - \047{% if not pr_title_check %}.github/workflows/pr-title-check.yml{% endif %}\047"; next }
-    { print }
-  ' "$TEMPLATE_REPO/copier.yml" > "$TEST_ROOT/copier.yml"
-  mv "$TEST_ROOT/copier.yml" "$TEMPLATE_REPO/copier.yml"
-  cp "$REPO_ROOT/template/.github/workflows/pr-title-check.yml" \
-    "$TEMPLATE_REPO/template/.github/workflows/pr-title-check.yml"
-  git -C "$TEMPLATE_REPO" add copier.yml template/.github/workflows/pr-title-check.yml
-  git -C "$TEMPLATE_REPO" commit --quiet -m "test: model question-enabled template"
-  QUESTION_REF=$(git -C "$TEMPLATE_REPO" rev-parse HEAD)
+  workflow="$REPO_ROOT/template/.github/workflows/pr-title-check.yml"
+  {
+    printf '# legacy template marker\n'
+    cat "$workflow"
+  } > "$TEST_ROOT/legacy-workflow.yml"
+  LEGACY_REF=$(commit_template_ref "$TEST_ROOT/legacy-copier.yml" "$TEST_ROOT/legacy-workflow.yml" "test: model legacy template")
 
-  cp "$REPO_ROOT/copier.yml" "$TEMPLATE_REPO/copier.yml"
-  cp "$REPO_ROOT/template/.github/workflows/pr-title-check.yml" \
-    "$TEMPLATE_REPO/template/.github/workflows/pr-title-check.yml"
-  git -C "$TEMPLATE_REPO" add copier.yml template/.github/workflows/pr-title-check.yml
-  git -C "$TEMPLATE_REPO" commit --quiet -m "test: use current template config"
-  CURRENT_REF=$(git -C "$TEMPLATE_REPO" rev-parse HEAD)
+  question_exclude='{% if not pr_title_check %}.github/workflows/pr-title-check.yml{% endif %}'
+  write_template_config "$TEST_ROOT/question-copier.yml" "$question_exclude"
+  QUESTION_REF=$(commit_template_ref "$TEST_ROOT/question-copier.yml" "$workflow" "test: model question-enabled template")
+  CURRENT_REF=$(commit_template_ref "$REPO_ROOT/copier.yml" "$workflow" "test: use current template config")
 
   export REPO_ROOT TEST_ROOT TEMPLATE_REPO LEGACY_REF QUESTION_REF CURRENT_REF
 }
@@ -138,7 +139,7 @@ set_pr_title_check_answer() {
   project="$TEST_DIR/project"
   run copy_legacy_project "$REPO_ROOT/tests/fixtures/base-release.yml" "$project"
   assert_copier_succeeded
-  run rg -q '^pr_title_check:' "$project/.copier-answers.yml"
+  run grep -Eq '^pr_title_check:' "$project/.copier-answers.yml"
   [ "$status" -eq 1 ]
   initialize_project_repo "$project"
 
@@ -162,7 +163,7 @@ set_pr_title_check_answer() {
   project="$TEST_DIR/project"
   run copy_legacy_project "$REPO_ROOT/tests/fixtures/base.yml" "$project"
   assert_copier_succeeded
-  run rg -q '^pr_title_check:' "$project/.copier-answers.yml"
+  run grep -Eq '^pr_title_check:' "$project/.copier-answers.yml"
   [ "$status" -eq 1 ]
   initialize_project_repo "$project"
 
