@@ -421,6 +421,10 @@ jobs:
           >
           ${content_loss_list}"
             gh pr edit "${pr_url}" --body "${body}"
+            if printf '%s\n' "${CONTENT_LOSS_OUTPUT}" | .content-loss-detector/scripts/content-loss-output-allows-job-success; then
+              echo "Content loss detected; leaving PR in draft without failing this job."
+              exit 0
+            fi
             exit 1
           fi
           echo "${CONTENT_LOSS_OUTPUT}"
