@@ -35,7 +35,7 @@ BASH
   while IFS= read -r workflow; do
     WORKFLOWS+=("$workflow")
   done < <(
-    rg -l --glob '*.yml' 'name: Get pnpm store directory' \
+    rg --no-config --hidden -l --glob '*.yml' 'name: Get pnpm store directory' \
       "$REPO_ROOT/generated" \
       "$REPO_ROOT/.github/workflows/validate-template.yml" |
       sort
@@ -58,7 +58,7 @@ execute_store_step() {
     PNPM_EXIT_CODE="$exit_code" \
     PNPM_STDOUT="$stdout" \
     PNPM_STDERR="$stderr" \
-    bash --noprofile --norc -e -o pipefail -c "$script" \
+    bash -e -c "$script" \
     > "$STEP_STDOUT" 2> "$STEP_STDERR"
 }
 
