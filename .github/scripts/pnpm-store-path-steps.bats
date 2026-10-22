@@ -13,6 +13,9 @@ setup() {
   EXPECTED_OUTPUT="$TEST_DIR/expected-output"
   EXPECTED_STDERR="$TEST_DIR/expected-stderr"
   EXPECTED_STORE_PATH='/tmp/example pnpm store'
+  # Pin the inventory so a workflow cannot silently disappear from runtime coverage.
+  EXPECTED_WORKFLOW_COUNT=16
+  EXPECTED_STORE_STEP_COUNT=38
 
   mkdir -p "$MOCK_BIN"
   cat > "$MOCK_BIN/pnpm" << 'BASH'
@@ -59,70 +62,73 @@ execute_store_step() {
     > "$STEP_STDOUT" 2> "$STEP_STDERR"
 }
 
-@test "writes the exact store path output for every targeted workflow step" {
-  [ "${#WORKFLOWS[@]}" -eq 16 ]
+assert_successful_store_step() {
+  local script=$1
 
-  step_count=0
-  printf 'path=%s\n' "$EXPECTED_STORE_PATH" > "$EXPECTED_OUTPUT"
+  : > "$OUTPUT_FILE"
+  if execute_store_step "$script" 0 "$EXPECTED_STORE_PATH" ''; then
+    status=0
+  else
+    status=$?
+  fi
+
+  [ "$status" -eq 0 ] || return 1
+  [ ! -s "$STEP_STDOUT" ] || return 1
+  [ ! -s "$STEP_STDERR" ] || return 1
+  cmp -s "$EXPECTED_OUTPUT" "$OUTPUT_FILE"
+}
+
+assert_failed_store_step() {
+  local script=$1
+
+  : > "$OUTPUT_FILE"
+  if execute_store_step "$script" 23 'partial result' 'pnpm error detail'; then
+    status=0
+  else
+    status=$?
+  fi
+
+  [ "$status" -eq 23 ] || return 1
+  [ ! -s "$OUTPUT_FILE" ] || return 1
+  [ ! -s "$STEP_STDOUT" ] || return 1
+  cmp -s "$EXPECTED_STDERR" "$STEP_STDERR"
+}
+
+for_each_store_step() {
+  local callback=$1
+  local step_count=0
+  local workflow
+  local steps_json
+  local workflow_step_count
+  local step_index
+  local script
+
+  [ "${#WORKFLOWS[@]}" -eq "$EXPECTED_WORKFLOW_COUNT" ] || return 1
 
   for workflow in "${WORKFLOWS[@]}"; do
     run bash "$EXTRACTOR" "$workflow"
-    [ "$status" -eq 0 ]
+    [ "$status" -eq 0 ] || return 1
     steps_json=$output
     workflow_step_count=$(jq 'length' <<< "$steps_json")
 
     for ((step_index = 0; step_index < workflow_step_count; step_index++)); do
       script=$(jq -r ".[$step_index]" <<< "$steps_json")
-      : > "$OUTPUT_FILE"
-
-      if execute_store_step "$script" 0 "$EXPECTED_STORE_PATH" ''; then
-        status=0
-      else
-        status=$?
-      fi
-
-      [ "$status" -eq 0 ]
-      [ ! -s "$STEP_STDOUT" ]
-      [ ! -s "$STEP_STDERR" ]
-      cmp -s "$EXPECTED_OUTPUT" "$OUTPUT_FILE"
+      "$callback" "$script" || return 1
       step_count=$((step_count + 1))
     done
   done
 
-  [ "$step_count" -eq 38 ]
+  [ "$step_count" -eq "$EXPECTED_STORE_STEP_COUNT" ]
+}
+
+@test "writes the exact store path output for every targeted workflow step" {
+  printf 'path=%s\n' "$EXPECTED_STORE_PATH" > "$EXPECTED_OUTPUT"
+  for_each_store_step assert_successful_store_step
 }
 
 @test "fails before writing the output when pnpm returns nonzero with stdout" {
-  [ "${#WORKFLOWS[@]}" -eq 16 ]
-
-  step_count=0
   printf 'pnpm error detail\n' > "$EXPECTED_STDERR"
-
-  for workflow in "${WORKFLOWS[@]}"; do
-    run bash "$EXTRACTOR" "$workflow"
-    [ "$status" -eq 0 ]
-    steps_json=$output
-    workflow_step_count=$(jq 'length' <<< "$steps_json")
-
-    for ((step_index = 0; step_index < workflow_step_count; step_index++)); do
-      script=$(jq -r ".[$step_index]" <<< "$steps_json")
-      : > "$OUTPUT_FILE"
-
-      if execute_store_step "$script" 23 'partial result' 'pnpm error detail'; then
-        status=0
-      else
-        status=$?
-      fi
-
-      [ "$status" -eq 23 ]
-      [ ! -s "$OUTPUT_FILE" ]
-      [ ! -s "$STEP_STDOUT" ]
-      cmp -s "$EXPECTED_STDERR" "$STEP_STDERR"
-      step_count=$((step_count + 1))
-    done
-  done
-
-  [ "$step_count" -eq 38 ]
+  for_each_store_step assert_failed_store_step
 }
 
 @test "rejects a workflow with no pnpm store path step" {
