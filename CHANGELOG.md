@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.11](https://github.com/fohte/generic-boilerplate/compare/v0.11.10...v0.11.11) (2026-10-22)
+
+
+### Bug Fixes
+
+* **ci:** include dependent workspaces in installs ([#759](https://github.com/fohte/generic-boilerplate/issues/759)) ([420df9a](https://github.com/fohte/generic-boilerplate/commit/420df9a4696f590dfbd0f44b5ff8eebbd5635bb3))
+* **copier:** preserve legacy PR title workflow ([#758](https://github.com/fohte/generic-boilerplate/issues/758)) ([21a8460](https://github.com/fohte/generic-boilerplate/commit/21a84602514caf984998faf3ef42bc2e01439b0b))
+* **template:** pass jobs for held content-loss PRs ([#756](https://github.com/fohte/generic-boilerplate/issues/756)) ([ba68817](https://github.com/fohte/generic-boilerplate/commit/ba688179a85398b3c6a7bedb072ecac0b5f80fae))
+
 ## [0.11.10](https://github.com/fohte/generic-boilerplate/compare/v0.11.9...v0.11.10) (2026-10-17)
 
 
