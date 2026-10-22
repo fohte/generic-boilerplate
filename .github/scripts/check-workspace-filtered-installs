@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+FIXTURE_ROOT="$REPO_ROOT/generated/monorepo-node-workspace"
+TEMP_BASE="${AGENT_TMPDIR:-${RUNNER_TEMP:-${TMPDIR:-/tmp}}}"
+TEMP_ROOT="$(mktemp -d "$TEMP_BASE/workspace-filtered-install.XXXXXX")"
+trap 'rm -rf "$TEMP_ROOT"' EXIT
+
+commands="$(
+  node - "$FIXTURE_ROOT" << 'NODE'
+const fs = require('node:fs')
+const path = require('node:path')
+
+const fixture = process.argv[2]
+const workflows = [
+  ['Test', '.github/workflows/test.yml'],
+  ['Storybook', '.github/workflows/storybook.yml'],
+  ['VRT', '.github/workflows/vrt.yml'],
+]
+
+for (const [name, relativePath] of workflows) {
+  const contents = fs.readFileSync(path.join(fixture, relativePath), 'utf8')
+  const commands = contents
+    .split(/\r?\n/)
+    .map((line) => line.trim().match(/^-\s+run:\s*(pnpm install --filter .+ --frozen-lockfile)\s*$/)?.[1])
+    .filter(Boolean)
+
+  if (commands.length !== 1) {
+    throw new Error(`${name} workflow must contain one filtered pnpm install command; found ${commands.length}`)
+  }
+
+  const command = commands[0].replaceAll('${{ matrix.package }}', 'frontend')
+  if (command.includes('${{')) throw new Error(`${name} install command has an unresolved expression`)
+  process.stdout.write(`${name}\t${command}\n`)
+}
+NODE
+)"
+
+seed="$TEMP_ROOT/seed"
+mkdir "$seed"
+cp -R "$FIXTURE_ROOT"/. "$seed"/
+find "$seed" -type d \( -name .git -o -name node_modules \) -prune -exec rm -rf {} +
+find "$seed" -type f -name pnpm-lock.yaml -delete
+
+provider_name="$(jq -r '.name' "$seed/backend/package.json")"
+jq --arg provider "$provider_name" '.dependencies[$provider] = "workspace:*"' \
+  "$seed/frontend/package.json" > "$TEMP_ROOT/frontend-package.json"
+mv "$TEMP_ROOT/frontend-package.json" "$seed/frontend/package.json"
+
+if find "$seed" -name node_modules -type d -print -quit | grep -q .; then
+  echo "node_modules existed before lockfile generation" >&2
+  exit 1
+fi
+
+(cd "$seed" && pnpm install --lockfile-only --ignore-scripts)
+
+if find "$seed" -name node_modules -type d -print -quit | grep -q .; then
+  echo "lockfile-only install created node_modules" >&2
+  exit 1
+fi
+
+while IFS=$'\t' read -r name command; do
+  workspace="$TEMP_ROOT/$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')"
+  cp -R "$seed" "$workspace"
+
+  if find "$workspace" -name node_modules -type d -print -quit | grep -q .; then
+    echo "node_modules existed before $name install" >&2
+    exit 1
+  fi
+
+  printf 'Running %s: %s\n' "$name" "$command"
+  (cd "$workspace" && bash --noprofile --norc -e -o pipefail -c "$command")
+  (
+    cd "$workspace/frontend"
+    PROVIDER_PACKAGE="$provider_name" node --input-type=module -e '
+      import { createRequire } from "node:module"
+      const providerManifest = import.meta.resolve(process.env.PROVIDER_PACKAGE + "/package.json")
+      const requireFromProvider = createRequire(providerManifest)
+      const { ok } = requireFromProvider("neverthrow")
+      if (!ok("workspace").isOk()) process.exit(1)
+    '
+  )
+  printf 'Verified %s\n' "$name"
+done <<< "$commands"
