@@ -316,6 +316,10 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-validate-monorepo-node-workspace-${{ hashFiles('generated/monorepo-node-workspace/**/package.json') }}
           restore-keys: ${{ runner.os }}-pnpm-store-validate-monorepo-node-workspace-
 
+      - name: Verify filtered workspace installs
+        run: bash ../../.github/scripts/check-workspace-filtered-installs
+        working-directory: generated/monorepo-node-workspace
+
       - run: pnpm install
         working-directory: generated/monorepo-node-workspace
 

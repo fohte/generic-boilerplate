@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+FIXTURE_ROOT="$REPO_ROOT/generated/monorepo-node-workspace"
+TEMP_BASE="${AGENT_TMPDIR:-${RUNNER_TEMP:-${TMPDIR:-/tmp}}}"
+TEMP_ROOT="$(mktemp -d "$TEMP_BASE/workspace-filtered-install.XXXXXX")"
+trap 'rm -r "$TEMP_ROOT"' EXIT
+
+commands_file="$TEMP_ROOT/commands.tsv"
+while IFS=' ' read -r name relative_path; do
+  command="$(bash "$SCRIPT_DIR/extract-workspace-install-command" "$FIXTURE_ROOT/$relative_path")"
+  printf '%s\t%s\n' "$name" "$command"
+done > "$commands_file" << 'WORKFLOWS'
+Test .github/workflows/test.yml
+Storybook .github/workflows/storybook.yml
+VRT .github/workflows/vrt.yml
+WORKFLOWS
+
+seed="$TEMP_ROOT/seed"
+mkdir "$seed"
+cp -R "$FIXTURE_ROOT"/. "$seed"/
+find "$seed" -type d \( -name .git -o -name node_modules \) -prune -exec rm -r {} +
+find "$seed" -type f -name pnpm-lock.yaml -delete
+
+provider_name="$(jq -r '.name' "$seed/backend/package.json")"
+jq --arg provider "$provider_name" '.dependencies[$provider] = "workspace:*"' \
+  "$seed/frontend/package.json" > "$TEMP_ROOT/frontend-package.json"
+mv "$TEMP_ROOT/frontend-package.json" "$seed/frontend/package.json"
+
+if find "$seed" -name node_modules -type d -print -quit | grep -q .; then
+  echo "node_modules existed before lockfile generation" >&2
+  exit 1
+fi
+
+(cd "$seed" && pnpm install --lockfile-only --ignore-scripts)
+
+if find "$seed" -name node_modules -type d -print -quit | grep -q .; then
+  echo "lockfile-only install created node_modules" >&2
+  exit 1
+fi
+
+while IFS=$'\t' read -r name command; do
+  workspace="$TEMP_ROOT/$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')"
+  cp -R "$seed" "$workspace"
+
+  if find "$workspace" -name node_modules -type d -print -quit | grep -q .; then
+    echo "node_modules existed before $name install" >&2
+    exit 1
+  fi
+
+  printf 'Running %s: %s\n' "$name" "$command"
+  install_log="$TEMP_ROOT/$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')-install.log"
+  (cd "$workspace" && bash --noprofile --norc -e -o pipefail -c "$command") 2>&1 | tee "$install_log"
+  if ! grep -Fqx 'Scope: 2 of 3 workspace projects' "$install_log"; then
+    echo "$name install did not select exactly the frontend and backend workspaces" >&2
+    exit 1
+  fi
+
+  (
+    cd "$workspace/frontend"
+    PROVIDER_PACKAGE="$provider_name" node --input-type=module -e '
+      import { createRequire } from "node:module"
+      const providerManifest = import.meta.resolve(process.env.PROVIDER_PACKAGE + "/package.json")
+      const requireFromProvider = createRequire(providerManifest)
+      const { ok } = requireFromProvider("neverthrow")
+      if (!ok("workspace").isOk()) process.exit(1)
+    '
+  )
+  printf 'Verified %s install and consumer dependency load\n' "$name"
+done < "$commands_file"
