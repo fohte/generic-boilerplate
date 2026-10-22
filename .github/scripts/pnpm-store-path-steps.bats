@@ -33,10 +33,10 @@ BASH
 
   WORKFLOWS=()
   while IFS= read -r workflow; do
-    WORKFLOWS+=("$workflow")
+    WORKFLOWS+=("$REPO_ROOT/$workflow")
   done < <(
-    git -C "$REPO_ROOT" grep -l -F 'name: Get pnpm store directory' -- \
-      generated \
+    git -C "$REPO_ROOT" grep --untracked -l -F 'name: Get pnpm store directory' -- \
+      ':(glob)generated/**/*.yml' \
       .github/workflows/validate-template.yml |
       sort
   )
