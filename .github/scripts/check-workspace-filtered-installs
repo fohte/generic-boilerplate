@@ -7,42 +7,22 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 FIXTURE_ROOT="$REPO_ROOT/generated/monorepo-node-workspace"
 TEMP_BASE="${AGENT_TMPDIR:-${RUNNER_TEMP:-${TMPDIR:-/tmp}}}"
 TEMP_ROOT="$(mktemp -d "$TEMP_BASE/workspace-filtered-install.XXXXXX")"
-trap 'rm -rf "$TEMP_ROOT"' EXIT
+trap 'rm -r "$TEMP_ROOT"' EXIT
 
-commands="$(
-  node - "$FIXTURE_ROOT" << 'NODE'
-const fs = require('node:fs')
-const path = require('node:path')
-
-const fixture = process.argv[2]
-const workflows = [
-  ['Test', '.github/workflows/test.yml'],
-  ['Storybook', '.github/workflows/storybook.yml'],
-  ['VRT', '.github/workflows/vrt.yml'],
-]
-
-for (const [name, relativePath] of workflows) {
-  const contents = fs.readFileSync(path.join(fixture, relativePath), 'utf8')
-  const commands = contents
-    .split(/\r?\n/)
-    .map((line) => line.trim().match(/^-\s+run:\s*(pnpm install --filter .+ --frozen-lockfile)\s*$/)?.[1])
-    .filter(Boolean)
-
-  if (commands.length !== 1) {
-    throw new Error(`${name} workflow must contain one filtered pnpm install command; found ${commands.length}`)
-  }
-
-  const command = commands[0].replaceAll('${{ matrix.package }}', 'frontend')
-  if (command.includes('${{')) throw new Error(`${name} install command has an unresolved expression`)
-  process.stdout.write(`${name}\t${command}\n`)
-}
-NODE
-)"
+commands_file="$TEMP_ROOT/commands.tsv"
+while IFS=' ' read -r name relative_path; do
+  command="$(bash "$SCRIPT_DIR/extract-workspace-install-command" "$FIXTURE_ROOT/$relative_path")"
+  printf '%s\t%s\n' "$name" "$command"
+done > "$commands_file" << 'WORKFLOWS'
+Test .github/workflows/test.yml
+Storybook .github/workflows/storybook.yml
+VRT .github/workflows/vrt.yml
+WORKFLOWS
 
 seed="$TEMP_ROOT/seed"
 mkdir "$seed"
 cp -R "$FIXTURE_ROOT"/. "$seed"/
-find "$seed" -type d \( -name .git -o -name node_modules \) -prune -exec rm -rf {} +
+find "$seed" -type d \( -name .git -o -name node_modules \) -prune -exec rm -r {} +
 find "$seed" -type f -name pnpm-lock.yaml -delete
 
 provider_name="$(jq -r '.name' "$seed/backend/package.json")"
@@ -89,5 +69,5 @@ while IFS=$'\t' read -r name command; do
       if (!ok("workspace").isOk()) process.exit(1)
     '
   )
-  printf 'Verified %s\n' "$name"
-done <<< "$commands"
+  printf 'Verified %s install and consumer dependency load\n' "$name"
+done < "$commands_file"

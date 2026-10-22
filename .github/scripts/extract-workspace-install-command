@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $0 <workflow.yml>" >&2
+  exit 2
+fi
+
+workflow_file="$1"
+matches="$(yq -r '[.jobs[].steps[]?.run | select(tag == "!!str") | select(test("^pnpm install --filter .+ --frozen-lockfile$"))] | .[]' "$workflow_file")"
+commands=()
+
+if [[ -n "$matches" ]]; then
+  while IFS= read -r command; do
+    commands+=("$command")
+  done <<< "$matches"
+fi
+
+if [[ "${#commands[@]}" -ne 1 ]]; then
+  printf '%s must contain exactly one filtered pnpm install command; found %s\n' "$workflow_file" "${#commands[@]}" >&2
+  exit 1
+fi
+
+command="${commands[0]}"
+matrix_expression="\${{ matrix.package }}"
+command="${command//"$matrix_expression"/frontend}"
+expression_prefix="\${{"
+
+if [[ "$command" == *"$expression_prefix"* ]]; then
+  printf 'Unresolved expression in filtered install command from %s\n' "$workflow_file" >&2
+  exit 1
+fi
+
+printf '%s\n' "$command"
