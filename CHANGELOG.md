@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.12](https://github.com/fohte/generic-boilerplate/compare/v0.11.11...v0.11.12) (2026-10-22)
+
+
+### Bug Fixes
+
+* **ci:** surface pnpm store path failures ([#762](https://github.com/fohte/generic-boilerplate/issues/762)) ([4aa94dc](https://github.com/fohte/generic-boilerplate/commit/4aa94dcd52e42ba32c27558f1654abb4c8fd6754))
+* **vrt:** avoid false VRT failures on master ([#764](https://github.com/fohte/generic-boilerplate/issues/764)) ([956b9d5](https://github.com/fohte/generic-boilerplate/commit/956b9d5c00e917d2bdd88ed35dd73e1252de631c))
+
 ## [0.11.11](https://github.com/fohte/generic-boilerplate/compare/v0.11.10...v0.11.11) (2026-10-22)
 
 
