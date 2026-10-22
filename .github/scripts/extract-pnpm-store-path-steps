@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  printf 'Usage: %s <workflow.yml>\n' "$0" >&2
+  exit 2
+fi
+
+workflow_file=$1
+steps=$(yq -o=json '[.jobs[].steps[]? | select(.name == "Get pnpm store directory") | .run]' "$workflow_file")
+step_count=$(jq 'length' <<< "$steps")
+
+if [[ "$step_count" -eq 0 ]]; then
+  printf '%s must contain at least one pnpm store path step; found 0\n' "$workflow_file" >&2
+  exit 1
+fi
+
+if ! jq -e 'all(.[]; type == "string")' <<< "$steps" > /dev/null; then
+  printf '%s has a pnpm store path step without a run script\n' "$workflow_file" >&2
+  exit 1
+fi
+
+printf '%s\n' "$steps"
