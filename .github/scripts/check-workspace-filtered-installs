@@ -72,7 +72,13 @@ while IFS=$'\t' read -r name command; do
   fi
 
   printf 'Running %s: %s\n' "$name" "$command"
-  (cd "$workspace" && bash --noprofile --norc -e -o pipefail -c "$command")
+  install_log="$TEMP_ROOT/$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')-install.log"
+  (cd "$workspace" && bash --noprofile --norc -e -o pipefail -c "$command") 2>&1 | tee "$install_log"
+  if ! grep -Fqx 'Scope: 2 of 3 workspace projects' "$install_log"; then
+    echo "$name install did not select exactly the frontend and backend workspaces" >&2
+    exit 1
+  fi
+
   (
     cd "$workspace/frontend"
     PROVIDER_PACKAGE="$provider_name" node --input-type=module -e '
