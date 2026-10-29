@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.13](https://github.com/fohte/generic-boilerplate/compare/v0.11.12...v0.11.13) (2026-10-29)
+
+
+### Bug Fixes
+
+* **template:** remove move-only commit requirement ([#765](https://github.com/fohte/generic-boilerplate/issues/765)) ([f2811c0](https://github.com/fohte/generic-boilerplate/commit/f2811c04fd7f02f89c913c8f197b0404c8282061))
+
 ## [0.11.12](https://github.com/fohte/generic-boilerplate/compare/v0.11.11...v0.11.12) (2026-10-22)
 
 
