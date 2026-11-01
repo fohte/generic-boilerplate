@@ -9,6 +9,7 @@
         with:
           version: 2026.9.14
 {%- if has_db %}
+          # mise-action resolves DB URLs before db:up, while the port is 0.
           env: false
 
       - name: Start PostgreSQL

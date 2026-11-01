@@ -14,7 +14,7 @@ drop_database() {
   fi
 
   docker compose exec -T db dropdb \
-    --username "workspace_rust_go_db_example" \
+    --username "workspace_db" \
     --if-exists \
     --force \
     "$current_database_name"
@@ -59,13 +59,13 @@ run_db_doc() {
   fi
 
   if [[ "$package" == "." ]]; then
-    current_database_name="workspace_rust_go_db_example_doc_$$"
+    current_database_name="workspace_db_doc_$$"
   else
-    current_database_name="workspace_rust_go_db_example_doc_${package//-/_}_$$"
+    current_database_name="workspace_db_doc_${package//-/_}_$$"
   fi
 
   docker compose exec -T db createdb \
-    --username "workspace_rust_go_db_example" \
+    --username "workspace_db" \
     "$current_database_name"
 
   local database_url

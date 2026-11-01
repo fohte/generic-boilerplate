@@ -18,10 +18,9 @@
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14
-{%- if has_db %}
+{%- if db | default(false) %}
+          # mise-action resolves DB URLs before db:up, while the port is 0.
           env: false
-{%- endif %}
-{%- if has_db %}
 
       - name: Start PostgreSQL
         run: mise run db:up
@@ -52,6 +51,7 @@
 {%- endif %}
 {%- if testable_node_pkgs %}
 {%- for pkg in testable_node_pkgs %}
+{%- set mise_exec = 'mise exec -- ' if pkg.db | default(false) else '' %}
 
   unit-test-{{ pkg.name }}:
     runs-on: ubuntu-latest
@@ -62,6 +62,13 @@
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14
+{%- if pkg.db | default(false) %}
+          # mise-action resolves DB URLs before db:up, while the port is 0.
+          env: false
+
+      - name: Start PostgreSQL
+        run: mise run db:up
+{%- endif %}
 
       # corepack creates the pnpm executable inside mise's node install bin
       # directory; reshim so the mise shims dir (which is on PATH) picks it up.
@@ -111,7 +118,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: pnpm run test
+        run: {{ mise_exec }}pnpm run test
 {%- endfor %}
 
   # Fixed name for branch protection: per-package job names are dynamic, and

@@ -76,6 +76,7 @@
           version: 2026.9.14
 {%- endraw %}
 {%- if has_db %}
+          # mise-action resolves DB URLs before db:up, while the port is 0.
           env: {{ '${{ !contains(fromJSON(' ~ "'" ~ (db_pkgs | map(attribute='name') | list | tojson) ~ "'" ~ '), matrix.package) }}' }}
 
       - name: Start PostgreSQL
@@ -221,9 +222,8 @@
         with:
           version: 2026.9.14{{ '\n          install_args: lefthook' if pkg.type == 'go' else '' }}
 {%- if pkg.db | default(false) %}
+          # mise-action resolves DB URLs before db:up, while the port is 0.
           env: false
-{%- endif %}
-{%- if pkg.db | default(false) %}
 
       - name: Start PostgreSQL
         run: mise run db:up

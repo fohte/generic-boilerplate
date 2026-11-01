@@ -1,5 +1,5 @@
 type: base
-project_name: workspace-rust-go-db-example
+project_name: workspace-db
 description: Test a workspace with database-enabled packages
 is_public: false
 use_release_please: false

@@ -1,5 +1,5 @@
 {
-  "name": "workspace-rust-go-db-example",
+  "name": "workspace-db",
   "private": true,
   "workspaces": [
     "frontend"

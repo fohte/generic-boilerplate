@@ -18,9 +18,9 @@ case "$environment" in
 esac
 
 if [ "$package" = "." ]; then
-  database_name="workspace_rust_go_db_example_$environment"
+  database_name="workspace_db_$environment"
 else
-  database_name="workspace_rust_go_db_example_${package//-/_}_$environment"
+  database_name="workspace_db_${package//-/_}_$environment"
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -36,4 +36,4 @@ case "$port" in
   '' | *[!0-9]*) port=0 ;;
 esac
 
-printf 'postgresql://workspace_rust_go_db_example:workspace_rust_go_db_example@127.0.0.1:%s/%s\n' "$port" "$database_name"
+printf 'postgresql://workspace_db:workspace_db@127.0.0.1:%s/%s\n' "$port" "$database_name"
