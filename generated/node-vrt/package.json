@@ -57,7 +57,7 @@
     "reg-simple-keygen-plugin": "0.14.2",
     "reg-suit": "0.14.5",
     "storybook": "10.6.0",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vitest": "4.1.11"
   }
 }
