@@ -74,6 +74,17 @@
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14
+{%- endraw %}
+{%- if has_db %}
+          env: false
+{%- endif %}
+{%- if has_db %}
+
+      - name: Start PostgreSQL
+        if: {{ '${{ contains(fromJSON(' ~ "'" ~ (db_pkgs | map(attribute='name') | list | tojson) ~ "'" ~ '), matrix.package) }}' }}
+        run: mise run db:up
+{%- endif -%}
+{% raw %}
 
       # corepack creates the pnpm executable inside mise's node install bin
       # directory; reshim so the mise shims dir (which is on PATH) picks it up.
@@ -142,7 +153,7 @@
 
       - name: Run tests
         working-directory: ${{ matrix.package }}
-        run: pnpm run test
+        run: {% endraw %}{{ 'mise exec -- ' if has_db else '' }}{% raw %}pnpm run test
 
 {%- endraw %}
 {%- endif %}
@@ -210,6 +221,14 @@
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14{{ '\n          install_args: lefthook' if pkg.type == 'go' else '' }}
+{%- if has_db %}
+          env: false
+{%- endif %}
+{%- if pkg.db | default(false) %}
+
+      - name: Start PostgreSQL
+        run: mise run db:up
+{%- endif %}
 {%- if pkg.type == 'node' %}
 {%- if is_workspace %}
 {#- Workspace mode: install from root (pnpm only) #}
@@ -238,7 +257,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: pnpm run test
+        run: {{ 'mise exec -- ' if has_db else '' }}pnpm run test
 {%- else %}
 {#- Non-workspace mode: per-package install #}
 
@@ -290,7 +309,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: pnpm run test
+        run: {{ 'mise exec -- ' if has_db else '' }}pnpm run test
 {%- endif %}
 {%- elif pkg.type == 'rust' %}
 {%- if use_coverage %}
@@ -305,7 +324,7 @@
 
       - name: Run tests with coverage
         working-directory: {{ pkg.name }}
-        run: cargo llvm-cov --lcov --output-path lcov.info
+        run: {{ 'mise exec -- ' if has_db else '' }}cargo llvm-cov --lcov --output-path lcov.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
@@ -318,7 +337,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: cargo test
+        run: {{ 'mise exec -- ' if has_db else '' }}cargo test
 {%- endif %}
 {%- elif pkg.type == 'go' %}
 
@@ -330,7 +349,7 @@
 
       - name: Run Go tests
         working-directory: {{ pkg.name }}
-        run: go test ./...
+        run: {{ 'mise exec -- ' if has_db else '' }}go test ./...
 {%- endif %}
 {%- endfor %}
 

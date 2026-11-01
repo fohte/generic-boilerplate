@@ -18,6 +18,14 @@
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14
+{%- if has_db %}
+          env: false
+{%- endif %}
+{%- if has_db %}
+
+      - name: Start PostgreSQL
+        run: mise run db:up
+{%- endif %}
 {%- if use_coverage %}
 
       - name: Install cargo-llvm-cov
@@ -29,7 +37,7 @@
         run: rustup component add llvm-tools-preview
 
       - name: Run tests with coverage
-        run: cargo llvm-cov --lcov --output-path lcov.info
+        run: {{ 'mise exec -- ' if has_db else '' }}cargo llvm-cov --lcov --output-path lcov.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
@@ -40,7 +48,7 @@
 {%- else %}
 
       - name: Run tests
-        run: cargo test
+        run: {{ 'mise exec -- ' if has_db else '' }}cargo test
 {%- endif %}
 {%- if testable_node_pkgs %}
 {%- for pkg in testable_node_pkgs %}
