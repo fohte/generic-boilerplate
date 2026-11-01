@@ -1,0 +1,17 @@
+type: base
+project_name: workspace-rust-go-example
+description: Test a workspace with Node, Rust, and Go subpackages
+is_public: false
+use_release_please: false
+pr_title_check: false
+use_coverage: false
+monorepo_node_workspace: true
+subpackages:
+  - name: frontend
+    type: node
+  - name: backend
+    type: rust
+  - name: worker
+    type: go
+repo_language: en
+repo_id: '246813579'

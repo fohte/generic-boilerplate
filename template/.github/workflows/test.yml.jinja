@@ -8,6 +8,14 @@
 {%- set _ = testable_subpackages.append(pkg) -%}
 {%- endif -%}
 {%- endfor -%}
+{#- Workspace node packages use the matrix above; Rust and Go retain their
+    package-specific jobs so their toolchains do not burden the node matrix. -#}
+{%- set unit_test_subpackages = [] -%}
+{%- for pkg in testable_subpackages -%}
+{%- if not is_workspace or pkg.type in ['rust', 'go'] -%}
+{%- set _ = unit_test_subpackages.append(pkg) -%}
+{%- endif -%}
+{%- endfor -%}
 {#- Node subpackages that participate in pnpm install on CI: same `tests: false`
     opt-out as testable_subpackages, but scoped to node only. -#}
 {%- set testable_node_pkgs = [] -%}
