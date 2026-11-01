@@ -161,11 +161,19 @@ teardown() {
 
 @test "mise exec refreshes inherited DB URLs after PostgreSQL starts" {
   export MOCK_PORT=54321
+  expected_urls="$($REPO_ROOT/generated/node-db/scripts/db-url . dev)"
+  expected_urls+=$'\n'
+  expected_urls+="$($REPO_ROOT/generated/node-db/scripts/db-url . test)"
+  expected_targets="$(sed -E 's#postgresql://[^@]+@#postgresql://<redacted>@#g' <<<"$expected_urls")"
 
   run env DATABASE_URL=postgresql://stale:stale@127.0.0.1:0/stale TEST_DATABASE_URL=postgresql://stale:stale@127.0.0.1:0/stale mise -C "$REPO_ROOT/generated/node-db" exec -- bash -c 'printf "%s\\n%s\\n" "$DATABASE_URL" "$TEST_DATABASE_URL"'
 
   [ "$status" -eq 0 ]
-  [ "$output" = $'postgresql://node_db:node_db@127.0.0.1:54321/node_db_dev\npostgresql://node_db:node_db@127.0.0.1:54321/node_db_test' ]
+  actual_targets="$(sed -E 's#postgresql://[^@]+@#postgresql://<redacted>@#g' <<<"$output")"
+  if [ "$actual_targets" != "$expected_targets" ]; then
+    printf 'mise exec returned unexpected DB URL targets:\n%s\n' "$actual_targets"
+    return 1
+  fi
 }
 
 @test "database URL override files are gitignored where mise loads them" {
