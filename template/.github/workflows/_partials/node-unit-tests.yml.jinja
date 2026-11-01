@@ -10,9 +10,7 @@
           version: 2026.9.14
 {%- if has_db %}
           env: false
-{%- endif %}
 
-{%- if has_db %}
       - name: Start PostgreSQL
         run: mise run db:up
 {%- endif %}
@@ -40,7 +38,7 @@
       - run: pnpm install --frozen-lockfile
 
       - name: Run tests
-        run: {{ 'mise exec -- ' if has_db else '' }}pnpm run test
+        run: {{ mise_exec }}pnpm run test
 
   # Fixed name for branch protection: knip has no `needs` of its own, so
   # this gate (skip == success) folds its result into unit-test.

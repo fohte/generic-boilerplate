@@ -76,9 +76,7 @@
           version: 2026.9.14
 {%- endraw %}
 {%- if has_db %}
-          env: false
-{%- endif %}
-{%- if has_db %}
+          env: {{ '${{ !contains(fromJSON(' ~ "'" ~ (db_pkgs | map(attribute='name') | list | tojson) ~ "'" ~ '), matrix.package) }}' }}
 
       - name: Start PostgreSQL
         if: {{ '${{ contains(fromJSON(' ~ "'" ~ (db_pkgs | map(attribute='name') | list | tojson) ~ "'" ~ '), matrix.package) }}' }}
@@ -153,7 +151,7 @@
 
       - name: Run tests
         working-directory: ${{ matrix.package }}
-        run: {% endraw %}{{ 'mise exec -- ' if has_db else '' }}{% raw %}pnpm run test
+        run: {% endraw %}{% if has_db %}{{ '${{ contains(fromJSON(' ~ "'" ~ (db_pkgs | map(attribute='name') | list | tojson) ~ "'" ~ '), matrix.package) && ' ~ "'" ~ 'mise exec -- ' ~ "'" ~ ' || ' ~ "'" ~ "'" ~ ' }}' }}{% endif %}{% raw %}pnpm run test
 
 {%- endraw %}
 {%- endif %}
@@ -186,6 +184,7 @@
         with:
           files: .github/workflows/test.yml
 {%- for pkg in unit_test_subpackages %}
+{%- set mise_exec = 'mise exec -- ' if pkg.db | default(false) else '' %}
 
   unit-test-{{ pkg.name }}:
     needs: detect-changes
@@ -221,7 +220,7 @@
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14{{ '\n          install_args: lefthook' if pkg.type == 'go' else '' }}
-{%- if has_db %}
+{%- if pkg.db | default(false) %}
           env: false
 {%- endif %}
 {%- if pkg.db | default(false) %}
@@ -257,7 +256,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: {{ 'mise exec -- ' if has_db else '' }}pnpm run test
+        run: {{ mise_exec }}pnpm run test
 {%- else %}
 {#- Non-workspace mode: per-package install #}
 
@@ -309,7 +308,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: {{ 'mise exec -- ' if has_db else '' }}pnpm run test
+        run: {{ mise_exec }}pnpm run test
 {%- endif %}
 {%- elif pkg.type == 'rust' %}
 {%- if use_coverage %}
@@ -324,7 +323,7 @@
 
       - name: Run tests with coverage
         working-directory: {{ pkg.name }}
-        run: {{ 'mise exec -- ' if has_db else '' }}cargo llvm-cov --lcov --output-path lcov.info
+        run: {{ mise_exec }}cargo llvm-cov --lcov --output-path lcov.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
@@ -337,7 +336,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: {{ 'mise exec -- ' if has_db else '' }}cargo test
+        run: {{ mise_exec }}cargo test
 {%- endif %}
 {%- elif pkg.type == 'go' %}
 
@@ -349,7 +348,7 @@
 
       - name: Run Go tests
         working-directory: {{ pkg.name }}
-        run: {{ 'mise exec -- ' if has_db else '' }}go test ./...
+        run: {{ mise_exec }}go test ./...
 {%- endif %}
 {%- endfor %}
 

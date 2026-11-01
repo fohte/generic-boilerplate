@@ -130,6 +130,7 @@ jobs:
         with:
           version: 2026.9.14
           env: false
+
       - name: Start PostgreSQL
         run: mise run db:up
 

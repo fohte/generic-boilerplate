@@ -37,7 +37,7 @@
         run: rustup component add llvm-tools-preview
 
       - name: Run tests with coverage
-        run: {{ 'mise exec -- ' if has_db else '' }}cargo llvm-cov --lcov --output-path lcov.info
+        run: {{ mise_exec }}cargo llvm-cov --lcov --output-path lcov.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
@@ -48,7 +48,7 @@
 {%- else %}
 
       - name: Run tests
-        run: {{ 'mise exec -- ' if has_db else '' }}cargo test
+        run: {{ mise_exec }}cargo test
 {%- endif %}
 {%- if testable_node_pkgs %}
 {%- for pkg in testable_node_pkgs %}

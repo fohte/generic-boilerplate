@@ -211,7 +211,7 @@ jobs:
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14
-          env: false
+          env: ${{ !contains(fromJSON('["frontend", "backend"]'), matrix.package) }}
 
       - name: Start PostgreSQL
         if: ${{ contains(fromJSON('["frontend", "backend"]'), matrix.package) }}
@@ -243,7 +243,7 @@ jobs:
 
       - name: Run tests
         working-directory: ${{ matrix.package }}
-        run: mise exec -- pnpm run test
+        run: ${{ contains(fromJSON('["frontend", "backend"]'), matrix.package) && 'mise exec -- ' || '' }}pnpm run test
 
   detect-changes:
     runs-on: ubuntu-slim
@@ -326,7 +326,6 @@ jobs:
         with:
           version: 2026.9.14
           install_args: lefthook
-          env: false
 
       - name: Run Go format and vet checks through lefthook
         run: |
@@ -336,7 +335,7 @@ jobs:
 
       - name: Run Go tests
         working-directory: worker
-        run: mise exec -- go test ./...
+        run: go test ./...
 
   # Fixed name for branch protection: matrix leg names are dynamic, and knip
   # has no `needs`, so this gate (skip == success) stands in for both.
