@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.11.13](https://github.com/fohte/generic-boilerplate/compare/v0.11.12...v0.11.13) (2026-11-01)
+
+
+### Bug Fixes
+
+* **ci:** run Rust and Go tests in Node workspaces ([#768](https://github.com/fohte/generic-boilerplate/issues/768)) ([12f7ad0](https://github.com/fohte/generic-boilerplate/commit/12f7ad0b0b09b98c089caf57c38c5b2c75f11b55))
+* **ci:** start PostgreSQL before unit tests ([#769](https://github.com/fohte/generic-boilerplate/issues/769)) ([8306891](https://github.com/fohte/generic-boilerplate/commit/83068913f333f4f89df2268fc1ffaa845d56ccfe))
+* **template:** ignore VRT screenshots in gitignore ([#767](https://github.com/fohte/generic-boilerplate/issues/767)) ([f2a9b3c](https://github.com/fohte/generic-boilerplate/commit/f2a9b3cc1998f87790badd1c024b8113a944890c))
+* **template:** remove move-only commit requirement ([#765](https://github.com/fohte/generic-boilerplate/issues/765)) ([f2811c0](https://github.com/fohte/generic-boilerplate/commit/f2811c04fd7f02f89c913c8f197b0404c8282061))
+
 ## [0.11.12](https://github.com/fohte/generic-boilerplate/compare/v0.11.11...v0.11.12) (2026-10-22)
 
 
