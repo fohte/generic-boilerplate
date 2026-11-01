@@ -1,0 +1,6 @@
+issuer: https://token.actions.githubusercontent.com
+subject_pattern: ^repo:fohte@11088009/workspace-rust-go-example@246813579:ref:refs/heads/.+$
+claim_pattern:
+  job_workflow_ref: ^fohte/workspace-rust-go-example/\.github/workflows/bootstrap\.yml@[^@]+$
+permissions:
+  contents: write

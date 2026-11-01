@@ -144,37 +144,23 @@
         working-directory: ${{ matrix.package }}
         run: pnpm run test
 
-  # Fixed name for branch protection: matrix leg names are dynamic, and knip
-  # has no `needs`, so this gate (skip == success) stands in for both.
-  unit-test:
-    runs-on: ubuntu-slim
-    timeout-minutes: 30
-    needs:
-      - setup
-      - unit-test-run
-      - knip
-    if: failure()
-    steps:
-      - run: exit 1
 {%- endraw %}
-{%- else %}
+{%- endif %}
+{%- if not is_workspace or unit_test_subpackages %}
 
   detect-changes:
     runs-on: ubuntu-slim
     timeout-minutes: 30
     outputs:
-{%- for pkg in testable_subpackages %}
+{%- for pkg in unit_test_subpackages %}
       {{ pkg.name }}: {% raw %}${{ steps.changes-{% endraw %}{{ pkg.name }}{% raw %}.outputs.any_modified }}{% endraw %}
 {%- endfor %}
       workflow: {% raw %}${{ steps.changes-workflow.outputs.any_modified }}{% endraw %}
-{%- if is_workspace %}
-      root-lockfile: {% raw %}${{ steps.changes-root-lockfile.outputs.any_modified }}{% endraw %}
-{%- endif %}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 2
-{%- for pkg in testable_subpackages %}
+{%- for pkg in unit_test_subpackages %}
 
       - name: Check for {{ pkg.name }} changes
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
@@ -188,31 +174,13 @@
         id: changes-workflow
         with:
           files: .github/workflows/test.yml
-{%- if is_workspace %}
-
-      - name: Check for root lockfile changes
-        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
-        id: changes-root-lockfile
-        with:
-          files: |
-            package.json
-            pnpm-lock.yaml
-            pnpm-workspace.yaml
-{%- endif %}
-{%- for pkg in testable_subpackages %}
+{%- for pkg in unit_test_subpackages %}
 
   unit-test-{{ pkg.name }}:
     needs: detect-changes
-{%- if pkg.type == 'node' and is_workspace %}
-    if: >-
-      needs.detect-changes.outputs.{{ pkg.name }} == 'true' ||
-      needs.detect-changes.outputs.workflow == 'true' ||
-      needs.detect-changes.outputs.root-lockfile == 'true'
-{%- else %}
     if: >-
       needs.detect-changes.outputs.{{ pkg.name }} == 'true' ||
       needs.detect-changes.outputs.workflow == 'true'
-{%- endif %}
     runs-on: ubuntu-latest
     timeout-minutes: 30
 {%- if pkg.type == 'rust' %}
@@ -366,22 +334,34 @@
 {%- endif %}
 {%- endfor %}
 
+{%- endif %}
+{% if is_workspace %}
+  # Fixed name for branch protection: matrix leg names are dynamic, and knip
+  # has no `needs`, so this gate (skip == success) stands in for both.
+{%- else %}
   # Fixed name for branch protection: per-package job names are dynamic, and
   # knip (when generated) has no `needs`, so this gate (skip == success)
   # stands in for both.
+{%- endif %}
   unit-test:
     runs-on: ubuntu-slim
     timeout-minutes: 30
     needs:
+{%- if is_workspace %}
+      - setup
+      - unit-test-run
+      - knip
+{%- endif %}
+{%- if not is_workspace or unit_test_subpackages %}
       - detect-changes
-{%- for pkg in testable_subpackages %}
+{%- for pkg in unit_test_subpackages %}
       - unit-test-{{ pkg.name }}
 {%- endfor %}
-{%- if testable_node_pkgs %}
+{%- endif %}
+{%- if not is_workspace and testable_node_pkgs %}
       - knip
 {%- endif %}
     if: failure()
     steps:
       - run: exit 1
-{%- endif %}
 {#- Jinja edge trimming prevents blank lines at the include boundary. -#}
