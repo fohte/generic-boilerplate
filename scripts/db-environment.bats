@@ -225,7 +225,13 @@ teardown() {
   workflow="$REPO_ROOT/generated/monorepo-node-workspace-rust-go-db/.github/workflows/test.yml"
   node_job="$(workflow_job "$workflow" unit-test-run)"
   rust_job="$(workflow_job "$workflow" unit-test-backend)"
+  node_db_condition="contains(fromJSON('[\"frontend\", \"backend\"]'), matrix.package)"
+  node_start_if="$(grep -A2 -F '      - name: Start PostgreSQL' <<<"$node_job" | grep -F 'if:')"
+  node_test_run_line="$(grep -F 'pnpm run test' <<<"$node_job")"
 
+  [[ "$node_start_if" == *"$node_db_condition"* ]]
+  [[ "$node_test_run_line" == *"$node_db_condition"* ]]
+  [[ "$node_test_run_line" == *"'mise exec -- '"* ]]
   assert_database_setup_before_test "$node_job" 'pnpm run test'
   assert_database_setup_before_test "$rust_job" 'mise exec -- cargo test'
 }
