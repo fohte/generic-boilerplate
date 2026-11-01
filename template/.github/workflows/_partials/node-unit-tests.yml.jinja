@@ -9,6 +9,7 @@
         with:
           version: 2026.9.14
 {%- if db | default(false) %}
+
       - name: Start PostgreSQL
         run: mise run db:up
 {%- endif %}
@@ -36,7 +37,7 @@
       - run: pnpm install --frozen-lockfile
 
       - name: Run tests
-        run: {{ mise_exec }}pnpm run test{% if db | default(false) %} # Re-evaluate DB URLs after db:up assigns the host port.{% endif %}
+        run: {{ mise_exec }}pnpm run test{{ db_url_comment if db | default(false) else '' }}
 
   # Fixed name for branch protection: knip has no `needs` of its own, so
   # this gate (skip == success) folds its result into unit-test.

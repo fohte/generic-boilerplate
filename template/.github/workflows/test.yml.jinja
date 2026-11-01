@@ -2,6 +2,7 @@
     subpackages unless they opt out with `tests: false`. Built once here so
     detect-changes outputs / change-detection steps / unit-test jobs stay in
     sync; mismatched filters would emit jobs referencing non-existent outputs. -#}
+{%- set db_url_comment = ' # Re-evaluate DB URLs after db:up assigns the host port.' -%}
 {%- set testable_subpackages = [] -%}
 {%- for pkg in subpackages -%}
 {%- if pkg.type in ['go', 'rust'] or (pkg.type == 'node' and pkg.tests | default(true)) -%}

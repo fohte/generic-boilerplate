@@ -19,6 +19,7 @@
         with:
           version: 2026.9.14
 {%- if db | default(false) %}
+
       - name: Start PostgreSQL
         run: mise run db:up
 {%- endif %}
@@ -33,7 +34,7 @@
         run: rustup component add llvm-tools-preview
 
       - name: Run tests with coverage
-        run: {{ mise_exec }}cargo llvm-cov --lcov --output-path lcov.info{% if db | default(false) %} # Re-evaluate DB URLs after db:up assigns the host port.{% endif %}
+        run: {{ mise_exec }}cargo llvm-cov --lcov --output-path lcov.info{{ db_url_comment if db | default(false) else '' }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
@@ -44,7 +45,7 @@
 {%- else %}
 
       - name: Run tests
-        run: {{ mise_exec }}cargo test{% if db | default(false) %} # Re-evaluate DB URLs after db:up assigns the host port.{% endif %}
+        run: {{ mise_exec }}cargo test{{ db_url_comment if db | default(false) else '' }}
 {%- endif %}
 {%- if testable_node_pkgs %}
 {%- for pkg in testable_node_pkgs %}
@@ -60,6 +61,7 @@
         with:
           version: 2026.9.14
 {%- if pkg.db | default(false) %}
+
       - name: Start PostgreSQL
         run: mise run db:up
 {%- endif %}
@@ -112,7 +114,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: {{ pkg_mise_exec }}pnpm run test{% if pkg.db | default(false) %} # Re-evaluate DB URLs after db:up assigns the host port.{% endif %}
+        run: {{ pkg_mise_exec }}pnpm run test{{ db_url_comment if pkg.db | default(false) else '' }}
 {%- endfor %}
 
   # Fixed name for branch protection: per-package job names are dynamic, and

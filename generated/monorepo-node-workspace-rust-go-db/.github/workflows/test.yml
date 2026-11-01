@@ -211,6 +211,7 @@ jobs:
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14
+
       - name: Start PostgreSQL
         if: ${{ contains(fromJSON('["frontend", "backend"]'), matrix.package) }}
         run: mise run db:up
@@ -241,7 +242,7 @@ jobs:
 
       - name: Run tests
         working-directory: ${{ matrix.package }}
-        run: ${{ contains(fromJSON('["frontend", "backend"]'), matrix.package) && 'mise exec -- ' || '' }}pnpm run test # DB packages use mise exec to re-evaluate URLs after startup.
+        run: ${{ contains(fromJSON('["frontend", "backend"]'), matrix.package) && 'mise exec -- ' || '' }}pnpm run test # Re-evaluate DB URLs after db:up assigns the host port.
 
   detect-changes:
     runs-on: ubuntu-slim
@@ -296,6 +297,7 @@ jobs:
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14
+
       - name: Start PostgreSQL
         run: mise run db:up
 
