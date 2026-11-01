@@ -161,15 +161,12 @@ teardown() {
 
 @test "mise exec refreshes inherited DB URLs after PostgreSQL starts" {
   export MOCK_PORT=54321
-  expected_urls="$($REPO_ROOT/generated/node-db/scripts/db-url . dev)"
-  expected_urls+=$'\n'
-  expected_urls+="$($REPO_ROOT/generated/node-db/scripts/db-url . test)"
-  expected_targets="$(sed -E 's#postgresql://[^@]+@#postgresql://<redacted>@#g' <<<"$expected_urls")"
+  expected_targets=$'127.0.0.1:54321/node_db_dev\n127.0.0.1:54321/node_db_test'
 
   run env DATABASE_URL=postgresql://stale:stale@127.0.0.1:0/stale TEST_DATABASE_URL=postgresql://stale:stale@127.0.0.1:0/stale mise -C "$REPO_ROOT/generated/node-db" exec -- bash -c 'printf "%s\\n%s\\n" "$DATABASE_URL" "$TEST_DATABASE_URL"'
 
   [ "$status" -eq 0 ]
-  actual_targets="$(sed -E 's#postgresql://[^@]+@#postgresql://<redacted>@#g' <<<"$output")"
+  actual_targets="$(sed -E 's#^postgresql://[^@]+@##' <<<"$output")"
   if [ "$actual_targets" != "$expected_targets" ]; then
     printf 'mise exec returned unexpected DB URL targets:\n%s\n' "$actual_targets"
     return 1
