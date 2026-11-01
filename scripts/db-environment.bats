@@ -163,7 +163,7 @@ teardown() {
   export MOCK_PORT=54321
   expected_targets=$'127.0.0.1:54321/node_db_dev\n127.0.0.1:54321/node_db_test'
 
-  run env DATABASE_URL=postgresql://stale:stale@127.0.0.1:0/stale TEST_DATABASE_URL=postgresql://stale:stale@127.0.0.1:0/stale mise -C "$REPO_ROOT/generated/node-db" exec -- bash -c 'printf "%s\\n%s\\n" "$DATABASE_URL" "$TEST_DATABASE_URL"'
+  run env MISE_LOG_LEVEL=error DATABASE_URL=postgresql://stale:stale@127.0.0.1:0/stale TEST_DATABASE_URL=postgresql://stale:stale@127.0.0.1:0/stale mise -C "$REPO_ROOT/generated/node-db" exec -- bash -c 'printf "%s\\n%s\\n" "$DATABASE_URL" "$TEST_DATABASE_URL"'
 
   [ "$status" -eq 0 ]
   actual_targets="$(sed -E 's#^postgresql://[^@]+@##' <<<"$output")"
