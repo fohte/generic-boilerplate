@@ -1,0 +1,20 @@
+# Test fixture for a Node root with a database-enabled Rust subpackage
+
+type: node
+project_name: node-rust-subpackage-db
+description: Test Node root with a database-enabled Rust subpackage
+is_public: false
+use_release_please: false
+pr_title_check: false
+use_coverage: false
+is_web_app: false
+web_app_port: 8080
+error_tracking: false
+storybook: false
+vrt: false
+repo_language: ja
+subpackages:
+  - name: service
+    type: rust
+    db: true
+repo_id: '987654321'

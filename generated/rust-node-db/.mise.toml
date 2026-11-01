@@ -1,0 +1,30 @@
+[tools]
+lefthook = "2.1.14"
+"github:ast-grep/ast-grep" = "0.45.3"
+
+# lefthook hooks
+actionlint = "1.7.12"
+"github:betterleaks/betterleaks" = "1.8.1"
+node = "24.21.0"
+pinact = "4.1.1"
+"github:fohte/basefmt" = "0.1.0"
+"github:k1LoW/tbls" = "1.95.0"
+"npm:@commitlint/cli" = "21.2.3"
+"npm:prettier" = "3.9.9"
+shellcheck = "0.11.0"
+shfmt = "3.14.1"
+
+[env]
+DATABASE_URL = "{{ exec(command=config_root ~ '/scripts/db-url docs dev') }}"
+TEST_DATABASE_URL = "{{ exec(command=config_root ~ '/scripts/db-url docs test') }}"
+_.file = ['.env', '.env.local']
+# Share target dir across worktrees to avoid full recompilation
+CARGO_TARGET_DIR = "{{config_root}}/target"
+
+[tasks."db:up"]
+description = "Start the local PostgreSQL databases"
+file = "scripts/db-up"
+
+[tasks."db:doc"]
+description = "Generate database documentation from disposable databases"
+file = "scripts/db-doc"

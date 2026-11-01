@@ -2,6 +2,7 @@
     subpackages unless they opt out with `tests: false`. Built once here so
     detect-changes outputs / change-detection steps / unit-test jobs stay in
     sync; mismatched filters would emit jobs referencing non-existent outputs. -#}
+{%- set db_url_comment = ' # Re-evaluate DB URLs after db:up assigns the host port.' -%}
 {%- set testable_subpackages = [] -%}
 {%- for pkg in subpackages -%}
 {%- if pkg.type in ['go', 'rust'] or (pkg.type == 'node' and pkg.tests | default(true)) -%}
@@ -146,11 +147,7 @@ jobs:
 {%- elif type == 'rust' %}
 {%- if has_node_pkg and not is_workspace and testable_node_pkgs %}
 {#- prettier/commitlint are hosted by mise so the root has no package.json;
-    only testable node subpackages install dependencies here.
-    No fixture combines type: rust with a testable node subpackage (testable
-    multi-package setups use monorepo mode instead), so this branch has no
-    snapshot coverage. Render it manually via `copier copy --overwrite
-    --defaults --vcs-ref HEAD --data-file <fixture>.yml . .` when editing. #}
+    only testable node subpackages install dependencies here. #}
 
       # corepack creates the pnpm executable inside mise's node install bin
       # directory; reshim so the mise shims dir (which is on PATH) picks it up.
@@ -361,11 +358,7 @@ jobs:
 {#- Non-workspace mode: each testable node subpackage is its own isolated
     pnpm project (own lockfile, own knip.json), so knip runs once per
     subpackage from its own directory, sharing one combined-key pnpm store
-    cache (same pattern as the lefthook job above). No fixture combines
-    type: rust with a testable node subpackage (testable multi-package setups
-    use monorepo mode instead), so this branch has no snapshot coverage.
-    Render it manually via `copier copy --overwrite --defaults --vcs-ref HEAD
-    --data-file <fixture>.yml . .` when editing. #}
+    cache (same pattern as the lefthook job above). #}
 
       - name: Get pnpm store directory
         id: pnpm-store

@@ -14,8 +14,8 @@ setup() {
   EXPECTED_STDERR="$TEST_DIR/expected-stderr"
   EXPECTED_STORE_PATH='/tmp/example pnpm store'
   # Pin the inventory so a workflow cannot silently disappear from runtime coverage.
-  EXPECTED_WORKFLOW_COUNT=17
-  EXPECTED_STORE_STEP_COUNT=41
+  EXPECTED_WORKFLOW_COUNT=20
+  EXPECTED_STORE_STEP_COUNT=50
 
   mkdir -p "$MOCK_BIN"
   cat > "$MOCK_BIN/pnpm" << 'BASH'

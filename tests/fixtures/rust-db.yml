@@ -1,0 +1,16 @@
+# Test fixture for a single-package Rust project with a local PostgreSQL DB
+
+type: rust
+project_name: rust-db
+description: Test Rust project with a database
+is_public: false
+use_release_please: false
+pr_title_check: false
+use_coverage: false
+repo_language: ja
+subpackages: []
+db: true
+db_migrate: cargo run -q -p migration -- up
+db_schema_paths:
+  - migration/**
+repo_id: '123456789'

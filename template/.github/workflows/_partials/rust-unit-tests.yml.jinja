@@ -1,4 +1,4 @@
-  {{ 'unit-test-run' if testable_node_pkgs else 'unit-test' }}:
+{% set mise_exec = 'mise exec -- ' if db | default(false) else '' %}  {{ 'unit-test-run' if testable_node_pkgs else 'unit-test' }}:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -18,6 +18,11 @@
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14
+{%- if db | default(false) %}
+
+      - name: Start PostgreSQL
+        run: mise run db:up
+{%- endif %}
 {%- if use_coverage %}
 
       - name: Install cargo-llvm-cov
@@ -29,7 +34,7 @@
         run: rustup component add llvm-tools-preview
 
       - name: Run tests with coverage
-        run: cargo llvm-cov --lcov --output-path lcov.info
+        run: {{ mise_exec }}cargo llvm-cov --lcov --output-path lcov.info{{ db_url_comment if db | default(false) else '' }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
@@ -40,10 +45,11 @@
 {%- else %}
 
       - name: Run tests
-        run: cargo test
+        run: {{ mise_exec }}cargo test{{ db_url_comment if db | default(false) else '' }}
 {%- endif %}
 {%- if testable_node_pkgs %}
 {%- for pkg in testable_node_pkgs %}
+{%- set pkg_mise_exec = 'mise exec -- ' if pkg.db | default(false) else '' %}
 
   unit-test-{{ pkg.name }}:
     runs-on: ubuntu-latest
@@ -54,6 +60,11 @@
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14
+{%- if pkg.db | default(false) %}
+
+      - name: Start PostgreSQL
+        run: mise run db:up
+{%- endif %}
 
       # corepack creates the pnpm executable inside mise's node install bin
       # directory; reshim so the mise shims dir (which is on PATH) picks it up.
@@ -103,7 +114,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: pnpm run test
+        run: {{ pkg_mise_exec }}pnpm run test{{ db_url_comment if pkg.db | default(false) else '' }}
 {%- endfor %}
 
   # Fixed name for branch protection: per-package job names are dynamic, and

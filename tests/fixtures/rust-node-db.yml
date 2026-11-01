@@ -1,0 +1,15 @@
+# Test fixture for a Rust root with a database-enabled Node subpackage
+type: rust
+project_name: rust-node-db
+description: Test Rust root with a database-enabled Node subpackage
+is_public: false
+use_release_please: false
+pr_title_check: false
+use_coverage: false
+monorepo_node_workspace: false
+subpackages:
+  - name: docs
+    type: node
+    db: true
+repo_language: ja
+repo_id: '123456789'

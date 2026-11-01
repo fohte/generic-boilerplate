@@ -1,0 +1,19 @@
+type: base
+project_name: workspace-db
+description: Test a workspace with database-enabled packages
+is_public: false
+use_release_please: false
+pr_title_check: false
+use_coverage: false
+monorepo_node_workspace: true
+subpackages:
+  - name: frontend
+    type: node
+    db: true
+  - name: backend
+    type: rust
+    db: true
+  - name: worker
+    type: go
+repo_language: en
+repo_id: '246813579'
