@@ -50,6 +50,17 @@ EOF
   cmp "$TEST_DIR/expected-all-sql" "$SQL_LOG"
 }
 
+workflow_job() {
+  local workflow="$1"
+  local job_name="$2"
+
+  awk -v job="  ${job_name}:" '
+    $0 == job { in_job = 1; print; next }
+    in_job && /^  [[:alnum:]_-]+:/ { exit }
+    in_job { print }
+  ' "$workflow"
+}
+
 teardown() {
   rm -rf "$TEST_DIR"
 }
@@ -168,39 +179,35 @@ teardown() {
   [ "$db_up_line" -lt "$test_line" ]
 }
 
-@test "unit-test-worker and database-free node workflow skip database setup" {
+@test "unit-test-worker skips database setup" {
   workflow="$REPO_ROOT/generated/monorepo-node-workspace-rust-go-db/.github/workflows/test.yml"
-  worker_job="$(awk '
-    /^  unit-test-worker:/ { in_job = 1 }
-    in_job && /^  [[:alnum:]_-]+:/ && $0 != "  unit-test-worker:" { exit }
-    in_job { print }
-  ' "$workflow")"
+  worker_job="$(workflow_job "$workflow" unit-test-worker)"
 
   [[ "$worker_job" == *"Run Go tests"* ]]
   ! grep -Fq 'run: mise run db:up' <<<"$worker_job"
   ! grep -Fq 'mise exec --' <<<"$worker_job"
   ! grep -Fq 'env: false' <<<"$worker_job"
+}
+
+@test "database-free node workflow skips database setup" {
   ! grep -Fq 'run: mise run db:up' "$REPO_ROOT/generated/node/.github/workflows/test.yml"
   ! grep -Fq 'mise exec --' "$REPO_ROOT/generated/node/.github/workflows/test.yml"
   ! grep -Fq 'env: false' "$REPO_ROOT/generated/node/.github/workflows/test.yml"
 }
 
-@test "Rust root and database-enabled node subpackage gate PostgreSQL independently" {
+@test "Rust root skips database setup when only a subpackage enables it" {
   workflow="$REPO_ROOT/generated/rust-node-db/.github/workflows/test.yml"
-  root_job="$(awk '
-    /^  unit-test-run:/ { in_job = 1 }
-    in_job && /^  [[:alnum:]_-]+:/ && $0 != "  unit-test-run:" { exit }
-    in_job { print }
-  ' "$workflow")"
-  node_job="$(awk '
-    /^  unit-test-docs:/ { in_job = 1 }
-    in_job && /^  [[:alnum:]_-]+:/ && $0 != "  unit-test-docs:" { exit }
-    in_job { print }
-  ' "$workflow")"
+  root_job="$(workflow_job "$workflow" unit-test-run)"
 
   [[ "$root_job" == *"Run tests"* ]]
   ! grep -Fq 'run: mise run db:up' <<<"$root_job"
   ! grep -Fq 'mise exec -- cargo' <<<"$root_job"
+}
+
+@test "database-enabled node subpackage starts PostgreSQL before tests" {
+  workflow="$REPO_ROOT/generated/rust-node-db/.github/workflows/test.yml"
+  node_job="$(workflow_job "$workflow" unit-test-docs)"
+
   [[ "$node_job" == *"Run tests"* ]]
   db_up_line="$(grep -nF 'run: mise run db:up' <<<"$node_job" | cut -d: -f1)"
   test_line="$(grep -nF 'run: mise exec -- pnpm run test' <<<"$node_job" | cut -d: -f1)"

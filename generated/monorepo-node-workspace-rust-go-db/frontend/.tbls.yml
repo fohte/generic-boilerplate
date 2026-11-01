@@ -1,5 +1,5 @@
 # prettier-ignore
-name: "workspace-rust-go-db-example frontend"
+name: "workspace-db frontend"
 docPath: docs/db
 # Fixed names keep the disposable database name out of generated headings.
 # schema.json includes architecture-specific database_version values.

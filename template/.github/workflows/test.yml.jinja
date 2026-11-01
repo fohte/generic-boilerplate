@@ -117,7 +117,7 @@ jobs:
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14
-{%- if type == 'node' %}{% set mise_exec = 'mise exec -- ' if has_db else '' %}
+{%- if type == 'node' %}
 
       # corepack creates the pnpm executable inside mise's node install bin
       # directory; reshim so the mise shims dir (which is on PATH) picks it up.
@@ -143,14 +143,10 @@ jobs:
 
       - name: Check peer dependencies
         run: pnpm peers check
-{%- elif type == 'rust' %}{% set mise_exec = 'mise exec -- ' if db | default(false) else '' %}
+{%- elif type == 'rust' %}
 {%- if has_node_pkg and not is_workspace and testable_node_pkgs %}
 {#- prettier/commitlint are hosted by mise so the root has no package.json;
-    only testable node subpackages install dependencies here.
-    No fixture combines type: rust with a testable node subpackage (testable
-    multi-package setups use monorepo mode instead), so this branch has no
-    snapshot coverage. Render it manually via `copier copy --overwrite
-    --defaults --vcs-ref HEAD --data-file <fixture>.yml . .` when editing. #}
+    only testable node subpackages install dependencies here. #}
 
       # corepack creates the pnpm executable inside mise's node install bin
       # directory; reshim so the mise shims dir (which is on PATH) picks it up.
@@ -361,11 +357,7 @@ jobs:
 {#- Non-workspace mode: each testable node subpackage is its own isolated
     pnpm project (own lockfile, own knip.json), so knip runs once per
     subpackage from its own directory, sharing one combined-key pnpm store
-    cache (same pattern as the lefthook job above). No fixture combines
-    type: rust with a testable node subpackage (testable multi-package setups
-    use monorepo mode instead), so this branch has no snapshot coverage.
-    Render it manually via `copier copy --overwrite --defaults --vcs-ref HEAD
-    --data-file <fixture>.yml . .` when editing. #}
+    cache (same pattern as the lefthook job above). #}
 
       - name: Get pnpm store directory
         id: pnpm-store

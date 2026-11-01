@@ -1,4 +1,4 @@
-  {{ 'unit-test-run' if testable_node_pkgs else 'unit-test' }}:
+{% set mise_exec = 'mise exec -- ' if db | default(false) else '' %}  {{ 'unit-test-run' if testable_node_pkgs else 'unit-test' }}:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -51,7 +51,7 @@
 {%- endif %}
 {%- if testable_node_pkgs %}
 {%- for pkg in testable_node_pkgs %}
-{%- set mise_exec = 'mise exec -- ' if pkg.db | default(false) else '' %}
+{%- set pkg_mise_exec = 'mise exec -- ' if pkg.db | default(false) else '' %}
 
   unit-test-{{ pkg.name }}:
     runs-on: ubuntu-latest
@@ -118,7 +118,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: {{ mise_exec }}pnpm run test
+        run: {{ pkg_mise_exec }}pnpm run test
 {%- endfor %}
 
   # Fixed name for branch protection: per-package job names are dynamic, and
