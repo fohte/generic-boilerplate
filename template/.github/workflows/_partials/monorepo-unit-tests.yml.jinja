@@ -76,9 +76,6 @@
           version: 2026.9.14
 {%- endraw %}
 {%- if has_db %}
-          # mise-action resolves DB URLs before db:up, while the port is 0.
-          env: {{ '${{ !contains(fromJSON(' ~ "'" ~ (db_pkgs | map(attribute='name') | list | tojson) ~ "'" ~ '), matrix.package) }}' }}
-
       - name: Start PostgreSQL
         if: {{ '${{ contains(fromJSON(' ~ "'" ~ (db_pkgs | map(attribute='name') | list | tojson) ~ "'" ~ '), matrix.package) }}' }}
         run: mise run db:up
@@ -152,7 +149,7 @@
 
       - name: Run tests
         working-directory: ${{ matrix.package }}
-        run: {% endraw %}{% if has_db %}{{ '${{ contains(fromJSON(' ~ "'" ~ (db_pkgs | map(attribute='name') | list | tojson) ~ "'" ~ '), matrix.package) && ' ~ "'" ~ 'mise exec -- ' ~ "'" ~ ' || ' ~ "'" ~ "'" ~ ' }}' }}{% endif %}{% raw %}pnpm run test
+        run: {% endraw %}{% if has_db %}{{ '${{ contains(fromJSON(' ~ "'" ~ (db_pkgs | map(attribute='name') | list | tojson) ~ "'" ~ '), matrix.package) && ' ~ "'" ~ 'mise exec -- ' ~ "'" ~ ' || ' ~ "'" ~ "'" ~ ' }}' }}{% endif %}{% raw %}pnpm run test{% endraw %}{% if has_db %} # DB packages use mise exec to re-evaluate URLs after startup.{% endif %}{% raw %}
 
 {%- endraw %}
 {%- endif %}
@@ -222,9 +219,6 @@
         with:
           version: 2026.9.14{{ '\n          install_args: lefthook' if pkg.type == 'go' else '' }}
 {%- if pkg.db | default(false) %}
-          # mise-action resolves DB URLs before db:up, while the port is 0.
-          env: false
-
       - name: Start PostgreSQL
         run: mise run db:up
 {%- endif %}
@@ -256,7 +250,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: {{ mise_exec }}pnpm run test
+        run: {{ mise_exec }}pnpm run test{% if pkg.db | default(false) %} # Re-evaluate DB URLs after db:up assigns the host port.{% endif %}
 {%- else %}
 {#- Non-workspace mode: per-package install #}
 
@@ -308,7 +302,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: {{ mise_exec }}pnpm run test
+        run: {{ mise_exec }}pnpm run test{% if pkg.db | default(false) %} # Re-evaluate DB URLs after db:up assigns the host port.{% endif %}
 {%- endif %}
 {%- elif pkg.type == 'rust' %}
 {%- if use_coverage %}
@@ -323,7 +317,7 @@
 
       - name: Run tests with coverage
         working-directory: {{ pkg.name }}
-        run: {{ mise_exec }}cargo llvm-cov --lcov --output-path lcov.info
+        run: {{ mise_exec }}cargo llvm-cov --lcov --output-path lcov.info{% if pkg.db | default(false) %} # Re-evaluate DB URLs after db:up assigns the host port.{% endif %}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
@@ -336,7 +330,7 @@
 
       - name: Run tests
         working-directory: {{ pkg.name }}
-        run: {{ mise_exec }}cargo test
+        run: {{ mise_exec }}cargo test{% if pkg.db | default(false) %} # Re-evaluate DB URLs after db:up assigns the host port.{% endif %}
 {%- endif %}
 {%- elif pkg.type == 'go' %}
 
@@ -348,7 +342,7 @@
 
       - name: Run Go tests
         working-directory: {{ pkg.name }}
-        run: {{ mise_exec }}go test ./...
+        run: {{ mise_exec }}go test ./...{% if pkg.db | default(false) %} # Re-evaluate DB URLs after db:up assigns the host port.{% endif %}
 {%- endif %}
 {%- endfor %}
 

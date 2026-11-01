@@ -61,6 +61,21 @@ workflow_job() {
   ' "$workflow"
 }
 
+assert_database_setup_before_test() {
+  local job="$1"
+  local test_command="$2"
+  local db_up_line
+  local test_line
+
+  db_up_line="$(grep -nF 'run: mise run db:up' <<<"$job" | cut -d: -f1)"
+  test_line="$(grep -nF "$test_command" <<<"$job" | cut -d: -f1)"
+
+  [ -n "$db_up_line" ]
+  [ -n "$test_line" ]
+  [ "$db_up_line" -lt "$test_line" ]
+  [[ "$job" != *'env: false'* ]]
+}
+
 teardown() {
   rm -rf "$TEST_DIR"
 }
@@ -144,6 +159,15 @@ teardown() {
   [ "$output" = $'postgresql://node_db:node_db@127.0.0.1:0/node_db_dev\tpostgresql://node_db:node_db@127.0.0.1:0/node_db_test' ]
 }
 
+@test "mise exec refreshes inherited DB URLs after PostgreSQL starts" {
+  export MOCK_PORT=54321
+
+  run env DATABASE_URL=postgresql://stale:stale@127.0.0.1:0/stale TEST_DATABASE_URL=postgresql://stale:stale@127.0.0.1:0/stale mise -C "$REPO_ROOT/generated/node-db" exec -- bash -c 'printf "%s\\n%s\\n" "$DATABASE_URL" "$TEST_DATABASE_URL"'
+
+  [ "$status" -eq 0 ]
+  [ "$output" = $'postgresql://node_db:node_db@127.0.0.1:54321/node_db_dev\npostgresql://node_db:node_db@127.0.0.1:54321/node_db_test' ]
+}
+
 @test "database URL override files are gitignored where mise loads them" {
   for gitignore in \
     "$REPO_ROOT/generated/monorepo/.gitignore" \
@@ -171,12 +195,34 @@ teardown() {
 
 @test "database-backed unit tests start PostgreSQL before resolving test URLs" {
   workflow="$REPO_ROOT/generated/node-db/.github/workflows/test.yml"
-  db_up_line="$(grep -nF 'run: mise run db:up' "$workflow" | cut -d: -f1)"
-  test_line="$(grep -nF 'run: mise exec -- pnpm run test' "$workflow" | cut -d: -f1)"
+  job="$(workflow_job "$workflow" unit-test-run)"
 
-  [ -n "$db_up_line" ]
-  [ -n "$test_line" ]
-  [ "$db_up_line" -lt "$test_line" ]
+  assert_database_setup_before_test "$job" 'mise exec -- pnpm run test'
+}
+
+@test "Rust root database-backed unit tests start PostgreSQL before tests" {
+  workflow="$REPO_ROOT/generated/rust-db/.github/workflows/test.yml"
+  job="$(workflow_job "$workflow" unit-test)"
+
+  assert_database_setup_before_test "$job" 'mise exec -- cargo test'
+}
+
+@test "monorepo database-backed packages start PostgreSQL before tests" {
+  workflow="$REPO_ROOT/generated/monorepo/.github/workflows/test.yml"
+  frontend_job="$(workflow_job "$workflow" unit-test-frontend)"
+  backend_job="$(workflow_job "$workflow" unit-test-api-service)"
+
+  assert_database_setup_before_test "$frontend_job" 'mise exec -- pnpm run test'
+  assert_database_setup_before_test "$backend_job" 'mise exec -- cargo llvm-cov'
+}
+
+@test "workspace database-backed Node and Rust tests start PostgreSQL before tests" {
+  workflow="$REPO_ROOT/generated/monorepo-node-workspace-rust-go-db/.github/workflows/test.yml"
+  node_job="$(workflow_job "$workflow" unit-test-run)"
+  rust_job="$(workflow_job "$workflow" unit-test-backend)"
+
+  assert_database_setup_before_test "$node_job" 'pnpm run test'
+  assert_database_setup_before_test "$rust_job" 'mise exec -- cargo test'
 }
 
 @test "unit-test-worker skips database setup" {
@@ -184,15 +230,18 @@ teardown() {
   worker_job="$(workflow_job "$workflow" unit-test-worker)"
 
   [[ "$worker_job" == *"Run Go tests"* ]]
-  ! grep -Fq 'run: mise run db:up' <<<"$worker_job"
-  ! grep -Fq 'mise exec --' <<<"$worker_job"
-  ! grep -Fq 'env: false' <<<"$worker_job"
+  [[ "$worker_job" != *'run: mise run db:up'* ]]
+  [[ "$worker_job" != *'mise exec --'* ]]
+  [[ "$worker_job" != *'env: false'* ]]
 }
 
 @test "database-free node workflow skips database setup" {
-  ! grep -Fq 'run: mise run db:up' "$REPO_ROOT/generated/node/.github/workflows/test.yml"
-  ! grep -Fq 'mise exec --' "$REPO_ROOT/generated/node/.github/workflows/test.yml"
-  ! grep -Fq 'env: false' "$REPO_ROOT/generated/node/.github/workflows/test.yml"
+  workflow="$REPO_ROOT/generated/node/.github/workflows/test.yml"
+  root_job="$(workflow_job "$workflow" unit-test-run)"
+
+  [[ "$root_job" != *'run: mise run db:up'* ]]
+  [[ "$root_job" != *'mise exec --'* ]]
+  [[ "$root_job" != *'env: false'* ]]
 }
 
 @test "Rust root skips database setup when only a subpackage enables it" {
@@ -200,8 +249,19 @@ teardown() {
   root_job="$(workflow_job "$workflow" unit-test-run)"
 
   [[ "$root_job" == *"Run tests"* ]]
-  ! grep -Fq 'run: mise run db:up' <<<"$root_job"
-  ! grep -Fq 'mise exec -- cargo' <<<"$root_job"
+  [[ "$root_job" != *'run: mise run db:up'* ]]
+  [[ "$root_job" != *'mise exec -- cargo'* ]]
+  [[ "$root_job" != *'env: false'* ]]
+}
+
+@test "Node root skips database setup when only a subpackage enables it" {
+  workflow="$REPO_ROOT/generated/node-rust-subpackage-db/.github/workflows/test.yml"
+  root_job="$(workflow_job "$workflow" unit-test-run)"
+
+  [[ "$root_job" == *"Run tests"* ]]
+  [[ "$root_job" != *'run: mise run db:up'* ]]
+  [[ "$root_job" != *'mise exec --'* ]]
+  [[ "$root_job" != *'env: false'* ]]
 }
 
 @test "database-enabled node subpackage starts PostgreSQL before tests" {
@@ -209,9 +269,5 @@ teardown() {
   node_job="$(workflow_job "$workflow" unit-test-docs)"
 
   [[ "$node_job" == *"Run tests"* ]]
-  db_up_line="$(grep -nF 'run: mise run db:up' <<<"$node_job" | cut -d: -f1)"
-  test_line="$(grep -nF 'run: mise exec -- pnpm run test' <<<"$node_job" | cut -d: -f1)"
-  [ -n "$db_up_line" ]
-  [ -n "$test_line" ]
-  [ "$db_up_line" -lt "$test_line" ]
+  assert_database_setup_before_test "$node_job" 'mise exec -- pnpm run test'
 }

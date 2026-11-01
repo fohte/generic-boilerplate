@@ -1,4 +1,4 @@
-{% set mise_exec = 'mise exec -- ' if has_db else '' %}  unit-test-run:
+{% set mise_exec = 'mise exec -- ' if db | default(false) else '' %}  unit-test-run:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -8,10 +8,7 @@
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.9.14
-{%- if has_db %}
-          # mise-action resolves DB URLs before db:up, while the port is 0.
-          env: false
-
+{%- if db | default(false) %}
       - name: Start PostgreSQL
         run: mise run db:up
 {%- endif %}
@@ -39,7 +36,7 @@
       - run: pnpm install --frozen-lockfile
 
       - name: Run tests
-        run: {{ mise_exec }}pnpm run test
+        run: {{ mise_exec }}pnpm run test{% if db | default(false) %} # Re-evaluate DB URLs after db:up assigns the host port.{% endif %}
 
   # Fixed name for branch protection: knip has no `needs` of its own, so
   # this gate (skip == success) folds its result into unit-test.
