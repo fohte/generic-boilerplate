@@ -9,6 +9,9 @@ permissions:
 
 jobs:
   test:
+    # The commit that adds bootstrap.yml has no lockfiles yet; the Bootstrap
+    # workflow commits them, and that push runs these jobs instead.
+    if: "!contains(github.event.head_commit.added, '.github/workflows/bootstrap.yml')"
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -120,6 +123,7 @@ jobs:
         run: exit 1
 
   unit-test-run:
+    if: "!contains(github.event.head_commit.added, '.github/workflows/bootstrap.yml')"
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -171,6 +175,7 @@ jobs:
       - run: exit 1
 
   knip:
+    if: "!contains(github.event.head_commit.added, '.github/workflows/bootstrap.yml')"
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
