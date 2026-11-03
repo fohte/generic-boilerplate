@@ -89,6 +89,7 @@ jobs:
         with:
           files: |
             service/migration/**
+            service/migrations/**
             **/.tbls.yml
             scripts/db-*
             compose*.yaml
