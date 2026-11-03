@@ -93,6 +93,7 @@ jobs:
           files: |
             frontend/drizzle/**
             backend/migration/**
+            backend/migrations/**
             **/.tbls.yml
             scripts/db-*
             compose*.yaml

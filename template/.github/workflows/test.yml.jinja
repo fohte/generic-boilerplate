@@ -39,7 +39,8 @@
 {%- elif pkg.type == 'node' -%}
 {%- set schema_paths = [pkg.name ~ '/drizzle/**'] -%}
 {%- elif pkg.type == 'rust' -%}
-{%- set schema_paths = [pkg.name ~ '/migration/**'] -%}
+{#- SeaORM keeps migrations in a `migration` crate, sqlx in a `migrations` directory. -#}
+{%- set schema_paths = [pkg.name ~ '/migration/**', pkg.name ~ '/migrations/**'] -%}
 {%- else -%}
 {%- set schema_paths = [] -%}
 {%- endif -%}

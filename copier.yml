@@ -387,7 +387,8 @@ db_migrate:
 
 db_schema_paths:
   type: yaml
-  default: "{{ ['drizzle/**'] if type == 'node' else (['migration/**'] if type == 'rust' else []) }}"
+  # Rust: SeaORM's `migration` crate and sqlx's `migrations` directory.
+  default: "{{ ['drizzle/**'] if type == 'node' else (['migration/**', 'migrations/**'] if type == 'rust' else []) }}"
   help: Repository-root-relative paths that trigger database documentation generation in CI
   when: '{{ db | default(false) }}'
 
