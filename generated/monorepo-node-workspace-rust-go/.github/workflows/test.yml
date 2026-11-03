@@ -96,11 +96,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: lefthook run pre-commit --all-files
 
-      # Earlier steps stage files (formatters with `stage_fixed: true`, generated
-      # docs), but commit-action lists files with
-      # `git ls-files --modified --others`, which skips staged changes.
-      # A staged new file is neither modified nor untracked, so unstage
-      # everything, not only modified files, or new files are left out.
+      # commit-action lists only unstaged files (`git ls-files --modified --others`),
+      # so unstage everything earlier steps staged, including new files.
       # https://github.com/suzuki-shunsuke/commit-action/blob/06e3b49d4706498d325d29bd85adc82ecf2f5d8f/src/run.ts#L186-L188
       - name: Unstage changes for commit-action
         run: git restore --staged .
