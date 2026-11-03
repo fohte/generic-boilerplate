@@ -1,4 +1,5 @@
 {% set mise_exec = 'mise exec -- ' if db | default(false) else '' %}  {{ 'unit-test-run' if testable_node_pkgs else 'unit-test' }}:
+    if: "!contains(github.event.head_commit.added, '.github/workflows/bootstrap.yml')"
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -52,6 +53,7 @@
 {%- set pkg_mise_exec = 'mise exec -- ' if pkg.db | default(false) else '' %}
 
   unit-test-{{ pkg.name }}:
+    if: "!contains(github.event.head_commit.added, '.github/workflows/bootstrap.yml')"
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

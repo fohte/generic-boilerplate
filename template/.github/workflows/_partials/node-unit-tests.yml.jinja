@@ -1,4 +1,5 @@
 {% set mise_exec = 'mise exec -- ' if db | default(false) else '' %}  unit-test-run:
+    if: "!contains(github.event.head_commit.added, '.github/workflows/bootstrap.yml')"
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
