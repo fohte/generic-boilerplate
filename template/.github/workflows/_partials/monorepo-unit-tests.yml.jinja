@@ -139,13 +139,13 @@
       - name: Install Playwright chromium
         if: steps.needs-playwright.outputs.needed == 'true' && steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ matrix.package }}
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install chromium
 
       - name: Install Playwright system dependencies
-        if: steps.needs-playwright.outputs.needed == 'true' && steps.playwright-cache.outputs.cache-hit == 'true'
+        if: steps.needs-playwright.outputs.needed == 'true'
         working-directory: ${{ matrix.package }}
-        run: pnpm exec playwright install-deps chromium
-{%- endraw -%}
+{% endraw -%}
+{% include 'template/.github/workflows/_partials/playwright-install-deps-run.yml.jinja' -%}
 {%- endif -%}
 {% raw %}
 
@@ -298,12 +298,11 @@
       - name: Install Playwright chromium
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: {{ pkg.name }}
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install chromium
 
       - name: Install Playwright system dependencies
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
         working-directory: {{ pkg.name }}
-        run: pnpm exec playwright install-deps chromium
+{% include 'template/.github/workflows/_partials/playwright-install-deps-run.yml.jinja' %}
 {%- endif %}
 
       - name: Run tests
