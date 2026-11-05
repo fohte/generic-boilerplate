@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.14](https://github.com/fohte/generic-boilerplate/compare/v0.11.13...v0.11.14) (2026-11-05)
+
+
+### Bug Fixes
+
+* **template:** retry Playwright dependency installs on slow apt mirrors ([#774](https://github.com/fohte/generic-boilerplate/issues/774)) ([9745c30](https://github.com/fohte/generic-boilerplate/commit/9745c301254af914fa2920285043da7528a29728))
+* **template:** skip lockfile-dependent jobs on the initial push ([#773](https://github.com/fohte/generic-boilerplate/issues/773)) ([80b856b](https://github.com/fohte/generic-boilerplate/commit/80b856b2f4ab5580d3a707bcc8b1d4d8b55cb17d))
+* **template:** watch sqlx migrations for DB docs ([#770](https://github.com/fohte/generic-boilerplate/issues/770)) ([4530669](https://github.com/fohte/generic-boilerplate/commit/4530669d190ba76a1d33d6fc040bb9ad536c0a11))
+
 ## [0.11.13](https://github.com/fohte/generic-boilerplate/compare/v0.11.12...v0.11.13) (2026-11-01)
 
 
