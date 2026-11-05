@@ -1,0 +1,11 @@
+        # A throttled apt mirror keeps sending bytes, so apt's own timeouts never
+        # fire. Each attempt reconnects and keeps the packages already downloaded.
+        run: |
+          for attempt in 1 2 3; do
+            timeout --kill-after=30s 3m pnpm exec playwright install-deps chromium && exit 0
+            echo "::warning::playwright install-deps attempt $attempt failed with status $?"
+            # `timeout` cannot signal the root-owned apt-get, which would keep the apt locks.
+            sudo pkill -x apt-get || true
+          done
+          exit 1
+{#- Jinja edge trimming prevents blank lines at the include boundary. -#}
