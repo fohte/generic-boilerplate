@@ -19,7 +19,7 @@ unguarded_root_jobs() {
       next
     }
     /^    needs:/ { has_needs = 1 }
-    $0 == "    if: \"!contains(github.event.head_commit.added, '"'"'.github/workflows/bootstrap.yml'"'"')\"" { has_guard = 1 }
+    index($0, "    if: \"!contains(github.event.head_commit.added, '"'"'.github/workflows/bootstrap.yml'"'"')") == 1 { has_guard = 1 }
     END { flush() }
   ' "$1"
 }

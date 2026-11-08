@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - master
   pull_request:
 
 concurrency:
@@ -86,7 +87,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           packageManager: pnpm
-          command: pages project create node-vrt-storybook --production-branch=main
+          command: pages project create node-vrt-storybook --production-branch=${{ github.event.repository.default_branch }}
         continue-on-error: true
 
       - name: Deploy to Cloudflare Pages
@@ -96,7 +97,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           packageManager: pnpm
-          command: pages deploy storybook-static --project-name=node-vrt-storybook --branch=${{ github.head_ref || 'main' }} --commit-dirty=true
+          command: pages deploy storybook-static --project-name=node-vrt-storybook --branch=${{ github.head_ref || github.ref_name }} --commit-dirty=true
 
       - name: Comment preview URL on PR
         if: github.event_name == 'pull_request'
