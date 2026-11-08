@@ -29,7 +29,7 @@ jobs_missing_branch_base() {
     .jobs | to_entries[]
     | select(any(.value.steps[]?; detects))
     | select(
-        ([.value.steps[] | select(.id == "branch-base")] | length) != 1
+        ([.value.steps[] | select(.id == "branch-base" and .if == "github.ref_name != github.event.repository.default_branch")] | length) != 1
         or (first(.value.steps[] | select((.uses // "") | contains("actions/checkout"))).with["fetch-depth"] != 0)
         or any(.value.steps[]; detects and .with.base_sha != "${{ steps.branch-base.outputs.sha }}")
       )
