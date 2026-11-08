@@ -29,16 +29,31 @@ setup() {
   done
 }
 
-@test "docker-publish skips pushes to a branch that is not the default" {
+# Prints one line for each build job that lacks the default branch check.
+unguarded_build_jobs() {
+  awk '
+    function flush() {
+      if (in_build && !has_guard) print "build"
+    }
+    /^  [A-Za-z0-9_-]+:$/ {
+      flush()
+      in_build = ($1 == "build:"); has_guard = 0
+      next
+    }
+    /^    if: / && index($0, "(github.event_name != '"'"'push'"'"' || github.ref_name == github.event.repository.default_branch)") { has_guard = 1 }
+    END { flush() }
+  ' "$1"
+}
+
+@test "docker-publish build jobs skip pushes to a branch that is not the default" {
   local workflow
   for workflow in \
     "$REPO_ROOT/template/.github/workflows/docker-publish.yml.jinja" \
     "$REPO_ROOT"/generated/*/.github/workflows/docker-publish.yml; do
     [ -f "$workflow" ] || continue
 
-    run grep -c "^  build:$" "$workflow"
-    local jobs="$output"
-    run grep -cF "(github.event_name != 'push' || github.ref_name == github.event.repository.default_branch)" "$workflow"
-    [ "$output" -eq "$jobs" ]
+    run unguarded_build_jobs "$workflow"
+    [ "$status" -eq 0 ]
+    [ -z "$output" ]
   done
 }
