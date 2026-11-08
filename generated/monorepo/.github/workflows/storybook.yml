@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - master
   pull_request:
 
 concurrency:
@@ -80,7 +81,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: frontend
           packageManager: pnpm
-          command: pages project create sample-project-frontend-storybook --production-branch=main
+          command: pages project create sample-project-frontend-storybook --production-branch=${{ github.event.repository.default_branch }}
         continue-on-error: true
 
       - name: Deploy to Cloudflare Pages
@@ -91,7 +92,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: frontend
           packageManager: pnpm
-          command: pages deploy storybook-static --project-name=sample-project-frontend-storybook --branch=${{ github.head_ref || 'main' }} --commit-dirty=true
+          command: pages deploy storybook-static --project-name=sample-project-frontend-storybook --branch=${{ github.head_ref || github.ref_name }} --commit-dirty=true
 
       - name: Comment preview URL on PR
         if: github.event_name == 'pull_request'
