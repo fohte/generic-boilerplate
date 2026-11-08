@@ -11,12 +11,17 @@
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+
+{% endraw -%}
+{% include 'template/.github/workflows/_partials/branch-base-step.yml.jinja' -%}
+{% raw %}
 
       - name: Detect changed files
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         id: changed
         with:
+          base_sha: ${{ steps.branch-base.outputs.sha }}
           json: true
           # Emit valid JSON; the default escapes quotes and breaks jq parsing.
           escape_json: false
@@ -171,13 +176,16 @@
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+
+{% include 'template/.github/workflows/_partials/branch-base-step.yml.jinja' %}
 {%- for pkg in unit_test_subpackages %}
 
       - name: Check for {{ pkg.name }} changes
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         id: changes-{{ pkg.name }}
         with:
+          base_sha: {% raw %}${{ steps.branch-base.outputs.sha }}{% endraw %}
           files: {{ pkg.name }}/**
 {%- endfor %}
 
@@ -185,6 +193,7 @@
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         id: changes-workflow
         with:
+          base_sha: {% raw %}${{ steps.branch-base.outputs.sha }}{% endraw %}
           files: .github/workflows/test.yml
 {%- for pkg in unit_test_subpackages %}
 {%- set mise_exec = 'mise exec -- ' if pkg.db | default(false) else '' %}
