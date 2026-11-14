@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.11.14](https://github.com/fohte/generic-boilerplate/compare/v0.11.13...v0.11.14) (2026-11-14)
+
+
+### Bug Fixes
+
+* **template:** bump VRT pin to apt retry release ([#778](https://github.com/fohte/generic-boilerplate/issues/778)) ([cb63899](https://github.com/fohte/generic-boilerplate/commit/cb6389953a5c7c7d785498290c379f8544681822))
+* **template:** retry Playwright dependency installs on slow apt mirrors ([#774](https://github.com/fohte/generic-boilerplate/issues/774)) ([9745c30](https://github.com/fohte/generic-boilerplate/commit/9745c301254af914fa2920285043da7528a29728))
+* **template:** run workflows on pushes to master ([#776](https://github.com/fohte/generic-boilerplate/issues/776)) ([68264d0](https://github.com/fohte/generic-boilerplate/commit/68264d0ddd49c21728183876575c1f9b00462010))
+* **template:** skip lockfile-dependent jobs on the initial push ([#773](https://github.com/fohte/generic-boilerplate/issues/773)) ([80b856b](https://github.com/fohte/generic-boilerplate/commit/80b856b2f4ab5580d3a707bcc8b1d4d8b55cb17d))
+* **template:** watch sqlx migrations for DB docs ([#770](https://github.com/fohte/generic-boilerplate/issues/770)) ([4530669](https://github.com/fohte/generic-boilerplate/commit/4530669d190ba76a1d33d6fc040bb9ad536c0a11))
+
 ## [0.11.13](https://github.com/fohte/generic-boilerplate/compare/v0.11.12...v0.11.13) (2026-11-01)
 
 
