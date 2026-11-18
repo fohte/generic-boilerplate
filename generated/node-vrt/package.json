@@ -34,7 +34,7 @@
     "@fohte/storybook-addon": "0.2.0",
     "@storybook/addon-docs": "10.6.0",
     "@storybook/addon-themes": "10.6.0",
-    "@storybook/addon-vitest": "10.6.0",
+    "@storybook/addon-vitest": "10.6.2",
     "@storybook/react-vite": "10.6.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
