@@ -53,7 +53,9 @@ jobs:
     timeout-minutes: 30
 {%- if root_storybook %}
     strategy:
+      fail-fast: false
       matrix:
+        # Keep this value in sync with the project name in vitest.screenshot.config.ts.
         project:
           - storybook-screenshot-{{ project_name }}
           - storybook-screenshot-{{ project_name }}-mobile
@@ -90,9 +92,9 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-      {{ "# project must match the `name` passed to createStorybookProject() in" if root_storybook else "# The repository's `vrt:capture` script must write screenshots to" }}
-      {{ "# vitest.screenshot.config.ts." if root_storybook else "# `" ~ root_vrt_screenshots_dir ~ "`." }}
-      - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
+{% if not root_storybook %}      # The repository's `vrt:capture` script must write screenshots to
+      # `{{ root_vrt_screenshots_dir }}`.
+{% endif %}      - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
           project: {% if root_storybook %}{% raw %}${{ matrix.project }}{% endraw %}{% else %}{{ root_vrt_slug }}{% endif %}
           shard: 1
@@ -184,7 +186,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
+        # Keep this value in sync with vitest.screenshot.config.ts and unique across vrt_pkgs entries.
         project:
           - storybook-screenshot-{{ pkg.name }}
           - storybook-screenshot-{{ pkg.name }}-mobile
@@ -239,11 +243,6 @@ jobs:
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
 {%- endif %}
 
-      # project must match the `name` passed to createStorybookProject() in
-      # vitest.screenshot.config.ts, and stay unique across every vrt_pkgs
-      # entry -- vrt-capture's upload-artifact step names the artifact
-      # `vrt-screenshots-<project>-<shard>`, and a workflow run can't upload
-      # two artifacts with the same name.
       - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
           project: {% raw %}${{ matrix.project }}{% endraw %}

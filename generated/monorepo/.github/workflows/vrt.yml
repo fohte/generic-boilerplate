@@ -36,7 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
+        # Keep this value in sync with vitest.screenshot.config.ts and unique across vrt_pkgs entries.
         project:
           - storybook-screenshot-frontend
           - storybook-screenshot-frontend-mobile
@@ -72,11 +74,6 @@ jobs:
       - name: Install pnpm dependencies
         run: cd "frontend" && pnpm install --frozen-lockfile
 
-      # project must match the `name` passed to createStorybookProject() in
-      # vitest.screenshot.config.ts, and stay unique across every vrt_pkgs
-      # entry -- vrt-capture's upload-artifact step names the artifact
-      # `vrt-screenshots-<project>-<shard>`, and a workflow run can't upload
-      # two artifacts with the same name.
       - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
           project: ${{ matrix.project }}

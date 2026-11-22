@@ -4,7 +4,10 @@ import { fileURLToPath } from 'node:url'
 import { createStorybookProject } from '@fohte/storybook-addon/vitest-plugin'
 import { defineConfig } from 'vitest/config'
 
-import { DESKTOP_VIEWPORT, MOBILE_VIEWPORT } from './.storybook/screenshot-viewport'
+import {
+  DESKTOP_VIEWPORT,
+  MOBILE_VIEWPORT,
+} from './.storybook/screenshot-viewport'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 

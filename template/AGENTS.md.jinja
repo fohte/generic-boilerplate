@@ -74,9 +74,6 @@ Every presentational component under `src/components/` should have a co-located 
 
 Write a short, natural-language sentence describing the rendered state, including the detail that distinguishes it from sibling stories. Splitting the story's export name into words (e.g. `open editor shows next preview`) does not describe the state as a sentence; write something like `the editor shows the next preview` instead. The `name` is displayed in Storybook.
 {%- if has_storybook_vrt %}
-
-The `vrt` check captures each story at desktop (1280x800) and mobile (375x667) widths. Add the `mobile-only` tag to a story that should not be captured at desktop width, or `desktop-only` to one that should not be captured at mobile width.
-
 ### Extract route-inline UI that has its own appearance or state
 
 Stories are the only thing the `vrt` CI check renders and screenshots. A route file is never rendered by a story, so UI written inline in a route — a `<select>`, a checkbox, a column header, an empty state, a full-screen loading/not-found view — has no visual-regression coverage even when the rule above (every presentational component under `src/components/` has a story) is fully satisfied.
@@ -115,6 +112,11 @@ The `vrt` CI check runs the repository's `vrt:capture` script, which must write 
 
 {% else -%}
 The `vrt` CI check renders Storybook stories to screenshots and compares them against the `main` baseline with reg-suit. A failure ("Visual differences detected") means the pixel diff exceeded reg-suit's `matchingThreshold`, not that something is broken — open the custom VRT report linked from the PR and compare the actual/expected/diff images to judge whether the change is intentional.
+
+{% endif -%}
+{% if has_storybook_vrt %}
+
+The `vrt` check captures each story at desktop (1280x800) and mobile (375x667) widths. Add the `mobile-only` tag to a story that should not be captured at desktop width, or `desktop-only` to one that should not be captured at mobile width.
 
 {% endif -%}
 ### Never add the `vrt-approved` label yourself
