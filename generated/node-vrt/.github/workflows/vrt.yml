@@ -84,6 +84,9 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Create screenshots directory for empty viewport projects
+        run: mkdir -p __screenshots__
+
       - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
           project: ${{ matrix.project }}

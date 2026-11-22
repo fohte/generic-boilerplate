@@ -93,7 +93,10 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-{% if not root_storybook %}      # The repository's `vrt:capture` script must write screenshots to
+{% if root_storybook %}      - name: Create screenshots directory for empty viewport projects
+        run: mkdir -p __screenshots__
+
+{% endif %}{% if not root_storybook %}      # The repository's `vrt:capture` script must write screenshots to
       # `{{ root_vrt_screenshots_dir }}`.
 {% endif %}      - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
@@ -244,6 +247,9 @@ jobs:
       - name: Install pnpm dependencies
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
 {%- endif %}
+
+      - name: Create screenshots directory for empty viewport projects
+        run: mkdir -p "{{ pkg.name }}/__screenshots__"
 
       - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
