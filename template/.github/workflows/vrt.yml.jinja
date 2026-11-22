@@ -1,6 +1,6 @@
 {#- Slugify: lowercase, replace _ and / with -, remove @ -#}
 {%- macro slug(name) %}{{ name | replace('_', '-') | replace('@', '') | replace('/', '-') | lower }}{% endmacro -%}
-{%- set root_vrt_screenshots_dir = '__screenshots__/desktop' if root_storybook else '__screenshots__/' ~ root_vrt_slug -%}
+{%- set root_vrt_screenshots_dir = '__screenshots__' if root_storybook else '__screenshots__/' ~ root_vrt_slug -%}
 {%- set root_vrt_change_files = [
   '.storybook/**',
   'src/**',
@@ -51,6 +51,16 @@ jobs:
     if: needs.detect-changes-root.outputs.changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+{%- if root_storybook %}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Project names must match vitest.screenshot.config.ts for --project selection.
+        # They also make vrt-screenshots-<project>-<shard> artifact names unique per run.
+        project:
+          - storybook-screenshot-{{ project_name }}
+          - storybook-screenshot-{{ project_name }}-mobile
+{%- endif %}
     permissions:
       contents: read
     steps:
@@ -83,11 +93,14 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
-      {{ "# project must match the `name` passed to createStorybookProject() in" if root_storybook else "# The repository's `vrt:capture` script must write screenshots to" }}
-      {{ "# vitest.screenshot.config.ts." if root_storybook else "# `" ~ root_vrt_screenshots_dir ~ "`." }}
-      - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
+{% if root_storybook %}      - name: Create screenshots directory for empty viewport projects
+        run: mkdir -p __screenshots__
+
+{% endif %}{% if not root_storybook %}      # The repository's `vrt:capture` script must write screenshots to
+      # `{{ root_vrt_screenshots_dir }}`.
+{% endif %}      - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
-          project: {% if root_storybook %}storybook-screenshot-{{ project_name }}{% else %}{{ root_vrt_slug }}{% endif %}
+          project: {% if root_storybook %}{% raw %}${{ matrix.project }}{% endraw %}{% else %}{{ root_vrt_slug }}{% endif %}
           shard: 1
           shards: 1
           capture-script: {% if root_storybook %}storybook:screenshot{% else %}vrt:capture{% endif %}
@@ -176,6 +189,14 @@ jobs:
     if: needs.detect-changes-{{ slug(pkg.name) }}.outputs.changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # Project names must match vitest.screenshot.config.ts for --project selection.
+        # They also make vrt-screenshots-<project>-<shard> artifact names unique per run.
+        project:
+          - storybook-screenshot-{{ pkg.name }}
+          - storybook-screenshot-{{ pkg.name }}-mobile
     permissions:
       contents: read
     steps:
@@ -227,19 +248,17 @@ jobs:
         run: cd "{{ pkg.name }}" && pnpm install --frozen-lockfile
 {%- endif %}
 
-      # project must match the `name` passed to createStorybookProject() in
-      # vitest.screenshot.config.ts, and stay unique across every vrt_pkgs
-      # entry -- vrt-capture's upload-artifact step names the artifact
-      # `vrt-screenshots-<project>-<shard>`, and a workflow run can't upload
-      # two artifacts with the same name.
+      - name: Create screenshots directory for empty viewport projects
+        run: mkdir -p "{{ pkg.name }}/__screenshots__"
+
       - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
-          project: storybook-screenshot-{{ pkg.name }}
+          project: {% raw %}${{ matrix.project }}{% endraw %}
           shard: 1
           shards: 1
           capture-script: storybook:screenshot
           package-dir: {{ pkg.name }}
-          screenshots-dir: __screenshots__/desktop
+          screenshots-dir: __screenshots__
 
   report-{{ slug(pkg.name) }}:
     needs: capture-{{ slug(pkg.name) }}
@@ -312,7 +331,7 @@ jobs:
       - uses: fohte/storybook-vrt-workflows/vrt-report@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
           package-dir: {{ pkg.name }}
-          screenshots-dir: __screenshots__/desktop
+          screenshots-dir: __screenshots__
           r2-bucket: {{ slug(project_name) }}-vrt
           github-token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
           aws-access-key-id: {% raw %}${{ secrets.AWS_ACCESS_KEY_ID }}{% endraw %}
