@@ -55,7 +55,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Keep this value in sync with the project name in vitest.screenshot.config.ts.
+        # Project names must match vitest.screenshot.config.ts for --project selection.
+        # They also make vrt-screenshots-<project>-<shard> artifact names unique per run.
         project:
           - storybook-screenshot-{{ project_name }}
           - storybook-screenshot-{{ project_name }}-mobile
@@ -188,7 +189,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # vrt-capture names artifacts by project because one run cannot upload duplicate names.
+        # Project names must match vitest.screenshot.config.ts for --project selection.
+        # They also make vrt-screenshots-<project>-<shard> artifact names unique per run.
         project:
           - storybook-screenshot-{{ pkg.name }}
           - storybook-screenshot-{{ pkg.name }}-mobile

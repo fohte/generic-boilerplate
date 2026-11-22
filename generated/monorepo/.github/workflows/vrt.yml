@@ -38,7 +38,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # vrt-capture names artifacts by project because one run cannot upload duplicate names.
+        # Project names must match vitest.screenshot.config.ts for --project selection.
+        # They also make vrt-screenshots-<project>-<shard> artifact names unique per run.
         project:
           - storybook-screenshot-frontend
           - storybook-screenshot-frontend-mobile
