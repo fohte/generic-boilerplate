@@ -331,8 +331,8 @@ subpackages:
                           trigger schema documentation generation in CI.
       vrt: true        -- enable Visual Regression Testing for a spa
                           subpackage (requires spa: true; ignored otherwise).
-                          Adds a screenshot-capture vitest project, the
-                          storycap/reg-suit devDependencies, and vrt.yml /
+                          Adds desktop and mobile screenshot-capture Vitest
+                          projects, storycap/reg-suit devDependencies, and vrt.yml /
                           vrt-approval.yml wired to
                           fohte/storybook-vrt-workflows. Still needs
                           manual setup in the consuming repo: an

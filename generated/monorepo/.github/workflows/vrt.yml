@@ -35,6 +35,11 @@ jobs:
     if: needs.detect-changes-frontend.outputs.changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      matrix:
+        project:
+          - storybook-screenshot-frontend
+          - storybook-screenshot-frontend-mobile
     permissions:
       contents: read
     steps:
@@ -74,12 +79,12 @@ jobs:
       # two artifacts with the same name.
       - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
-          project: storybook-screenshot-frontend
+          project: ${{ matrix.project }}
           shard: 1
           shards: 1
           capture-script: storybook:screenshot
           package-dir: frontend
-          screenshots-dir: __screenshots__/desktop
+          screenshots-dir: __screenshots__
 
   report-frontend:
     needs: capture-frontend
@@ -133,7 +138,7 @@ jobs:
       - uses: fohte/storybook-vrt-workflows/vrt-report@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
           package-dir: frontend
-          screenshots-dir: __screenshots__/desktop
+          screenshots-dir: __screenshots__
           r2-bucket: sample-project-vrt
           github-token: ${{ secrets.GITHUB_TOKEN }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}

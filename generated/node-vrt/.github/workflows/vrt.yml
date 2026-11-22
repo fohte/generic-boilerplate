@@ -44,6 +44,11 @@ jobs:
     if: needs.detect-changes-root.outputs.changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      matrix:
+        project:
+          - storybook-screenshot-node-vrt
+          - storybook-screenshot-node-vrt-mobile
     permissions:
       contents: read
     steps:
@@ -80,12 +85,12 @@ jobs:
       # vitest.screenshot.config.ts.
       - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
-          project: storybook-screenshot-node-vrt
+          project: ${{ matrix.project }}
           shard: 1
           shards: 1
           capture-script: storybook:screenshot
           package-dir: .
-          screenshots-dir: __screenshots__/desktop
+          screenshots-dir: __screenshots__
 
   report-root:
     needs: capture-root
@@ -133,7 +138,7 @@ jobs:
       - uses: fohte/storybook-vrt-workflows/vrt-report@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
         with:
           package-dir: .
-          screenshots-dir: __screenshots__/desktop
+          screenshots-dir: __screenshots__
           r2-bucket: node-vrt-vrt
           github-token: ${{ secrets.GITHUB_TOKEN }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
