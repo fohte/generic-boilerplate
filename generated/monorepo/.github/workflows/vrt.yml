@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Keep this value in sync with vitest.screenshot.config.ts and unique across vrt_pkgs entries.
+        # vrt-capture names artifacts by project because one run cannot upload duplicate names.
         project:
           - storybook-screenshot-frontend
           - storybook-screenshot-frontend-mobile
