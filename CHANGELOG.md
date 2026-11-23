@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.16](https://github.com/fohte/generic-boilerplate/compare/v0.11.15...v0.11.16) (2026-11-23)
+
+
+### Bug Fixes
+
+* **template:** select tests from all changes on a branch ([#775](https://github.com/fohte/generic-boilerplate/issues/775)) ([3920c90](https://github.com/fohte/generic-boilerplate/commit/3920c9052587238bfe395287c781722c97f1b353))
+
 ## [0.11.15](https://github.com/fohte/generic-boilerplate/compare/v0.11.14...v0.11.15) (2026-11-23)
 
 
