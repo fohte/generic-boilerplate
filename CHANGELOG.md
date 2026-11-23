@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.15](https://github.com/fohte/generic-boilerplate/compare/v0.11.14...v0.11.15) (2026-11-23)
+
+
+### Features
+
+* **template:** support mobile-width VRT ([#779](https://github.com/fohte/generic-boilerplate/issues/779)) ([958c50a](https://github.com/fohte/generic-boilerplate/commit/958c50a37fd0479e96714f9d149e0fb8c1924d5c))
+
 ## [0.11.14](https://github.com/fohte/generic-boilerplate/compare/v0.11.13...v0.11.14) (2026-11-14)
 
 
