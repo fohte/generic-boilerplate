@@ -116,24 +116,38 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+
+      # Without a base, changed-files compares a new branch against HEAD^ only,
+      # so changes from its earlier commits go undetected.
+      - name: Find where this branch left the default branch
+        id: branch-base
+        if: github.ref_name != github.event.repository.default_branch
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          sha=$(git merge-base "origin/$DEFAULT_BRANCH" HEAD)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
       - name: Check for web-client changes
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         id: changes-web-client
         with:
+          base_sha: ${{ steps.branch-base.outputs.sha }}
           files: web-client/**
 
       - name: Check for provider-go changes
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         id: changes-provider-go
         with:
+          base_sha: ${{ steps.branch-base.outputs.sha }}
           files: provider-go/**
 
       - name: Check for workflow changes
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         id: changes-workflow
         with:
+          base_sha: ${{ steps.branch-base.outputs.sha }}
           files: .github/workflows/test.yml
 
   unit-test-web-client:

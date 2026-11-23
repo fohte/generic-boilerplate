@@ -90,7 +90,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 2
+          fetch-depth: {{ 0 if has_db else 2 }}
 
       - name: Check if current commit is auto-format by bot
         id: check-auto-format
@@ -263,10 +263,13 @@ jobs:
 
 {%- if has_db %}
 
+{% include 'template/.github/workflows/_partials/branch-base-step.yml.jinja' %}
+
       - name: Check for database documentation changes
         id: db-doc-changes
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
+          base_sha: {% raw %}${{ steps.branch-base.outputs.sha }}{% endraw %}
           files: |
             {{ db_doc_paths | join('\n            ') }}
 
