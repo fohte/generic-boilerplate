@@ -1260,29 +1260,29 @@ EOF
 
 @test "syncs Compose image tags and digests with registry ports, list items, and comments" {
   cat > template/compose.yaml.jinja << 'EOF'
+x-image-list:
+  - image: fixture/redis:7.3@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 services:
   db:
     image: registry.example:5000/fixture/postgres:15.8@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa # database image
-  cache:
-    - image: fixture/redis:7.3@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 EOF
 
   cat > generated/base/compose.yaml << 'EOF'
+x-image-list:
+  - image: fixture/redis:7.3@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 services:
   db:
     image: registry.example:5000/fixture/postgres:15.8@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa # database image
-  cache:
-    - image: fixture/redis:7.3@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 EOF
 
   create_initial_commit
 
   cat > generated/base/compose.yaml << 'EOF'
+x-image-list:
+  - image: fixture/redis:7.4@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 services:
   db:
     image: registry.example:5000/fixture/postgres:16.2@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc # database image
-  cache:
-    - image: fixture/redis:7.4@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 EOF
 
   git add .
@@ -1293,11 +1293,11 @@ EOF
   [[ "$output" == *"Synced 2 version"* ]]
 
   diff -u template/compose.yaml.jinja - << 'EOF'
+x-image-list:
+  - image: fixture/redis:7.4@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 services:
   db:
     image: registry.example:5000/fixture/postgres:16.2@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc # database image
-  cache:
-    - image: fixture/redis:7.4@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 EOF
 }
 
