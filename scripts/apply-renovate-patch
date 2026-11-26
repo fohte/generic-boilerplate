@@ -123,6 +123,7 @@ sync_versions_to_template() {
     # - TOML: key = "version" or "key" = "version"
     # - JSON: "key": "version"
     # - YAML: key: version or key: vX.Y.Z (unquoted, with optional v prefix)
+    # - Compose: image: name:tag[@sha256:digest]
     # - GitHub Actions: uses: owner/repo@vX.Y.Z or uses: owner/repo@<sha> # vX.Y.Z
     # - Dockerfile: FROM image:version (optionally followed by "AS stage")
     # Semver range specifiers: =, ^, ~, >, >=, <, <= (for Cargo.toml pin, npm ranges)
@@ -133,6 +134,16 @@ sync_versions_to_template() {
       local quoted=false
       local uses_syntax=true
       local dockerfile_syntax=false
+      local compose_syntax=false
+    elif [[ "$line" =~ ^[[:space:]]*-?[[:space:]]*(image:[[:space:]]+([A-Za-z0-9.-]+(:[0-9]+)?/)?[A-Za-z0-9_./-]+:)([^[:space:]#]+) ]]; then
+      # Compose image directive - keep the image name in the key so only that
+      # image's tag and digest are updated.
+      local key="${BASH_REMATCH[1]}"
+      local version="${BASH_REMATCH[4]}"
+      local quoted=false
+      local uses_syntax=false
+      local dockerfile_syntax=false
+      local compose_syntax=true
     elif [[ "$line" =~ ^(FROM[[:space:]]+[A-Za-z0-9_./-]+:)([^[:space:]]+) ]]; then
       # Dockerfile FROM directive - version after the image name's colon. A
       # stage alias reference (e.g. "FROM base AS deps") has no colon and
@@ -142,6 +153,7 @@ sync_versions_to_template() {
       local quoted=false
       local uses_syntax=false
       local dockerfile_syntax=true
+      local compose_syntax=false
     elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*[=:][[:space:]]*\"([^@\"]+@|[=^~\>\<]{0,2}v?)?([0-9]+\.[0-9]+[^\"]*)\" ]]; then
       # Quoted version (TOML/JSON) - includes semver range specifiers and package@version format
       local key="${BASH_REMATCH[1]}"
@@ -149,6 +161,7 @@ sync_versions_to_template() {
       local quoted=true
       local uses_syntax=false
       local dockerfile_syntax=false
+      local compose_syntax=false
     elif [[ "$line" =~ ^[[:space:]]*(\"[^\"]+\"|[^[:space:]=:]+)[[:space:]]*:[[:space:]]*([=^~\>\<]{0,2}v?[0-9]+\.[0-9]+[^[:space:]#]*) ]]; then
       # Unquoted version (YAML) - only match colon separator, includes semver range specifiers
       local key="${BASH_REMATCH[1]}"
@@ -156,6 +169,7 @@ sync_versions_to_template() {
       local quoted=false
       local uses_syntax=false
       local dockerfile_syntax=false
+      local compose_syntax=false
     else
       continue
     fi
@@ -195,6 +209,18 @@ sync_versions_to_template() {
         local escaped_version_sed
         escaped_version_sed=$(escape_sed_replacement "$version")
         if sed -i.bak -E "s|(${escaped_key})[^[:space:]]*|\\1${escaped_version_sed}|" "$template_file"; then
+          rm -f "${template_file}.bak"
+          ((changes_applied++)) || true
+        fi
+      elif [[ "$compose_syntax" == "true" ]]; then
+        if grep -F -- "${key}${version}" "$template_file" > /dev/null 2>&1; then
+          continue
+        fi
+        local escaped_key
+        escaped_key=$(escape_sed_pattern "$key")
+        local escaped_version_sed
+        escaped_version_sed=$(escape_sed_replacement "$version")
+        if sed -i.bak -E "s|^([[:space:]]*-?[[:space:]]*${escaped_key})[^[:space:]#]*|\\1${escaped_version_sed}|" "$template_file"; then
           rm -f "${template_file}.bak"
           ((changes_applied++)) || true
         fi
