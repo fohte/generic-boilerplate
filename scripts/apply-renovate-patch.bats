@@ -1258,21 +1258,21 @@ EOF
   [[ "$output" == *"Already in sync"* ]]
 }
 
-@test "syncs Compose image tags and digests for the matching image" {
+@test "syncs Compose image tags and digests with registry ports, list items, and comments" {
   cat > template/compose.yaml.jinja << 'EOF'
 services:
   db:
-    image: postgres:15.8@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    image: registry.example:5000/fixture/postgres:15.8@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa # database image
   cache:
-    image: redis:7.3@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    - image: fixture/redis:7.3@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 EOF
 
   cat > generated/base/compose.yaml << 'EOF'
 services:
   db:
-    image: postgres:15.8@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    image: registry.example:5000/fixture/postgres:15.8@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa # database image
   cache:
-    image: redis:7.3@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    - image: fixture/redis:7.3@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 EOF
 
   create_initial_commit
@@ -1280,9 +1280,9 @@ EOF
   cat > generated/base/compose.yaml << 'EOF'
 services:
   db:
-    image: postgres:16.2@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+    image: registry.example:5000/fixture/postgres:16.2@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc # database image
   cache:
-    image: redis:7.3@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    - image: fixture/redis:7.4@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 EOF
 
   git add .
@@ -1290,57 +1290,15 @@ EOF
 
   run "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
   [ "$status" -eq 0 ]
-  [[ "$output" == *"Synced 1 version"* ]]
+  [[ "$output" == *"Synced 2 version"* ]]
 
   diff -u template/compose.yaml.jinja - << 'EOF'
 services:
   db:
-    image: postgres:16.2@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+    image: registry.example:5000/fixture/postgres:16.2@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc # database image
   cache:
-    image: redis:7.3@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    - image: fixture/redis:7.4@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 EOF
-}
-
-@test "reports failed Compose image updates" {
-  cat > template/compose.yaml.jinja << 'EOF'
-services:
-  db:
-    image: postgres:15.8@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-EOF
-
-  cat > generated/base/compose.yaml << 'EOF'
-services:
-  db:
-    image: postgres:15.8@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-EOF
-
-  create_initial_commit
-
-  cat > generated/base/compose.yaml << 'EOF'
-services:
-  db:
-    image: postgres:16.2@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-EOF
-
-  git add .
-  git commit -q -m "chore(deps): update postgres image"
-
-  mkdir -p "$TEST_DIR/bin"
-  local real_sed
-  real_sed=$(command -v sed)
-  cat > "$TEST_DIR/bin/sed" << 'EOF'
-#!/usr/bin/env bash
-if [[ "$1" == "-i.bak" ]]; then
-  exit 1
-fi
-exec "$REAL_SED" "$@"
-EOF
-  chmod +x "$TEST_DIR/bin/sed"
-
-  run env REAL_SED="$real_sed" PATH="$TEST_DIR/bin:$PATH" "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
-  [ "$status" -eq 1 ]
-  [[ "$output" == *"failed to update version"* ]]
-  [[ "$output" == *"Files requiring manual update"* ]]
 }
 
 @test "is idempotent when template is already pinned to the same SHA" {

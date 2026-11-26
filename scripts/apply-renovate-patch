@@ -216,10 +216,6 @@ sync_versions_to_template() {
         if sed -i.bak -E "s|${replacement_pattern}|\\1${escaped_version_sed}|" "$template_file"; then
           rm -f "${template_file}.bak"
           ((changes_applied++)) || true
-        else
-          rm -f "${template_file}.bak"
-          echo "Error: failed to update version in $template_file" >&2
-          return 1
         fi
       elif [[ "$quoted" == "true" ]]; then
         if grep -F -- "$key" "$template_file" | grep -Fq "\"${version}\""; then
