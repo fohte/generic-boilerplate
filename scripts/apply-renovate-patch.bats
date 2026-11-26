@@ -1301,6 +1301,48 @@ services:
 EOF
 }
 
+@test "reports failed Compose image updates" {
+  cat > template/compose.yaml.jinja << 'EOF'
+services:
+  db:
+    image: postgres:15.8@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+EOF
+
+  cat > generated/base/compose.yaml << 'EOF'
+services:
+  db:
+    image: postgres:15.8@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+EOF
+
+  create_initial_commit
+
+  cat > generated/base/compose.yaml << 'EOF'
+services:
+  db:
+    image: postgres:16.2@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+EOF
+
+  git add .
+  git commit -q -m "chore(deps): update postgres image"
+
+  mkdir -p "$TEST_DIR/bin"
+  local real_sed
+  real_sed=$(command -v sed)
+  cat > "$TEST_DIR/bin/sed" << 'EOF'
+#!/usr/bin/env bash
+if [[ "$1" == "-i.bak" ]]; then
+  exit 1
+fi
+exec "$REAL_SED" "$@"
+EOF
+  chmod +x "$TEST_DIR/bin/sed"
+
+  run env REAL_SED="$real_sed" PATH="$TEST_DIR/bin:$PATH" "$REPO_ROOT/scripts/apply-renovate-patch" HEAD~1
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"failed to update version"* ]]
+  [[ "$output" == *"Files requiring manual update"* ]]
+}
+
 @test "is idempotent when template is already pinned to the same SHA" {
   mkdir -p template/.github/workflows generated/base/.github/workflows
 

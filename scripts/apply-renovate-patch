@@ -123,7 +123,6 @@ sync_versions_to_template() {
     # - TOML: key = "version" or "key" = "version"
     # - JSON: "key": "version"
     # - YAML: key: version or key: vX.Y.Z (unquoted, with optional v prefix)
-    # - Compose: image: name:tag[@sha256:digest]
     # - GitHub Actions: uses: owner/repo@vX.Y.Z or uses: owner/repo@<sha> # vX.Y.Z
     # - Dockerfile: FROM image:version (optionally followed by "AS stage")
     # Semver range specifiers: =, ^, ~, >, >=, <, <= (for Cargo.toml pin, npm ranges)
@@ -198,9 +197,7 @@ sync_versions_to_template() {
           rm -f "${template_file}.bak"
           ((changes_applied++)) || true
         fi
-      elif [[ "$dockerfile_syntax" == "true" ]]; then
-        # Dockerfile FROM directive - version right after the image's colon,
-        # stopping at the next space so a trailing "AS stage" is preserved.
+      elif [[ "$dockerfile_syntax" == "true" || "$compose_syntax" == "true" ]]; then
         if grep -F -- "${key}${version}" "$template_file" > /dev/null 2>&1; then
           continue
         fi
@@ -208,21 +205,21 @@ sync_versions_to_template() {
         escaped_key=$(escape_sed_pattern "$key")
         local escaped_version_sed
         escaped_version_sed=$(escape_sed_replacement "$version")
-        if sed -i.bak -E "s|(${escaped_key})[^[:space:]]*|\\1${escaped_version_sed}|" "$template_file"; then
+        local replacement_pattern
+        if [[ "$dockerfile_syntax" == "true" ]]; then
+          # Preserve a trailing Dockerfile stage alias.
+          replacement_pattern="(${escaped_key})[^[:space:]]*"
+        else
+          # Match the image name as well as the directive to keep other images unchanged.
+          replacement_pattern="^([[:space:]]*-?[[:space:]]*${escaped_key})[^[:space:]#]*"
+        fi
+        if sed -i.bak -E "s|${replacement_pattern}|\\1${escaped_version_sed}|" "$template_file"; then
           rm -f "${template_file}.bak"
           ((changes_applied++)) || true
-        fi
-      elif [[ "$compose_syntax" == "true" ]]; then
-        if grep -F -- "${key}${version}" "$template_file" > /dev/null 2>&1; then
-          continue
-        fi
-        local escaped_key
-        escaped_key=$(escape_sed_pattern "$key")
-        local escaped_version_sed
-        escaped_version_sed=$(escape_sed_replacement "$version")
-        if sed -i.bak -E "s|^([[:space:]]*-?[[:space:]]*${escaped_key})[^[:space:]#]*|\\1${escaped_version_sed}|" "$template_file"; then
+        else
           rm -f "${template_file}.bak"
-          ((changes_applied++)) || true
+          echo "Error: failed to update version in $template_file" >&2
+          return 1
         fi
       elif [[ "$quoted" == "true" ]]; then
         if grep -F -- "$key" "$template_file" | grep -Fq "\"${version}\""; then
