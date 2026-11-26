@@ -42,7 +42,7 @@
     "tailwind-merge": "3.7.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "21.2.3",
+    "@commitlint/cli": "21.2.4",
     "@fohte/eslint-config": "0.5.3",
     "@fohte/storybook-addon": "0.2.1",
     "@ninoseki/eslint-plugin-neverthrow": "0.3.2",
