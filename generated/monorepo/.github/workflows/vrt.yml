@@ -78,7 +78,7 @@ jobs:
       - name: Create screenshots directory for empty viewport projects
         run: mkdir -p "frontend/__screenshots__"
 
-      - uses: fohte/storybook-vrt-workflows/vrt-capture@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
+      - uses: fohte/storybook-vrt-workflows/vrt-capture@39639ff752f7fc8b2e2ae4be350e3e6c67435ba9 # v0.2.4
         with:
           project: ${{ matrix.project }}
           shard: 1
@@ -136,7 +136,7 @@ jobs:
       # reports overwrite each other in this bucket. Keep vrt: true on a
       # single subpackage until fohte/storybook-vrt-workflows adds a key
       # prefix input.
-      - uses: fohte/storybook-vrt-workflows/vrt-report@1752f73f6fe39a5f83ca7208a95b32e600e3813c # v0.2.3
+      - uses: fohte/storybook-vrt-workflows/vrt-report@39639ff752f7fc8b2e2ae4be350e3e6c67435ba9 # v0.2.4
         with:
           package-dir: frontend
           screenshots-dir: __screenshots__
