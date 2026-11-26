@@ -53,7 +53,7 @@ teardown() {
 set -euo pipefail
 
 output_dir="${!#}"
-mkdir -p "$output_dir/provider-go"
+mkdir -p "$output_dir/provider-go/sub"
 cat > "$output_dir/README.md" << 'README'
 # base
 README

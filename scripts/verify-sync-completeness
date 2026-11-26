@@ -41,9 +41,6 @@ check_fixture() {
   # Regenerate from template using the shared script
   "$SCRIPT_DIR/generate-snapshots" --fixture "$fixture" --output "$tmpdir" > /dev/null 2>&1
 
-  # Git cannot represent empty directories, so compare only generated files.
-  find "$tmpdir" -depth -mindepth 1 -type d -empty -delete
-
   # Compare with current generated/$fixture
   if ! diff -rq "generated/$fixture" "$tmpdir" > /dev/null 2>&1; then
     echo "::error::Sync incomplete for $fixture"

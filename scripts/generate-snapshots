@@ -84,6 +84,9 @@ generate_fixture() {
 
   # Remove answers file as it contains a commit hash that changes on every run
   rm -f "$output_dir/.copier-answers.yml"
+
+  # Git cannot represent empty directories.
+  find "$output_dir" -depth -mindepth 1 -type d -empty -delete
 }
 
 # Parse arguments
