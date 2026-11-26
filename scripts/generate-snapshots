@@ -11,8 +11,8 @@
 # _skip_if_exists (e.g. README.md) are preserved using rsync --exclude, and
 # files no longer produced by the template are removed via --delete. For new
 # fixtures, excluded files are copied from the temp dir if missing.
-# In single-fixture mode, the output directory is used as-is (the caller is
-# responsible for cleanup).
+# In single-fixture mode, the output directory is used as-is. The generator
+# removes the answers file and empty directories; the caller cleans up the rest.
 
 set -euo pipefail
 
@@ -84,6 +84,9 @@ generate_fixture() {
 
   # Remove answers file as it contains a commit hash that changes on every run
   rm -f "$output_dir/.copier-answers.yml"
+
+  # Git cannot represent empty directories.
+  find "$output_dir" -depth -mindepth 1 -type d -empty -delete
 }
 
 # Parse arguments
