@@ -106,38 +106,38 @@
 {%- endif %}
     "@ninoseki/eslint-plugin-neverthrow": "0.4.0",
 {%- if pkg_has_spa %}
-    "@storybook/addon-docs": "10.6.2",
-    "@storybook/addon-themes": "10.6.2",
-    "@storybook/addon-vitest": "10.6.2",
-    "@storybook/react-vite": "10.6.2",
+    "@storybook/addon-docs": "10.6.7",
+    "@storybook/addon-themes": "10.6.7",
+    "@storybook/addon-vitest": "10.6.7",
+    "@storybook/react-vite": "10.6.7",
 {%- endif %}
 {%- if pkg_has_vrt %}
-    "@storycap-testrun/browser": "3.1.1",
+    "@storycap-testrun/browser": "3.1.3",
 {%- endif %}
 {%- if pkg_has_spa %}
-    "@tailwindcss/vite": "4.3.3",
+    "@tailwindcss/vite": "4.3.5",
 {%- endif %}
     "@tsconfig/node-lts": "24.0.1",
-    "@tsconfig/strictest": "2.0.8",
-    "@types/node": "24.19.0",
+    "@tsconfig/strictest": "2.0.9",
+    "@types/node": "24.19.2",
 {%- if pkg_has_spa %}
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "@vitejs/plugin-react": "6.1.1",
-    "@vitest/browser": "4.1.11",
-    "@vitest/browser-playwright": "4.1.11",
+    "@vitejs/plugin-react": "6.3.0",
+    "@vitest/browser": "4.1.12",
+    "@vitest/browser-playwright": "4.1.12",
 {%- endif %}
-    "concurrently": "10.0.5",
-    "eslint": "10.11.0",
+    "concurrently": "10.0.7",
+    "eslint": "10.15.0",
 {%- if pkg_has_spa %}
-    "eslint-plugin-storybook": "10.6.2",
+    "eslint-plugin-storybook": "10.6.7",
     "eslint-plugin-tailwindcss": "4.4.0",
 {%- endif %}
-    "knip": "6.38.0",
+    "knip": "6.46.1",
 {%- if pkg_has_spa %}
     "msw": "2.15.0",
     "msw-storybook-addon": "3.0.3",
-    "playwright": "1.63.0",
+    "playwright": "1.65.1",
 {%- endif %}
     "prettier": "3.9.9",
 {%- if pkg_has_vrt %}
@@ -146,8 +146,8 @@
     "reg-suit": "0.14.5",
 {%- endif %}
 {%- if pkg_has_spa %}
-    "storybook": "10.6.2",
-    "tailwindcss": "4.3.3",
+    "storybook": "10.6.7",
+    "tailwindcss": "4.3.5",
 {%- endif %}
 {%- if pkg_is_web_app %}
     "tsup": "8.5.1",
@@ -158,9 +158,9 @@
 {%- endif %}
     "typescript": "6.0.3",
 {%- if pkg_has_spa %}
-    "vite": "8.3.3",
+    "vite": "8.3.8",
 {%- endif %}
-    "vitest": "4.1.11"
+    "vitest": "4.1.12"
   }{{ "," if pkg_has_spa else "" }}
 {%- if pkg_has_spa %}
   "msw": {
@@ -173,24 +173,24 @@
   "devDependencies": {
 {%- if pkg_has_spa %}
     "@fohte/storybook-addon": "0.2.1",
-    "@storybook/addon-docs": "10.6.2",
-    "@storybook/addon-themes": "10.6.2",
-    "@storybook/addon-vitest": "10.6.2",
-    "@storybook/react-vite": "10.6.2",
+    "@storybook/addon-docs": "10.6.7",
+    "@storybook/addon-themes": "10.6.7",
+    "@storybook/addon-vitest": "10.6.7",
+    "@storybook/react-vite": "10.6.7",
 {%- endif %}
 {%- if pkg_has_vrt %}
-    "@storycap-testrun/browser": "3.1.1",
+    "@storycap-testrun/browser": "3.1.3",
 {%- endif %}
 {%- if pkg_has_spa %}
-    "@tailwindcss/vite": "4.3.3",
+    "@tailwindcss/vite": "4.3.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "@vitejs/plugin-react": "6.1.1",
-    "@vitest/browser": "4.1.11",
-    "@vitest/browser-playwright": "4.1.11",
+    "@vitejs/plugin-react": "6.3.0",
+    "@vitest/browser": "4.1.12",
+    "@vitest/browser-playwright": "4.1.12",
     "msw": "2.15.0",
     "msw-storybook-addon": "3.0.3",
-    "playwright": "1.63.0",
+    "playwright": "1.65.1",
 {%- endif %}
 {%- if pkg_has_vrt %}
     "reg-publish-s3-plugin": "0.14.4",
@@ -198,17 +198,17 @@
     "reg-suit": "0.14.5",
 {%- endif %}
 {%- if pkg_has_spa %}
-    "storybook": "10.6.2",
-    "tailwindcss": "4.3.3",
+    "storybook": "10.6.7",
+    "tailwindcss": "4.3.5",
 {%- endif %}
 {%- if pkg_has_spa and pkg_is_web_app %}
     "tsup": "8.5.1",
     "tsx": "4.23.15",
     "tw-animate-css": "1.4.0",
-    "vite": "8.3.3"
+    "vite": "8.3.8"
 {%- elif pkg_has_spa %}
     "tw-animate-css": "1.4.0",
-    "vite": "8.3.3"
+    "vite": "8.3.8"
 {%- else %}
     "tsup": "8.5.1",
     "tsx": "4.23.15"
