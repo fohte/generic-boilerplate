@@ -29,7 +29,7 @@
     "neverthrow": "8.2.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "21.2.3",
+    "@commitlint/cli": "21.2.4",
     "@fohte/eslint-config": "0.5.3",
     "@fohte/storybook-addon": "0.2.1",
     "@storybook/addon-docs": "10.6.0",
