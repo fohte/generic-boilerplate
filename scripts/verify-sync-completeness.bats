@@ -44,6 +44,26 @@ teardown() {
   [ "$status" -eq 0 ]
 }
 
+@test "ignores empty directories in regenerated output" {
+  local mock_bin="$TEST_DIR/mock-bin"
+  mkdir -p "$mock_bin"
+
+  cat > "$mock_bin/copier" << 'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+output_dir="${!#}"
+mkdir -p "$output_dir/provider-go"
+cat > "$output_dir/README.md" << 'README'
+# base
+README
+EOF
+  chmod +x "$mock_bin/copier"
+
+  PATH="$mock_bin:$PATH" run "$REPO_ROOT/scripts/verify-sync-completeness"
+  [ "$status" -eq 0 ]
+}
+
 @test "fails when generated does not match template regeneration" {
   cat > generated/base/README.md << 'EOF'
 # wrong-name
