@@ -72,7 +72,7 @@
     "reg-publish-s3-plugin": "0.14.4",
     "reg-simple-keygen-plugin": "0.14.2",
     "reg-suit": "0.14.5",
-    "storybook": "10.6.0",
+    "storybook": "10.6.2",
     "tailwindcss": "4.3.3",
     "tsup": "8.5.1",
     "tsx": "4.23.15",
