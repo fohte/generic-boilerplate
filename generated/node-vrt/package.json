@@ -31,7 +31,7 @@
   "devDependencies": {
     "@commitlint/cli": "21.2.3",
     "@fohte/eslint-config": "0.5.1",
-    "@fohte/storybook-addon": "0.2.0",
+    "@fohte/storybook-addon": "0.2.1",
     "@storybook/addon-docs": "10.6.0",
     "@storybook/addon-themes": "10.6.0",
     "@storybook/addon-vitest": "10.6.0",
