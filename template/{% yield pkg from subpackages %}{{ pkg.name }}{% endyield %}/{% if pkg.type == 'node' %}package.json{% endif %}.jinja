@@ -80,7 +80,7 @@
 {%- if has_tests %}
   "dependencies": {
 {%- if pkg_has_error_tracking %}
-    "@fohte/service-kit": "0.1.14",
+    "@fohte/service-kit": "0.1.18",
     "@opentelemetry/api": "1.9.1",
 {%- endif %}
 {%- if pkg_has_spa %}
@@ -90,17 +90,17 @@
     "neverthrow": "8.2.0"{{ "," if pkg_has_spa else "" }}
 {%- endif %}
 {%- if pkg_has_spa %}
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "shadcn": "4.21.0",
-    "tailwind-merge": "3.6.0"
+    "tailwind-merge": "3.7.0"
 {%- endif %}
   }{{ "," if has_dev_deps else "" }}
 {%- endif %}
 {%- if has_tests and not is_workspace %}
   "devDependencies": {
     "@commitlint/cli": "21.2.3",
-    "@fohte/eslint-config": "0.5.1",
+    "@fohte/eslint-config": "0.5.3",
 {%- if pkg_has_spa %}
     "@fohte/storybook-addon": "0.2.1",
 {%- endif %}
