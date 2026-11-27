@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.11.17](https://github.com/fohte/generic-boilerplate/compare/v0.11.16...v0.11.17) (2026-11-27)
+
+
+### Bug Fixes
+
+* **scripts:** prune empty snapshot directories ([#783](https://github.com/fohte/generic-boilerplate/issues/783)) ([faf1c17](https://github.com/fohte/generic-boilerplate/commit/faf1c17bae41730e1cd892c7b8f1b4ed68269809))
+* **sync:** sync Compose image tags and digests ([#795](https://github.com/fohte/generic-boilerplate/issues/795)) ([a08cd5a](https://github.com/fohte/generic-boilerplate/commit/a08cd5ae23486d6c2f29296e3aed1e10588558a8))
+
+
+### Dependencies
+
+* align six Storybook packages at 10.6.2 ([#791](https://github.com/fohte/generic-boilerplate/issues/791)) ([8f296dc](https://github.com/fohte/generic-boilerplate/commit/8f296dc7026e761a28a04fd483500750556f1c45))
+* **ci:** Update fohte/storybook-vrt-workflows action to v0.2.4 ([#790](https://github.com/fohte/generic-boilerplate/issues/790)) ([b55f89d](https://github.com/fohte/generic-boilerplate/commit/b55f89db851bb7bcb944d675c51ca79215b37199))
+* Update @commitlint/cli to v21.2.4 ([#789](https://github.com/fohte/generic-boilerplate/issues/789)) ([ed8a0c3](https://github.com/fohte/generic-boilerplate/commit/ed8a0c3f67596525846ad72d76f2fde21d1b14cd))
+* Update dependency @fohte/eslint-config to v0.5.3 ([#785](https://github.com/fohte/generic-boilerplate/issues/785)) ([4bb8dd4](https://github.com/fohte/generic-boilerplate/commit/4bb8dd4f6ee5390c52d49fec9ca21eae312c78e0))
+* update dependency @fohte/service-kit to v0.1.18 ([#786](https://github.com/fohte/generic-boilerplate/issues/786)) ([7f95f16](https://github.com/fohte/generic-boilerplate/commit/7f95f16efb5e84b123840604dc7663841ea7de25))
+* Update dependency @fohte/storybook-addon to v0.2.1 ([#787](https://github.com/fohte/generic-boilerplate/issues/787)) ([f4edb13](https://github.com/fohte/generic-boilerplate/commit/f4edb13b92e6c73a0dd0bdeaf411762de50afbd6))
+* Update dependency @ninoseki/eslint-plugin-neverthrow to v0.4.0 ([#793](https://github.com/fohte/generic-boilerplate/issues/793)) ([0d2d17f](https://github.com/fohte/generic-boilerplate/commit/0d2d17f739ccd9286ca2d909fbe966fb9b5855a6))
+* Update dependency github:ast-grep/ast-grep to v0.51.3 ([#796](https://github.com/fohte/generic-boilerplate/issues/796)) ([04425f2](https://github.com/fohte/generic-boilerplate/commit/04425f2955ca064c2868657f6da11c45e727d5b2))
+* Update dependency github:betterleaks/betterleaks to v1.10.1 ([#797](https://github.com/fohte/generic-boilerplate/issues/797)) ([c63bf27](https://github.com/fohte/generic-boilerplate/commit/c63bf27229421ea2fa18f2c005151b5aa684f7be))
+* Update dependency github:k1LoW/tbls to v1.96.1 ([#798](https://github.com/fohte/generic-boilerplate/issues/798)) ([b784218](https://github.com/fohte/generic-boilerplate/commit/b784218a662434a7ae80c4e9134dfc6a462eeb39))
+* Update dependency lefthook to v2.2.2 ([#799](https://github.com/fohte/generic-boilerplate/issues/799)) ([95a8273](https://github.com/fohte/generic-boilerplate/commit/95a8273d4bb1566724d8e46e74caaafda9f40850))
+* update dependency tailwind-merge to v3.7.0 ([#722](https://github.com/fohte/generic-boilerplate/issues/722)) ([1aebb5b](https://github.com/fohte/generic-boilerplate/commit/1aebb5b47ec7d0562a692cc22ce956622eb0874a))
+* update dependency tailwind-merge to v3.7.1 ([#801](https://github.com/fohte/generic-boilerplate/issues/801)) ([0987b31](https://github.com/fohte/generic-boilerplate/commit/0987b31f6cac10632c4c10675279ce7231fe1ebd))
+* Update dependency vite to v8.3.3 [SECURITY] ([#755](https://github.com/fohte/generic-boilerplate/issues/755)) ([7298552](https://github.com/fohte/generic-boilerplate/commit/7298552e7723f1cc99f67be1859b29417389da95))
+* Update devDependencies (non-major) ([#792](https://github.com/fohte/generic-boilerplate/issues/792)) ([22e190d](https://github.com/fohte/generic-boilerplate/commit/22e190ddc626e91f89debb6f7ffac1e9df3a4ea0))
+* update react monorepo to v19.3.1 ([#739](https://github.com/fohte/generic-boilerplate/issues/739)) ([dcc8892](https://github.com/fohte/generic-boilerplate/commit/dcc88926a17017b062295edee5604ff0561c5ac4))
+* update rust crate rstest to v0.28.0 ([#680](https://github.com/fohte/generic-boilerplate/issues/680)) ([03939ea](https://github.com/fohte/generic-boilerplate/commit/03939ea87497f88b334bda55d6044ee6d0e4207f))
+
 ## [0.11.16](https://github.com/fohte/generic-boilerplate/compare/v0.11.15...v0.11.16) (2026-11-23)
 
 
